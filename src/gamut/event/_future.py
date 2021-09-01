@@ -49,13 +49,13 @@ class Future(Generic[T, B]):
             yield self
         return self._result
         
-    def __del__(self):
+    def __del__(self) -> None:
         if not self._is_ready:
             warn(f'future expired before being resolved: {self!r}')
             if self._blocking:
                 warn(f'future expired while blocking: {self!r}')
                 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self._is_ready:
             return f'<gamut.Future result={self.result!r}>'
         else:

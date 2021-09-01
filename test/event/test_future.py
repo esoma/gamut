@@ -19,6 +19,7 @@ class Result:
     pass
     
     
+@pytest.mark.filterwarnings('ignore: future expired before being resolved')
 def test_initial_state() -> None:
     future: Future[Result, Blockable] = Future()
     
@@ -26,11 +27,6 @@ def test_initial_state() -> None:
     assert future.is_ready is False
     with pytest.raises(AttributeError):
         future.result
-    # suppress any warnings about the future not being resolved
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        del future
-        gc.collect()
 
 
 @pytest.mark.parametrize("blocked_count", [0, 1, 2, 10])
