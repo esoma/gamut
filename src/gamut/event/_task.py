@@ -92,7 +92,12 @@ class Task(Generic[T]):
             if self._exception_to_throw:
                 exception_to_throw = self._exception_to_throw
                 self._exception_to_throw = None
-                self._execution.throw(exception_to_throw)
+                try:
+                    self._execution.throw(exception_to_throw)
+                except StopIteration as ex:
+                    self._status = TaskStatus.COMPLETE
+                    self._result = ex.value
+                    return
                 assert False
         except Exception as ex:
             self._status = TaskStatus.ERROR

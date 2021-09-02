@@ -130,6 +130,33 @@ def test_throw() -> None:
     assert task.exception is exception
     
     
+@pytest.mark.filterwarnings('ignore: future expired before being resolved')
+@pytest.mark.filterwarnings('ignore: future expired while blocking')   
+def test_throw_continue() -> None:
+    future: Future[Result, Task[Result]] = Future()
+    result = Result()
+    caught_exceptions: list[Exception] = []
+    async def func() -> Result:
+        try:
+            return await future
+        except RuntimeError as ex:
+            caught_exceptions.append(ex)
+        return result
+        
+    task = Task(func())
+    task.run()
+    
+    exception = RuntimeError()
+    task.throw(exception)
+    task.run()
+
+    assert task.status is TaskStatus.COMPLETE
+    assert task.result is result
+    with pytest.raises(AttributeError):
+        task.exception
+    assert caught_exceptions == [exception]
+    
+    
 def test_throw_already_complete() -> None:
     async def func() -> Result:
         return Result()
