@@ -25,6 +25,19 @@ class Plugin(_Plugin):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._context = _Context()
+        
+    def get_metaclass_hook(
+        self,
+        fullname: str
+    )  -> Optional[Callable[[ClassDefContext], None]]:
+        result = super().get_base_class_hook(fullname)
+        if result is not None:
+            return result
+
+        if fullname == 'gamut.event._event.EventType':
+            return _transform_event
+    
+        return None
     
     def get_base_class_hook(
         self, fullname: str
@@ -80,6 +93,17 @@ class _Context:
         self.events = {
             'gamut.event._event.Event': _Event('gamut.event._event.Event', {})
         }
+        
+        
+def _transform_event(ctx: ClassDefContext) -> None:
+    # the only class that should use EventType is the Event class
+    assert ctx.cls.info.fullname == 'gamut.event._event.Event'
+    
+    add_method(ctx, '__init__', [], NoneType())
+    add_method(
+        ctx, '__init_subclass__', [], NoneType(),
+        self_type=AnyType(TypeOfAny.explicit)
+    )
 
 
 def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
