@@ -25,8 +25,8 @@ class EventType(type):
 
     _all: WeakSet[Type[EventType]] = WeakSet()
 
-    def __new__(cls, *args, **kwargs): # type: ignore
-        cls = super().__new__(cls, *args, **kwargs)
+    def __new__(cls, name, bases, attrs, **kwds): # type: ignore
+        cls = super().__new__(cls, name, bases, attrs, **kwds) # type: ignore
         cls._future = None
         cls._sent_callbacks = WeakSet() # type: ignore
         cls._all.add(cls)
@@ -36,7 +36,7 @@ class EventType(type):
         if cls._future is None: # type: ignore
             cls._future = Future() # type: ignore
         return cls._future.__await__() # type: ignore
-
+    
 
 def reset_events() -> None:
     """Effectivley "resets" all Events. Any Tasks that are waiting on any
@@ -119,6 +119,7 @@ class Event(metaclass=EventType):
         # note that we don't pull in the base class field values from the base
         # classes yet, this is to ensure we're capturing the information
         # declared in this specific class definition first
+        original_kwargs = dict(kwargs)
         for k, v in cls._fields.items():
             try:
                 fields[k] = kwargs.pop(k)
@@ -131,6 +132,10 @@ class Event(metaclass=EventType):
                 continue
             # we copy any fields from our parent classes in mro
             for field, value in mro_cls._fields.items():
+                if value is not cls._NonStatic and field in original_kwargs:
+                    raise TypeError(
+                        f'got an unexpected keyword argument \'{field}\''
+                    )    
                 # if the field is static we need to make sure that doesn't
                 # conflict with any base classes, for example a base class
                 # may say the value is statically set to 5, but ours says it is
@@ -146,7 +151,7 @@ class Event(metaclass=EventType):
                 else:
                     fields[field] = value
         cls._fields = fields
-        super().__init_subclass__(**kwargs) # type: ignore
+        super().__init_subclass__(**kwargs)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         for field, arg in self._fields.items():
@@ -168,7 +173,7 @@ class Event(metaclass=EventType):
                                 f'missing argument {field!r}'
                             ) from None
             setattr(self, field, arg)
-        super().__init__(*args, **kwargs) # type: ignore
+        super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
         s = ' '.join(
@@ -204,12 +209,12 @@ class Event(metaclass=EventType):
         assert task_manager is not None
         
         future: Future[None, Task[None]] = Future()
-        async def _() -> None:
+        async def wait_for_send_to_complete() -> None:
             assert task_manager is not None
             for task in Task.sort(future.resolve(None)):
                 task_manager.queue(task)
        
-        task = Task(_())
+        task = Task(wait_for_send_to_complete())
         task_manager.queue(task)
         await future
 

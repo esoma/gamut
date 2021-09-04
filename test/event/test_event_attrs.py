@@ -69,28 +69,16 @@ def test_set_static_does_not_exist() -> None:
             thing: int
             
             
-def test_override_static_same() -> None:
+@pytest.mark.parametrize("override_thing", [1, 2])
+def test_override_static(override_thing: int) -> None:
     class Base(Event):
         thing: int
     class Child(Base, thing=1):
         pass
-    class Same(Child, thing=1):
-        pass
-        
-    same = Same()
-    assert same.thing == 1
-    
-
-def test_override_static_different() -> None:
-    class Base(Event):
-        thing: int
-    class Child(Base, thing=1):
-        pass
-    
     with pytest.raises(TypeError):
-        class Different(Child, thing=2):
+        class Override(Child, thing=override_thing): # type: ignore
             pass
-    
+
 
 def test_multi_static_first_inherit() -> None:
     class O(Event):
@@ -130,7 +118,6 @@ def test_multi_static_same() -> None:
     class Z(X, Y):
         pass
         
-    
     z = Z()
     assert z.a == 1
     
@@ -155,7 +142,7 @@ def test_instantiate_with_multiple_values() -> None:
         c: int
 
     with pytest.raises(TypeError):
-        AttrEvent(1, 2, b=4)
+        AttrEvent(1, 2, b=4) # type: ignore
     
     
 @pytest.mark.parametrize(
