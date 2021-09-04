@@ -98,7 +98,7 @@ class _Context:
 def _transform_event(ctx: ClassDefContext) -> None:
     # the only class that should use EventType is the Event class
     assert ctx.cls.info.fullname == 'gamut.event._event.Event'
-    
+
     add_method(ctx, '__init__', [], NoneType())
     add_method(
         ctx, '__init_subclass__', [], NoneType(),

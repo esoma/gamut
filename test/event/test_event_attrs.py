@@ -171,6 +171,26 @@ def test_default(
     assert event.text == expected_text
     
     
+def test_default_before_no_default() -> None:
+    class AttrEvent(Event):
+        a: int = 0
+        b: str = 'b'
+        c: int
+        
+    with pytest.raises(TypeError):  
+        AttrEvent(1) # type: ignore
+    
+    event = AttrEvent(c=1)
+    assert event.a == 0
+    assert event.b == 'b'
+    assert event.c == 1
+    
+    event = AttrEvent(100, 'bbb', 1)
+    assert event.a == 100
+    assert event.b == 'bbb'
+    assert event.c == 1
+    
+    
 @pytest.mark.parametrize(
     "args, kwargs, expected_number, text", [
     [(1,), {}, 1, 'test'],
