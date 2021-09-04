@@ -1,0 +1,18 @@
+
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+    -   id: trailing-whitespace
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v0.910'
+    hooks:
+    -   id: mypy
+        entry: python .pre-commit-mypy.py
+        args: [--config-file=pyproject.toml]
+        exclude: setup.py
+-   repo: https://github.com/pycqa/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
+        name: isort (python)

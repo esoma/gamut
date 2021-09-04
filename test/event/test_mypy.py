@@ -1,11 +1,11 @@
 
 # mypy
-import mypy.api
-# python
-from dataclasses import dataclass
 import re
 import textwrap
+# python
+from dataclasses import dataclass
 
+import mypy.api
 
 mypy_error_pattern = re.compile(r'<string>:(\d+): (.+)')
 
@@ -38,7 +38,7 @@ def test_event_init() -> None:
                       '"def (self: gamut.event._event.Event)"'),
         MypyResult(5, 'error: Too many arguments for "Event"')
     ]
-    
+
 
 def test_event_init_subclass() -> None:
     assert run_mypy("""
@@ -52,7 +52,7 @@ def test_event_init_subclass() -> None:
                       '"__init_subclass__" of "Event"')
     ]
 
-    
+
 def test_event_await() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -72,8 +72,8 @@ def test_event_await() -> None:
             ']"'),
         MypyResult(6, 'note: Revealed type is "gamut.event._event.Event*"')
     ]
-    
-    
+
+
 def test_event_subclass_no_attrs_init() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -86,7 +86,7 @@ def test_event_subclass_no_attrs_init() -> None:
                       '"def (self: __main__.SubEvent)"'),
         MypyResult(6, 'error: Too many arguments for "SubEvent"')
     ]
-    
+
 
 def test_event_subclass_no_attrs_init_subclass() -> None:
     assert run_mypy("""
@@ -100,8 +100,8 @@ def test_event_subclass_no_attrs_init_subclass() -> None:
         MypyResult(6, 'error: Unexpected keyword argument "keyword" for '
                       '"__init_subclass__" of "SubEvent"')
     ]
-    
-    
+
+
 def test_event_subclass_await() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -122,8 +122,8 @@ def test_event_subclass_await() -> None:
             ']"'),
         MypyResult(7, 'note: Revealed type is "__main__.SubEvent*"')
     ]
-    
-    
+
+
 def test_event_subclass_attrs_no_defaults_init() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -150,8 +150,8 @@ def test_event_subclass_attrs_no_defaults_init() -> None:
             'error: Argument 3 to "SubEvent" has incompatible type "str"; '
             'expected "int"')
     ]
-    
-    
+
+
 def test_event_subclass_attrs_defaults_init() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -177,8 +177,8 @@ def test_event_subclass_attrs_defaults_init() -> None:
             'error: Argument 3 to "SubEvent" has incompatible type "str"; '
             'expected "int"')
     ]
-    
-    
+
+
 def test_event_subclass_attrs_init_subclass() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -204,8 +204,8 @@ def test_event_subclass_attrs_init_subclass() -> None:
             'error: Argument "a" to "__init_subclass__" of "SubEvent" has '
             'incompatible type "str"; expected "int"')
     ]
-    
-    
+
+
 def test_event_subclass_static_attrs_init() -> None:
     assert run_mypy("""
         from gamut.event import Event
@@ -227,8 +227,8 @@ def test_event_subclass_static_attrs_init() -> None:
         MypyResult(10,
             'error: Unexpected keyword argument "b" for "StaticEvent"'),
     ]
-    
-    
+
+
 def test_event_subclass_static_attrs_init_subclass() -> None:
     assert run_mypy("""
         from gamut.event import Event

@@ -1,25 +1,27 @@
 
 from __future__ import annotations
 
+# python
+from typing import Generator, Type
+
+# pytest
+import pytest
+
+from gamut.event import Event
 # gamut
 from gamut.event._task import Task, TaskStatus
 from gamut.event._taskmanager import TaskManager
-from gamut.event import Event
-# pytest
-import pytest
-# python
-from typing import Generator, Type
 
 
 class EventSub(Event):
     pass
-    
+
 class EventSubSub1(EventSub):
     pass
-    
+
 class EventSubSub2(EventSub):
     pass
-    
+
 class EventSubSubCombined(EventSubSub1, EventSubSub2):
     pass
 
@@ -55,13 +57,13 @@ def test_send(
         return await receive_class
     task = Task(func())
     task_manager.queue(task)
-    
+
     task_manager.run()
     assert task.status == TaskStatus.WORKING
 
     event = send_class()
     event.send()
-    
+
     task_manager.run()
     assert task.status == TaskStatus.COMPLETE
     assert task.result is event
@@ -89,24 +91,24 @@ def test_asend(
     send_class: Type[Event],
 ) -> None:
     order: list[int] = []
-    
+
     async def func() -> Event:
         event = await receive_class
         order.append(1)
         return event
     task = Task(func())
     task_manager.queue(task)
-    
+
     task_manager.run()
     assert task.status == TaskStatus.WORKING
-    
+
     event = send_class()
     async def func2() -> None:
         await event.asend()
         order.append(2)
     task2 = Task(func2())
     task_manager.queue(task2)
-    
+
     task_manager.run()
 
     assert task.status == TaskStatus.COMPLETE
@@ -141,13 +143,13 @@ def test_send_not_awaited(
         return await receive_class
     task = Task(func())
     task_manager.queue(task)
-    
+
     task_manager.run()
     assert task.status is TaskStatus.WORKING
 
     event = send_class()
     event.send()
-    
+
     task_manager.run()
     assert task.status is TaskStatus.WORKING
 
@@ -174,24 +176,24 @@ def test_asend_not_awaited(
     send_class: Type[Event],
 ) -> None:
     order: list[int] = []
-    
+
     async def func() -> Event:
         event = await receive_class
         order.append(1)
         return event
     task = Task(func())
     task_manager.queue(task)
-    
+
     task_manager.run()
     assert task.status is TaskStatus.WORKING
-    
+
     event = send_class()
     async def func2() -> None:
         await event.asend()
         order.append(2)
     task2 = Task(func2())
     task_manager.queue(task2)
-    
+
     task_manager.run()
     assert task.status is TaskStatus.WORKING
     assert task2.status is TaskStatus.COMPLETE

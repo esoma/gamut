@@ -1,10 +1,12 @@
 
 # gamut
-from gamut.event import Event
-# pytest
-import pytest
 # python
 from typing import Any, Sequence
+
+# pytest
+import pytest
+
+from gamut.event import Event
 
 
 @pytest.mark.parametrize(
@@ -29,8 +31,8 @@ def test_direct(
     event = AttrEvent(*args, **kwargs)
     assert event.number == expected_number
     assert event.text == expected_text
-    
-    
+
+
 def test_multi_inherit() -> None:
     class X(Event):
         a: int
@@ -40,13 +42,13 @@ def test_multi_inherit() -> None:
         c: int
     class Z(X, Y):
         pass
-        
+
     z = Z(1, 2, 3)
     assert z.a == 1
     assert z.b == 2
     assert z.c == 3
-    
-    
+
+
 def test_mutli_inherit_conflicting_defaults() -> None:
     class X(Event):
         a: int
@@ -56,19 +58,19 @@ def test_mutli_inherit_conflicting_defaults() -> None:
         c: int
     class Z(X, Y):
         pass
-        
+
     z = Z(1, c=3)
     assert z.a == 1
     assert z.b == 20
     assert z.c == 3
-    
-    
+
+
 def test_set_static_does_not_exist() -> None:
     with pytest.raises(TypeError):
         class AttrEvent(Event, thing=1): # type: ignore
             thing: int
-            
-            
+
+
 @pytest.mark.parametrize("override_thing", [1, 2])
 def test_override_static(override_thing: int) -> None:
     class Base(Event):
@@ -89,11 +91,11 @@ def test_multi_static_first_inherit() -> None:
         pass
     class Z(X, Y):
         pass
-        
+
     z = Z()
     assert z.a == 1
-       
-       
+
+
 def test_multi_static_second_inherit() -> None:
     class O(Event):
         a: int
@@ -103,11 +105,11 @@ def test_multi_static_second_inherit() -> None:
         pass
     class Z(Y, X):
         pass
-        
+
     z = Z()
     assert z.a == 1
-       
-            
+
+
 def test_multi_static_same() -> None:
     class O(Event):
         a: int
@@ -117,11 +119,11 @@ def test_multi_static_same() -> None:
         pass
     class Z(X, Y):
         pass
-        
+
     z = Z()
     assert z.a == 1
-    
-    
+
+
 def test_multi_static_different() -> None:
     class O(Event):
         a: int
@@ -129,11 +131,11 @@ def test_multi_static_different() -> None:
         pass
     class Y(O, a=2):
         pass
-        
+
     with pytest.raises(TypeError):
         class Z(X, Y):
             pass
-    
+
 
 def test_instantiate_with_multiple_values() -> None:
     class AttrEvent(Event):
@@ -143,8 +145,8 @@ def test_instantiate_with_multiple_values() -> None:
 
     with pytest.raises(TypeError):
         AttrEvent(1, 2, b=4) # type: ignore
-    
-    
+
+
 @pytest.mark.parametrize(
     "args, kwargs, "
     "expected_number, expected_text, "
@@ -169,28 +171,28 @@ def test_default(
     event = AttrEvent(*args, **kwargs)
     assert event.number == expected_number
     assert event.text == expected_text
-    
-    
+
+
 def test_default_before_no_default() -> None:
     class AttrEvent(Event):
         a: int = 0
         b: str = 'b'
         c: int
-        
-    with pytest.raises(TypeError):  
+
+    with pytest.raises(TypeError):
         AttrEvent(1) # type: ignore
-    
+
     event = AttrEvent(c=1)
     assert event.a == 0
     assert event.b == 'b'
     assert event.c == 1
-    
+
     event = AttrEvent(100, 'bbb', 1)
     assert event.a == 100
     assert event.b == 'bbb'
     assert event.c == 1
-    
-    
+
+
 @pytest.mark.parametrize(
     "args, kwargs, expected_number, text", [
     [(1,), {}, 1, 'test'],
@@ -212,7 +214,7 @@ def test_static(
 
     event = StaticAttrEvent(*args, **kwargs)
     assert event.number == expected_number
-    assert event.text == text  
+    assert event.text == text
 
 
 @pytest.mark.parametrize(
@@ -231,4 +233,4 @@ def test_instantiate_specify_static(
         pass
 
     with pytest.raises(TypeError):
-        event = StaticAttrEvent(1, *args, **kwargs)
+        event = StaticAttrEvent(1, *args, **kwargs) # type: ignore

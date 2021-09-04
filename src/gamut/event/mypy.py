@@ -1,31 +1,37 @@
 
 __all__ = ['Plugin']
 
-# mypy
-from mypy.fastparse import parse
-from mypy.plugin import ClassDefContext, Plugin as _Plugin
-from mypy.plugins.common import add_method, add_method_to_class
-from mypy.nodes import ARG_POS, ARG_OPT, Argument, ClassDef, AssignmentStmt, TypeInfo, Block, FuncDef, SymbolTable, NameExpr, MDEF, SymbolTableNode, TempNode, Var
-from mypy.mro import calculate_mro
-from mypy.semanal import SemanticAnalyzer
-from mypy.types import AnyType, get_proper_type, Instance, NoneType, Type as MypyType, TypeOfAny
-from mypy.typevars import fill_typevars
+import logging
+import textwrap
 # python
 from dataclasses import dataclass
-import logging
 from functools import partial
-import textwrap
 from typing import Any, Callable, Generator, Optional, Type
+
+# mypy
+from mypy.fastparse import parse
+from mypy.mro import calculate_mro
+from mypy.nodes import (ARG_OPT, ARG_POS, MDEF, Argument, AssignmentStmt,
+                        Block, ClassDef, FuncDef, NameExpr, SymbolTable,
+                        SymbolTableNode, TempNode, TypeInfo, Var)
+from mypy.plugin import ClassDefContext
+from mypy.plugin import Plugin as _Plugin
+from mypy.plugins.common import add_method, add_method_to_class
+from mypy.semanal import SemanticAnalyzer
+from mypy.types import AnyType, Instance, NoneType
+from mypy.types import Type as MypyType
+from mypy.types import TypeOfAny, get_proper_type
+from mypy.typevars import fill_typevars
 
 log = logging.getLogger(__name__)
 
 
 class Plugin(_Plugin):
-    
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._context = _Context()
-        
+
     def get_metaclass_hook(
         self,
         fullname: str
@@ -36,26 +42,26 @@ class Plugin(_Plugin):
 
         if fullname == 'gamut.event._event.EventType':
             return _transform_event
-    
+
         return None
-    
+
     def get_base_class_hook(
         self, fullname: str
     ) -> Optional[Callable[[ClassDefContext], None]]:
         result = super().get_base_class_hook(fullname)
         if result is not None:
             return result
-            
+
         if fullname in self._context.events:
             return partial(_transform_event_subclass, context=self._context)
-            
+
         return None
-        
-        
+
+
 def plugin(version: str) -> Type[Plugin]:
     return Plugin
-    
-    
+
+
 @dataclass
 class _EventField:
     name: str
@@ -63,7 +69,7 @@ class _EventField:
     is_static: bool
     type: MypyType
     node: AssignmentStmt
-    
+
     def to_init_argument(self) -> Argument:
         return Argument(
             Var(self.name, self.type),
@@ -71,7 +77,7 @@ class _EventField:
             None,
             ARG_OPT if self.has_default else ARG_POS
         )
-        
+
     def to_init_subclass_argument(self) -> Argument:
         return Argument(
             Var(self.name, self.type),
@@ -79,22 +85,22 @@ class _EventField:
             None,
             ARG_OPT
         )
-    
-    
+
+
 @dataclass
 class _Event:
     name: str
     fields: dict[str, _EventField]
-    
-    
+
+
 class _Context:
-    
+
     def __init__(self) -> None:
         self.events = {
             'gamut.event._event.Event': _Event('gamut.event._event.Event', {})
         }
-        
-        
+
+
 def _transform_event(ctx: ClassDefContext) -> None:
     # the only class that should use EventType is the Event class
     assert ctx.cls.info.fullname == 'gamut.event._event.Event'
@@ -112,7 +118,7 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
     # see: https://github.com/python/mypy/issues/11057
     assert ctx.cls.info.metaclass_type
     ctx.cls.info.metaclass_type.type._fullname = 'builtins.type'
-    
+
     context.events[ctx.cls.fullname] = event = _Event(
         ctx.cls.fullname,
         _get_fields(ctx, context),
@@ -139,14 +145,14 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
         assert isinstance(ctx.api, SemanticAnalyzer)
         assert isinstance(init_subclass_node.node, FuncDef)
         ctx.api.visit_func_def(init_subclass_node.node)
-    
-    
+
+
 def _get_fields(
     ctx: ClassDefContext,
     context: _Context,
 ) -> dict[str, _EventField]:
     fields = {ef.name: ef for ef in _get_direct_fields(ctx)}
-    
+
     for base in ctx.cls.info.bases:
         base_event = context.events[base.type.fullname]
         for field in base_event.fields.values():
@@ -164,7 +170,7 @@ def _get_fields(
                     field.type,
                     field.node,
                 )
-    
+
     return fields
 
 
@@ -186,4 +192,4 @@ def _get_direct_fields(
                         node.type,
                         node
                     )
-    
+

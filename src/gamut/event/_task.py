@@ -3,15 +3,15 @@ from __future__ import annotations
 
 __all__ = ['Task', 'TaskStatus']
 
-# gamut
-from ._future import Future
 # python
 from enum import Enum
-from typing import (Any, Coroutine, final, Generic, Iterable, Optional,
-                    Protocol, TypeVar)
+from typing import (Any, Coroutine, Generic, Iterable, Optional, Protocol,
+                    TypeVar, final)
 from warnings import warn
 from weakref import ref
 
+# gamut
+from ._future import Future
 
 T = TypeVar('T')
 
@@ -21,8 +21,8 @@ def next_order() -> int:
     global last_order
     last_order += 1
     return last_order
-        
-    
+
+
 class TaskStatus(Enum):
     WORKING = object()
     COMPLETE = object()
@@ -33,7 +33,7 @@ class TaskStatus(Enum):
 class Task(Generic[T]):
     """Task objects are containers for the execution of a coroutine which await
     on Future objects.
-    
+
     Tasks have three states:
         - TaskStatus.WORKING: the task's coroutine has not finished executing
         - TaskStatus.COMPLETE: the task's coroutine has finished executing and
@@ -41,15 +41,15 @@ class Task(Generic[T]):
         - TaskStatus.ERROR: the task's coroutine has finished executing because
             an error occured and the error is available via the "exception"
             property
-            
+
     The "run" method may only be used when the Task is in the working status.
     After the "run" method is executed the Task may have changed to the
     complete or error status.
-    
+
     The "queue" method may be used to queue the Task for execution in the
     Task's TaskManager. THe "queue_batch" method is used to queue many Tasks
     at once in an internally specified order.
-    
+
     The "throw" method may be used to induce an exception to be thrown by the
     Task's coroutine. Note that this method will also automatically queue up
     the Task. The Task must be in the working status.
@@ -76,18 +76,18 @@ class Task(Generic[T]):
         # if the status is ERROR then this will be populated, otherwise it
         # should always be None
         self._exception_to_throw: Optional[Exception] = None
-        
+
     def __del__(self) -> None:
         if self._status == TaskStatus.WORKING:
             warn(f'task expired while still working: {self!r}')
-            
+
     def __repr__(self) -> str:
         return f'<gamut.Task {id(self)} status={self._status}>'
 
     def run(self) -> None:
         if self._status != TaskStatus.WORKING:
             raise RuntimeError('task has nothing more to do')
-            
+
         try:
             if self._exception_to_throw:
                 exception_to_throw = self._exception_to_throw
@@ -103,7 +103,7 @@ class Task(Generic[T]):
             self._status = TaskStatus.ERROR
             self._thrown_exception = ex
             raise
-    
+
         try:
             future: Future[T, Task[T]] = next(self._execution)
         except StopIteration as ex:
@@ -117,7 +117,7 @@ class Task(Generic[T]):
 
         self._order = next_order()
         future.block(self)
-        
+
     @classmethod
     def sort(self, tasks: Iterable[Task[T]]) -> Iterable[Task[T]]:
         return sorted(tasks, key=lambda t: t._order)
@@ -127,15 +127,15 @@ class Task(Generic[T]):
             raise RuntimeError('task has nothing more to do')
 
         self._exception_to_throw = exception
-        
+
     @property
     def status(self) -> TaskStatus:
         return self._status
-        
+
     @property
     def result(self) -> T:
         return self._result
-        
+
     @property
     def exception(self) -> Exception:
         return self._thrown_exception

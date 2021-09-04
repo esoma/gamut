@@ -3,16 +3,16 @@ from __future__ import annotations
 
 __all__ = ['Event']
 
+# python
+import inspect
+from typing import (Any, Callable, ClassVar, Generator, Generic, Optional,
+                    Sequence, Type, TypeVar, Union, overload)
+from weakref import WeakSet
+
 # gamut
 from ._future import Future
 from ._task import Task
 from ._taskmanager import TaskManager
-# python
-import inspect
-from typing import (Any, Callable, ClassVar, Generator, Generic, Optional,
-                    overload, Sequence, Union, Type, TypeVar)
-from weakref import WeakSet
-
 
 T = TypeVar('T')
 
@@ -31,12 +31,12 @@ class EventType(type):
         cls._sent_callbacks = WeakSet()
         cls._all.add(cls)
         return cls
-    
+
     def __await__(cls: Type[T]) -> Generator[Future[T, Task[T]], None, T]:
         if cls._future is None: # type: ignore
             cls._future = Future() # type: ignore
         return cls._future.__await__() # type: ignore
-    
+
 
 def reset_events() -> None:
     """Effectivley "resets" all Events. Any Tasks that are waiting on any
@@ -46,15 +46,15 @@ def reset_events() -> None:
     for event in EventType._all:
         event._future = None
         event._sent_callbacks = WeakSet()
-        
-        
+
+
 def add_sent_callback(
     event: Type[E],
     callback: EventSentCallback[E]
 ) -> None:
     event._sent_callbacks.add(callback)
-    
-    
+
+
 def remove_sent_callback(
     event: Type[E],
     callback: EventSentCallback[E]
@@ -67,27 +67,27 @@ def remove_sent_callback(
 
 class Event(metaclass=EventType):
     """Events are distinct global units which may be awaited on.
-    
+
     The Event class itself is what is awaited on and it will return an instance
     of that Event (or a subclass) which was sent.
-    
+
     Event instances may be sent using the "send" and "asend" methods. When an
     Event is sent it will wake up any tasks that were waiting on that Event or
     a parent class.
-    
+
     The "send" method will only queue up the Task in the active TaskManager.
     On the other hand the "asend" method may be awaited so that the results of
     that Event being sent are processed before continuing the execution.
-    
+
     Event use annotations to define which additional fields they have:
-    
+
     class SubEvent(Event):
         my_attribute: int
     sub_event = SubEvent(1)
     assert sub_event.my_attribute == 1
-    
+
     Attributes may be made "static" in subclasses:
-    
+
     class SubEvent100(SubEvent, my_attribute=100):
         pass
     sub_event_100 = SubEvent()
@@ -135,7 +135,7 @@ class Event(metaclass=EventType):
                 if value is not cls._NonStatic and field in original_kwargs:
                     raise TypeError(
                         f'got an unexpected keyword argument \'{field}\''
-                    )    
+                    )
                 # if the field is static we need to make sure that doesn't
                 # conflict with any base classes, for example a base class
                 # may say the value is statically set to 5, but ours says it is
@@ -151,7 +151,7 @@ class Event(metaclass=EventType):
                 else:
                     fields[field] = value
         cls._fields = fields
-        super().__init_subclass__(**kwargs)
+        super().__init_subclass__(**kwargs) # type: ignore
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         for field, arg in self._fields.items():
@@ -173,7 +173,7 @@ class Event(metaclass=EventType):
                                 f'missing argument {field!r}'
                             ) from None
             setattr(self, field, arg)
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs) # type: ignore
 
     def __repr__(self) -> str:
         s = ' '.join(
@@ -202,18 +202,18 @@ class Event(metaclass=EventType):
 
         for task in Task.sort(tasks):
             task_manager.queue(task)
-                
+
     async def asend(self) -> None:
         task_manager = TaskManager.get_current()
         self.send()
         assert task_manager is not None
-        
+
         future: Future[None, Task[None]] = Future()
         async def wait_for_send_to_complete() -> None:
             assert task_manager is not None
             for task in Task.sort(future.resolve(None)):
                 task_manager.queue(task)
-       
+
         task = Task(wait_for_send_to_complete())
         task_manager.queue(task)
         await future
