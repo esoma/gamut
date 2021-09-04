@@ -57,14 +57,13 @@ def test_send(
     task_manager.queue(task)
     
     task_manager.run()
-    assert task.status is TaskStatus.WORKING
+    assert task.status == TaskStatus.WORKING
 
     event = send_class()
     event.send()
     
     task_manager.run()
-    # https://github.com/python/mypy/issues/9005
-    assert task.status is TaskStatus.COMPLETE # type: ignore  
+    assert task.status == TaskStatus.COMPLETE
     assert task.result is event
 
 
@@ -99,7 +98,7 @@ def test_asend(
     task_manager.queue(task)
     
     task_manager.run()
-    assert task.status is TaskStatus.WORKING
+    assert task.status == TaskStatus.WORKING
     
     event = send_class()
     async def func2() -> None:
@@ -109,10 +108,10 @@ def test_asend(
     task_manager.queue(task2)
     
     task_manager.run()
-    # https://github.com/python/mypy/issues/9005
-    assert task.status is TaskStatus.COMPLETE # type: ignore  
+
+    assert task.status == TaskStatus.COMPLETE
     assert task.result is event
-    assert task2.status is TaskStatus.COMPLETE
+    assert task2.status == TaskStatus.COMPLETE
     assert task2.result is None
     assert order == [1, 2]
 

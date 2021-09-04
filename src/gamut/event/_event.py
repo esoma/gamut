@@ -26,9 +26,9 @@ class EventType(type):
     _all: WeakSet[Type[EventType]] = WeakSet()
 
     def __new__(cls, name, bases, attrs, **kwds): # type: ignore
-        cls = super().__new__(cls, name, bases, attrs, **kwds) # type: ignore
+        cls = super().__new__(cls, name, bases, attrs, **kwds)
         cls._future = None
-        cls._sent_callbacks = WeakSet() # type: ignore
+        cls._sent_callbacks = WeakSet()
         cls._all.add(cls)
         return cls
     

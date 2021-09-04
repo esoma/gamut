@@ -113,7 +113,7 @@ def test_throw() -> None:
     
     exception = Exception('test')
     task.throw(exception)
-    assert task.status is TaskStatus.WORKING
+    assert task.status == TaskStatus.WORKING
     with pytest.raises(AttributeError):
         task.result
     with pytest.raises(AttributeError):
@@ -123,8 +123,7 @@ def test_throw() -> None:
         task.run()
     assert excinfo.value is exception
         
-    # https://github.com/python/mypy/issues/9005
-    assert task.status is TaskStatus.ERROR # type: ignore  
+    assert task.status == TaskStatus.ERROR
     with pytest.raises(AttributeError):
         task.result
     assert task.exception is exception
