@@ -156,6 +156,8 @@ def test_once_event(
         task_manager.run()
     assert callbacks == events[:1]
 
+    assert bind.kind == BindKind.ONCE
+
 
 @pytest.mark.parametrize("simultaneous_event_count", [1, 2, 5, 10])
 def test_mutex_event(
