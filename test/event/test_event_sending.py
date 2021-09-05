@@ -29,6 +29,21 @@ def task_manager() -> Generator[TaskManager, None, None]:
         yield task_manager
 
 
+def test_send_no_task_manager() -> None:
+    event = Event()
+    with pytest.raises(RuntimeError) as excinfo:
+        event.send()
+    assert str(excinfo.value) == 'no active task manager'
+
+
+def test_asend_no_task_manager() -> None:
+    event = Event()
+    coro = event.asend().__await__()
+    with pytest.raises(RuntimeError) as excinfo:
+        next(coro)
+    assert str(excinfo.value) == 'no active task manager'
+
+
 @pytest.mark.parametrize("receive_class, send_class", [
     [Event, Event],
     [Event, EventSub],
