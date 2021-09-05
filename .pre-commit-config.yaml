@@ -11,6 +11,7 @@ repos:
         entry: python .pre-commit-mypy.py
         args: [--config-file=pyproject.toml]
         exclude: setup.py
+        additional_dependencies: ['pytest']
 -   repo: https://github.com/pycqa/isort
     rev: '5.9.3'
     hooks:
