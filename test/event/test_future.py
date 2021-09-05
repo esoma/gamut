@@ -13,7 +13,11 @@ class Blockable:
 
 
 class Result:
-    pass
+    def __str__(self) -> str:
+        return 'not the repr'
+
+    def __repr__(self) -> str:
+        return '<Result>'
 
 
 @pytest.mark.filterwarnings('ignore: future expired before being resolved')
@@ -99,3 +103,15 @@ def test_expires_without_being_resolved_while_blocking() -> None:
     assert str(warnings[1].message).startswith(
         'future expired while blocking: '
     )
+
+
+def test_not_ready_repr() -> None:
+    future: Future[Result, Blockable] = Future()
+    assert repr(future) == '<gamut.Future is_ready=False>'
+
+
+def test_ready_repr() -> None:
+    future: Future[Result, Blockable] = Future()
+    future.resolve(Result())
+
+    assert repr(future) == '<gamut.Future result=<Result>>'
