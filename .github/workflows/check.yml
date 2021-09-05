@@ -59,11 +59,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}-${{ matrix.python-arch }}
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-        architecture: ${{ matrix.python-arch }}
+        python-version: 3.9
+        architecture: x64
 
     - name: Upgrade pip & setuptools
       run: |
