@@ -76,6 +76,23 @@ def test_context_maanger_close(bind_kind: BindKind) -> None:
     assert str(excinfo.value) == 'bind is closed'
 
 
+@pytest.mark.parametrize("bind_kind", [
+    BindKind.ON,
+    BindKind.ONCE,
+    BindKind.MUTEX
+])
+def test_context_manager_already_closed(bind_kind: BindKind) -> None:
+    async def callback(event: Event) -> None:
+        return None
+    bind = Bind(Event, callback, bind_kind)
+    bind.close()
+
+    with pytest.raises(RuntimeError) as excinfo:
+        with bind:
+            pass
+    assert str(excinfo.value) == 'bind is already closed'
+
+
 @pytest.mark.parametrize("simultaneous_event_count", [1, 2, 5, 10])
 def test_on_event(
     task_manager: TaskManager,
