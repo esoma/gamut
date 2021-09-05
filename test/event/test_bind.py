@@ -58,6 +58,30 @@ def test_close(bind_kind: BindKind) -> None:
         assert str(excinfo.value) == 'bind is closed'
 
 
+@pytest.mark.filterwarnings('ignore: future expired before being resolved')
+@pytest.mark.filterwarnings('ignore: future expired while blocking')
+@pytest.mark.filterwarnings('ignore: task expired while still working')
+@pytest.mark.parametrize("bind_kind", [
+    BindKind.ON,
+    BindKind.ONCE,
+    BindKind.MUTEX
+])
+def test_close_with_tasks_no_task_manager(bind_kind: BindKind) -> None:
+    async def callback(event: Event) -> None:
+        await Event
+    bind = Bind(Event, callback, bind_kind)
+    event = Event()
+
+    with TaskManager() as task_manager:
+        event.send()
+        task_manager.run()
+
+    with pytest.raises(RuntimeError) as excinfo:
+        bind.close()
+    assert str(excinfo.value) == ('unable to close bind with unfinished tasks '
+                                  'without an active task manager')
+
+
 @pytest.mark.parametrize("bind_kind", [
     BindKind.ON,
     BindKind.ONCE,
