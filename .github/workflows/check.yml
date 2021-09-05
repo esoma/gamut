@@ -53,8 +53,6 @@ jobs:
 
   static-analysis:
 
-    if: ${{ github.base_ref }}
-
     runs-on: ubuntu-latest
 
     steps:
