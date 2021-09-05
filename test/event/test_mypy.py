@@ -3,11 +3,16 @@
 import re
 import textwrap
 from dataclasses import dataclass
+from os import path
+from typing import Callable
 # mypy
 import mypy.api
+# pytest
+import pytest
 
 mypy_error_pattern = re.compile(r'<string>:(\d+): (.+)')
 
+directory = path.dirname(path.realpath(__file__))
 
 @dataclass
 class MypyResult:
@@ -15,8 +20,12 @@ class MypyResult:
     text: str
 
 
-def run_mypy(src: str) -> list[MypyResult]:
-    report, _, _ = mypy.api.run(['-c', textwrap.dedent(src), '--strict'])
+def run_mypy_with_config(src: str, config_file: str) -> list[MypyResult]:
+    report, _, _ = mypy.api.run([
+        '--config-file', config_file,
+        '-c', textwrap.dedent(src),
+        '--no-incremental',
+    ])
     errors: list[MypyResult] = []
     for line in report.split('\n'):
         print(line)
@@ -26,7 +35,28 @@ def run_mypy(src: str) -> list[MypyResult]:
     return errors
 
 
-def test_event_init() -> None:
+def run_mypy_with_main_plugin(src: str) -> list[MypyResult]:
+    return run_mypy_with_config(
+        src,
+        path.join(directory, 'mypy-main-plugin.ini')
+    )
+
+
+def run_mypy_with_event_plugin(src: str) -> list[MypyResult]:
+    return run_mypy_with_config(
+        src,
+        path.join(directory, 'mypy-event-plugin.ini')
+    )
+
+
+parametrize_run_mypy = pytest.mark.parametrize("run_mypy", [
+    run_mypy_with_main_plugin,
+    run_mypy_with_event_plugin,
+])
+
+
+@parametrize_run_mypy
+def test_event_init(run_mypy: Callable[[str], list[MypyResult]]) -> None:
     assert run_mypy("""
         from gamut.event import Event
         reveal_type(Event.__init__)
@@ -39,7 +69,10 @@ def test_event_init() -> None:
     ]
 
 
-def test_event_init_subclass() -> None:
+@parametrize_run_mypy
+def test_event_init_subclass(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         reveal_type(Event.__init_subclass__)
@@ -52,7 +85,8 @@ def test_event_init_subclass() -> None:
     ]
 
 
-def test_event_await() -> None:
+@parametrize_run_mypy
+def test_event_await(run_mypy: Callable[[str], list[MypyResult]]) -> None:
     assert run_mypy("""
         from gamut.event import Event
         reveal_type(Event.__await__)
@@ -73,7 +107,10 @@ def test_event_await() -> None:
     ]
 
 
-def test_event_subclass_no_attrs_init() -> None:
+@parametrize_run_mypy
+def test_event_subclass_no_attrs_init(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event): ...
@@ -87,7 +124,10 @@ def test_event_subclass_no_attrs_init() -> None:
     ]
 
 
-def test_event_subclass_no_attrs_init_subclass() -> None:
+@parametrize_run_mypy
+def test_event_subclass_no_attrs_init_subclass(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event): ...
@@ -101,7 +141,10 @@ def test_event_subclass_no_attrs_init_subclass() -> None:
     ]
 
 
-def test_event_subclass_await() -> None:
+@parametrize_run_mypy
+def test_event_subclass_await(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event): ...
@@ -123,7 +166,10 @@ def test_event_subclass_await() -> None:
     ]
 
 
-def test_event_subclass_attrs_no_defaults_init() -> None:
+@parametrize_run_mypy
+def test_event_subclass_attrs_no_defaults_init(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event):
@@ -151,7 +197,10 @@ def test_event_subclass_attrs_no_defaults_init() -> None:
     ]
 
 
-def test_event_subclass_attrs_defaults_init() -> None:
+@parametrize_run_mypy
+def test_event_subclass_attrs_defaults_init(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event):
@@ -178,7 +227,10 @@ def test_event_subclass_attrs_defaults_init() -> None:
     ]
 
 
-def test_event_subclass_inherited_attrs_defaults_init() -> None:
+@parametrize_run_mypy
+def test_event_subclass_inherited_attrs_defaults_init(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event):
@@ -202,7 +254,10 @@ def test_event_subclass_inherited_attrs_defaults_init() -> None:
     ]
 
 
-def test_event_subclass_attrs_init_subclass() -> None:
+@parametrize_run_mypy
+def test_event_subclass_attrs_init_subclass(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event):
@@ -229,7 +284,10 @@ def test_event_subclass_attrs_init_subclass() -> None:
     ]
 
 
-def test_event_subclass_static_attrs_init() -> None:
+@parametrize_run_mypy
+def test_event_subclass_static_attrs_init(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event):
@@ -252,7 +310,10 @@ def test_event_subclass_static_attrs_init() -> None:
     ]
 
 
-def test_event_subclass_static_attrs_init_subclass() -> None:
+@parametrize_run_mypy
+def test_event_subclass_static_attrs_init_subclass(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class SubEvent(Event):
@@ -272,4 +333,32 @@ def test_event_subclass_static_attrs_init_subclass() -> None:
             ')"'),
         MypyResult(11, 'error: Unexpected keyword argument "b" for '
                       '"__init_subclass__" of "StaticEvent"'),
+    ]
+
+
+@parametrize_run_mypy
+def test_event_subclass_multi_inherit_static_attrs_init_subclass(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class SubEvent(Event):
+            a: int
+            b: str
+            c: int
+        class StaticEvent(SubEvent, b="test"): ...
+        class ParallelEvent(SubEvent): ...
+        class TestEvent(ParallelEvent, StaticEvent): ...
+        reveal_type(TestEvent.__init_subclass__)
+        class SubTestEvent(TestEvent): ...
+        class SubTestEventStaticA(TestEvent, a=1): ...
+        class SubTestEventBAgain(TestEvent, b="test"): ...
+    """) == [
+        MypyResult(10,
+            'note: Revealed type is "def ('
+                'a: builtins.int =, '
+                'c: builtins.int ='
+            ')"'),
+        MypyResult(13, 'error: Unexpected keyword argument "b" for '
+                      '"__init_subclass__" of "TestEvent"'),
     ]
