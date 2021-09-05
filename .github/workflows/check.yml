@@ -76,5 +76,5 @@ jobs:
 
     - name: Static Analysis
       run: |
-        python -m pre_commit run --from-ref ${{ github.base_ref }} --to-ref ${{ github.head_ref }}
+        python -m pre_commit run --all-files
 
