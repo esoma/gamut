@@ -3,12 +3,11 @@ from __future__ import annotations
 
 __all__ = ['TaskManager', 'TaskManagerIgnoredException']
 
+# gamut
+from ._task import Task, TaskStatus
 # python
 from collections import deque
 from typing import Any, ClassVar, Optional, TypeVar, final
-
-# gamut
-from ._task import Task, TaskStatus
 
 T = TypeVar('T')
 

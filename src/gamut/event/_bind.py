@@ -3,17 +3,16 @@ from __future__ import annotations
 
 __all__ = ['Bind', 'BindKind', 'BindClosed']
 
+# gamut
+from ._event import Event, add_sent_callback, remove_sent_callback
+from ._future import Future
+from ._task import Task
+from ._taskmanager import TaskManager, TaskManagerIgnoredException
 # python
 from enum import Enum
 from typing import (Any, Callable, Coroutine, Generic, Optional, Type, TypeVar,
                     final)
 from weakref import WeakSet
-
-from ._event import Event, add_sent_callback, remove_sent_callback
-# gamut
-from ._future import Future
-from ._task import Task
-from ._taskmanager import TaskManager, TaskManagerIgnoredException
 
 
 class BindClosed(TaskManagerIgnoredException):

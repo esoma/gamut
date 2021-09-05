@@ -1,10 +1,10 @@
 
 # mypy
+# python
 import re
 import textwrap
-# python
 from dataclasses import dataclass
-
+# mypy
 import mypy.api
 
 mypy_error_pattern = re.compile(r'<string>:(\d+): (.+)')

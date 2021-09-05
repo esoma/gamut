@@ -1,14 +1,11 @@
 
 from __future__ import annotations
-
-# python
-import gc
-
-# pytest
-import pytest
-
 # gamut
 from gamut.event._future import Future
+# python
+import gc
+# pytest
+import pytest
 
 
 class Blockable:

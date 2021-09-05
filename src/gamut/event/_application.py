@@ -3,14 +3,13 @@ from __future__ import annotations
 
 __all__ = ['Application', 'ApplicationEnd', 'ApplicationStart']
 
-# python
-from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
-
 # gamut
 from ._event import Event
 from ._task import Task, TaskStatus
 from ._taskmanager import TaskManager
+# python
+from abc import ABC, abstractmethod
+from typing import Any, Generic, TypeVar
 
 R = TypeVar('R')
 

@@ -1,13 +1,13 @@
 
 # gamut
+# gamut
+# gamut
+from gamut.event._event import reset_events
 # python
 import gc
 from typing import Any, Generator
-
 # pytest
 import pytest
-
-from gamut.event._event import reset_events
 
 
 @pytest.fixture(autouse=True)

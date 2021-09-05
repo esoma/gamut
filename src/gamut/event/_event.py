@@ -3,15 +3,14 @@ from __future__ import annotations
 
 __all__ = ['Event']
 
-# python
-import inspect
-from typing import Any, Callable, ClassVar, Generator, Optional, Type, TypeVar
-from weakref import WeakSet
-
 # gamut
 from ._future import Future
 from ._task import Task
 from ._taskmanager import TaskManager
+# python
+import inspect
+from typing import Any, Callable, ClassVar, Generator, Optional, Type, TypeVar
+from weakref import WeakSet
 
 T = TypeVar('T')
 

@@ -1,16 +1,13 @@
 
 from __future__ import annotations
-
-# python
-from typing import Generator
-
-# pytest
-import pytest
-
 # gamut
 from gamut.event._future import Future
 from gamut.event._task import Task, TaskStatus
 from gamut.event._taskmanager import TaskManager, TaskManagerIgnoredException
+# python
+from typing import Generator
+# pytest
+import pytest
 
 
 class Result:

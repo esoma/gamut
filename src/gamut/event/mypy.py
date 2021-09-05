@@ -5,7 +5,6 @@ __all__ = ['Plugin']
 from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Generator, Optional, Type
-
 # mypy
 from mypy.nodes import (ARG_OPT, ARG_POS, Argument, AssignmentStmt, FuncDef,
                         NameExpr, TempNode, Var)

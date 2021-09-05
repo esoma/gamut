@@ -1,11 +1,10 @@
 
 __all__ = ['plugin']
 
-# python
-from typing import Type
-
 # gamut
 from .event.mypy import Plugin as EventPlugin
+# python
+from typing import Type
 
 
 class Plugin(EventPlugin):

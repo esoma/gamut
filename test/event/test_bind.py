@@ -1,17 +1,14 @@
 
 from __future__ import annotations
-
+# gamut
+from gamut.event import Bind, BindClosed, BindKind, Event
+from gamut.event._taskmanager import TaskManager
 # python
 import gc
 import weakref
 from typing import Generator
-
 # pytest
 import pytest
-
-# gamut
-from gamut.event import Bind, BindClosed, BindKind, Event
-from gamut.event._taskmanager import TaskManager
 
 
 @pytest.fixture

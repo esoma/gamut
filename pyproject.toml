@@ -20,3 +20,21 @@ warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
+
+[tool.isort]
+known_pytest = 'pytest'
+known_mypy = 'mypy'
+known_setuptools = 'setuptools'
+
+sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'MYPY', 'PYTEST',
+            'SETUPTOOLS', 'THIRDPARTY']
+no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'MYPY', 'PYTEST',
+                   'SETUPTOOLS', 'THIRDPARTY']
+
+import_heading_localfolder = 'gamut'
+import_heading_firstparty = 'gamut'
+import_heading_stdlib = 'python'
+import_heading_mypy = 'mypy'
+import_heading_pytest = 'pytest'
+import_heading_setuptools = 'setuptools'
+import_heading_thirdparty = 'TODO: add isort heading'

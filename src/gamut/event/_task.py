@@ -3,13 +3,12 @@ from __future__ import annotations
 
 __all__ = ['Task', 'TaskStatus']
 
+# gamut
+from ._future import Future
 # python
 from enum import Enum
 from typing import Any, Coroutine, Generic, Iterable, Optional, TypeVar, final
 from warnings import warn
-
-# gamut
-from ._future import Future
 
 T = TypeVar('T')
 

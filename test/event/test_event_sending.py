@@ -1,16 +1,13 @@
 
 from __future__ import annotations
-
-# python
-from typing import Generator, Type
-
-# pytest
-import pytest
-
-from gamut.event import Event
 # gamut
+from gamut.event import Event
 from gamut.event._task import Task, TaskStatus
 from gamut.event._taskmanager import TaskManager
+# python
+from typing import Generator, Type
+# pytest
+import pytest
 
 
 class EventSub(Event):

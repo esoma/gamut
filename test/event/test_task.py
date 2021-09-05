@@ -1,12 +1,10 @@
 
 from __future__ import annotations
-
-# pytest
-import pytest
-
 # gamut
 from gamut.event._future import Future
 from gamut.event._task import Task, TaskStatus
+# pytest
+import pytest
 
 
 class Result:
