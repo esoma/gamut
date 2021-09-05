@@ -124,8 +124,10 @@ class Event(metaclass=EventType):
         # so that they come after any base fields
         fields.update({
             k: cls._NonStatic
-            for k in cls.__annotations__
+            for k, v in cls.__annotations__.items()
             if k not in fields
+            if type(v) is not ClassVar # type: ignore
+            if not (isinstance(v, str) and v.startswith('ClassVar'))
         })
         # now we travel the class inheritance graph, ignoring this class since
         # we've already procesed it
@@ -178,11 +180,17 @@ class Event(metaclass=EventType):
         super().__init__(*args, **kwargs) # type: ignore
 
     def __repr__(self) -> str:
-        s = ' '.join(
-            f'{"*" if v is not self._NonStatic else ""}{k}={getattr(self, k)}'
+        name = f'{type(self).__module__}.{type(self).__qualname__}'
+        if name == 'gamut.event._event.Event':
+            name = 'gamut.event.Event'
+        fields = ' '.join(
+            f'{"*" if v is not self._NonStatic else ""}'
+            f'{k}={getattr(self, k)!r}'
             for k, v in self._fields.items()
         )
-        return f'<{type(self).__name__} {s}>'
+        if fields:
+            fields = ' ' + fields
+        return f'<{name}{fields}>'
 
     def send(self: E) -> None:
         task_manager = TaskManager.get_current()

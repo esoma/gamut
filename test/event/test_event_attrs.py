@@ -264,3 +264,49 @@ def test_instantiate_specify_static(
 
     with pytest.raises(TypeError):
         event = StaticAttrEvent(1, *args, **kwargs) # type: ignore
+
+
+def test_event_repr() -> None:
+    assert repr(Event()) == '<gamut.event.Event>'
+
+
+def test_event_no_attrs_repr() -> None:
+    class TestEvent(Event):
+        pass
+    expected = '<test_event_attrs.test_event_no_attrs_repr.<locals>.TestEvent>'
+    assert repr(TestEvent()) == expected
+
+
+def test_event_one_attr_repr() -> None:
+    class TestEvent(Event):
+        a: int
+    expected = (
+        '<test_event_attrs.test_event_attrs_repr.<locals>.TestEvent a=1>'
+    )
+    assert repr(TestEvent(1)) == expected
+
+
+def test_event_many_attr_repr() -> None:
+    class TestEvent(Event):
+        a: int
+        b: str
+    expected = (
+        '<test_event_attrs.test_event_many_attr_repr.<locals>.TestEvent '
+        'a=1 '
+        'b=\'b\'>'
+    )
+    assert repr(TestEvent(1, 'b')) == expected
+
+
+def test_event_static_attr_repr() -> None:
+    class Base(Event):
+        a: int
+        b: str
+    class TestEvent(Base, a=10):
+        pass
+    expected = (
+        '<test_event_attrs.test_event_static_attr_repr.<locals>.TestEvent '
+        '*a=10 '
+        'b=\'b\'>'
+    )
+    assert repr(TestEvent('b')) == expected
