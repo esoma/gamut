@@ -198,6 +198,32 @@ def test_event_subclass_attrs_no_defaults_init(
 
 
 @parametrize_run_mypy
+def test_event_subclass_non_event_init(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class SubEvent(Event):
+            a: int
+        class NonEvent:
+            b: int
+        class TestEvent(SubEvent, NonEvent): ...
+        reveal_type(TestEvent.__init__)
+        SubEvent(1)
+        reveal_type(TestEvent.a)
+        reveal_type(TestEvent.b)
+    """) == [
+        MypyResult(8,
+            'note: Revealed type is "def ('
+                'self: __main__.TestEvent, '
+                'a: builtins.int'
+            ')"'),
+        MypyResult(10, 'note: Revealed type is "builtins.int"'),
+        MypyResult(11, 'note: Revealed type is "builtins.int"'),
+    ]
+
+
+@parametrize_run_mypy
 def test_event_subclass_attrs_defaults_init(
     run_mypy: Callable[[str], list[MypyResult]]
 ) -> None:

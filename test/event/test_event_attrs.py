@@ -31,6 +31,20 @@ def test_direct(
     assert event.text == expected_text
 
 
+def test_inherit_non_event() -> None:
+    class BaseEvent(Event):
+        a: int
+    class SomeMixin:
+        b: int
+    class TestEvent(BaseEvent, SomeMixin):
+        pass
+
+    t = TestEvent(1)
+    assert t.a == 1
+    with pytest.raises(AttributeError):
+        t.b
+
+
 def test_multi_inherit() -> None:
     class X(Event):
         a: int

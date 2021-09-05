@@ -171,7 +171,10 @@ def _get_fields(
             fields[field.name].is_static = True
 
     for base in ctx.cls.info.bases:
-        base_event = context.events[base.type.fullname]
+        try:
+            base_event = context.events[base.type.fullname]
+        except KeyError:
+            continue
         for field in base_event.fields.values():
             _apply_field(field)
 
