@@ -128,7 +128,11 @@ class Event(metaclass=EventType):
             for k, v in cls.__annotations__.items()
             if k not in fields
             if get_origin(v) is not ClassVar
-            if not (isinstance(v, str) and v.startswith('ClassVar'))
+            if not (isinstance(v, str) and v.startswith((
+                'ClassVar',
+                'typing.ClassVar',
+                'typing_extensions.ClassVar',
+            )))
         })
         # now we travel the class inheritance graph, ignoring this class since
         # we've already procesed it

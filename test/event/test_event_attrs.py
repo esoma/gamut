@@ -40,10 +40,15 @@ def test_class_var() -> None:
         assert t.a
 
 
-def test_class_var_string() -> None:
+@pytest.mark.parametrize("classvar_prefix", [
+    'ClassVar',
+    'typing.ClassVar',
+    'typing_extensions.ClassVar',
+])
+def test_class_var_string(classvar_prefix: str) -> None:
     class TestEvent(Event):
-        a: 'ClassVar[int]'
-    t = TestEvent()
+        a: f'{classvar_prefix}[int]' # type: ignore
+    t = TestEvent() # type: ignore
 
     with pytest.raises(AttributeError):
         assert t.a
