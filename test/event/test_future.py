@@ -105,6 +105,7 @@ def test_expires_without_being_resolved_while_blocking() -> None:
     )
 
 
+@pytest.mark.filterwarnings('ignore: future expired before being resolved')
 def test_not_ready_repr() -> None:
     future: Future[Result, Blockable] = Future()
     assert repr(future) == '<gamut.Future is_ready=False>'
