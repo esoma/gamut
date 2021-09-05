@@ -178,6 +178,30 @@ def test_event_subclass_attrs_defaults_init() -> None:
     ]
 
 
+def test_event_subclass_inherited_attrs_defaults_init() -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class SubEvent(Event):
+            a: int
+            b: str
+            c: int
+        class DefaultEvent(SubEvent):
+            c: int = 3
+        reveal_type(DefaultEvent.__init__)
+        DefaultEvent(1, "b")
+        DefaultEvent(1, "b", 4)
+        DefaultEvent(c=1, a=2, b="3")
+    """) == [
+        MypyResult(9,
+            'note: Revealed type is "def ('
+                'self: __main__.DefaultEvent, '
+                'a: builtins.int, '
+                'b: builtins.str, '
+                'c: builtins.int ='
+            ')"'),
+    ]
+
+
 def test_event_subclass_attrs_init_subclass() -> None:
     assert run_mypy("""
         from gamut.event import Event

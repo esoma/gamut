@@ -39,12 +39,30 @@ def test_multi_inherit() -> None:
         b: int
         c: int
     class Z(X, Y):
-        pass
+        d: int
 
-    z = Z(1, 2, 3)
+    z = Z(1, 2, 3, 4)
     assert z.a == 1
     assert z.b == 2
     assert z.c == 3
+    assert z.d == 4
+
+
+def test_multi_inherit_flip_order() -> None:
+    class X(Event):
+        a: int
+        b: int
+    class Y(Event):
+        b: int
+        c: int
+    class Z(Y, X):
+        d: int
+
+    z = Z(1, 2, 3, 4)
+    assert z.b == 1
+    assert z.c == 2
+    assert z.a == 3
+    assert z.d == 4
 
 
 def test_mutli_inherit_conflicting_defaults() -> None:
