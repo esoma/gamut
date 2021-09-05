@@ -19,6 +19,13 @@ jobs:
         python-version: [3.9, 3.10-dev]
         python-arch: [x86, x64]
 
+        exclude:
+          - os: ubuntu-latest
+            python-arch: x86
+
+          - os: macos-latest
+            python-arch: x86
+
     steps:
     - uses: actions/checkout@v2
 
