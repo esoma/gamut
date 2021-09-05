@@ -2,7 +2,7 @@
 # gamut
 from gamut.event import Event
 # python
-from typing import Any, Sequence
+from typing import Any, ClassVar, Sequence
 # pytest
 import pytest
 
@@ -29,6 +29,24 @@ def test_direct(
     event = AttrEvent(*args, **kwargs)
     assert event.number == expected_number
     assert event.text == expected_text
+
+
+def test_class_var() -> None:
+    class TestEvent(Event):
+        a: ClassVar[int]
+    t = Event()
+
+    with pytest.raises(AttributeError):
+        assert t.a # type: ignore
+
+
+def test_class_var_string() -> None:
+    class TestEvent(Event):
+        a: 'ClassVar[int]'
+    t = Event()
+
+    with pytest.raises(AttributeError):
+        assert t.a # type: ignore
 
 
 def test_inherit_non_event() -> None:
@@ -281,7 +299,7 @@ def test_event_one_attr_repr() -> None:
     class TestEvent(Event):
         a: int
     expected = (
-        '<test_event_attrs.test_event_attrs_repr.<locals>.TestEvent a=1>'
+        '<test_event_attrs.test_event_one_attr_repr.<locals>.TestEvent a=1>'
     )
     assert repr(TestEvent(1)) == expected
 
