@@ -155,6 +155,8 @@ def _get_fields(
     def _apply_field(field: _EventField) -> None:
         adjacent_field = fields.get(field.name, None)
         if adjacent_field:
+            if field.is_static:
+                adjacent_field.is_static = True
             if field.has_default and not adjacent_field.has_default:
                 adjacent_field.has_default = True
         else:
