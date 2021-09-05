@@ -1,7 +1,5 @@
 
 # gamut
-# gamut
-# gamut
 from gamut.event import Event
 # python
 from typing import Any, Sequence

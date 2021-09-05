@@ -1,5 +1,4 @@
 
-# mypy
 # python
 import re
 import textwrap
