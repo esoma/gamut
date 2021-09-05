@@ -9,7 +9,8 @@ from ._task import Task
 from ._taskmanager import TaskManager
 # python
 import inspect
-from typing import Any, Callable, ClassVar, Generator, Optional, Type, TypeVar
+from typing import (Any, Callable, ClassVar, Generator, Optional, Type,
+                    TypeVar, get_origin)
 from weakref import WeakSet
 
 T = TypeVar('T')
@@ -126,7 +127,7 @@ class Event(metaclass=EventType):
             k: cls._NonStatic
             for k, v in cls.__annotations__.items()
             if k not in fields
-            if type(v) is not ClassVar # type: ignore
+            if get_origin(v) is not ClassVar
             if not (isinstance(v, str) and v.startswith('ClassVar'))
         })
         # now we travel the class inheritance graph, ignoring this class since

@@ -34,19 +34,19 @@ def test_direct(
 def test_class_var() -> None:
     class TestEvent(Event):
         a: ClassVar[int]
-    t = Event()
+    t = TestEvent()
 
     with pytest.raises(AttributeError):
-        assert t.a # type: ignore
+        assert t.a
 
 
 def test_class_var_string() -> None:
     class TestEvent(Event):
         a: 'ClassVar[int]'
-    t = Event()
+    t = TestEvent()
 
     with pytest.raises(AttributeError):
-        assert t.a # type: ignore
+        assert t.a
 
 
 def test_inherit_non_event() -> None:

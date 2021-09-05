@@ -7,7 +7,7 @@ from functools import partial
 from typing import Any, Callable, Generator, Optional, Type
 # mypy
 from mypy.nodes import (ARG_OPT, ARG_POS, Argument, AssignmentStmt, FuncDef,
-                        NameExpr, TempNode, Var)
+                        NameExpr, TempNode, Var, is_class_var)
 from mypy.plugin import ClassDefContext
 from mypy.plugin import Plugin as _Plugin
 from mypy.plugins.common import add_method
@@ -195,6 +195,8 @@ def _get_direct_fields(
             )
             for lvalue in node.lvalues:
                 if isinstance(lvalue, NameExpr):
+                    if is_class_var(lvalue):
+                        continue
                     yield _EventField(
                         lvalue.name,
                         has_default,
