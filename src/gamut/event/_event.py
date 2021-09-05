@@ -5,8 +5,7 @@ __all__ = ['Event']
 
 # python
 import inspect
-from typing import (Any, Callable, ClassVar, Generator, Generic, Optional,
-                    Sequence, Type, TypeVar, Union, overload)
+from typing import Any, Callable, ClassVar, Generator, Optional, Type, TypeVar
 from weakref import WeakSet
 
 # gamut

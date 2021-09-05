@@ -12,7 +12,10 @@ repos:
         args: [--config-file=pyproject.toml]
         exclude: setup.py
 -   repo: https://github.com/pycqa/isort
-    rev: 5.9.3
+    rev: '5.9.3'
     hooks:
       - id: isort
-        name: isort (python)
+-   repo: https://github.com/pycqa/flake8
+    rev: '3.9.2'
+    hooks:
+    -   id: flake8

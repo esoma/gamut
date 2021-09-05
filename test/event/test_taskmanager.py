@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 # python
-import gc
-import warnings
 from typing import Generator
 
 # pytest

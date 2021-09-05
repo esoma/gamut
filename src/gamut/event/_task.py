@@ -5,10 +5,8 @@ __all__ = ['Task', 'TaskStatus']
 
 # python
 from enum import Enum
-from typing import (Any, Coroutine, Generic, Iterable, Optional, Protocol,
-                    TypeVar, final)
+from typing import Any, Coroutine, Generic, Iterable, Optional, TypeVar, final
 from warnings import warn
-from weakref import ref
 
 # gamut
 from ._future import Future
@@ -64,7 +62,7 @@ class Task(Generic[T]):
     _result: T
     _thrown_exception: Exception
 
-    def __init__(self,coro: Coroutine[Future[T, Task[T]], Any, T]) -> None:
+    def __init__(self, coro: Coroutine[Future[T, Task[T]], Any, T]) -> None:
         # the order, relative to other tasks in which to unblock multiple tasks
         # on multiple futures
         self._order: int = 0

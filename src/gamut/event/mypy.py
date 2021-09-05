@@ -1,29 +1,21 @@
 
 __all__ = ['Plugin']
 
-import logging
-import textwrap
 # python
 from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Generator, Optional, Type
 
 # mypy
-from mypy.fastparse import parse
-from mypy.mro import calculate_mro
-from mypy.nodes import (ARG_OPT, ARG_POS, MDEF, Argument, AssignmentStmt,
-                        Block, ClassDef, FuncDef, NameExpr, SymbolTable,
-                        SymbolTableNode, TempNode, TypeInfo, Var)
+from mypy.nodes import (ARG_OPT, ARG_POS, Argument, AssignmentStmt, FuncDef,
+                        NameExpr, TempNode, Var)
 from mypy.plugin import ClassDefContext
 from mypy.plugin import Plugin as _Plugin
-from mypy.plugins.common import add_method, add_method_to_class
+from mypy.plugins.common import add_method
 from mypy.semanal import SemanticAnalyzer
-from mypy.types import AnyType, Instance, NoneType
+from mypy.types import AnyType, NoneType
 from mypy.types import Type as MypyType
 from mypy.types import TypeOfAny, get_proper_type
-from mypy.typevars import fill_typevars
-
-log = logging.getLogger(__name__)
 
 
 class Plugin(_Plugin):
@@ -35,7 +27,7 @@ class Plugin(_Plugin):
     def get_metaclass_hook(
         self,
         fullname: str
-    )  -> Optional[Callable[[ClassDefContext], None]]:
+    ) -> Optional[Callable[[ClassDefContext], None]]:
         result = super().get_base_class_hook(fullname)
         if result is not None:
             return result
@@ -127,14 +119,22 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
         add_method(
             ctx,
             '__init__',
-            [ef.to_init_argument() for ef in event.fields.values() if not ef.is_static],
+            [
+                ef.to_init_argument()
+                for ef in event.fields.values()
+                if not ef.is_static
+            ],
             NoneType(),
         )
     if "__init_subclass__" not in ctx.cls.info.names:
         add_method(
             ctx,
             '__init_subclass__',
-            [ef.to_init_subclass_argument() for ef in event.fields.values() if not ef.is_static],
+            [
+                ef.to_init_subclass_argument()
+                for ef in event.fields.values()
+                if not ef.is_static
+            ],
             NoneType(),
             self_type=AnyType(TypeOfAny.explicit),
         )
@@ -192,4 +192,3 @@ def _get_direct_fields(
                         node.type,
                         node
                     )
-

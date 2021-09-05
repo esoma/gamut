@@ -1,19 +1,12 @@
 
 from __future__ import annotations
 
-# python
-import gc
-import warnings
-from typing import Any, Generator, TypeVar
-
 # pytest
 import pytest
 
 # gamut
 from gamut.event._future import Future
 from gamut.event._task import Task, TaskStatus
-
-T = TypeVar('T')
 
 
 class Result:

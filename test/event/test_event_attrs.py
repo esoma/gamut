@@ -83,11 +83,11 @@ def test_override_static(override_thing: int) -> None:
 
 
 def test_multi_static_first_inherit() -> None:
-    class O(Event):
+    class Base(Event):
         a: int
-    class X(O, a=1):
+    class X(Base, a=1):
         pass
-    class Y(O):
+    class Y(Base):
         pass
     class Z(X, Y):
         pass
@@ -97,11 +97,11 @@ def test_multi_static_first_inherit() -> None:
 
 
 def test_multi_static_second_inherit() -> None:
-    class O(Event):
+    class Base(Event):
         a: int
-    class X(O, a=1):
+    class X(Base, a=1):
         pass
-    class Y(O):
+    class Y(Base):
         pass
     class Z(Y, X):
         pass
@@ -111,11 +111,11 @@ def test_multi_static_second_inherit() -> None:
 
 
 def test_multi_static_same() -> None:
-    class O(Event):
+    class Base(Event):
         a: int
-    class X(O, a=1):
+    class X(Base, a=1):
         pass
-    class Y(O, a=1):
+    class Y(Base, a=1):
         pass
     class Z(X, Y):
         pass
@@ -125,11 +125,11 @@ def test_multi_static_same() -> None:
 
 
 def test_multi_static_different() -> None:
-    class O(Event):
+    class Base(Event):
         a: int
-    class X(O, a=1):
+    class X(Base, a=1):
         pass
-    class Y(O, a=2):
+    class Y(Base, a=2):
         pass
 
     with pytest.raises(TypeError):

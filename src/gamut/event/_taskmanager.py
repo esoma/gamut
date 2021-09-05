@@ -5,10 +5,9 @@ __all__ = ['TaskManager', 'TaskManagerIgnoredException']
 
 # python
 from collections import deque
-from typing import Any, ClassVar, Coroutine, Optional, TypeVar, final
+from typing import Any, ClassVar, Optional, TypeVar, final
 
 # gamut
-from ._future import Future
 from ._task import Task, TaskStatus
 
 T = TypeVar('T')

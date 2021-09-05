@@ -3,7 +3,6 @@ from __future__ import annotations
 
 # python
 import gc
-import warnings
 
 # pytest
 import pytest
