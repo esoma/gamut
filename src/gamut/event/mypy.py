@@ -150,25 +150,31 @@ def _get_fields(
     ctx: ClassDefContext,
     context: _Context,
 ) -> dict[str, _EventField]:
-    fields = {ef.name: ef for ef in _get_direct_fields(ctx)}
+    fields: dict[str, _EventField] = {}
+
+    def _apply_field(field: _EventField) -> None:
+        adjacent_field = fields.get(field.name, None)
+        if adjacent_field:
+            if field.has_default and not adjacent_field.has_default:
+                adjacent_field.has_default = True
+        else:
+            fields[field.name] = _EventField(
+                field.name,
+                field.has_default,
+                field.is_static,
+                field.type,
+                field.node,
+            )
+        if field.name in ctx.cls.keywords:
+            fields[field.name].is_static = True
 
     for base in ctx.cls.info.bases:
         base_event = context.events[base.type.fullname]
         for field in base_event.fields.values():
-            if field.name in ctx.cls.keywords:
-                field.is_static = True
-            adjacent_field = fields.get(field.name, None)
-            if adjacent_field:
-                if field.has_default and not adjacent_field.has_default:
-                    adjacent_field.has_default = True
-            else:
-                fields[field.name] = _EventField(
-                    field.name,
-                    field.has_default,
-                    field.is_static,
-                    field.type,
-                    field.node,
-                )
+            _apply_field(field)
+
+    for field in _get_direct_fields(ctx):
+        _apply_field(field)
 
     return fields
 
