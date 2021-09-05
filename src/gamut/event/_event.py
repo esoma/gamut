@@ -9,11 +9,15 @@ from ._task import Task
 from ._taskmanager import TaskManager
 # python
 import inspect
-from typing import (Any, Callable, ClassVar, Generator, get_origin, Optional,
-                    Type, TypeVar)
+from typing import (Any, Callable, ClassVar, Generator, Generic, get_origin,
+                    Optional, Type, TypeVar, Union)
 from weakref import WeakSet
 
 T = TypeVar('T')
+E = TypeVar('E', bound='Event')
+OE = TypeVar('OE', bound='Type[Event]')
+OE2 = TypeVar('OE2', bound='Type[Event]')
+OE3 = TypeVar('OE3', bound='Type[Event]')
 
 
 # there is some hackery going on here
@@ -30,6 +34,9 @@ class EventType(type):
         cls._sent_callbacks = WeakSet()
         cls._all.add(cls)
         return cls
+
+    def __or__(cls: Type[T], other: Type[E]) -> OrEvents[T, E]: # type: ignore
+        return OrEvents(cls, other) # type: ignore
 
     def __await__(cls: Type[T]) -> Generator[Future[T, Task[T]], None, T]:
         if cls._future is None: # type: ignore
@@ -62,6 +69,68 @@ def remove_sent_callback(
         event._sent_callbacks.remove(callback)
     except KeyError:
         pass
+
+
+class OrEvents(Generic[OE, OE2]):
+
+    def __init__(self, left: OE, right: OE2) -> None:
+        self._bound_sent: EventSentCallback
+        self._events: set[Type[Event]] = set([
+            *self._get_events(left),
+            *self._get_events(right)
+        ])
+        self._future: Optional[Future[
+            Union[OE, OE2],
+            Task[Union[OE, OE2]]
+        ]] = None
+
+    def __or__(self, other: OE3) -> OrEvents[Union[OE, OE2], OE3]:
+        raise NotImplementedError()
+
+    def __await__(self) -> Generator[
+        Future[Union[OE, OE2], Task[Union[OE, OE2]]],
+        None,
+        Union[OE, OE2]
+    ]:
+        if self._future is None:
+            self._future = Future()
+            # since events store a weakref to the callback we need to keep a
+            # strong reference to the bound version of this method, this
+            # creates a small but manageable cycle that is broken by _sent
+            # itself
+            self._bound_sent = self._sent
+            for event in self._events:
+                add_sent_callback(event, self._bound_sent)
+        return self._future.__await__()
+
+    def _get_events(
+        self,
+        thing: Union[OE, OE2]
+    ) -> Generator[Union[OE, OE2], None, None]:
+        yield thing
+
+    def _sent(
+        self,
+        task_manager: TaskManager,
+        event: Event
+    ) -> Optional[Task[Event]]:
+        # this is basically equivalent to calling remove_sent_callback,
+        # except that we don't cause an error by mutating the set which is
+        # currently being iterated over
+        assert isinstance(event, tuple(self._events))
+        del self._bound_sent
+        task = Task(self._resolve(event)) # type: ignore
+        return task
+
+    async def _resolve(self, event: Union[OE, OE2]) -> None:
+        task_manager = TaskManager.get_current()
+        assert task_manager is not None
+        assert self._future is not None
+        future = self._future
+        self._future = None
+        tasks = future.resolve(event)
+        for task in Task.sort(tasks):
+            task_manager.queue(task)
 
 
 class Event(metaclass=EventType):
@@ -102,7 +171,7 @@ class Event(metaclass=EventType):
     class _NonStatic(metaclass=_NonStaticType):
         pass
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: Any) -> None: # type: ignore
         # we need to build the _fields data structure for this specific class,
         # start by generating it from the fields in the base classes
         #
@@ -162,7 +231,7 @@ class Event(metaclass=EventType):
         cls._fields = fields
         super().__init_subclass__(**kwargs) # type: ignore
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None: # type: ignore
         for field, arg in self._fields.items():
             if arg is self._NonStatic:
                 try:
@@ -232,9 +301,6 @@ class Event(metaclass=EventType):
         task = Task(wait_for_send_to_complete())
         task_manager.queue(task)
         await future
-
-
-E = TypeVar('E', bound=Event)
 
 
 EventSentCallback = Callable[[TaskManager, E], Optional[Task[E]]]
