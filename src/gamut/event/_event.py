@@ -103,26 +103,30 @@ class Event(metaclass=EventType):
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         # we need to build the _fields data structure for this specific class,
-        # start by generating it from the annotations that were specified in
-        # this class definition
+        # start by generating it from the fields in the base classes
         #
-        # we don't want to copy any fields from our base classes yet because
-        # there are incompatibility checks to detect
-        fields: dict[str, Any] = {
-            k: cls._NonStatic
-            for k in cls.__annotations__
-            if k not in cls._fields
-        }
+        # we don't want to copy the actual value yet from the base classes so
+        # that we can do error checking, this is just to get the order correct
+        fields: dict[str, Any] = {}
+        for base in cls.__bases__:
+            if not issubclass(base, Event):
+                continue
+            for key in base._fields:
+                fields[key] = cls._NonStatic
         # now we can apply static values to any base class fields
-        # note that we don't pull in the base class field values from the base
-        # classes yet, this is to ensure we're capturing the information
-        # declared in this specific class definition first
         original_kwargs = dict(kwargs)
         for k, v in cls._fields.items():
             try:
                 fields[k] = kwargs.pop(k)
             except KeyError:
                 pass
+        # now we can add any of the annotations defined directly on this class
+        # so that they come after any base fields
+        fields.update({
+            k: cls._NonStatic
+            for k in cls.__annotations__
+            if k not in fields
+        })
         # now we travel the class inheritance graph, ignoring this class since
         # we've already procesed it
         for mro_cls in inspect.getmro(cls):
