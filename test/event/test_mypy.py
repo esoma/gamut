@@ -273,3 +273,28 @@ def test_event_subclass_static_attrs_init_subclass() -> None:
         MypyResult(11, 'error: Unexpected keyword argument "b" for '
                       '"__init_subclass__" of "StaticEvent"'),
     ]
+
+
+def test_event_subclass_multi_inherit_static_attrs_init_subclass() -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class SubEvent(Event):
+            a: int
+            b: str
+            c: int
+        class StaticEvent(SubEvent, b="test"): ...
+        class ParallelEvent(SubEvent): ...
+        class TestEvent(ParallelEvent, StaticEvent): ...
+        reveal_type(TestEvent.__init_subclass__)
+        class SubTestEvent(TestEvent): ...
+        class SubTestEventStaticA(TestEvent, a=1): ...
+        class SubTestEventBAgain(TestEvent, b="test"): ...
+    """) == [
+        MypyResult(10,
+            'note: Revealed type is "def ('
+                'a: builtins.int =, '
+                'c: builtins.int ='
+            ')"'),
+        MypyResult(13, 'error: Unexpected keyword argument "b" for '
+                      '"__init_subclass__" of "TestEvent"'),
+    ]
