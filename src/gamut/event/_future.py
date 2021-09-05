@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['Future']
 
 # python
-from typing import Generator, Generic, Hashable, TypeVar, final
+from typing import final, Generator, Generic, Hashable, TypeVar
 from warnings import warn
 
 T = TypeVar('T')

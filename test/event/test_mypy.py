@@ -1,9 +1,9 @@
 
 # python
-import re
-import textwrap
 from dataclasses import dataclass
 from os import path
+import re
+import textwrap
 from typing import Callable
 # mypy
 import mypy.api

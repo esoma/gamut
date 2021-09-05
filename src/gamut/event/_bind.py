@@ -4,14 +4,14 @@ from __future__ import annotations
 __all__ = ['Bind', 'BindKind', 'BindClosed']
 
 # gamut
-from ._event import Event, add_sent_callback, remove_sent_callback
+from ._event import add_sent_callback, Event, remove_sent_callback
 from ._future import Future
 from ._task import Task
 from ._taskmanager import TaskManager, TaskManagerIgnoredException
 # python
 from enum import Enum
-from typing import (Any, Callable, Coroutine, Generic, Optional, Type, TypeVar,
-                    final)
+from typing import (Any, Callable, Coroutine, final, Generic, Optional, Type,
+                    TypeVar)
 from weakref import WeakSet
 
 

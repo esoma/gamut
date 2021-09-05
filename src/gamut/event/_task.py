@@ -7,7 +7,7 @@ __all__ = ['Task', 'TaskStatus']
 from ._future import Future
 # python
 from enum import Enum
-from typing import Any, Coroutine, Generic, Iterable, Optional, TypeVar, final
+from typing import Any, Coroutine, final, Generic, Iterable, Optional, TypeVar
 from warnings import warn
 
 T = TypeVar('T')

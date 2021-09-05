@@ -7,7 +7,7 @@ __all__ = ['TaskManager', 'TaskManagerIgnoredException']
 from ._task import Task, TaskStatus
 # python
 from collections import deque
-from typing import Any, ClassVar, Optional, TypeVar, final
+from typing import Any, ClassVar, final, Optional, TypeVar
 
 T = TypeVar('T')
 

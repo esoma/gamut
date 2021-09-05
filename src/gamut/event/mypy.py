@@ -7,14 +7,14 @@ from functools import partial
 from typing import Any, Callable, Generator, Optional, Type
 # mypy
 from mypy.nodes import (ARG_OPT, ARG_POS, Argument, AssignmentStmt, FuncDef,
-                        NameExpr, TempNode, Var, is_class_var)
+                        is_class_var, NameExpr, TempNode, Var)
 from mypy.plugin import ClassDefContext
 from mypy.plugin import Plugin as _Plugin
 from mypy.plugins.common import add_method
 from mypy.semanal import SemanticAnalyzer
-from mypy.types import AnyType, NoneType
+from mypy.types import AnyType, get_proper_type, NoneType
 from mypy.types import Type as MypyType
-from mypy.types import TypeOfAny, get_proper_type
+from mypy.types import TypeOfAny
 
 
 class Plugin(_Plugin):

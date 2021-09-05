@@ -9,8 +9,8 @@ from ._task import Task
 from ._taskmanager import TaskManager
 # python
 import inspect
-from typing import (Any, Callable, ClassVar, Generator, Optional, Type,
-                    TypeVar, get_origin)
+from typing import (Any, Callable, ClassVar, Generator, get_origin, Optional,
+                    Type, TypeVar)
 from weakref import WeakSet
 
 T = TypeVar('T')

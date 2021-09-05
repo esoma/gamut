@@ -5,8 +5,8 @@ from gamut.event import Bind, BindClosed, BindKind, Event
 from gamut.event._taskmanager import TaskManager
 # python
 import gc
-import weakref
 from typing import Generator
+import weakref
 # pytest
 import pytest
 
