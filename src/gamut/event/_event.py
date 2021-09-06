@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Event']
+__all__ = ['Event', 'OrEvents']
 
 # gamut
 from ._future import Future
@@ -10,14 +10,17 @@ from ._taskmanager import TaskManager
 # python
 import inspect
 from typing import (Any, Callable, ClassVar, Generator, Generic, get_origin,
-                    Optional, Type, TypeVar, Union)
+                    Optional, overload, Sequence, Type, TypeVar, Union)
 from weakref import WeakSet
 
 T = TypeVar('T')
+T2 = TypeVar('T2')
+T3 = TypeVar('T3')
 E = TypeVar('E', bound='Event')
-OE = TypeVar('OE', bound='Type[Event]')
-OE2 = TypeVar('OE2', bound='Type[Event]')
-OE3 = TypeVar('OE3', bound='Type[Event]')
+ET = TypeVar('ET', bound='Type[Event]')
+ET2 = TypeVar('ET2', bound='Type[Event]')
+ET3 = TypeVar('ET3', bound='Type[Event]')
+ET4 = TypeVar('ET4', bound='Type[Event]')
 
 
 # there is some hackery going on here
@@ -35,8 +38,30 @@ class EventType(type):
         cls._all.add(cls)
         return cls
 
-    def __or__(cls: Type[T], other: Type[E]) -> OrEvents[T, E]: # type: ignore
-        return OrEvents(cls, other) # type: ignore
+    @overload
+    def __or__(cls: ET, other: ET2) -> OrEvents[ET, ET2]: # type: ignore
+        ...
+
+    @overload
+    def __or__( # type: ignore
+        cls: ET,
+        other: OrEvents[T2, T3] # type: ignore
+    ) -> OrEvents[ET, Union[T2, T3]]: # type: ignore
+        ...
+
+    def __or__(cls, other): # type: ignore
+        try:
+            other_is_event = issubclass(other, Event)
+        except TypeError:
+            other_is_event = False
+        if other_is_event:
+            return OrEvents([cls], [other])
+        elif isinstance(other, OrEvents):
+            return OrEvents([cls], other._events)
+        raise TypeError(
+            f'unsupported operand type(s) for |: '
+            f'\'{cls.__name__}\' and \'{type(other).__name__}\''
+        )
 
     def __await__(cls: Type[T]) -> Generator[Future[T, Task[T]], None, T]:
         if cls._future is None: # type: ignore
@@ -71,26 +96,51 @@ def remove_sent_callback(
         pass
 
 
-class OrEvents(Generic[OE, OE2]):
+class OrEvents(Generic[ET, ET2]):
 
-    def __init__(self, left: OE, right: OE2) -> None:
+    def __init__(
+        self: OrEvents[Type[T], Type[T2]], # type: ignore
+        left: Sequence[ET],
+        right: Sequence[ET2]
+    ) -> None:
         self._bound_sent: EventSentCallback
-        self._events: set[Type[Event]] = set([
-            *self._get_events(left),
-            *self._get_events(right)
-        ])
+        self._events: set[Type[Event]] = set([*left, *right])
         self._future: Optional[Future[
-            Union[OE, OE2],
-            Task[Union[OE, OE2]]
+            Union[T, T2],
+            Task[Union[T, T2]]
         ]] = None
 
-    def __or__(self, other: OE3) -> OrEvents[Union[OE, OE2], OE3]:
-        raise NotImplementedError()
+    @overload
+    def __or__(self, other: ET3) -> OrEvents[Union[ET, ET2], ET3]:
+        ...
 
-    def __await__(self) -> Generator[
-        Future[Union[OE, OE2], Task[Union[OE, OE2]]],
+    @overload
+    def __or__(
+        self,
+        other: OrEvents[T, T2] # type: ignore
+    ) -> OrEvents[Union[ET, ET2], Union[T, T2]]: # type: ignore
+        ...
+
+    def __or__(self, other): # type: ignore
+        try:
+            other_is_event = issubclass(other, Event)
+        except TypeError:
+            other_is_event = False
+        if other_is_event:
+            return OrEvents(self._events, [other])
+        elif isinstance(other, OrEvents):
+            return OrEvents(self._events, other._events)
+        raise TypeError(
+            f'unsupported operand type(s) for |: '
+            f'\'{type(self).__name__}\' and \'{type(other).__name__}\''
+        )
+
+    def __await__(
+        self: OrEvents[Type[T], Type[T2]] # type: ignore
+    ) -> Generator[
+        Future[Union[T, T2], Task[Union[T, T2]]],
         None,
-        Union[OE, OE2]
+        Union[T, T2]
     ]:
         if self._future is None:
             self._future = Future()
@@ -102,12 +152,6 @@ class OrEvents(Generic[OE, OE2]):
             for event in self._events:
                 add_sent_callback(event, self._bound_sent)
         return self._future.__await__()
-
-    def _get_events(
-        self,
-        thing: Union[OE, OE2]
-    ) -> Generator[Union[OE, OE2], None, None]:
-        yield thing
 
     def _sent(
         self,
@@ -122,7 +166,10 @@ class OrEvents(Generic[OE, OE2]):
         task = Task(self._resolve(event)) # type: ignore
         return task
 
-    async def _resolve(self, event: Union[OE, OE2]) -> None:
+    async def _resolve(
+        self: OrEvents[Type[T], Type[T2]], # type: ignore
+        event: Union[T, T2]
+    ) -> None:
         task_manager = TaskManager.get_current()
         assert task_manager is not None
         assert self._future is not None
