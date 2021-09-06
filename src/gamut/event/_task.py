@@ -59,7 +59,7 @@ class Task(Generic[T]):
     ]
 
     _result: T
-    _thrown_exception: Exception
+    _thrown_exception: BaseException
 
     def __init__(self, coro: Coroutine[Future[T, Task[T]], Any, T]) -> None:
         # the order, relative to other tasks in which to unblock multiple tasks
@@ -96,7 +96,7 @@ class Task(Generic[T]):
                     self._result = ex.value
                     return
                 assert False
-        except Exception as ex:
+        except BaseException as ex:
             self._status = TaskStatus.ERROR
             self._thrown_exception = ex
             raise
@@ -107,7 +107,7 @@ class Task(Generic[T]):
             self._status = TaskStatus.COMPLETE
             self._result = ex.value
             return
-        except Exception as ex:
+        except BaseException as ex:
             self._status = TaskStatus.ERROR
             self._thrown_exception = ex
             raise
@@ -134,5 +134,5 @@ class Task(Generic[T]):
         return self._result
 
     @property
-    def exception(self) -> Exception:
+    def exception(self) -> BaseException:
         return self._thrown_exception

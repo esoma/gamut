@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Application', 'ApplicationEnd', 'ApplicationStart']
+__all__ = ['Application']
 
 # gamut
 from ._event import Event
@@ -14,38 +14,31 @@ from typing import Any, Generic, TypeVar
 R = TypeVar('R')
 
 
-class ApplicationStart(Event):
-    application: Application[Any]
-
-
-class ApplicationEnd(Event):
-    application: Application[Any]
-
-
 class Application(ABC, Generic[R]):
 
-    Start = ApplicationStart
-    End = ApplicationEnd
+    class Start(Event):
+        application: Application[Any]
 
-    def run(self, *args: Any, **kwargs: Any) -> R:
+    class End(Event):
+        application: Application[Any]
+
+    def run(self) -> R:
         with TaskManager() as task_manager:
-            main_task: Task[R] = Task(self.__main(*args, **kwargs))
+            main_task: Task[R] = Task(self.__main())
             task_manager.queue(main_task)
 
             while True:
                 task_manager.run()
                 if main_task.status == TaskStatus.COMPLETE:
                     return main_task.result
-                elif main_task.status == TaskStatus.ERROR:
-                    raise main_task.exception
                 assert main_task.status == TaskStatus.WORKING
 
-    async def __main(self, *args: Any, **kwargs: Any) -> R:
+    async def __main(self) -> R:
         await self.Start(self).asend()
-        result = await self.main(*args, **kwargs)
+        result = await self.main()
         await self.End(self).asend()
         return result
 
     @abstractmethod
-    async def main(self, *args: Any, **kwargs: Any) -> R:
+    async def main(self) -> R:
         raise NotImplementedError()

@@ -1,8 +1,6 @@
 
 __all__ = [
     'Application',
-    'ApplicationEnd',
-    'ApplicationStart',
     'Bind',
     'BindClosed',
     'BindKind',
@@ -11,6 +9,6 @@ __all__ = [
 ]
 
 # gamut
-from ._application import Application, ApplicationEnd, ApplicationStart
+from ._application import Application
 from ._bind import Bind, BindClosed, BindKind
 from ._event import Event, OrEvents
