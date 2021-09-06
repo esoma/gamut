@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Event']
+__all__ = ['Event', 'OrEvents']
 
 # gamut
 from ._future import Future
@@ -9,17 +9,33 @@ from ._task import Task
 from ._taskmanager import TaskManager
 # python
 import inspect
-from typing import (Any, Callable, ClassVar, Generator, get_origin, Optional,
-                    Type, TypeVar)
+from typing import (Any, Callable, ClassVar, Generator, Generic, get_origin,
+                    Optional, overload, Sequence, Type, TypeVar, Union)
 from weakref import WeakSet
 
-T = TypeVar('T')
-
-
-# there is some hackery going on here
+# there is a lot of hackery going on in this set of classes regarding the
+# typing system, see:
 # see: https://github.com/python/typing/issues/715
+
+# roughly, all these type ignores and strange use of TypeVars are because we
+# know that the only class using EventType is Event
+
+
+T = TypeVar('T')
+T2 = TypeVar('T2')
+T3 = TypeVar('T3')
+E = TypeVar('E', bound='Event')
+ET = TypeVar('ET', bound='Type[Event]')
+ET2 = TypeVar('ET2', bound='Type[Event]')
+ET3 = TypeVar('ET3', bound='Type[Event]')
+
+
 class EventType(type):
-    """The EventType metaclass serves to make the Event class itself awaitable.
+    """The EventType metaclass serves a few purposes for the Event class:
+
+    - it makes the Event class itself awaitable
+    - it makes the Event class itself OR-able to create OrEvents objects
+    - it does some minor setup
     """
 
     _all: WeakSet[Type[EventType]] = WeakSet()
@@ -30,6 +46,31 @@ class EventType(type):
         cls._sent_callbacks = WeakSet()
         cls._all.add(cls)
         return cls
+
+    @overload
+    def __or__(cls: ET, other: ET2) -> OrEvents[ET, ET2]: # type: ignore
+        ...
+
+    @overload
+    def __or__( # type: ignore
+        cls: ET,
+        other: OrEvents[T2, T3] # type: ignore
+    ) -> OrEvents[ET, Union[T2, T3]]: # type: ignore
+        ...
+
+    def __or__(cls, other): # type: ignore
+        try:
+            other_is_event = issubclass(other, Event)
+        except TypeError:
+            other_is_event = False
+        if other_is_event:
+            return OrEvents([cls], [other])
+        elif isinstance(other, OrEvents):
+            return OrEvents([cls], other._events)
+        raise TypeError(
+            f'unsupported operand type(s) for |: '
+            f'\'{cls.__name__}\' and \'{type(other).__name__}\''
+        )
 
     def __await__(cls: Type[T]) -> Generator[Future[T, Task[T]], None, T]:
         if cls._future is None: # type: ignore
@@ -62,6 +103,96 @@ def remove_sent_callback(
         event._sent_callbacks.remove(callback)
     except KeyError:
         pass
+
+
+class OrEvents(Generic[ET, ET2]):
+    """OrEvents provide a way to await on multiple Events, only catching the
+    first one that is sent. Typically this is not instantiated directly by
+    the user, instead the bitwise OR operator is used to create one:
+
+    EventAorB = EventA | EventB
+    """
+
+    def __init__(
+        self: OrEvents[Type[T], Type[T2]], # type: ignore
+        left: Sequence[ET],
+        right: Sequence[ET2]
+    ) -> None:
+        self._bound_sent: EventSentCallback
+        self._events: set[Type[Event]] = set([*left, *right])
+        self._future: Optional[Future[
+            Union[T, T2],
+            Task[Union[T, T2]]
+        ]] = None
+
+    @overload
+    def __or__(self, other: ET3) -> OrEvents[Union[ET, ET2], ET3]:
+        ...
+
+    @overload
+    def __or__(
+        self,
+        other: OrEvents[T, T2] # type: ignore
+    ) -> OrEvents[Union[ET, ET2], Union[T, T2]]: # type: ignore
+        ...
+
+    def __or__(self, other): # type: ignore
+        try:
+            other_is_event = issubclass(other, Event)
+        except TypeError:
+            other_is_event = False
+        if other_is_event:
+            return OrEvents(self._events, [other])
+        elif isinstance(other, OrEvents):
+            return OrEvents(self._events, other._events)
+        raise TypeError(
+            f'unsupported operand type(s) for |: '
+            f'\'{type(self).__name__}\' and \'{type(other).__name__}\''
+        )
+
+    def __await__(
+        self: OrEvents[Type[T], Type[T2]] # type: ignore
+    ) -> Generator[
+        Future[Union[T, T2], Task[Union[T, T2]]],
+        None,
+        Union[T, T2]
+    ]:
+        if self._future is None:
+            self._future = Future()
+            # since events store a weakref to the callback we need to keep a
+            # strong reference to the bound version of this method, this
+            # creates a small but manageable cycle that is broken by _sent
+            # itself
+            self._bound_sent = self._sent
+            for event in self._events:
+                add_sent_callback(event, self._bound_sent)
+        return self._future.__await__()
+
+    def _sent(
+        self,
+        task_manager: TaskManager,
+        event: Event
+    ) -> Optional[Task[Event]]:
+        # this is basically equivalent to calling remove_sent_callback,
+        # except that we don't cause an error by mutating the set which is
+        # currently being iterated over
+        assert isinstance(event, tuple(self._events))
+        del self._bound_sent
+        task = Task(self._resolve(event)) # type: ignore
+        return task
+
+    async def _resolve(
+        self: OrEvents[Type[T], Type[T2]], # type: ignore
+        event: Union[T, T2]
+    ) -> None:
+        task_manager = TaskManager.get_current()
+        assert task_manager is not None
+        assert self._future is not None
+        future = self._future
+        self._future = None
+        tasks = future.resolve(event)
+        for task in Task.sort(tasks):
+            task_manager.queue(task)
 
 
 class Event(metaclass=EventType):
@@ -102,7 +233,7 @@ class Event(metaclass=EventType):
     class _NonStatic(metaclass=_NonStaticType):
         pass
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: Any) -> None: # type: ignore
         # we need to build the _fields data structure for this specific class,
         # start by generating it from the fields in the base classes
         #
@@ -162,7 +293,7 @@ class Event(metaclass=EventType):
         cls._fields = fields
         super().__init_subclass__(**kwargs) # type: ignore
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None: # type: ignore
         for field, arg in self._fields.items():
             if arg is self._NonStatic:
                 try:
@@ -232,9 +363,6 @@ class Event(metaclass=EventType):
         task = Task(wait_for_send_to_complete())
         task_manager.queue(task)
         await future
-
-
-E = TypeVar('E', bound=Event)
 
 
 EventSentCallback = Callable[[TaskManager, E], Optional[Task[E]]]
