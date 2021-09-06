@@ -198,6 +198,54 @@ def test_event_subclass_attrs_no_defaults_init(
 
 
 @parametrize_run_mypy
+def test_event_subclass_attrs_override_type(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class A: pass
+        class SubA(A): pass
+        class SubEvent(Event):
+            a: A
+        class SubEvent2(SubEvent):
+            a: SubA
+        reveal_type(SubEvent2.__init__)
+        reveal_type(SubEvent2.__init_subclass__)
+    """) == [
+        MypyResult(9,
+            'note: Revealed type is "def ('
+                'self: __main__.SubEvent2, '
+                'a: __main__.SubA'
+            ')"'),
+        MypyResult(10,
+            'note: Revealed type is "def ('
+                'a: __main__.SubA ='
+            ')"'),
+    ]
+
+
+@parametrize_run_mypy
+def test_event_subclass_attrs_override_type_invalid(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class A: pass
+        class SubA(A): pass
+        class SubEvent(Event):
+            a: A
+        class SubEvent2(SubEvent):
+            a: int
+    """) == [
+        MypyResult(8,
+            'error: Incompatible types in assignment ('
+                'expression has type "int", '
+                'base class "SubEvent" defined the type as "A"'
+            ')'),
+    ]
+
+
+@parametrize_run_mypy
 def test_event_subclass_attrs_class_var(
     run_mypy: Callable[[str], list[MypyResult]]
 ) -> None:

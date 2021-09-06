@@ -159,6 +159,8 @@ def _get_fields(
                 adjacent_field.is_static = True
             if field.has_default and not adjacent_field.has_default:
                 adjacent_field.has_default = True
+            if field.type != adjacent_field.type:
+                adjacent_field.type = field.type
         else:
             fields[field.name] = _EventField(
                 field.name,
