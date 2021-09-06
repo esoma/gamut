@@ -31,7 +31,11 @@ ET3 = TypeVar('ET3', bound='Type[Event]')
 
 
 class EventType(type):
-    """The EventType metaclass serves to make the Event class itself awaitable.
+    """The EventType metaclass serves a few purposes for the Event class:
+
+    - it makes the Event class itself awaitable
+    - it makes the Event class itself OR-able to create OrEvents objects
+    - it does some minor setup
     """
 
     _all: WeakSet[Type[EventType]] = WeakSet()
@@ -102,6 +106,12 @@ def remove_sent_callback(
 
 
 class OrEvents(Generic[ET, ET2]):
+    """OrEvents provide a way to await on multiple Events, only catching the
+    first one that is sent. Typically this is not instantiated directly by
+    the user, instead the bitwise OR operator is used to create one:
+
+    EventAorB = EventA | EventB
+    """
 
     def __init__(
         self: OrEvents[Type[T], Type[T2]], # type: ignore
