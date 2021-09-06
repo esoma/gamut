@@ -416,3 +416,36 @@ def test_event_subclass_multi_inherit_static_attrs_init_subclass(
         MypyResult(13, 'error: Unexpected keyword argument "b" for '
                       '"__init_subclass__" of "TestEvent"'),
     ]
+
+
+@parametrize_run_mypy
+def test_or_event(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class EventA(Event):
+            pass
+        class EventB(Event):
+            pass
+        or_events = EventA | EventB
+        reveal_type(or_events)
+        reveal_type(or_events.__await__)
+    """) == [
+        MypyResult(8,
+            'note: Revealed type is "gamut.event._event.OrEvents['
+                'def () -> __main__.EventA, '
+                'def () -> __main__.EventB'
+            ']"'),
+        MypyResult(9,
+            'note: Revealed type is "def () -> typing.Generator['
+                'gamut.event._future.Future['
+                    'Union[__main__.EventA, __main__.EventB], '
+                    'gamut.event._task.Task['
+                        'Union[__main__.EventA, __main__.EventB]'
+                    ']'
+                '], '
+                'None, '
+                'Union[__main__.EventA, __main__.EventB]'
+            ']"'),
+    ]
