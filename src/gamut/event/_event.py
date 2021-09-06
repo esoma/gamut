@@ -13,6 +13,14 @@ from typing import (Any, Callable, ClassVar, Generator, Generic, get_origin,
                     Optional, overload, Sequence, Type, TypeVar, Union)
 from weakref import WeakSet
 
+# there is a lot of hackery going on in this set of classes regarding the
+# typing system, see:
+# see: https://github.com/python/typing/issues/715
+
+# roughly, all these type ignores and strange use of TypeVars are because we
+# know that the only class using EventType is Event
+
+
 T = TypeVar('T')
 T2 = TypeVar('T2')
 T3 = TypeVar('T3')
@@ -20,11 +28,8 @@ E = TypeVar('E', bound='Event')
 ET = TypeVar('ET', bound='Type[Event]')
 ET2 = TypeVar('ET2', bound='Type[Event]')
 ET3 = TypeVar('ET3', bound='Type[Event]')
-ET4 = TypeVar('ET4', bound='Type[Event]')
 
 
-# there is some hackery going on here
-# see: https://github.com/python/typing/issues/715
 class EventType(type):
     """The EventType metaclass serves to make the Event class itself awaitable.
     """

@@ -5,8 +5,9 @@ from gamut.event import Event, OrEvents
 from gamut.event._task import Task, TaskStatus
 from gamut.event._taskmanager import TaskManager
 # python
+import gc
 from itertools import product
-from typing import Generator, Type
+from typing import Any, Generator, Type
 # pytest
 import pytest
 
@@ -72,6 +73,69 @@ def test_send(
     task_manager.run()
     assert task.status == TaskStatus.COMPLETE
     assert task.result is event
+
+
+def test_created_inside_coro(task_manager: TaskManager) -> None:
+    events: list[Event] = []
+    async def func() -> None:
+        events.append(await (EventA | EventB))
+        events.append(await (EventA | EventB))
+    task = Task(func())
+    task_manager.queue(task)
+    del func
+    del task
+
+    gc.collect()
+    task_manager.run()
+    assert not events
+
+    event_1 = EventA()
+    event_1.send()
+    gc.collect()
+    task_manager.run()
+    assert len(events) == 1
+    assert events[0] == event_1
+
+    event_2 = EventA()
+    event_2.send()
+    gc.collect()
+    task_manager.run()
+    assert len(events) == 2
+    assert events[0] == event_1
+    assert events[1] == event_2
+
+
+def test_created_inside_other_coro(task_manager: TaskManager) -> None:
+    events: list[Event] = []
+    async def other_func() -> None:
+        events.append(await (EventA | EventB))
+        events.append(await (EventA | EventB))
+    async def func(other_func: Any) -> None:
+        await other_func()
+    task = Task(func(other_func))
+    task_manager.queue(task)
+    del other_func
+    del func
+    del task
+
+    gc.collect()
+    task_manager.run()
+    assert not events
+
+    event_1 = EventA()
+    event_1.send()
+    gc.collect()
+    task_manager.run()
+    assert len(events) == 1
+    assert events[0] == event_1
+
+    event_2 = EventA()
+    event_2.send()
+    gc.collect()
+    task_manager.run()
+    assert len(events) == 2
+    assert events[0] == event_1
+    assert events[1] == event_2
 
 
 def test_event_or_invalid_type() -> None:
