@@ -9,7 +9,7 @@ from typing import Any, Callable, Generator, Optional, Type
 from mypy.nodes import (ARG_NAMED, ARG_OPT, ARG_POS, Argument, AssignmentStmt,
                         EllipsisExpr, FuncDef, is_class_var, NameExpr,
                         TempNode, Var)
-from mypy.plugin import ClassDefContext, FunctionContext, MethodSigContext
+from mypy.plugin import ClassDefContext, MethodSigContext
 from mypy.plugin import Plugin as _Plugin
 from mypy.plugins.common import add_method
 from mypy.semanal import SemanticAnalyzer
@@ -35,22 +35,6 @@ class Plugin(_Plugin):
             return partial(_transform_event_subclass, context=self._context)
 
         return None
-
-    def get_function_hook(
-        self,
-        fullname: str
-    ) -> Optional[Callable[[FunctionContext], MypyType]]:
-        result = super().get_function_hook(fullname)
-        if result is not None:
-            return result
-
-        try:
-            event = self._context.events[fullname]
-        except KeyError:
-            return None
-
-        return partial(_transform_event_init, event=event)
-
 
     def get_metaclass_hook(
         self,
@@ -297,12 +281,3 @@ def _transform_event_init_subclass(
         else:
             param_types.append(param_type)
     return ctx.default_signature.copy_modified(arg_types=param_types)
-
-
-def _transform_event_init(ctx: FunctionContext, event: _Event) -> MypyType:
-    if any(f.is_prototype for f in event.fields.values()):
-        ctx.api.fail(
-            f'cannot instantiate "{event.name}", it is prototyped',
-            ctx.context
-        )
-    return ctx.default_return_type

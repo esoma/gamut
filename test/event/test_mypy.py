@@ -531,9 +531,6 @@ def test_instantiate_prototype(
     """) == [
         MypyResult(7,
             'note: Revealed type is "def (self: __main__.ProtoEvent)"'),
-        MypyResult(8,
-            'error: cannot instantiate "__main__.ProtoEvent", '
-            'it is prototyped')
     ]
 
 
