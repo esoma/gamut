@@ -225,6 +225,7 @@ class Event(metaclass=EventType):
     """
 
     _fields: ClassVar[dict[str, Any]] = {}
+    _prototype_fields: ClassVar[list[str]] = []
 
     class _NonStaticType(type):
         def __repr__(cls) -> str:
@@ -240,6 +241,7 @@ class Event(metaclass=EventType):
         # we don't want to copy the actual value yet from the base classes so
         # that we can do error checking, this is just to get the order correct
         fields: dict[str, Any] = {}
+        prototype_fields: list[str] = []
         for base in cls.__bases__:
             if not issubclass(base, Event):
                 continue
@@ -247,11 +249,15 @@ class Event(metaclass=EventType):
                 fields[key] = cls._NonStatic
         # now we can apply static values to any base class fields
         original_kwargs = dict(kwargs)
-        for k, v in cls._fields.items():
+        for k in cls._fields:
             try:
-                fields[k] = kwargs.pop(k)
+                kwarg_value = kwargs.pop(k)
             except KeyError:
-                pass
+                continue
+            if kwarg_value is ...:
+                prototype_fields.append(k)
+            else:
+                fields[k] = kwarg_value
         # now we can add any of the annotations defined directly on this class
         # so that they come after any base fields
         fields.update({
@@ -270,7 +276,7 @@ class Event(metaclass=EventType):
         for mro_cls in inspect.getmro(cls):
             if mro_cls is cls or not issubclass(mro_cls, Event):
                 continue
-            # we copy any fields from our parent classes in mro
+            # we copy any field values from our parent classes in mro
             for field, value in mro_cls._fields.items():
                 if value is not cls._NonStatic and field in original_kwargs:
                     raise TypeError(
@@ -290,10 +296,32 @@ class Event(metaclass=EventType):
                         )
                 else:
                     fields[field] = value
+        # check if there are any prototype fields for the parent classes that
+        # weren't provided
+        required_kwargs: list[str] = []
+        for base in cls.__bases__:
+            if not issubclass(base, Event):
+                continue
+            required_kwargs += base._prototype_fields
+        missing_kwargs: list[str] = [
+            f for f in required_kwargs
+            if f not in original_kwargs
+            if fields[f] is cls._NonStatic
+        ]
+        if missing_kwargs:
+            missing_kwargs.sort()
+            raise TypeError(
+                f'missing required keyword-only argument(s): ' +
+                ', '.join(missing_kwargs)
+            )
+
         cls._fields = fields
+        cls._prototype_fields = prototype_fields
         super().__init_subclass__(**kwargs) # type: ignore
 
     def __init__(self, *args: Any, **kwargs: Any) -> None: # type: ignore
+        if self._prototype_fields:
+            raise TypeError('cannot instantiate a prototype event')
         for field, arg in self._fields.items():
             if arg is self._NonStatic:
                 try:
