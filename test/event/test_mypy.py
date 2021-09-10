@@ -25,6 +25,7 @@ def run_mypy_with_config(src: str, config_file: str) -> list[MypyResult]:
         '--config-file', config_file,
         '-c', textwrap.dedent(src),
         '--no-incremental',
+        '--show-traceback',
     ])
     errors: list[MypyResult] = []
     for line in report.split('\n'):
@@ -467,9 +468,7 @@ def test_event_subclass_multi_inherit_static_attrs_init_subclass(
 
 
 @parametrize_run_mypy
-def test_or_event(
-    run_mypy: Callable[[str], list[MypyResult]]
-) -> None:
+def test_or_event(run_mypy: Callable[[str], list[MypyResult]]) -> None:
     assert run_mypy("""
         from gamut.event import Event
         class EventA(Event):
@@ -496,4 +495,183 @@ def test_or_event(
                 'None, '
                 'Union[__main__.EventA, __main__.EventB]'
             ']"'),
+    ]
+
+
+@parametrize_run_mypy
+def test_non_existent_field_prototyped(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+            b: int
+        class ProtoEvent(BaseEvent, c=...):
+            pass
+    """) == [
+        MypyResult(6,
+            'error: Unexpected keyword argument '
+            '"c" for "__init_subclass__" of "BaseEvent"')
+    ]
+
+
+@parametrize_run_mypy
+def test_instantiate_prototype(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+        class ProtoEvent(BaseEvent, a=...):
+            pass
+        reveal_type(ProtoEvent.__init__)
+        ProtoEvent()
+    """) == [
+        MypyResult(7,
+            'note: Revealed type is "def (self: __main__.ProtoEvent)"'),
+        MypyResult(8,
+            'error: cannot instantiate "__main__.ProtoEvent", '
+            'it is prototyped')
+    ]
+
+
+@parametrize_run_mypy
+def test_use_prototype(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+        class ProtoEvent(BaseEvent, a=...):
+            pass
+        class UseProtoEvent(ProtoEvent, a=5):
+            pass
+        reveal_type(UseProtoEvent.__init__)
+        event = UseProtoEvent()
+        reveal_type(event)
+    """) == [
+        MypyResult(9,
+            'note: Revealed type is "def (self: __main__.UseProtoEvent)"'),
+        MypyResult(11,
+            'note: Revealed type is "__main__.UseProtoEvent"')
+    ]
+
+
+@parametrize_run_mypy
+def test_use_prototype_multiple_fields(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+            b: int
+        class ProtoEvent(BaseEvent, a=..., b=...):
+            pass
+        class UseProtoEvent(ProtoEvent, a=5, b=10):
+            pass
+        reveal_type(UseProtoEvent.__init__)
+        event = UseProtoEvent()
+        reveal_type(event)
+    """) == [
+        MypyResult(10,
+            'note: Revealed type is "def (self: __main__.UseProtoEvent)"'),
+        MypyResult(12,
+            'note: Revealed type is "__main__.UseProtoEvent"')
+    ]
+
+
+@parametrize_run_mypy
+def test_use_multiple_prototype_multiple_fields(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+            b: int
+        class ProtoEventA(BaseEvent, a=...):
+            pass
+        class ProtoEventB(BaseEvent, b=...):
+            pass
+        class UseProtoEvent(ProtoEventA, ProtoEventB, a=5, b=10):
+            pass
+        reveal_type(UseProtoEvent.__init__)
+        event = UseProtoEvent()
+        reveal_type(event)
+    """) == [
+        MypyResult(12,
+            'note: Revealed type is "def (self: __main__.UseProtoEvent)"'),
+        MypyResult(14,
+            'note: Revealed type is "__main__.UseProtoEvent"')
+    ]
+
+
+@parametrize_run_mypy
+def test_use_prototype_field_not_provided(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+        class ProtoEvent(BaseEvent, a=...):
+            pass
+        class UseProtoEvent(ProtoEvent):
+            pass
+    """) == [
+        MypyResult(7,
+            'error: Missing named argument '
+            '"a" for "__init_subclass__" of "ProtoEvent"')
+    ]
+
+
+@parametrize_run_mypy
+def test_use_prototype_multiple_fields_not_provided(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+            b: int
+        class ProtoEvent(BaseEvent, a=..., b=...):
+            pass
+        class UseProtoEvent(ProtoEvent):
+            pass
+    """) == [
+        MypyResult(8,
+            'error: Missing named argument '
+            '"a" for "__init_subclass__" of "ProtoEvent"'),
+        MypyResult(8,
+            'error: Missing named argument '
+            '"b" for "__init_subclass__" of "ProtoEvent"')
+    ]
+
+
+@parametrize_run_mypy
+def test_use_multiple_prototype_multiple_fields_not_provided(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+            b: int
+        class ProtoEventA(BaseEvent, a=...):
+            pass
+        class ProtoEventB(BaseEvent, b=...):
+            pass
+        class UseProtoEvent(ProtoEventA, ProtoEventB):
+            pass
+    """) == [
+        MypyResult(10,
+            'error: Missing named argument '
+            '"a" for "__init_subclass__" of "ProtoEventA"'),
+        MypyResult(10,
+            'error: Missing named argument '
+            '"b" for "__init_subclass__" of "ProtoEventB"')
     ]
