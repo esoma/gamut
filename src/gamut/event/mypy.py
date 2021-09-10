@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Generator, Optional, Type
 # mypy
-from mypy.nodes import (ARG_NAMED, ARG_OPT, ARG_POS, Argument, AssignmentStmt,
+from mypy.nodes import (ARG_OPT, ARG_POS, Argument, AssignmentStmt,
                         EllipsisExpr, FuncDef, is_class_var, NameExpr,
                         TempNode, Var)
 from mypy.plugin import ClassDefContext, MethodSigContext
@@ -94,7 +94,7 @@ class _EventField:
             Var(self.name, self.type),
             self.type,
             None,
-            ARG_NAMED if self.is_prototype else ARG_OPT
+            ARG_OPT
         )
 
 
@@ -129,13 +129,15 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
     # see: https://github.com/python/mypy/issues/11057
     assert ctx.cls.info.metaclass_type
     ctx.cls.info.metaclass_type.type._fullname = 'builtins.type'
-    # if we have multiple bases that are events then we need to make sure all
-    # the required keywords were supplied for each of the base's
-    # __init_subclass__
-    #
-    # note that we skip the first base class, since that would have been
-    # already checked by mypy normally
-    for base in ctx.cls.info.bases[1:]:
+
+    context.events[ctx.cls.fullname] = event = _Event(
+        ctx.cls.fullname,
+        _get_fields(ctx, context),
+    )
+
+    # we need to make sure all the required keywords (prototyped fields) were
+    # supplied for each of the base's __init_subclass__
+    for base in ctx.cls.info.bases:
         try:
             base_event = context.events[base.type.fullname]
         except KeyError:
@@ -143,7 +145,8 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
         for base_event_field in base_event.fields.values():
             if (
                 base_event_field.is_prototype and
-                base_event_field.name not in ctx.cls.keywords
+                base_event_field.name not in ctx.cls.keywords and
+                not event.fields[base_event_field.name].is_static
             ):
                 ctx.api.fail(
                     f'Missing named argument "{base_event_field.name}" '
@@ -151,10 +154,6 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
                     ctx.reason
                 )
 
-    context.events[ctx.cls.fullname] = event = _Event(
-        ctx.cls.fullname,
-        _get_fields(ctx, context),
-    )
     if "__init__" not in ctx.cls.info.names:
         add_method(
             ctx,

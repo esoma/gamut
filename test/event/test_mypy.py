@@ -672,3 +672,28 @@ def test_use_multiple_prototype_multiple_fields_not_provided(
             'error: Missing named argument '
             '"b" for "__init_subclass__" of "ProtoEventB"')
     ]
+
+
+@parametrize_run_mypy
+def test_use_prototype_inherit_static(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class BaseEvent(Event):
+            a: int
+        class ProtoEventA(BaseEvent, a=...):
+            pass
+        class BaseStaticA(BaseEvent, a=1):
+            pass
+        class UseProtoEvent(ProtoEventA, BaseStaticA):
+            pass
+        reveal_type(UseProtoEvent.__init__)
+        event = UseProtoEvent()
+        reveal_type(event)
+    """) == [
+        MypyResult(11,
+            'note: Revealed type is "def (self: __main__.UseProtoEvent)"'),
+        MypyResult(13,
+            'note: Revealed type is "__main__.UseProtoEvent"')
+    ]

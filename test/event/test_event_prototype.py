@@ -24,7 +24,7 @@ def test_instantiate_prototype() -> None:
     class ProtoEvent(BaseEvent, a=...):
         pass
     with pytest.raises(TypeError) as excinfo:
-        ProtoEvent() # type: ignore
+        ProtoEvent()
     assert str(excinfo.value) == 'cannot instantiate a prototype event'
 
 
@@ -106,3 +106,15 @@ def test_use_multiple_prototype_multiple_fields_not_provided() -> None:
     assert str(excinfo.value) == (
         'missing required keyword-only argument(s): a, b'
     )
+
+def test_use_prototype_inherit_static() -> None:
+    class BaseEvent(Event):
+        a: int
+    class ProtoEventA(BaseEvent, a=...):
+        pass
+    class BaseStaticA(BaseEvent, a=1):
+        pass
+    class UseProtoEvent(ProtoEventA, BaseStaticA):
+        pass
+    event = UseProtoEvent()
+    assert event.a == 1
