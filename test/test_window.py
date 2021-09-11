@@ -139,6 +139,11 @@ def test_set_is_visible(value: Any) -> None:
     assert window.is_visible is bool(value)
 
 
+def test_recenter() -> None:
+    window = Window()
+    window.recenter()
+
+
 @pytest.mark.parametrize("x", [0, 1, 100, 1000, .5, 62.1])
 @pytest.mark.parametrize("y", [0, 1, 100, 1000, .5, 62.1])
 def test_resize(x: int, y: int) -> None:
