@@ -296,7 +296,10 @@ def test_event_repr() -> None:
 def test_event_no_attrs_repr() -> None:
     class TestEvent(Event):
         pass
-    expected = '<test_event_attrs.test_event_no_attrs_repr.<locals>.TestEvent>'
+    expected = (
+        '<test.event.test_event_attrs.test_event_no_attrs_repr.<locals>.'
+        'TestEvent>'
+    )
     assert repr(TestEvent()) == expected
 
 
@@ -304,7 +307,8 @@ def test_event_one_attr_repr() -> None:
     class TestEvent(Event):
         a: int
     expected = (
-        '<test_event_attrs.test_event_one_attr_repr.<locals>.TestEvent a=1>'
+        '<test.event.test_event_attrs.test_event_one_attr_repr.<locals>.'
+        'TestEvent a=1>'
     )
     assert repr(TestEvent(1)) == expected
 
@@ -314,7 +318,8 @@ def test_event_many_attr_repr() -> None:
         a: int
         b: str
     expected = (
-        '<test_event_attrs.test_event_many_attr_repr.<locals>.TestEvent '
+        '<test.event.test_event_attrs.test_event_many_attr_repr.<locals>.'
+        'TestEvent '
         'a=1 '
         'b=\'b\'>'
     )
@@ -328,7 +333,8 @@ def test_event_static_attr_repr() -> None:
     class TestEvent(Base, a=10):
         pass
     expected = (
-        '<test_event_attrs.test_event_static_attr_repr.<locals>.TestEvent '
+        '<test.event.test_event_attrs.test_event_static_attr_repr.<locals>.'
+        'TestEvent '
         '*a=10 '
         'b=\'b\'>'
     )
