@@ -1,13 +1,10 @@
 
 # gamut
-# gamut
-# gamut
 from gamut.event._event import reset_events
 # python
 import gc
 from typing import Any, Generator
 # pysdl2
-# pysdl
 from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
                   SDL_INIT_HAPTIC, SDL_INIT_JOYSTICK, SDL_INIT_TIMER,
                   SDL_INIT_VIDEO, SDL_WasInit)
