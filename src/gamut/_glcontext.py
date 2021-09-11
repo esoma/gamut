@@ -10,9 +10,24 @@ from weakref import ref
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
-                  SDL_GL_SetAttribute, SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
+                  SDL_GL_SetAttribute, SDL_Init, SDL_INIT_VIDEO,
+                  SDL_QuitSubSystem, SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
 
 singleton: Optional[ref[GlContext]] = None
+
+
+class SdlVideo:
+
+    def __init__(self) -> None:
+        self._is_closed = True
+        if SDL_Init(SDL_INIT_VIDEO) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
+        self._is_closed = False
+
+    def __del__(self) -> None:
+        if self._is_closed:
+            SDL_QuitSubSystem(SDL_INIT_VIDEO)
+            self._is_closed = True
 
 
 class GlContext:
@@ -28,6 +43,7 @@ class GlContext:
     _sdl_gl_context: Optional[int]
 
     def __init__(self) -> None:
+        self._sdl_video = SdlVideo()
         self._sdl_window = SDL_CreateWindow(
             b'', 0, 0, 0, 0,
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
