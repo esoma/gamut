@@ -80,12 +80,10 @@ class EventType(type):
 
 def reset_events() -> None:
     """Effectivley "resets" all Events. Any Tasks that are waiting on any
-    Event will be broken and any registered sent callbacks are lost. This is
-    made for testing purposes.
+    Event will be broken. This is made for testing purposes.
     """
     for event in EventType._all:
         event._future = None
-        event._sent_callbacks = WeakSet()
 
 
 def add_sent_callback(

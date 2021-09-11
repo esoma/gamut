@@ -12,7 +12,6 @@ __all__ = [
 ]
 
 # gamut
-from gamut.event import Bind
 from gamut.event import Event as BaseEvent
 
 
@@ -50,8 +49,8 @@ class Peripheral:
     Connected: type[BoundPeripheralConnected]
     Disconnected: type[BoundPeripheralDisconnected]
 
-    def __init__(self, is_connected: bool, name: str):
-        self._is_connected = is_connected
+    def __init__(self, name: str):
+        self._is_connected = False
         self._name = name
         class Event(BoundPeripheralEvent, peripheral=self):
             pass
@@ -67,21 +66,18 @@ class Peripheral:
     def is_connected(self) -> bool:
         return self._is_connected
 
+    def connect(self) -> BoundPeripheralConnected:
+        if self._is_connected:
+            raise RuntimeError('peripheral is already connected')
+        self._is_connected = True
+        return self.Connected()
+
+    def disconnect(self) -> BoundPeripheralDisconnected:
+        if not self._is_connected:
+            raise RuntimeError('peripheral is already disconnected')
+        self._is_connected = False
+        return self.Disconnected()
+
     @property
     def name(self) -> str:
         return self._name
-
-
-async def connect_peripheral(event: PeripheralConnected) -> None:
-    event.peripheral._is_connected = True
-
-connect_peripheral_bind = Bind.on(PeripheralConnected, connect_peripheral)
-
-
-async def disconnect_peripheral(event: PeripheralDisconnected) -> None:
-    event.peripheral._is_connected = False
-
-disconnect_peripheral_bind = Bind.on(
-    PeripheralDisconnected,
-    disconnect_peripheral
-)
