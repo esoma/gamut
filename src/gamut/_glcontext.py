@@ -12,7 +12,7 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
                   SDL_GL_SetAttribute, SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
 
-_singleton: Optional[ref[GlContext]] = None
+singleton: Optional[ref[GlContext]] = None
 
 
 class GlContext:
@@ -25,7 +25,7 @@ class GlContext:
     """
 
     _sdl_window: Any
-    _sdl_gl_context: Any
+    _sdl_gl_context: Optional[int]
 
     def __init__(self) -> None:
         self._sdl_window = SDL_CreateWindow(
@@ -43,6 +43,7 @@ class GlContext:
         self._sdl_gl_context = SDL_GL_CreateContext(self._sdl_window)
         if self._sdl_gl_context is None:
             raise RuntimeError(SDL_GetError().decode('utf8'))
+        assert isinstance(self._sdl_gl_context, int)
 
     def __del__(self) -> None:
         if self._sdl_window is not None:
@@ -53,16 +54,17 @@ class GlContext:
             self._sdl_gl_context = None
 
     @property
-    def sdl_gl_context(self) -> Any:
+    def sdl_gl_context(self) -> int:
+        assert self._sdl_gl_context is not None
         return self._sdl_gl_context
 
 
 def get_gl_context() -> GlContext:
-    global _singleton
-    if _singleton is not None:
-        gl_context = _singleton()
+    global singleton
+    if singleton is not None:
+        gl_context = singleton()
         if gl_context is not None:
             return gl_context
     gl_context = GlContext()
-    _singleton = ref(gl_context)
+    singleton = ref(gl_context)
     return gl_context
