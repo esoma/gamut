@@ -6,6 +6,11 @@ from gamut.event._event import reset_events
 # python
 import gc
 from typing import Any, Generator
+# pysdl2
+# pysdl
+from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
+                  SDL_INIT_HAPTIC, SDL_INIT_JOYSTICK, SDL_INIT_TIMER,
+                  SDL_INIT_VIDEO, SDL_WasInit)
 # pytest
 import pytest
 
@@ -22,3 +27,11 @@ def cleanup() -> Generator[Any, Any, None]:
     # force a garbage collection to get rid of anything that is still dangling
     # and hasn't had its __del__ resolved
     gc.collect()
+    # make sure SDL was completley de-initialized
+    assert SDL_WasInit(SDL_INIT_TIMER) == 0
+    assert SDL_WasInit(SDL_INIT_AUDIO) == 0
+    assert SDL_WasInit(SDL_INIT_VIDEO) == 0
+    assert SDL_WasInit(SDL_INIT_JOYSTICK) == 0
+    assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
+    assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
+    assert SDL_WasInit(SDL_INIT_EVENTS) == 0

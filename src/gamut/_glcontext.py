@@ -25,7 +25,7 @@ class SdlVideo:
         self._is_closed = False
 
     def __del__(self) -> None:
-        if self._is_closed:
+        if not self._is_closed:
             SDL_QuitSubSystem(SDL_INIT_VIDEO)
             self._is_closed = True
 
