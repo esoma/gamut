@@ -3,6 +3,11 @@ __all__ = [
     'BoundGamutApplicationEnd',
     'BoundGamutApplicationEvent',
     'BoundGamutApplicationStart',
+    'BoundWindowClose',
+    'BoundWindowHidden',
+    'BoundWindowMoved',
+    'BoundWindowResized',
+    'BoundWindowShown',
     'GamutApplication',
     'GamutApplicationEnd',
     'GamutApplicationEvent',
@@ -21,4 +26,5 @@ from ._application import (BoundGamutApplicationEnd,
                            BoundGamutApplicationStart, GamutApplication,
                            GamutApplicationEnd, GamutApplicationEvent,
                            GamutApplicationStart)
-from ._window import Window
+from ._window import (BoundWindowClose, BoundWindowHidden, BoundWindowMoved,
+                      BoundWindowResized, BoundWindowShown, Window)

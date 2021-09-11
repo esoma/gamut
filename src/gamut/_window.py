@@ -1,8 +1,21 @@
 
 from __future__ import annotations
 
-__all__ = ['sdl_window_event_callback', 'Window', 'WindowClose', 'WindowEvent',
-           'WindowHidden', 'WindowMoved', 'WindowResized', 'WindowShown']
+__all__ = [
+    'BoundWindowClose',
+    'BoundWindowHidden',
+    'BoundWindowMoved',
+    'BoundWindowResized',
+    'BoundWindowShown',
+    'sdl_window_event_callback',
+    'Window',
+    'WindowClose',
+    'WindowEvent',
+    'WindowHidden',
+    'WindowMoved',
+    'WindowResized',
+    'WindowShown'
+]
 
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
@@ -120,7 +133,10 @@ class Window:
         self.close()
 
     def __repr__(self) -> str:
-        return f'<gamut.window.Window {self.title!r}>'
+        if self._sdl is None:
+            return f'<gamut.Window [closed]>'
+        else:
+            return f'<gamut.Window {self.title!r}>'
 
     def _ensure_open(self) -> None:
         if self._sdl is None:
@@ -140,7 +156,7 @@ class Window:
     @is_bordered.setter
     def is_bordered(self, is_bordered: bool) -> None:
         self._ensure_open()
-        SDL_SetWindowBordered(self._sdl, is_bordered)
+        SDL_SetWindowBordered(self._sdl, bool(is_bordered))
 
     @property
     def is_fullscreen(self) -> bool:
@@ -172,14 +188,15 @@ class Window:
             SDL_HideWindow(self._sdl)
 
     def recenter(self) -> None:
+        self._ensure_open()
         SDL_SetWindowPosition(
             self._sdl,
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
         )
 
-    def resize(self, size: tuple[int, int]) -> None:
+    def resize(self, width: int, height: int) -> None:
         self._ensure_open()
-        SDL_SetWindowSize(self._sdl, *size)
+        SDL_SetWindowSize(self._sdl, int(width), int(height))
 
     @property
     def size(self) -> tuple[int, int]:
@@ -198,7 +215,7 @@ class Window:
     @title.setter
     def title(self, title: str) -> None:
         self._ensure_open()
-        SDL_SetWindowTitle(self._sdl, title.encode('utf8'))
+        SDL_SetWindowTitle(self._sdl, str(title).encode('utf8'))
 
 
 def sdl_window_event_callback(sdl_event: Any) -> Optional[WindowEvent]:
