@@ -12,19 +12,16 @@ __all__ = [
 ]
 
 # gamut
+from gamut._window import sdl_window_event_callback
 from gamut.event import (Application, ApplicationEnd, ApplicationEvent,
                          ApplicationStart, BoundApplicationEnd,
                          BoundApplicationEvent, BoundApplicationStart)
 from gamut.event import Event as BaseEvent
-from gamut._window import sdl_window_event_callback
 # python
 from ctypes import byref as c_byref
-from functools import cached_property
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Optional, TypeVar
 # pysdl2
-from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
-                  SDL_GL_CreateContext, SDL_GL_DeleteContext, SDL_PollEvent,
-                  SDL_WaitEvent, SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL,
+from sdl2 import (SDL_Event, SDL_GetError, SDL_PollEvent, SDL_WaitEvent,
                   SDL_WINDOWEVENT)
 
 R = TypeVar('R')
@@ -85,15 +82,15 @@ class GamutApplication(Application[R]):
             pass
         self.Event = Event
         class Start(
-            BoundGamutApplicationStart,
-            Event,
+            BoundGamutApplicationStart, # type: ignore
+            Event, # type: ignore
             self.Start # type: ignore
         ):
             pass
         self.Start = Start
         class End(
-            Event,
-            BoundGamutApplicationEnd,
+            Event, # type: ignore
+            BoundGamutApplicationEnd, # type: ignore
             self.End # type: ignore
         ):
             pass
