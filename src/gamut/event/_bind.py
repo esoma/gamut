@@ -6,7 +6,7 @@ __all__ = ['Bind', 'BindKind', 'BindClosed']
 # gamut
 from ._event import add_sent_callback, Event, remove_sent_callback
 from ._future import Future
-from ._task import Task
+from ._task import Task, TaskStatus
 from ._taskmanager import TaskManager, TaskManagerIgnoredException
 # python
 from enum import Enum
@@ -107,8 +107,8 @@ class Bind(Generic[E]):
         if self._kind == BindKind._CLOSED:
             return
 
-        remove_sent_callback(self._event, self._on_send)
         self._kind = BindKind._CLOSED
+        remove_sent_callback(self._event, self._on_send)
         if self._tasks:
             task_manager = TaskManager.get_current()
             if not task_manager:
@@ -117,8 +117,9 @@ class Bind(Generic[E]):
                     'active task manager'
                 )
             for task in self._tasks:
-                task.throw(BindClosed())
-                task_manager.queue(task)
+                if task.status == TaskStatus.WORKING:
+                    task.throw(BindClosed())
+                    task_manager.queue(task)
 
         del self._event
         del self._callback

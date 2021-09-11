@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.event import Application, Bind, Event
+from gamut.event import Application, BoundApplicationEnd, BoundApplicationStart, Bind, Event
 # python
 import threading
 import time
@@ -77,19 +77,19 @@ def test_await_event() -> None:
 def test_start_end() -> None:
     order: list[int] = []
 
-    async def start(event: Application.Start) -> None:
+    async def start(event: BoundApplicationStart) -> None:
         order.append(1)
 
     class TestApplication(Application):
         async def main(self) -> None:
             order.append(2)
 
-    async def end(event: Application.End) -> None:
+    async def end(event: BoundApplicationEnd) -> None:
         order.append(3)
 
     with (
-        Bind.on(TestApplication.Start, start),
-        Bind.on(TestApplication.End, end)
+        Bind.on(BoundApplicationStart, start),
+        Bind.on(BoundApplicationEnd, end)
     ):
         TestApplication().run()
 
