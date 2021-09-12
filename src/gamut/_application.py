@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 # gamut
-from gamut._window import sdl_window_event_callback
+from gamut._sdl import sdl_event_callback_map
 from gamut.event import (Application, ApplicationEnd, ApplicationEvent,
                          ApplicationStart, Bind)
 from gamut.event import Event as BaseEvent
@@ -18,15 +18,9 @@ from gamut.peripheral import Mouse
 from ctypes import byref as c_byref
 from typing import Any, ContextManager, Optional, TypeVar
 # pysdl2
-from sdl2 import (SDL_Event, SDL_GetError, SDL_PollEvent, SDL_WaitEvent,
-                  SDL_WINDOWEVENT)
+from sdl2 import SDL_Event, SDL_GetError, SDL_PollEvent, SDL_WaitEvent
 
 R = TypeVar('R')
-
-
-event_callback_map = {
-    SDL_WINDOWEVENT: sdl_window_event_callback,
-}
 
 
 class GamutApplicationEvent(ApplicationEvent, application=...):
@@ -96,10 +90,10 @@ class GamutApplication(Application[R]):
             if SDL_PollEvent(c_byref(event)) != 1:
                 return None
         try:
-            event_callback = event_callback_map[event.type]
+            callback = sdl_event_callback_map[event.type]
         except KeyError:
             return None
-        return event_callback(event)
+        return callback(event, self._mouse)
 
     async def _connect_peripherals(self, event: GamutApplicationStart) -> None:
         self._mouse.connect().send()
