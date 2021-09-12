@@ -3,9 +3,10 @@
 from .event.test_application import TestApplication
 # gamut
 from gamut import GamutApplication, GamutApplicationEnd, GamutApplicationStart
-from gamut.event import Event
+from gamut.event import Bind, Event
+from gamut.peripheral import MouseConnected, MouseDisconnected
 # python
-from typing import Optional
+from typing import Any, ContextManager, Optional
 # pytest
 import pytest
 
@@ -29,3 +30,54 @@ class TestGamutApplication(TestApplication):
     @pytest.fixture
     def end_event_cls(self) -> type[GamutApplicationEnd]:
         return GamutApplicationEnd
+
+
+def test_mouse() -> None:
+    connected_event: Optional[MouseConnected] = None
+    disconnected_event: Optional[MouseDisconnected] = None
+
+    class App(GamutApplication):
+
+        async def main(self) -> None:
+            assert self.mouse.is_connected
+
+        async def connected(self, event: MouseConnected) -> None:
+            nonlocal connected_event
+            assert connected_event is None
+            connected_event = event
+            assert self.mouse.is_connected
+
+        async def disconnected(self, event: MouseDisconnected) -> None:
+            nonlocal disconnected_event
+            assert disconnected_event is None
+            disconnected_event = event
+            assert not self.mouse.is_connected
+
+        def run_context(self) -> ContextManager:
+            super_cm = super().run_context()
+            class TestContextManager:
+                def __init__(cm_self) -> None:
+                    cm_self.binds: list[Bind] = [
+                        Bind.on(self.mouse.Connected, self.connected),
+                        Bind.on(self.mouse.Disconnected, self.disconnected)
+                    ]
+                def __enter__(cm_self) -> None:
+                    super_cm.__enter__()
+                    for bind in cm_self.binds:
+                        bind.__enter__()
+                def __exit__(cm_self, *args: Any) -> None:
+                    super_cm.__exit__(*args)
+                    for bind in cm_self.binds:
+                        bind.__exit__(*args)
+            return TestContextManager()
+
+    app = App()
+    assert not app.mouse.is_connected
+    assert connected_event is None
+    assert disconnected_event is None
+    app.run()
+    assert not app.mouse.is_connected
+    assert isinstance(connected_event, app.mouse.Connected)
+    assert connected_event.mouse is app.mouse # type: ignore
+    assert isinstance(disconnected_event, app.mouse.Disconnected)
+    assert disconnected_event.mouse is app.mouse

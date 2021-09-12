@@ -15,7 +15,7 @@ from ._task import Task, TaskStatus
 from ._taskmanager import TaskManager
 # python
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, ContextManager, Generic, Optional, TypeVar
 
 R = TypeVar('R')
 
@@ -53,10 +53,14 @@ class Application(ABC, Generic[R]):
             pass
         self._OutOfEvents = _OutOfEvents
 
+    def run_context(self) -> ContextManager:
+        return DoNothingContextManager()
+
     def run(self) -> R:
         with (
             TaskManager() as task_manager,
-            Bind.mutex(self._OutOfEvents, self.__poll)
+            Bind.mutex(self._OutOfEvents, self.__poll),
+            self.run_context()
         ):
             main_task: Task[R] = Task(self.__main())
             task_manager.queue(main_task)
@@ -84,4 +88,13 @@ class Application(ABC, Generic[R]):
             await event.asend()
 
     async def poll(self) -> Optional[BaseEvent]:
+        return None
+
+
+class DoNothingContextManager:
+
+    def __enter__(self) -> None:
+        return None
+
+    def __exit__(self, *args: Any) -> None:
         return None
