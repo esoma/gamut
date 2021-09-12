@@ -6,9 +6,6 @@ __all__ = [
     'ApplicationEnd',
     'ApplicationEvent',
     'ApplicationStart',
-    'BoundApplicationEnd',
-    'BoundApplicationEvent',
-    'BoundApplicationStart',
 ]
 
 # gamut
@@ -23,53 +20,33 @@ from typing import Any, Generic, Optional, TypeVar
 R = TypeVar('R')
 
 
-class ApplicationEvent(BaseEvent):
+class ApplicationEvent(BaseEvent, application=...):
     application: Application[Any]
 
 
-class ApplicationStart(ApplicationEvent):
+class ApplicationStart(ApplicationEvent, application=...):
     pass
 
 
-class ApplicationEnd(ApplicationEvent):
-    pass
-
-
-class BoundApplicationEvent(ApplicationEvent, application=...):
-    pass
-
-
-class BoundApplicationStart(
-    BoundApplicationEvent,
-    ApplicationStart,
-    application=...
-):
-    pass
-
-
-class BoundApplicationEnd(
-    BoundApplicationEvent,
-    ApplicationEnd,
-    application=...
-):
+class ApplicationEnd(ApplicationEvent, application=...):
     pass
 
 
 class Application(ABC, Generic[R]):
 
-    Event: type[BoundApplicationEvent]
-    Start: type[BoundApplicationStart]
-    End: type[BoundApplicationEnd]
+    Event: type[ApplicationEvent]
+    Start: type[ApplicationStart]
+    End: type[ApplicationEnd]
 
     def __init__(self) -> None:
         super().__init__()
-        class Event(BoundApplicationEvent, application=self):
+        class Event(ApplicationEvent, application=self):
             pass
         self.Event = Event
-        class Start(Event, BoundApplicationStart):
+        class Start(Event, ApplicationStart):
             pass
         self.Start = Start
-        class End(Event, BoundApplicationEnd):
+        class End(Event, ApplicationEnd):
             pass
         self.End = End
         class _OutOfEvents(Event):

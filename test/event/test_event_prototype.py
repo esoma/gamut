@@ -28,6 +28,14 @@ def test_instantiate_prototype() -> None:
     assert str(excinfo.value) == 'cannot instantiate a prototype event'
 
 
+def test_immediate_prototype() -> None:
+    class ProtoEvent(Event, a=...):
+        a: int
+    with pytest.raises(TypeError) as excinfo:
+        ProtoEvent()
+    assert str(excinfo.value) == 'cannot instantiate a prototype event'
+
+
 def test_use_prototype() -> None:
     class BaseEvent(Event):
         a: int

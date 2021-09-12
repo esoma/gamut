@@ -2,9 +2,6 @@
 from __future__ import annotations
 
 __all__ = [
-    'BoundGamutApplicationEnd',
-    'BoundGamutApplicationEvent',
-    'BoundGamutApplicationStart',
     'GamutApplication',
     'GamutApplicationEnd',
     'GamutApplicationStart',
@@ -14,8 +11,7 @@ __all__ = [
 # gamut
 from gamut._window import sdl_window_event_callback
 from gamut.event import (Application, ApplicationEnd, ApplicationEvent,
-                         ApplicationStart, BoundApplicationEnd,
-                         BoundApplicationEvent, BoundApplicationStart)
+                         ApplicationStart)
 from gamut.event import Event as BaseEvent
 # python
 from ctypes import byref as c_byref
@@ -32,65 +28,41 @@ event_callback_map = {
 }
 
 
-class GamutApplicationEvent(ApplicationEvent):
+class GamutApplicationEvent(ApplicationEvent, application=...):
     application: GamutApplication[Any]
 
 
-class GamutApplicationStart(ApplicationStart):
+class GamutApplicationStart(GamutApplicationEvent, ApplicationStart,
+                            application=...):
     pass
 
 
-class GamutApplicationEnd(ApplicationEnd):
-    pass
-
-
-class BoundGamutApplicationEvent(
-    BoundApplicationEvent,
-    GamutApplicationEvent,
-    application=...
-):
-    pass
-
-
-class BoundGamutApplicationStart(
-    BoundGamutApplicationEvent,
-    BoundApplicationStart,
-    GamutApplicationStart,
-    application=...
-):
-    pass
-
-
-class BoundGamutApplicationEnd(
-    BoundGamutApplicationEvent,
-    BoundApplicationEnd,
-    GamutApplicationEnd,
-    application=...
-):
+class GamutApplicationEnd(GamutApplicationEvent, ApplicationEnd,
+                          application=...):
     pass
 
 
 class GamutApplication(Application[R]):
 
-    Event: type[BoundGamutApplicationEvent]
-    Start: type[BoundGamutApplicationStart]
-    End: type[BoundGamutApplicationEnd]
+    Event: type[GamutApplicationEvent]
+    Start: type[GamutApplicationStart]
+    End: type[GamutApplicationEnd]
 
     def __init__(self) -> None:
         super().__init__()
-        class Event(BoundGamutApplicationEvent, self.Event): # type: ignore
+        class Event(GamutApplicationEvent, self.Event): # type: ignore
             pass
         self.Event = Event
-        class Start(
-            BoundGamutApplicationStart, # type: ignore
-            Event, # type: ignore
-            self.Start # type: ignore
+        class Start( # type: ignore
+            GamutApplicationStart,
+            Event,
+            self.Start, # type: ignore
         ):
             pass
         self.Start = Start
-        class End(
-            Event, # type: ignore
-            BoundGamutApplicationEnd, # type: ignore
+        class End( # type: ignore
+            GamutApplicationEnd,
+            Event,
             self.End # type: ignore
         ):
             pass

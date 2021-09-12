@@ -2,8 +2,8 @@
 __all__ = ['TestApplication']
 
 # gamut
-from gamut.event import (Application, Bind, BoundApplicationEnd,
-                         BoundApplicationStart, Event)
+from gamut.event import (Application, ApplicationEnd, ApplicationStart, Bind,
+                         Event)
 # python
 from typing import Optional
 # pytest
@@ -17,12 +17,12 @@ class TestApplication:
         return Application
 
     @pytest.fixture
-    def bound_start_event_cls(self) -> type[BoundApplicationStart]:
-        return BoundApplicationStart
+    def start_event_cls(self) -> type[ApplicationStart]:
+        return ApplicationStart
 
     @pytest.fixture
-    def bound_end_event_cls(self) -> type[BoundApplicationEnd]:
-        return BoundApplicationEnd
+    def end_event_cls(self) -> type[ApplicationEnd]:
+        return ApplicationEnd
 
     def test_instantiate_base_application(
         self,
@@ -99,26 +99,26 @@ class TestApplication:
     def test_start_end(
         self,
         cls: type[Application],
-        bound_start_event_cls: type[BoundApplicationStart],
-        bound_end_event_cls: type[BoundApplicationEnd],
+        start_event_cls: type[ApplicationStart],
+        end_event_cls: type[ApplicationEnd],
     ) -> None:
         order: list[int] = []
 
-        async def start(event: BoundApplicationStart) -> None:
-            assert isinstance(event, bound_start_event_cls)
+        async def start(event: ApplicationStart) -> None:
+            assert isinstance(event, start_event_cls)
             order.append(1)
 
         class TestApplication(cls): # type: ignore
             async def main(self) -> None:
                 order.append(2)
 
-        async def end(event: BoundApplicationEnd) -> None:
-            assert isinstance(event, bound_end_event_cls)
+        async def end(event: ApplicationEnd) -> None:
+            assert isinstance(event, end_event_cls)
             order.append(3)
 
         with (
-            Bind.on(bound_start_event_cls, start),
-            Bind.on(bound_end_event_cls, end)
+            Bind.on(start_event_cls, start),
+            Bind.on(end_event_cls, end)
         ):
             TestApplication().run()
 

@@ -81,8 +81,7 @@ def test_event_init_subclass(
         class SubEventFail(Event, keyword=1): ...
     """) == [
         MypyResult(3, 'note: Revealed type is "def ()"'),
-        MypyResult(5, 'error: Unexpected keyword argument "keyword" for '
-                      '"__init_subclass__" of "Event"')
+        MypyResult(5, 'error: Unexpected keyword argument "keyword"')
     ]
 
 
@@ -137,8 +136,7 @@ def test_event_subclass_no_attrs_init_subclass(
         class SubSubEventFail(SubEvent, keyword=1): ...
     """) == [
         MypyResult(4, 'note: Revealed type is "def ()"'),
-        MypyResult(6, 'error: Unexpected keyword argument "keyword" for '
-                      '"__init_subclass__" of "SubEvent"')
+        MypyResult(6, 'error: Unexpected keyword argument "keyword"')
     ]
 
 
@@ -379,11 +377,9 @@ def test_event_subclass_attrs_init_subclass(
                 'b: builtins.str =, '
                 'c: builtins.int ='
             ')"'),
-        MypyResult(10, 'error: Unexpected keyword argument "keyword" for '
-                      '"__init_subclass__" of "SubEvent"'),
+        MypyResult(10, 'error: Unexpected keyword argument "keyword"'),
         MypyResult(11,
-            'error: Argument "a" to "__init_subclass__" of "SubEvent" has '
-            'incompatible type "str"; expected "int"')
+            'error: Argument "a" has incompatible type "str"; expected "int"')
     ]
 
 
@@ -414,6 +410,31 @@ def test_event_subclass_static_attrs_init(
 
 
 @parametrize_run_mypy
+def test_event_subclass_static_attrs_immediate(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class StaticEvent(Event, b="test"):
+            a: int
+            b: str
+            c: int
+        reveal_type(StaticEvent.__init__)
+        StaticEvent(1, 3)
+        StaticEvent(1, 3, b="2")
+    """) == [
+        MypyResult(7,
+            'note: Revealed type is "def ('
+                'self: __main__.StaticEvent, '
+                'a: builtins.int, '
+                'c: builtins.int'
+            ')"'),
+        MypyResult(9,
+            'error: Unexpected keyword argument "b" for "StaticEvent"'),
+    ]
+
+
+@parametrize_run_mypy
 def test_event_subclass_static_attrs_init_subclass(
     run_mypy: Callable[[str], list[MypyResult]]
 ) -> None:
@@ -434,8 +455,7 @@ def test_event_subclass_static_attrs_init_subclass(
                 'a: builtins.int =, '
                 'c: builtins.int ='
             ')"'),
-        MypyResult(11, 'error: Unexpected keyword argument "b" for '
-                      '"__init_subclass__" of "StaticEvent"'),
+        MypyResult(11, 'error: Unexpected keyword argument "b"'),
     ]
 
 
@@ -462,8 +482,7 @@ def test_event_subclass_multi_inherit_static_attrs_init_subclass(
                 'a: builtins.int =, '
                 'c: builtins.int ='
             ')"'),
-        MypyResult(13, 'error: Unexpected keyword argument "b" for '
-                      '"__init_subclass__" of "TestEvent"'),
+        MypyResult(13, 'error: Unexpected keyword argument "b"'),
     ]
 
 
@@ -510,9 +529,7 @@ def test_non_existent_field_prototyped(
         class ProtoEvent(BaseEvent, c=...):
             pass
     """) == [
-        MypyResult(6,
-            'error: Unexpected keyword argument '
-            '"c" for "__init_subclass__" of "BaseEvent"')
+        MypyResult(6, 'error: Unexpected keyword argument "c"')
     ]
 
 
@@ -530,6 +547,22 @@ def test_instantiate_prototype(
         ProtoEvent()
     """) == [
         MypyResult(7,
+            'note: Revealed type is "def (self: __main__.ProtoEvent)"'),
+    ]
+
+
+@parametrize_run_mypy
+def test_immediate_prototype(
+    run_mypy: Callable[[str], list[MypyResult]]
+) -> None:
+    assert run_mypy("""
+        from gamut.event import Event
+        class ProtoEvent(Event, a=...):
+            a: int
+        reveal_type(ProtoEvent.__init__)
+        ProtoEvent()
+    """) == [
+        MypyResult(5,
             'note: Revealed type is "def (self: __main__.ProtoEvent)"'),
     ]
 
@@ -620,9 +653,7 @@ def test_use_prototype_field_not_provided(
         class UseProtoEvent(ProtoEvent):
             pass
     """) == [
-        MypyResult(7,
-            'error: Missing named argument '
-            '"a" for "__init_subclass__" of "ProtoEvent"')
+        MypyResult(7, 'error: Missing named argument "a"')
     ]
 
 
@@ -641,11 +672,9 @@ def test_use_prototype_multiple_fields_not_provided(
             pass
     """) == [
         MypyResult(8,
-            'error: Missing named argument '
-            '"a" for "__init_subclass__" of "ProtoEvent"'),
+            'error: Missing named argument "a"'),
         MypyResult(8,
-            'error: Missing named argument '
-            '"b" for "__init_subclass__" of "ProtoEvent"')
+            'error: Missing named argument "b"')
     ]
 
 
@@ -665,12 +694,8 @@ def test_use_multiple_prototype_multiple_fields_not_provided(
         class UseProtoEvent(ProtoEventA, ProtoEventB):
             pass
     """) == [
-        MypyResult(10,
-            'error: Missing named argument '
-            '"a" for "__init_subclass__" of "ProtoEventA"'),
-        MypyResult(10,
-            'error: Missing named argument '
-            '"b" for "__init_subclass__" of "ProtoEventB"')
+        MypyResult(10, 'error: Missing named argument "a"'),
+        MypyResult(10, 'error: Missing named argument "b"'),
     ]
 
 

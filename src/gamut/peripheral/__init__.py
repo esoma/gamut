@@ -2,9 +2,6 @@
 from __future__ import annotations
 
 __all__ = [
-    'BoundPeripheralEvent',
-    'BoundPeripheralConnected',
-    'BoundPeripheralDisconnected',
     'Peripheral',
     'PeripheralEvent',
     'PeripheralConnected',
@@ -12,7 +9,5 @@ __all__ = [
 ]
 
 # gamut
-from ._peripheral import (BoundPeripheralConnected,
-                          BoundPeripheralDisconnected, BoundPeripheralEvent,
-                          Peripheral, PeripheralConnected,
+from ._peripheral import (Peripheral, PeripheralConnected,
                           PeripheralDisconnected, PeripheralEvent)
