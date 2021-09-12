@@ -247,17 +247,6 @@ class Event(metaclass=EventType):
                 continue
             for key in base._fields:
                 fields[key] = cls._NonStatic
-        # now we can apply static values to any base class fields
-        original_kwargs = dict(kwargs)
-        for k in cls._fields:
-            try:
-                kwarg_value = kwargs.pop(k)
-            except KeyError:
-                continue
-            if kwarg_value is ...:
-                prototype_fields.append(k)
-            else:
-                fields[k] = kwarg_value
         # now we can add any of the annotations defined directly on this class
         # so that they come after any base fields
         fields.update({
@@ -271,6 +260,17 @@ class Event(metaclass=EventType):
                 'typing_extensions.ClassVar',
             )))
         })
+        # now we can apply static values to any class fields
+        original_kwargs = dict(kwargs)
+        for k in fields:
+            try:
+                kwarg_value = kwargs.pop(k)
+            except KeyError:
+                continue
+            if kwarg_value is ...:
+                prototype_fields.append(k)
+            else:
+                fields[k] = kwarg_value
         # now we travel the class inheritance graph, ignoring this class since
         # we've already procesed it
         for mro_cls in inspect.getmro(cls):

@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Generator, Optional, Type
 # mypy
-from mypy.nodes import (ARG_OPT, ARG_POS, Argument, AssignmentStmt,
-                        EllipsisExpr, FuncDef, is_class_var, NameExpr,
-                        TempNode, Var)
+from mypy.nodes import (ARG_NAMED, ARG_OPT, ARG_POS, Argument, AssignmentStmt,
+                        EllipsisExpr, Expression, FuncDef, is_class_var,
+                        NameExpr, TempNode, Var)
 from mypy.plugin import ClassDefContext, MethodSigContext
 from mypy.plugin import Plugin as _Plugin
 from mypy.plugins.common import add_method
@@ -101,15 +101,20 @@ class _EventField:
 @dataclass
 class _Event:
     name: str
+    bases: list[str]
     fields: dict[str, _EventField]
+    keywords: dict[str, Expression]
 
 
 class _Context:
 
     def __init__(self) -> None:
         self.events = {
-            'gamut.event._event.Event': _Event('gamut.event._event.Event', {})
+            'gamut.event._event.Event': _Event(
+                'gamut.event._event.Event', [], {}, {}
+            )
         }
+        self.events_by_line: dict[int, _Event] = {}
 
 
 def _transform_event(ctx: ClassDefContext) -> None:
@@ -132,27 +137,11 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
 
     context.events[ctx.cls.fullname] = event = _Event(
         ctx.cls.fullname,
+        [base.type.fullname for base in ctx.cls.info.bases],
         _get_fields(ctx, context),
+        ctx.cls.keywords
     )
-
-    # we need to make sure all the required keywords (prototyped fields) were
-    # supplied for each of the base's __init_subclass__
-    for base in ctx.cls.info.bases:
-        try:
-            base_event = context.events[base.type.fullname]
-        except KeyError:
-            continue
-        for base_event_field in base_event.fields.values():
-            if (
-                base_event_field.is_prototype and
-                base_event_field.name not in ctx.cls.keywords and
-                not event.fields[base_event_field.name].is_static
-            ):
-                ctx.api.fail(
-                    f'Missing named argument "{base_event_field.name}" '
-                    f'for "__init_subclass__" of "{base.type.name}"',
-                    ctx.reason
-                )
+    context.events_by_line[ctx.cls.line] = event
 
     if "__init__" not in ctx.cls.info.names:
         add_method(
@@ -256,27 +245,76 @@ def _get_direct_fields(
                         node
                     )
 
+@dataclass
+class _SubclassParam:
+    name: str
+    type: MypyType
+    is_required: bool
+    is_static: bool
+
+
 def _transform_event_init_subclass(
     ctx: MethodSigContext,
     context: _Context
 ) -> CallableType:
-    # the keyword overrides for an Event's __init_subclass__ normally only
-    # accept the type defined on the parent class for that field
-    #
-    # we want to be able to pass an ellipsis to create protocol events -- the
-    # obvious solution would be to make all the __init_subclass__ kwargs a
-    # union between the type and the ellipsis type, but there is no ellipsis
-    # type
-    #
-    # so, we override the type here, to accept Any, when an ellipsis is passed
-    # in
-    param_types: list[MypyType] = []
-    for arg, param_type in zip(
-        ctx.args,
-        ctx.default_signature.arg_types,
-    ):
-        if len(arg) == 1 and isinstance(arg[0], EllipsisExpr):
-            param_types.append(AnyType(TypeOfAny.explicit))
-        else:
-            param_types.append(param_type)
-    return ctx.default_signature.copy_modified(arg_types=param_types)
+    # combine the fields on the base classes and the defined class to determine
+    # the signature for class instantiation
+    event = context.events_by_line[ctx.context.line]
+    params: dict[str, _SubclassParam] = {}
+    for base_name in event.bases:
+        try:
+            base = context.events[base_name]
+        except KeyError:
+            # this base is not an event
+            continue
+        for field in base.fields.values():
+            try:
+                param = params[field.name]
+            except KeyError:
+                param = params[field.name] = _SubclassParam(
+                    field.name,
+                    field.type,
+                    False,
+                    False
+                )
+            if field.is_prototype:
+                param.is_required = True
+            if field.is_static:
+                param.is_static = True
+    # fields may be defined on the instantiated event itself that can be made
+    # static or prototypes
+    for field in event.fields.values():
+        try:
+            param = params[field.name]
+        except KeyError:
+            param = params[field.name] = _SubclassParam(
+                field.name,
+                field.type,
+                False,
+                False
+            )
+    # remove static parameters, they cannot be parameters
+    params = {
+        name: param
+        for name, param in params.items()
+        if not param.is_static
+    }
+    # any parameters may be prototypes
+    for param in params.values():
+        kwarg: Optional[Expression] = None
+        try:
+            kwarg = event.keywords[param.name]
+        except KeyError:
+            pass
+        if kwarg and isinstance(kwarg, EllipsisExpr):
+            param.type = AnyType(TypeOfAny.explicit)
+
+    return ctx.default_signature.copy_modified(
+        name=None,
+        arg_kinds=[
+            ARG_NAMED if p.is_required else ARG_OPT
+            for p in params.values()
+        ],
+        arg_types=[p.type for p in params.values()],
+        arg_names=[p.name for p in params.values()],
+    )

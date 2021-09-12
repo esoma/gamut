@@ -118,10 +118,11 @@ def test_mutli_inherit_conflicting_defaults() -> None:
     assert z.c == 3
 
 
-def test_set_static_does_not_exist() -> None:
-    with pytest.raises(TypeError):
-        class AttrEvent(Event, thing=1): # type: ignore
-            thing: int
+def test_set_static_immediate() -> None:
+    class AttrEvent(Event, thing=1):
+        thing: int
+    a = AttrEvent()
+    assert a.thing == 1
 
 
 @pytest.mark.parametrize("override_thing", [1, 2])
