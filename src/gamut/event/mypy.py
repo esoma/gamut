@@ -114,7 +114,7 @@ class _Context:
                 'gamut.event._event.Event', [], {}, {}
             )
         }
-        self.events_by_line: dict[int, _Event] = {}
+        self.events_by_line: dict[tuple[str, int], _Event] = {}
 
 
 def _transform_event(ctx: ClassDefContext) -> None:
@@ -141,7 +141,8 @@ def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
         _get_fields(ctx, context),
         ctx.cls.keywords
     )
-    context.events_by_line[ctx.cls.line] = event
+    path = ctx.api.modules[ctx.cls.info.module_name].path
+    context.events_by_line[(path, ctx.cls.line)] = event
 
     if "__init__" not in ctx.cls.info.names:
         add_method(
@@ -259,7 +260,7 @@ def _transform_event_init_subclass(
 ) -> CallableType:
     # combine the fields on the base classes and the defined class to determine
     # the signature for class instantiation
-    event = context.events_by_line[ctx.context.line]
+    event = context.events_by_line[(ctx.api.path, ctx.context.line)]
     params: dict[str, _SubclassParam] = {}
     for base_name in event.bases:
         try:
