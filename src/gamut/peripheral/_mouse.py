@@ -11,6 +11,8 @@ __all__ = [
     'MouseDisconnected',
     'MouseEvent',
     'MouseMoved',
+    'MouseScrolledHorizontally',
+    'MouseScrolledVertically',
 ]
 
 # gamut
@@ -20,10 +22,22 @@ from ._peripheral import (Peripheral, PeripheralConnected,
 from gamut._sdl import sdl_event_callback_map, sdl_window_event_callback_map
 from gamut._window import get_window_from_sdl_id, Window
 # python
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from weakref import ref
 # pysdl2
-from sdl2 import SDL_MOUSEMOTION, SDL_TOUCH_MOUSEID, SDL_WINDOWEVENT_LEAVE
+from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
+                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_MOUSEBUTTONDOWN,
+                  SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_MOUSEWHEEL,
+                  SDL_MOUSEWHEEL_FLIPPED, SDL_TOUCH_MOUSEID,
+                  SDL_WINDOWEVENT_LEAVE)
+
+sdl_button_to_gamut_button_name: dict[int, str] = {
+    SDL_BUTTON_LEFT: 'left',
+    SDL_BUTTON_MIDDLE: 'middle',
+    SDL_BUTTON_RIGHT: 'right',
+    SDL_BUTTON_X1: 'back',
+    SDL_BUTTON_X2: 'front',
+}
 
 
 class MouseEvent(PeripheralEvent, peripheral=...):
@@ -62,6 +76,14 @@ class MouseDisconnected(MouseEvent, PeripheralDisconnected, peripheral=...):
 class MouseMoved(MouseEvent, peripheral=...):
     position: Optional[tuple[int, int]]
     window: Optional[Window]
+
+
+class MouseScrolledVertically(MouseEvent, peripheral=...):
+    delta: int
+
+
+class MouseScrolledHorizontally(MouseEvent, peripheral=...):
+    delta: int
 
 
 class BaseMouseButton:
@@ -172,6 +194,8 @@ class Mouse(Peripheral):
     Connected: type[MouseConnected]
     Disconnected: type[MouseDisconnected]
     Moved: type[MouseMoved]
+    ScrolledVertically: type[MouseScrolledVertically]
+    ScrolledHorizontally: type[MouseScrolledHorizontally]
 
     Button: type[PressableMouseButton]
 
@@ -197,6 +221,18 @@ class Mouse(Peripheral):
         class Moved(MouseMoved, Event): # type: ignore
             pass
         self.Moved = Moved
+        class ScrolledHorizontally( # type: ignore
+            MouseScrolledHorizontally,
+            Event
+        ):
+            pass
+        self.ScrolledHorizontally = ScrolledHorizontally
+        class ScrolledVertically( # type: ignore
+            MouseScrolledVertically,
+            Event
+        ):
+            pass
+        self.ScrolledVertically = ScrolledVertically
 
         class Button(PressableMouseButton, mouse=self):
             pass
@@ -244,3 +280,61 @@ def sdl_mouse_motion_event_callback(
 
 assert SDL_MOUSEMOTION not in sdl_event_callback_map
 sdl_event_callback_map[SDL_MOUSEMOTION] = sdl_mouse_motion_event_callback
+
+
+def sdl_mouse_button_down_event_callback(
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[MouseButtonPressed]:
+    if sdl_event.button.which == SDL_TOUCH_MOUSEID:
+        return None
+    button: PressableMouseButton = getattr(
+        mouse.Button,
+        sdl_button_to_gamut_button_name[sdl_event.button.button]
+    )
+    assert isinstance(button, PressableMouseButton)
+    button._is_pressed = True
+    return button.Pressed()
+
+assert SDL_MOUSEBUTTONDOWN not in sdl_event_callback_map
+sdl_event_callback_map[SDL_MOUSEBUTTONDOWN] = (
+    sdl_mouse_button_down_event_callback
+)
+
+
+def sdl_mouse_button_up_event_callback(
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[MouseButtonReleased]:
+    if sdl_event.button.which == SDL_TOUCH_MOUSEID:
+        return None
+    button: PressableMouseButton = getattr(
+        mouse.Button,
+        sdl_button_to_gamut_button_name[sdl_event.button.button]
+    )
+    assert isinstance(button, PressableMouseButton)
+    button._is_pressed = False
+    return button.Released()
+
+assert SDL_MOUSEBUTTONUP not in sdl_event_callback_map
+sdl_event_callback_map[SDL_MOUSEBUTTONUP] = (
+    sdl_mouse_button_up_event_callback
+)
+
+
+def sdl_mouse_wheel_event(
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[Union[MouseScrolledVertically, MouseScrolledHorizontally]]:
+    if sdl_event.button.which == SDL_TOUCH_MOUSEID:
+        return None
+    c = -1 if sdl_event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED else 1
+    if sdl_event.wheel.y:
+        assert sdl_event.wheel.x == 0
+        return mouse.ScrolledVertically(sdl_event.wheel.y * c)
+    else:
+        assert sdl_event.wheel.x != 0
+        return mouse.ScrolledHorizontally(sdl_event.wheel.x * c)
+
+assert SDL_MOUSEWHEEL not in sdl_event_callback_map
+sdl_event_callback_map[SDL_MOUSEWHEEL] = sdl_mouse_wheel_event
