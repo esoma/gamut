@@ -17,12 +17,13 @@ __all__ = [
     'PeripheralConnected',
     'PeripheralDisconnected',
     'PeripheralEvent',
+    'PressableMouseButton',
 ]
 
 # gamut
 from ._mouse import (Mouse, MouseButton, MouseButtonEvent, MouseButtonPressed,
                      MouseButtonReleased, MouseConnected, MouseDisconnected,
                      MouseEvent, MouseMoved, MouseScrolledHorizontally,
-                     MouseScrolledVertically)
+                     MouseScrolledVertically, PressableMouseButton)
 from ._peripheral import (Peripheral, PeripheralConnected,
                           PeripheralDisconnected, PeripheralEvent)

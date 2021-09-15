@@ -13,6 +13,7 @@ __all__ = [
     'MouseMoved',
     'MouseScrolledHorizontally',
     'MouseScrolledVertically',
+    'PressableMouseButton',
 ]
 
 # gamut
