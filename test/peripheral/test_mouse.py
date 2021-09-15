@@ -3,8 +3,9 @@
 from .test_peripheral import TestPeripheral
 # gamut
 from gamut import GamutApplication, Window
-from gamut.peripheral import (Mouse, MouseButtonPressed, MouseButtonReleased,
-                              MouseConnected, MouseDisconnected, MouseMoved,
+from gamut.peripheral import (Mouse, MouseButton, MouseButtonPressed,
+                              MouseButtonReleased, MouseConnected,
+                              MouseDisconnected, MouseMoved,
                               MouseScrolledHorizontally,
                               MouseScrolledVertically, PressableMouseButton)
 # python
@@ -90,6 +91,31 @@ def test_defaults() -> None:
 def test_repr(name: str) -> None:
     mouse = Mouse(name)
     assert repr(mouse) == f'<gamut.peripheral.Mouse {name!r}>'
+
+
+@pytest.mark.parametrize("name", ['left', 'middle', 'right', 'front', 'back'])
+def test_non_instance_button_repr(name: str) -> None:
+    button: MouseButton = getattr(MouseButton, name)
+    assert isinstance(button, MouseButton)
+    assert repr(button) == f'<gamut.peripheral.MouseButton {name!r}>'
+
+
+@pytest.mark.parametrize("name", ['left', 'middle', 'right', 'front', 'back'])
+def test_instance_button_repr(name: str) -> None:
+    mouse = Mouse('test')
+    button: PressableMouseButton = getattr(mouse.Button, name)
+    assert isinstance(button, PressableMouseButton)
+    assert repr(button) == (
+        f'<gamut.peripheral.MouseButton {name!r} for {mouse!r}>'
+    )
+
+
+@pytest.mark.parametrize("name", ['left', 'middle', 'right', 'front', 'back'])
+def test_button_name(name: str) -> None:
+    mouse = Mouse('test')
+    button: PressableMouseButton = getattr(mouse.Button, name)
+    assert isinstance(button, PressableMouseButton)
+    assert button.name == name
 
 
 @pytest.mark.parametrize("x", [0, 20, 80, 100])
