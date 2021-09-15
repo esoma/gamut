@@ -7,7 +7,7 @@ __all__ = [
     'BoundWindowMoved',
     'BoundWindowResized',
     'BoundWindowShown',
-    'sdl_window_event_callback',
+    'get_window_from_sdl_id',
     'Window',
     'WindowClose',
     'WindowEvent',
@@ -19,11 +19,12 @@ __all__ = [
 
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
+from gamut._sdl import sdl_window_event_callback_map
 from gamut.event import Event as _Event
 # python
 from ctypes import byref as c_byref
 from ctypes import c_int
-from typing import Any, Callable, ClassVar, Optional
+from typing import Any, ClassVar, Optional, TYPE_CHECKING
 from weakref import WeakValueDictionary
 # pyopengl
 from OpenGL.GL import glViewport
@@ -38,6 +39,10 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetWindowFlags,
                   SDL_WINDOWEVENT_HIDDEN, SDL_WINDOWEVENT_MOVED,
                   SDL_WINDOWEVENT_SHOWN, SDL_WINDOWEVENT_SIZE_CHANGED,
                   SDL_WINDOWPOS_CENTERED)
+
+if TYPE_CHECKING:
+    # gamut
+    from gamut.peripheral import Mouse
 
 
 class WindowEvent(_Event):
@@ -218,58 +223,87 @@ class Window:
         SDL_SetWindowTitle(self._sdl, str(title).encode('utf8'))
 
 
-def sdl_window_event_callback(sdl_event: Any) -> Optional[WindowEvent]:
-    try:
-        event_callback = sdl_event_callback_map[sdl_event.window.event]
-    except KeyError:
-        return None
-    try:
-        window = Window._id_map[sdl_event.window.windowID]
-    except KeyError:
-        return None
-    return event_callback(window, sdl_event)
+def get_window_from_sdl_id(id: int) -> Window:
+    return Window._id_map[id]
 
 
 def sdl_window_event_close_callback(
-    window: Window,
-    sdl_event: Any
-) -> WindowClose:
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[WindowClose]:
+    try:
+        window = get_window_from_sdl_id(sdl_event.window.windowID)
+    except KeyError:
+        return None
     return window.Close()
+
+assert SDL_WINDOWEVENT_CLOSE not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_CLOSE] = (
+    sdl_window_event_close_callback
+)
 
 
 def sdl_window_event_hidden_callback(
-    window: Window,
-    sdl_event: Any
-) -> WindowHidden:
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[WindowHidden]:
+    try:
+        window = get_window_from_sdl_id(sdl_event.window.windowID)
+    except KeyError:
+        return None
     return window.Hidden()
+
+assert SDL_WINDOWEVENT_HIDDEN not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_HIDDEN] = (
+    sdl_window_event_hidden_callback
+)
 
 
 def sdl_window_event_moved_callback(
-    window: Window,
-    sdl_event: Any
-) -> WindowMoved:
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[WindowMoved]:
+    try:
+        window = get_window_from_sdl_id(sdl_event.window.windowID)
+    except KeyError:
+        return None
     return window.Moved((sdl_event.window.data1, sdl_event.window.data2))
+
+assert SDL_WINDOWEVENT_MOVED not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_MOVED] = (
+    sdl_window_event_moved_callback
+)
+
 
 
 def sdl_window_event_resized_callback(
-    window: Window,
-    sdl_event: Any
-) -> WindowResized:
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[WindowResized]:
+    try:
+        window = get_window_from_sdl_id(sdl_event.window.windowID)
+    except KeyError:
+        return None
     glViewport(0, 0, sdl_event.window.data1, sdl_event.window.data2)
     return window.Resized((sdl_event.window.data1, sdl_event.window.data2))
 
+assert SDL_WINDOWEVENT_SIZE_CHANGED not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_SIZE_CHANGED] = (
+    sdl_window_event_resized_callback
+)
+
 
 def sdl_window_event_shown_callback(
-    window: Window,
-    sdl_event: Any
-) -> WindowShown:
+    sdl_event: Any,
+    mouse: Mouse
+) -> Optional[WindowShown]:
+    try:
+        window = get_window_from_sdl_id(sdl_event.window.windowID)
+    except KeyError:
+        return None
     return window.Shown()
 
-
-sdl_event_callback_map: dict[Any, Callable[[Window, Any], WindowEvent]] = {
-    SDL_WINDOWEVENT_CLOSE: sdl_window_event_close_callback,
-    SDL_WINDOWEVENT_HIDDEN: sdl_window_event_hidden_callback,
-    SDL_WINDOWEVENT_MOVED: sdl_window_event_moved_callback,
-    SDL_WINDOWEVENT_SIZE_CHANGED: sdl_window_event_resized_callback,
-    SDL_WINDOWEVENT_SHOWN: sdl_window_event_shown_callback,
-}
+assert SDL_WINDOWEVENT_SHOWN not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_SHOWN] = (
+    sdl_window_event_shown_callback
+)
