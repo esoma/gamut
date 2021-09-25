@@ -15,26 +15,30 @@ from sdl2 import SDL_WINDOWEVENT
 
 if TYPE_CHECKING:
     # gamut
-    from gamut.peripheral import Mouse
+    from gamut.peripheral import Keyboard, Mouse
 
 
-def sdl_window_event_callback(sdl_event: Any, mouse: Mouse) -> Optional[Event]:
+def sdl_window_event_callback(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard
+) -> Optional[Event]:
     assert sdl_event.type == SDL_WINDOWEVENT
     try:
         callback = sdl_window_event_callback_map[sdl_event.window.event]
     except KeyError:
         return None
-    return callback(sdl_event, mouse)
+    return callback(sdl_event, mouse, keyboard)
 
 
 sdl_event_callback_map: dict[
     int,
-    Callable[[Any, Mouse], Optional[Event]]
+    Callable[[Any, Mouse, Keyboard], Optional[Event]]
 ] = {
     SDL_WINDOWEVENT: sdl_window_event_callback,
 }
 
 sdl_window_event_callback_map: dict[
     int,
-    Callable[[Any, Mouse], Optional[Event]]
+    Callable[[Any, Mouse, Keyboard], Optional[Event]]
 ] = {}
