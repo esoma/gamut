@@ -2,6 +2,14 @@
 from __future__ import annotations
 
 __all__ = [
+    'Keyboard',
+    'KeyboardKey',
+    'KeyboardKeyEvent',
+    'KeyboardKeyPressed',
+    'KeyboardKeyReleased',
+    'KeyboardConnected',
+    'KeyboardDisconnected',
+    'KeyboardEvent',
     'Mouse',
     'MouseButton',
     'MouseButtonEvent',
@@ -17,10 +25,15 @@ __all__ = [
     'PeripheralConnected',
     'PeripheralDisconnected',
     'PeripheralEvent',
+    'PressableKeyboardKey',
     'PressableMouseButton',
 ]
 
 # gamut
+from ._keyboard import (Keyboard, KeyboardConnected, KeyboardDisconnected,
+                        KeyboardEvent, KeyboardKey, KeyboardKeyEvent,
+                        KeyboardKeyPressed, KeyboardKeyReleased,
+                        PressableKeyboardKey)
 from ._mouse import (Mouse, MouseButton, MouseButtonEvent, MouseButtonPressed,
                      MouseButtonReleased, MouseConnected, MouseDisconnected,
                      MouseEvent, MouseMoved, MouseScrolledHorizontally,

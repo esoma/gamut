@@ -23,7 +23,7 @@ from ._peripheral import (Peripheral, PeripheralConnected,
 from gamut._sdl import sdl_event_callback_map, sdl_window_event_callback_map
 from gamut._window import get_window_from_sdl_id, Window
 # python
-from typing import Any, Optional, Union
+from typing import Any, Optional, TYPE_CHECKING, Union
 from weakref import ref
 # pysdl2
 from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
@@ -31,6 +31,10 @@ from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
                   SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_MOUSEWHEEL,
                   SDL_MOUSEWHEEL_FLIPPED, SDL_TOUCH_MOUSEID,
                   SDL_WINDOWEVENT_LEAVE)
+
+if TYPE_CHECKING:
+    # gamut
+    from ._keyboard import Keyboard
 
 sdl_button_to_gamut_button_name: dict[int, str] = {
     SDL_BUTTON_LEFT: 'left',
@@ -254,7 +258,11 @@ class Mouse(Peripheral):
         return self._window
 
 
-def sdl_window_event_leave(sdl_event: Any, mouse: Mouse) -> MouseMoved:
+def sdl_window_event_leave(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard
+) -> MouseMoved:
     assert mouse._window is not None
     assert mouse._position is not None
     mouse._position = None
@@ -267,7 +275,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_LEAVE] = sdl_window_event_leave
 
 def sdl_mouse_motion_event_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[MouseMoved]:
     if sdl_event.motion.which == SDL_TOUCH_MOUSEID:
         return None
@@ -285,7 +294,8 @@ sdl_event_callback_map[SDL_MOUSEMOTION] = sdl_mouse_motion_event_callback
 
 def sdl_mouse_button_down_event_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[MouseButtonPressed]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
@@ -305,7 +315,8 @@ sdl_event_callback_map[SDL_MOUSEBUTTONDOWN] = (
 
 def sdl_mouse_button_up_event_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[MouseButtonReleased]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
@@ -325,7 +336,8 @@ sdl_event_callback_map[SDL_MOUSEBUTTONUP] = (
 
 def sdl_mouse_wheel_event(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[Union[MouseScrolledVertically, MouseScrolledHorizontally]]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
