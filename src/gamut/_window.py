@@ -42,7 +42,7 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetWindowFlags,
 
 if TYPE_CHECKING:
     # gamut
-    from gamut.peripheral import Mouse
+    from gamut.peripheral import Keyboard, Mouse
 
 
 class WindowEvent(_Event):
@@ -229,7 +229,8 @@ def get_window_from_sdl_id(id: int) -> Window:
 
 def sdl_window_event_close_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[WindowClose]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
@@ -245,7 +246,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_CLOSE] = (
 
 def sdl_window_event_hidden_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[WindowHidden]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
@@ -261,7 +263,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_HIDDEN] = (
 
 def sdl_window_event_moved_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[WindowMoved]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
@@ -278,7 +281,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_MOVED] = (
 
 def sdl_window_event_resized_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[WindowResized]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
@@ -295,7 +299,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_SIZE_CHANGED] = (
 
 def sdl_window_event_shown_callback(
     sdl_event: Any,
-    mouse: Mouse
+    mouse: Mouse,
+    keyboard: Keyboard
 ) -> Optional[WindowShown]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
