@@ -17,14 +17,16 @@ __all__ = [
 from ._peripheral import (Peripheral, PeripheralConnected,
                           PeripheralDisconnected, PeripheralEvent)
 # gamut
-from gamut._sdl import sdl_event_callback_map
+from gamut._sdl import sdl_event_callback_map, sdl_window_event_callback_map
+from gamut._window import get_window_from_sdl_id, Window
 # python
 import platform
 from typing import Any, ClassVar, Final, Optional, TYPE_CHECKING
 from weakref import ref
 # pysdl2
 import sdl2
-from sdl2 import SDL_KEYDOWN, SDL_KEYUP, SDL_SCANCODE_UNKNOWN
+from sdl2 import (SDL_KEYDOWN, SDL_KEYUP, SDL_SCANCODE_UNKNOWN,
+                  SDL_WINDOWEVENT_FOCUS_GAINED, SDL_WINDOWEVENT_FOCUS_LOST)
 
 if TYPE_CHECKING:
     # gamut
@@ -588,6 +590,14 @@ class KeyboardConnected(KeyboardEvent, PeripheralConnected, peripheral=...):
 class KeyboardDisconnected(KeyboardEvent, PeripheralDisconnected,
     peripheral=...
 ):
+    pass
+
+
+class KeyboardFocused(KeyboardEvent, peripheral=...):
+    window: Window
+
+
+class KeyboardLostFocus(KeyboardEvent, peripheral=...):
     pass
 
 
@@ -1165,6 +1175,8 @@ class Keyboard(Peripheral):
     Event: type[KeyboardEvent]
     Connected: type[KeyboardConnected]
     Disconnected: type[KeyboardDisconnected]
+    Focused: type[KeyboardFocused]
+    LostFocus: type[KeyboardLostFocus]
 
     Key: type[PressableKeyboardKey]
 
@@ -1187,13 +1199,59 @@ class Keyboard(Peripheral):
         ):
             pass
         self.Disconnected = Disconnected
+        class Focused(KeyboardFocused, Event): # type: ignore
+            pass
+        self.Focused = Focused
+        class LostFocus(KeyboardLostFocus, Event): # type: ignore
+            pass
+        self.LostFocus = LostFocus
 
         class Key(PressableKeyboardKey, keyboard=self):
             pass
         self.Key = Key
 
+        self._window: Optional[Window] = None
+
     def __repr__(self) -> str:
         return f'<gamut.peripheral.Keyboard {self._name!r}>'
+
+    @property
+    def window(self) -> Optional[Window]:
+        return self._window
+
+
+def sdl_window_event_focus_gained(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard
+) -> Optional[KeyboardFocused]:
+    try:
+        window = get_window_from_sdl_id(sdl_event.window.windowID)
+    except KeyError:
+        return None
+    assert keyboard._window is None
+    keyboard._window = window
+    return keyboard.Focused(window)
+
+assert SDL_WINDOWEVENT_FOCUS_GAINED not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_FOCUS_GAINED] = (
+    sdl_window_event_focus_gained
+)
+
+
+def sdl_window_event_focus_lost(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard
+) -> KeyboardLostFocus:
+    assert keyboard._window is not None
+    keyboard._window = None
+    return keyboard.LostFocus()
+
+assert SDL_WINDOWEVENT_FOCUS_LOST not in sdl_window_event_callback_map
+sdl_window_event_callback_map[SDL_WINDOWEVENT_FOCUS_LOST] = (
+    sdl_window_event_focus_lost
+)
 
 
 def sdl_key_down_event_callback(
