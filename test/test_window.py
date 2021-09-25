@@ -1,7 +1,7 @@
 
 # gamut
-from gamut import (BoundWindowClose, BoundWindowHidden, BoundWindowMoved,
-                   BoundWindowResized, BoundWindowShown, GamutApplication,
+from gamut import (Application, BoundWindowClose, BoundWindowHidden,
+                   BoundWindowMoved, BoundWindowResized, BoundWindowShown,
                    Window)
 # python
 import ctypes
@@ -171,14 +171,14 @@ def test_poll_close_event() -> None:
     window = Window()
     close_event: Optional[BoundWindowClose] = None
 
-    class Application(GamutApplication):
+    class TestApp(Application):
         async def main(self) -> None:
             nonlocal close_event
             send_sdl_window_event(window, SDL_WINDOWEVENT_CLOSE)
             close_event = await window.Close
             window.close()
 
-    app = Application()
+    app = TestApp()
     app.run()
 
     assert close_event is not None
@@ -190,7 +190,7 @@ def test_poll_hidden_event() -> None:
     window = Window()
     hidden_event: Optional[BoundWindowHidden] = None
 
-    class Application(GamutApplication):
+    class TestApp(Application):
         async def main(self) -> None:
             nonlocal hidden_event
             window.is_visible = True
@@ -198,7 +198,7 @@ def test_poll_hidden_event() -> None:
             hidden_event = await window.Hidden
             window.close()
 
-    app = Application()
+    app = TestApp()
     app.run()
 
     assert hidden_event is not None
@@ -210,14 +210,14 @@ def test_poll_moved_event() -> None:
     window = Window()
     moved_event: Optional[BoundWindowMoved] = None
 
-    class Application(GamutApplication):
+    class TestApp(Application):
         async def main(self) -> None:
             nonlocal moved_event
             send_sdl_window_event(window, SDL_WINDOWEVENT_MOVED, 99, 49)
             moved_event = await window.Moved
             window.close()
 
-    app = Application()
+    app = TestApp()
     app.run()
 
     assert moved_event is not None
@@ -232,14 +232,14 @@ def test_poll_resized_event() -> None:
     window = Window()
     resized_event: Optional[BoundWindowResized] = None
 
-    class Application(GamutApplication):
+    class TestApp(Application):
         async def main(self) -> None:
             nonlocal resized_event
             window.resize(234, 156)
             resized_event = await window.Resized
             window.close()
 
-    app = Application()
+    app = TestApp()
     app.run()
 
     assert resized_event is not None
@@ -254,14 +254,14 @@ def test_poll_shown_event() -> None:
     window = Window()
     shown_event: Optional[BoundWindowShown] = None
 
-    class Application(GamutApplication):
+    class TestApp(Application):
         async def main(self) -> None:
             nonlocal shown_event
             window.is_visible = True
             shown_event = await window.Shown
             window.close()
 
-    app = Application()
+    app = TestApp()
     app.run()
 
     assert shown_event is not None

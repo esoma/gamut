@@ -2,7 +2,7 @@
 # gamut
 from .event.test_event_loop import TestEventLoop
 # gamut
-from gamut import GamutApplication, GamutApplicationEnd, GamutApplicationStart
+from gamut import Application, ApplicationEnd, ApplicationStart
 from gamut.event import Bind, Event
 from gamut.peripheral import (KeyboardConnected, KeyboardDisconnected,
                               MouseConnected, MouseDisconnected)
@@ -12,32 +12,32 @@ from typing import Any, ContextManager, Optional
 import pytest
 
 
-class NonBlockingGamutApplication(GamutApplication):
+class NonBlockingApplication(Application):
 
     async def poll(self, block: bool = False) -> Optional[Event]:
         return await super().poll(block=block)
 
 
-class TestGamutApplication(TestEventLoop):
+class TestApplication(TestEventLoop):
 
     @pytest.fixture
-    def cls(self) -> type[NonBlockingGamutApplication]:
-        return NonBlockingGamutApplication
+    def cls(self) -> type[NonBlockingApplication]:
+        return NonBlockingApplication
 
     @pytest.fixture
-    def start_event_cls(self) -> type[GamutApplicationStart]:
-        return GamutApplicationStart
+    def start_event_cls(self) -> type[ApplicationStart]:
+        return ApplicationStart
 
     @pytest.fixture
-    def end_event_cls(self) -> type[GamutApplicationEnd]:
-        return GamutApplicationEnd
+    def end_event_cls(self) -> type[ApplicationEnd]:
+        return ApplicationEnd
 
 
 def test_mouse() -> None:
     connected_event: Optional[MouseConnected] = None
     disconnected_event: Optional[MouseDisconnected] = None
 
-    class App(GamutApplication):
+    class App(Application):
 
         async def main(self) -> None:
             assert self.mouse.is_connected
@@ -88,7 +88,7 @@ def test_keyboard() -> None:
     connected_event: Optional[KeyboardConnected] = None
     disconnected_event: Optional[KeyboardDisconnected] = None
 
-    class App(GamutApplication):
+    class App(Application):
 
         async def main(self) -> None:
             assert self.keyboard.is_connected

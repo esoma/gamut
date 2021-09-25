@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 __all__ = [
-    'GamutApplication',
-    'GamutApplicationEnd',
-    'GamutApplicationStart',
-    'GamutApplicationEvent',
+    'Application',
+    'ApplicationEnd',
+    'ApplicationStart',
+    'ApplicationEvent',
 ]
 
 # gamut
@@ -24,44 +24,44 @@ from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
 R = TypeVar('R')
 
 
-class GamutApplicationEvent(EventLoopEvent, event_loop=...):
-    event_loop: GamutApplication[Any]
+class ApplicationEvent(EventLoopEvent, event_loop=...):
+    event_loop: Application[Any]
 
     @property
-    def application(self) -> GamutApplication[Any]:
+    def application(self) -> Application[Any]:
         return self.event_loop
 
 
-class GamutApplicationStart(GamutApplicationEvent, EventLoopStart,
+class ApplicationStart(ApplicationEvent, EventLoopStart,
                             event_loop=...):
     pass
 
 
-class GamutApplicationEnd(GamutApplicationEvent, EventLoopEnd,
+class ApplicationEnd(ApplicationEvent, EventLoopEnd,
                           event_loop=...):
     pass
 
 
-class GamutApplication(EventLoop[R]):
+class Application(EventLoop[R]):
 
-    Event: type[GamutApplicationEvent]
-    Start: type[GamutApplicationStart]
-    End: type[GamutApplicationEnd]
+    Event: type[ApplicationEvent]
+    Start: type[ApplicationStart]
+    End: type[ApplicationEnd]
 
     def __init__(self) -> None:
         super().__init__()
-        class Event(GamutApplicationEvent, self.Event): # type: ignore
+        class Event(ApplicationEvent, self.Event): # type: ignore
             pass
         self.Event = Event
         class Start( # type: ignore
-            GamutApplicationStart,
+            ApplicationStart,
             Event,
             self.Start, # type: ignore
         ):
             pass
         self.Start = Start
         class End( # type: ignore
-            GamutApplicationEnd,
+            ApplicationEnd,
             Event,
             self.End # type: ignore
         ):
@@ -72,7 +72,7 @@ class GamutApplication(EventLoop[R]):
         self._keyboard = Keyboard('primary')
 
     def run_context(self) -> ContextManager:
-        return GamutApplicationRunContext((
+        return ApplicationRunContext((
             Bind.on(self.Start, self._connect_peripherals),
             Bind.on(self.End, self._disconnect_peripherals),
         ))
@@ -105,19 +105,19 @@ class GamutApplication(EventLoop[R]):
             return None
         return callback(event, self._mouse, self._keyboard)
 
-    async def _connect_peripherals(self, event: GamutApplicationStart) -> None:
+    async def _connect_peripherals(self, event: ApplicationStart) -> None:
         self._mouse.connect().send()
         self._keyboard.connect().send()
 
     async def _disconnect_peripherals(
         self,
-        event: GamutApplicationStart
+        event: ApplicationStart
     ) -> None:
         self._keyboard.disconnect().send()
         self._mouse.disconnect().send()
 
 
-class GamutApplicationRunContext:
+class ApplicationRunContext:
 
     def __init__(self, binds: tuple[Bind, ...]) -> None:
         self._binds = binds

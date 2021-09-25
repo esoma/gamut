@@ -1,14 +1,14 @@
 
 __all__ = [
+    'Application',
+    'ApplicationEnd',
+    'ApplicationEvent',
+    'ApplicationStart',
     'BoundWindowClose',
     'BoundWindowHidden',
     'BoundWindowMoved',
     'BoundWindowResized',
     'BoundWindowShown',
-    'GamutApplication',
-    'GamutApplicationEnd',
-    'GamutApplicationEvent',
-    'GamutApplicationStart',
     'Window',
 ]
 
@@ -18,7 +18,7 @@ import warnings
 warnings.filterwarnings('ignore', 'Using SDL2 binaries from ')
 
 # gamut
-from ._application import (GamutApplication, GamutApplicationEnd,
-                           GamutApplicationEvent, GamutApplicationStart)
+from ._application import (Application, ApplicationEnd, ApplicationEvent,
+                           ApplicationStart)
 from ._window import (BoundWindowClose, BoundWindowHidden, BoundWindowMoved,
                       BoundWindowResized, BoundWindowShown, Window)
