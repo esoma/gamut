@@ -18,7 +18,8 @@ from gamut.peripheral import Keyboard, Mouse
 from ctypes import byref as c_byref
 from typing import Any, ContextManager, Optional, TypeVar
 # pysdl2
-from sdl2 import SDL_Event, SDL_GetError, SDL_PollEvent, SDL_WaitEvent
+from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
+                  SDL_PollEvent, SDL_QuitSubSystem, SDL_WaitEvent)
 
 R = TypeVar('R')
 
@@ -118,9 +119,12 @@ class GamutApplicationRunContext:
         self._binds = binds
 
     def __enter__(self) -> None:
+        if SDL_Init(SDL_INIT_EVENTS) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
         for bind in self._binds:
             bind.__enter__()
 
     def __exit__(self, *args: Any) -> None:
         for bind in self._binds:
             bind.__exit__(*args)
+        SDL_QuitSubSystem(SDL_INIT_EVENTS)
