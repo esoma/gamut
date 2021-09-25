@@ -1,32 +1,31 @@
 
-__all__ = ['TestApplication']
+__all__ = ['TestEventLoop']
 
 # gamut
-from gamut.event import (Application, ApplicationEnd, ApplicationStart, Bind,
-                         Event)
+from gamut.event import Bind, Event, EventLoop, EventLoopEnd, EventLoopStart
 # python
 from typing import Optional
 # pytest
 import pytest
 
 
-class TestApplication:
+class TestEventLoop:
 
     @pytest.fixture
-    def cls(self) -> type[Application]:
-        return Application
+    def cls(self) -> type[EventLoop]:
+        return EventLoop
 
     @pytest.fixture
-    def start_event_cls(self) -> type[ApplicationStart]:
-        return ApplicationStart
+    def start_event_cls(self) -> type[EventLoopStart]:
+        return EventLoopStart
 
     @pytest.fixture
-    def end_event_cls(self) -> type[ApplicationEnd]:
-        return ApplicationEnd
+    def end_event_cls(self) -> type[EventLoopEnd]:
+        return EventLoopEnd
 
-    def test_instantiate_base_application(
+    def test_instantiate_base_event_loop(
         self,
-        cls: type[Application]
+        cls: type[EventLoop]
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             cls()
@@ -35,12 +34,12 @@ class TestApplication:
             f'method main'
         )
 
-    def test_base_main_call(self, cls: type[Application]) -> None:
-        class TestApplication(cls): # type: ignore
+    def test_base_main_call(self, cls: type[EventLoop]) -> None:
+        class TestEventLoop(cls): # type: ignore
             async def main(self) -> None:
                 await super().main()
 
-        app = TestApplication()
+        app = TestEventLoop()
         with pytest.raises(NotImplementedError) as excinfo:
             app.run()
 
@@ -48,14 +47,14 @@ class TestApplication:
     @pytest.mark.parametrize("return_value", [0, 1, 100])
     def test_return_value(
         self,
-        cls: type[Application],
+        cls: type[EventLoop],
         return_value: int
     ) -> None:
-        class TestApplication(cls): # type: ignore
+        class TestEventLoop(cls): # type: ignore
             async def main(self) -> int:
                 return return_value
 
-        app = TestApplication()
+        app = TestEventLoop()
         assert app.run() == return_value
         assert app.run() == return_value
 
@@ -67,24 +66,24 @@ class TestApplication:
     ])
     def test_error_in_main(
         self,
-        cls: type[Application],
+        cls: type[EventLoop],
         exception: BaseException
     ) -> None:
-        class TestApplication(cls): # type: ignore
+        class TestEventLoop(cls): # type: ignore
             async def main(self) -> None:
                 raise exception
 
-        app = TestApplication()
+        app = TestEventLoop()
         with pytest.raises(BaseException) as excinfo:
             app.run()
         assert excinfo.value is exception
 
 
-    def test_await_event(self, cls: type[Application]) -> None:
+    def test_await_event(self, cls: type[EventLoop]) -> None:
         class TestEvent(Event):
             text: str
 
-        class TestApplication(cls): # type: ignore
+        class TestEventLoop(cls): # type: ignore
             async def main(self) -> str:
                 event = await TestEvent
                 return event.text
@@ -92,27 +91,27 @@ class TestApplication:
             async def poll(self) -> Optional[Event]:
                 return TestEvent("test")
 
-        app = TestApplication()
+        app = TestEventLoop()
         assert app.run() == "test"
 
 
     def test_start_end(
         self,
-        cls: type[Application],
-        start_event_cls: type[ApplicationStart],
-        end_event_cls: type[ApplicationEnd],
+        cls: type[EventLoop],
+        start_event_cls: type[EventLoopStart],
+        end_event_cls: type[EventLoopEnd],
     ) -> None:
         order: list[int] = []
 
-        async def start(event: ApplicationStart) -> None:
+        async def start(event: EventLoopStart) -> None:
             assert isinstance(event, start_event_cls)
             order.append(1)
 
-        class TestApplication(cls): # type: ignore
+        class TestEventLoop(cls): # type: ignore
             async def main(self) -> None:
                 order.append(2)
 
-        async def end(event: ApplicationEnd) -> None:
+        async def end(event: EventLoopEnd) -> None:
             assert isinstance(event, end_event_cls)
             order.append(3)
 
@@ -120,6 +119,6 @@ class TestApplication:
             Bind.on(start_event_cls, start),
             Bind.on(end_event_cls, end)
         ):
-            TestApplication().run()
+            TestEventLoop().run()
 
         assert order == [1, 2, 3]

@@ -2,7 +2,7 @@
 # gamut
 from .test_peripheral import TestPeripheral
 # gamut
-from gamut import GamutApplication
+from gamut import Application
 from gamut.peripheral import (Keyboard, KeyboardConnected,
                               KeyboardDisconnected, KeyboardKey,
                               KeyboardKeyPressed, KeyboardKeyReleased,
@@ -343,7 +343,7 @@ def test_poll_key_down_event(sdl_scancode: int, key_name: str) -> None:
     pressed_event: Optional[KeyboardKeyPressed] = None
     key: Optional[PressableKeyboardKey] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal key
             nonlocal pressed_event
@@ -370,7 +370,7 @@ def test_poll_key_up_event(sdl_scancode: int, key_name: str) -> None:
     released_event: Optional[KeyboardKeyReleased] = None
     key: Optional[PressableKeyboardKey] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal key
             nonlocal released_event

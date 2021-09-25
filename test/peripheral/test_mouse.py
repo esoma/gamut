@@ -2,7 +2,7 @@
 # gamut
 from .test_peripheral import TestPeripheral
 # gamut
-from gamut import GamutApplication, Window
+from gamut import Application, Window
 from gamut.peripheral import (Mouse, MouseButton, MouseButtonPressed,
                               MouseButtonReleased, MouseConnected,
                               MouseDisconnected, MouseMoved,
@@ -124,7 +124,7 @@ def test_poll_motion_event(x: int, y: int) -> None:
     window = Window()
     moved_event: Optional[MouseMoved] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal moved_event
             send_sdl_mouse_motion_event(window, x, y)
@@ -143,7 +143,7 @@ def test_poll_window_leave_event() -> None:
     window = Window()
     moved_event: Optional[MouseMoved] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal moved_event
             send_sdl_mouse_motion_event(window, 1, 1)
@@ -181,7 +181,7 @@ def test_poll_scroll_event(
         MouseScrolledVertically
     ]] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal scrolled_event
             send_sdl_mouse_wheel_event(window, x=x, y=y, flipped=flipped)
@@ -212,7 +212,7 @@ def test_poll_button_down_event(sdl_button: int, button_name: str) -> None:
     pressed_event: Optional[MouseButtonPressed] = None
     button: Optional[PressableMouseButton] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal button
             nonlocal pressed_event
@@ -243,7 +243,7 @@ def test_poll_button_up_event(sdl_button: int, button_name: str) -> None:
     released_event: Optional[MouseButtonReleased] = None
     button: Optional[PressableMouseButton] = None
 
-    class TestApplication(GamutApplication):
+    class TestApplication(Application):
         async def main(self) -> None:
             nonlocal button
             nonlocal released_event

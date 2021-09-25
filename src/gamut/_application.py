@@ -2,17 +2,17 @@
 from __future__ import annotations
 
 __all__ = [
-    'GamutApplication',
-    'GamutApplicationEnd',
-    'GamutApplicationStart',
-    'GamutApplicationEvent',
+    'Application',
+    'ApplicationEnd',
+    'ApplicationStart',
+    'ApplicationEvent',
 ]
 
 # gamut
 from gamut._sdl import sdl_event_callback_map
-from gamut.event import (Application, ApplicationEnd, ApplicationEvent,
-                         ApplicationStart, Bind)
+from gamut.event import Bind
 from gamut.event import Event as BaseEvent
+from gamut.event import EventLoop, EventLoopEnd, EventLoopEvent, EventLoopStart
 from gamut.peripheral import Keyboard, Mouse
 # python
 from ctypes import byref as c_byref
@@ -24,40 +24,44 @@ from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
 R = TypeVar('R')
 
 
-class GamutApplicationEvent(ApplicationEvent, application=...):
-    application: GamutApplication[Any]
+class ApplicationEvent(EventLoopEvent, event_loop=...):
+    event_loop: Application[Any]
+
+    @property
+    def application(self) -> Application[Any]:
+        return self.event_loop
 
 
-class GamutApplicationStart(GamutApplicationEvent, ApplicationStart,
-                            application=...):
+class ApplicationStart(ApplicationEvent, EventLoopStart,
+                            event_loop=...):
     pass
 
 
-class GamutApplicationEnd(GamutApplicationEvent, ApplicationEnd,
-                          application=...):
+class ApplicationEnd(ApplicationEvent, EventLoopEnd,
+                          event_loop=...):
     pass
 
 
-class GamutApplication(Application[R]):
+class Application(EventLoop[R]):
 
-    Event: type[GamutApplicationEvent]
-    Start: type[GamutApplicationStart]
-    End: type[GamutApplicationEnd]
+    Event: type[ApplicationEvent]
+    Start: type[ApplicationStart]
+    End: type[ApplicationEnd]
 
     def __init__(self) -> None:
         super().__init__()
-        class Event(GamutApplicationEvent, self.Event): # type: ignore
+        class Event(ApplicationEvent, self.Event): # type: ignore
             pass
         self.Event = Event
         class Start( # type: ignore
-            GamutApplicationStart,
+            ApplicationStart,
             Event,
             self.Start, # type: ignore
         ):
             pass
         self.Start = Start
         class End( # type: ignore
-            GamutApplicationEnd,
+            ApplicationEnd,
             Event,
             self.End # type: ignore
         ):
@@ -68,7 +72,7 @@ class GamutApplication(Application[R]):
         self._keyboard = Keyboard('primary')
 
     def run_context(self) -> ContextManager:
-        return GamutApplicationRunContext((
+        return ApplicationRunContext((
             Bind.on(self.Start, self._connect_peripherals),
             Bind.on(self.End, self._disconnect_peripherals),
         ))
@@ -101,19 +105,19 @@ class GamutApplication(Application[R]):
             return None
         return callback(event, self._mouse, self._keyboard)
 
-    async def _connect_peripherals(self, event: GamutApplicationStart) -> None:
+    async def _connect_peripherals(self, event: ApplicationStart) -> None:
         self._mouse.connect().send()
         self._keyboard.connect().send()
 
     async def _disconnect_peripherals(
         self,
-        event: GamutApplicationStart
+        event: ApplicationStart
     ) -> None:
         self._keyboard.disconnect().send()
         self._mouse.disconnect().send()
 
 
-class GamutApplicationRunContext:
+class ApplicationRunContext:
 
     def __init__(self, binds: tuple[Bind, ...]) -> None:
         self._binds = binds

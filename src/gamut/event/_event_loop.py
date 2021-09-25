@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 __all__ = [
-    'Application',
-    'ApplicationEnd',
-    'ApplicationEvent',
-    'ApplicationStart',
+    'EventLoop',
+    'EventLoopEnd',
+    'EventLoopEvent',
+    'EventLoopStart',
 ]
 
 # gamut
@@ -20,33 +20,33 @@ from typing import Any, ContextManager, Generic, Optional, TypeVar
 R = TypeVar('R')
 
 
-class ApplicationEvent(BaseEvent, application=...):
-    application: Application[Any]
+class EventLoopEvent(BaseEvent, event_loop=...):
+    event_loop: EventLoop[Any]
 
 
-class ApplicationStart(ApplicationEvent, application=...):
+class EventLoopStart(EventLoopEvent, event_loop=...):
     pass
 
 
-class ApplicationEnd(ApplicationEvent, application=...):
+class EventLoopEnd(EventLoopEvent, event_loop=...):
     pass
 
 
-class Application(ABC, Generic[R]):
+class EventLoop(ABC, Generic[R]):
 
-    Event: type[ApplicationEvent]
-    Start: type[ApplicationStart]
-    End: type[ApplicationEnd]
+    Event: type[EventLoopEvent]
+    Start: type[EventLoopStart]
+    End: type[EventLoopEnd]
 
     def __init__(self) -> None:
         super().__init__()
-        class Event(ApplicationEvent, application=self):
+        class Event(EventLoopEvent, event_loop=self):
             pass
         self.Event = Event
-        class Start(Event, ApplicationStart):
+        class Start(Event, EventLoopStart):
             pass
         self.Start = Start
-        class End(Event, ApplicationEnd):
+        class End(Event, EventLoopEnd):
             pass
         self.End = End
         class _OutOfEvents(Event):
