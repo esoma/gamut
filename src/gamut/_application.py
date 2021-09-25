@@ -10,9 +10,9 @@ __all__ = [
 
 # gamut
 from gamut._sdl import sdl_event_callback_map
-from gamut.event import (Application, ApplicationEnd, ApplicationEvent,
-                         ApplicationStart, Bind)
+from gamut.event import Bind
 from gamut.event import Event as BaseEvent
+from gamut.event import EventLoop, EventLoopEnd, EventLoopEvent, EventLoopStart
 from gamut.peripheral import Keyboard, Mouse
 # python
 from ctypes import byref as c_byref
@@ -24,21 +24,25 @@ from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
 R = TypeVar('R')
 
 
-class GamutApplicationEvent(ApplicationEvent, application=...):
-    application: GamutApplication[Any]
+class GamutApplicationEvent(EventLoopEvent, event_loop=...):
+    event_loop: GamutApplication[Any]
+
+    @property
+    def application(self) -> GamutApplication[Any]:
+        return self.event_loop
 
 
-class GamutApplicationStart(GamutApplicationEvent, ApplicationStart,
-                            application=...):
+class GamutApplicationStart(GamutApplicationEvent, EventLoopStart,
+                            event_loop=...):
     pass
 
 
-class GamutApplicationEnd(GamutApplicationEvent, ApplicationEnd,
-                          application=...):
+class GamutApplicationEnd(GamutApplicationEvent, EventLoopEnd,
+                          event_loop=...):
     pass
 
 
-class GamutApplication(Application[R]):
+class GamutApplication(EventLoop[R]):
 
     Event: type[GamutApplicationEvent]
     Start: type[GamutApplicationStart]

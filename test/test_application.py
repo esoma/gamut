@@ -1,6 +1,6 @@
 
 # gamut
-from .event.test_application import TestApplication
+from .event.test_event_loop import TestEventLoop
 # gamut
 from gamut import GamutApplication, GamutApplicationEnd, GamutApplicationStart
 from gamut.event import Bind, Event
@@ -18,7 +18,7 @@ class NonBlockingGamutApplication(GamutApplication):
         return await super().poll(block=block)
 
 
-class TestGamutApplication(TestApplication):
+class TestGamutApplication(TestEventLoop):
 
     @pytest.fixture
     def cls(self) -> type[NonBlockingGamutApplication]:

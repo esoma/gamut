@@ -1,18 +1,18 @@
 
 __all__ = [
-    'Application',
-    'ApplicationEnd',
-    'ApplicationEvent',
-    'ApplicationStart',
     'Bind',
     'BindClosed',
     'BindKind',
     'Event',
+    'EventLoop',
+    'EventLoopEnd',
+    'EventLoopEvent',
+    'EventLoopStart',
     'OrEvents',
 ]
 
 # gamut
-from ._application import (Application, ApplicationEnd, ApplicationEvent,
-                           ApplicationStart)
 from ._bind import Bind, BindClosed, BindKind
 from ._event import Event, OrEvents
+from ._event_loop import (EventLoop, EventLoopEnd, EventLoopEvent,
+                          EventLoopStart)

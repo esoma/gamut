@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.event import Application, Event
+from gamut.event import Event, EventLoop
 from gamut.peripheral import (Peripheral, PeripheralConnected,
                               PeripheralDisconnected)
 # python
@@ -37,7 +37,7 @@ class TestPeripheral:
         event: Optional[PeripheralConnected] = None
         peripheral = cls('test')
 
-        class App(Application):
+        class App(EventLoop):
             def __init__(self) -> None:
                 super().__init__()
                 self.peripheral_connect_sent = False
@@ -68,7 +68,7 @@ class TestPeripheral:
         event: Optional[PeripheralDisconnected] = None
         peripheral = cls('test')
 
-        class App(Application):
+        class App(EventLoop):
             def __init__(self) -> None:
                 super().__init__()
                 self.peripheral_disconnect_sent = False
