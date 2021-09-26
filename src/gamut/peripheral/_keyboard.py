@@ -10,6 +10,8 @@ __all__ = [
     'KeyboardConnected',
     'KeyboardDisconnected',
     'KeyboardEvent',
+    'KeyboardLostFocus',
+    'KeyboardFocused',
     'PressableKeyboardKey',
 ]
 
