@@ -2,10 +2,11 @@
 # gamut
 from .test_peripheral import TestPeripheral
 # gamut
-from gamut import Application
+from gamut import Application, Window
 from gamut.peripheral import (Keyboard, KeyboardConnected,
-                              KeyboardDisconnected, KeyboardKey,
-                              KeyboardKeyPressed, KeyboardKeyReleased,
+                              KeyboardDisconnected, KeyboardFocused,
+                              KeyboardKey, KeyboardKeyPressed,
+                              KeyboardKeyReleased, KeyboardLostFocus,
                               PressableKeyboardKey)
 # python
 import ctypes
@@ -13,7 +14,9 @@ from typing import Final, Optional
 # pysdl2
 # sdl2
 import sdl2
-from sdl2 import SDL_Event, SDL_KEYDOWN, SDL_KEYUP, SDL_PushEvent
+from sdl2 import (SDL_Event, SDL_GetWindowID, SDL_KEYDOWN, SDL_KEYUP,
+                  SDL_PushEvent, SDL_WINDOWEVENT, SDL_WINDOWEVENT_FOCUS_GAINED,
+                  SDL_WINDOWEVENT_FOCUS_LOST)
 # pytest
 import pytest
 
@@ -23,6 +26,21 @@ def send_sdl_keyboard_key_event(sdl_scancode: int, pressed: bool) -> None:
     sdl_event.type = SDL_KEYDOWN if pressed else SDL_KEYUP
     sdl_event.key.keysym.scancode = sdl_scancode
     sdl_event.key.repeat = 0
+    SDL_PushEvent(ctypes.byref(sdl_event))
+
+
+def send_sdl_window_focus_gained_event(window: Window) -> None:
+    sdl_event = SDL_Event()
+    sdl_event.type = SDL_WINDOWEVENT
+    sdl_event.window.event = SDL_WINDOWEVENT_FOCUS_GAINED
+    sdl_event.window.windowID = SDL_GetWindowID(window._sdl)
+    SDL_PushEvent(ctypes.byref(sdl_event))
+
+
+def send_sdl_window_focus_lost_event() -> None:
+    sdl_event = SDL_Event()
+    sdl_event.type = SDL_WINDOWEVENT
+    sdl_event.window.event = SDL_WINDOWEVENT_FOCUS_LOST
     SDL_PushEvent(ctypes.byref(sdl_event))
 
 
@@ -304,6 +322,7 @@ class TestKeyboard(TestPeripheral):
 
 def test_defaults() -> None:
     keyboard = Keyboard('test')
+    assert keyboard.window is None
     for key_name in sdl_scancode_to_gamut_key_name.values():
         key = getattr(keyboard.Key, key_name)
         assert isinstance(key, PressableKeyboardKey)
@@ -333,6 +352,43 @@ def test_instance_key_repr_and_name(name: str) -> None:
         f'<gamut.peripheral.KeyboardKey {name!r} for {keyboard!r}>'
     )
     assert key.name == name
+
+
+def test_poll_window_focus_gained_event() -> None:
+    window = Window()
+    focused_event: Optional[KeyboardFocused] = None
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal focused_event
+            assert self.keyboard.window is None
+            send_sdl_window_focus_gained_event(window)
+            focused_event = await self.keyboard.Focused
+            assert self.keyboard.window is window
+
+    app = TestApplication()
+    app.run()
+    assert isinstance(focused_event, KeyboardFocused)
+    assert focused_event.window is window
+
+
+def test_poll_window_focus_lost_event() -> None:
+    window = Window()
+    lost_focus_event: Optional[KeyboardLostFocus] = None
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal lost_focus_event
+            assert self.keyboard.window is None
+            send_sdl_window_focus_gained_event(window)
+            await self.keyboard.Focused
+            send_sdl_window_focus_lost_event()
+            lost_focus_event = await self.keyboard.LostFocus
+            assert self.keyboard.window is None
+
+    app = TestApplication()
+    app.run()
+    assert isinstance(lost_focus_event, KeyboardLostFocus)
 
 
 @pytest.mark.parametrize(

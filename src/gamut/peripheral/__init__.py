@@ -10,6 +10,8 @@ __all__ = [
     'KeyboardConnected',
     'KeyboardDisconnected',
     'KeyboardEvent',
+    'KeyboardLostFocus',
+    'KeyboardFocused',
     'Mouse',
     'MouseButton',
     'MouseButtonEvent',
@@ -31,8 +33,9 @@ __all__ = [
 
 # gamut
 from ._keyboard import (Keyboard, KeyboardConnected, KeyboardDisconnected,
-                        KeyboardEvent, KeyboardKey, KeyboardKeyEvent,
-                        KeyboardKeyPressed, KeyboardKeyReleased,
+                        KeyboardEvent, KeyboardFocused, KeyboardKey,
+                        KeyboardKeyEvent, KeyboardKeyPressed,
+                        KeyboardKeyReleased, KeyboardLostFocus,
                         PressableKeyboardKey)
 from ._mouse import (Mouse, MouseButton, MouseButtonEvent, MouseButtonPressed,
                      MouseButtonReleased, MouseConnected, MouseDisconnected,
