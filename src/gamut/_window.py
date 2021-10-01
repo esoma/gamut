@@ -2,11 +2,6 @@
 from __future__ import annotations
 
 __all__ = [
-    'BoundWindowClose',
-    'BoundWindowHidden',
-    'BoundWindowMoved',
-    'BoundWindowResized',
-    'BoundWindowShown',
     'get_window_from_sdl_id',
     'Window',
     'WindowClose',
@@ -45,51 +40,27 @@ if TYPE_CHECKING:
     from gamut.peripheral import Keyboard, Mouse
 
 
-class WindowEvent(_Event):
+class WindowEvent(_Event, window=...):
     window: Window
 
 
-class WindowClose(WindowEvent):
+class WindowClose(WindowEvent, window=...):
     pass
 
 
-class WindowHidden(WindowEvent):
+class WindowHidden(WindowEvent, window=...):
     pass
 
 
-class WindowMoved(WindowEvent):
+class WindowMoved(WindowEvent, window=...):
     position: tuple[int, int]
 
 
-class WindowResized(WindowEvent):
+class WindowResized(WindowEvent, window=...):
     size: tuple[int, int]
 
 
-class WindowShown(WindowEvent):
-    pass
-
-
-class BoundWindowEvent(WindowEvent, window=...):
-    pass
-
-
-class BoundWindowClose(BoundWindowEvent, WindowClose, window=...):
-    pass
-
-
-class BoundWindowHidden(BoundWindowEvent, WindowHidden, window=...):
-    pass
-
-
-class BoundWindowMoved(BoundWindowEvent, WindowMoved, window=...):
-    pass
-
-
-class BoundWindowResized(BoundWindowEvent, WindowResized, window=...):
-    pass
-
-
-class BoundWindowShown(BoundWindowEvent, WindowShown, window=...):
+class WindowShown(WindowEvent, window=...):
     pass
 
 
@@ -97,12 +68,12 @@ class Window:
 
     _id_map: ClassVar[WeakValueDictionary[int, Window]] = WeakValueDictionary()
 
-    Event: type[BoundWindowEvent]
-    Close: type[BoundWindowClose]
-    Hidden: type[BoundWindowHidden]
-    Moved: type[BoundWindowMoved]
-    Resized: type[BoundWindowResized]
-    Shown: type[BoundWindowShown]
+    Event: type[WindowEvent]
+    Close: type[WindowClose]
+    Hidden: type[WindowHidden]
+    Moved: type[WindowMoved]
+    Resized: type[WindowResized]
+    Shown: type[WindowShown]
 
     def __init__(self) -> None:
         self._gl_context: Optional[GlContext] = get_gl_context()
@@ -113,22 +84,22 @@ class Window:
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
         )
 
-        class Event(BoundWindowEvent, window=self):
+        class Event(WindowEvent, window=self):
             pass
         self.Event = Event
-        class Close(BoundWindowClose, Event):
+        class Close(WindowClose, Event):
             pass
         self.Close = Close
-        class Hidden(BoundWindowHidden, Event):
+        class Hidden(WindowHidden, Event):
             pass
         self.Hidden = Hidden
-        class Moved(BoundWindowMoved, Event):
+        class Moved(WindowMoved, Event):
             pass
         self.Moved = Moved
-        class Resized(BoundWindowResized, Event):
+        class Resized(WindowResized, Event):
             pass
         self.Resized = Resized
-        class Shown(BoundWindowShown, Event):
+        class Shown(WindowShown, Event):
             pass
         self.Shown = Shown
 

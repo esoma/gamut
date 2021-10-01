@@ -1,8 +1,7 @@
 
 # gamut
-from gamut import (Application, BoundWindowClose, BoundWindowHidden,
-                   BoundWindowMoved, BoundWindowResized, BoundWindowShown,
-                   Window)
+from gamut import (Application, Window, WindowClose, WindowHidden, WindowMoved,
+                   WindowResized, WindowShown)
 # python
 import ctypes
 from typing import Any, Optional
@@ -169,7 +168,7 @@ def test_set_title(value: Any) -> None:
 
 def test_poll_close_event() -> None:
     window = Window()
-    close_event: Optional[BoundWindowClose] = None
+    close_event: Optional[WindowClose] = None
 
     class TestApp(Application):
         async def main(self) -> None:
@@ -182,13 +181,13 @@ def test_poll_close_event() -> None:
     app.run()
 
     assert close_event is not None
-    assert isinstance(close_event, BoundWindowClose)
+    assert isinstance(close_event, WindowClose)
     assert close_event.window is window
 
 
 def test_poll_hidden_event() -> None:
     window = Window()
-    hidden_event: Optional[BoundWindowHidden] = None
+    hidden_event: Optional[WindowHidden] = None
 
     class TestApp(Application):
         async def main(self) -> None:
@@ -202,13 +201,13 @@ def test_poll_hidden_event() -> None:
     app.run()
 
     assert hidden_event is not None
-    assert isinstance(hidden_event, BoundWindowHidden)
+    assert isinstance(hidden_event, WindowHidden)
     assert hidden_event.window is window
 
 
 def test_poll_moved_event() -> None:
     window = Window()
-    moved_event: Optional[BoundWindowMoved] = None
+    moved_event: Optional[WindowMoved] = None
 
     class TestApp(Application):
         async def main(self) -> None:
@@ -221,7 +220,7 @@ def test_poll_moved_event() -> None:
     app.run()
 
     assert moved_event is not None
-    assert isinstance(moved_event, BoundWindowMoved)
+    assert isinstance(moved_event, WindowMoved)
     assert moved_event.window is window
     assert isinstance(moved_event.position, tuple)
     assert len(moved_event.position) == 2
@@ -230,7 +229,7 @@ def test_poll_moved_event() -> None:
 
 def test_poll_resized_event() -> None:
     window = Window()
-    resized_event: Optional[BoundWindowResized] = None
+    resized_event: Optional[WindowResized] = None
 
     class TestApp(Application):
         async def main(self) -> None:
@@ -243,7 +242,7 @@ def test_poll_resized_event() -> None:
     app.run()
 
     assert resized_event is not None
-    assert isinstance(resized_event, BoundWindowResized)
+    assert isinstance(resized_event, WindowResized)
     assert resized_event.window is window
     assert isinstance(resized_event.size, tuple)
     assert len(resized_event.size) == 2
@@ -252,7 +251,7 @@ def test_poll_resized_event() -> None:
 
 def test_poll_shown_event() -> None:
     window = Window()
-    shown_event: Optional[BoundWindowShown] = None
+    shown_event: Optional[WindowShown] = None
 
     class TestApp(Application):
         async def main(self) -> None:
@@ -265,5 +264,5 @@ def test_poll_shown_event() -> None:
     app.run()
 
     assert shown_event is not None
-    assert isinstance(shown_event, BoundWindowShown)
+    assert isinstance(shown_event, WindowShown)
     assert shown_event.window is window

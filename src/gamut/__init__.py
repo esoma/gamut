@@ -4,11 +4,11 @@ __all__ = [
     'ApplicationEnd',
     'ApplicationEvent',
     'ApplicationStart',
-    'BoundWindowClose',
-    'BoundWindowHidden',
-    'BoundWindowMoved',
-    'BoundWindowResized',
-    'BoundWindowShown',
+    'WindowClose',
+    'WindowHidden',
+    'WindowMoved',
+    'WindowResized',
+    'WindowShown',
     'Window',
 ]
 
@@ -20,5 +20,5 @@ warnings.filterwarnings('ignore', 'Using SDL2 binaries from ')
 # gamut
 from ._application import (Application, ApplicationEnd, ApplicationEvent,
                            ApplicationStart)
-from ._window import (BoundWindowClose, BoundWindowHidden, BoundWindowMoved,
-                      BoundWindowResized, BoundWindowShown, Window)
+from ._window import (Window, WindowClose, WindowHidden, WindowMoved,
+                      WindowResized, WindowShown)
