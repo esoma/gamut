@@ -90,6 +90,16 @@ def test_poll_joy_device_added_event_prior_to_application_start(
                 connected_event = await ControllerConnected
                 assert len(self.controllers) == 1
 
+            async def poll(self, block=False):
+                # python
+                import time
+                start = time.monotonic()
+                while True:
+                    event = await super().poll(block=False)
+                    if event:
+                        return event
+                    assert time.monotonic() - start < 2
+
         app = TestApplication()
         app.run()
 
