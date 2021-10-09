@@ -44,6 +44,11 @@ jobs:
       run: |
         python -m pip install .[test]
 
+    - name: Enable uinput for all users
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        sudo chmod a+rw /dev/uinput
+
     - name: Test
       uses: GabrielBB/xvfb-action@v1
       with:
