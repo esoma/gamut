@@ -25,9 +25,12 @@ class TestPeripheral:
 
     @pytest.mark.parametrize("name", ['', 'test'])
     def test_defaults(self, cls: type[Peripheral], name: str) -> None:
-        peripheral = cls(name)
+        peripheral = self.instantiate(cls, name)
         assert peripheral.is_connected is False
         assert peripheral.name == name
+
+    def instantiate(self, cls: type[Peripheral], name: str) -> Peripheral:
+        return cls(name)
 
     def test_connect(
         self,
@@ -35,7 +38,7 @@ class TestPeripheral:
         connected_event: type[PeripheralConnected]
     ) -> None:
         event: Optional[PeripheralConnected] = None
-        peripheral = cls('test')
+        peripheral = self.instantiate(cls, 'test')
 
         class App(EventLoop):
             def __init__(self) -> None:
@@ -66,7 +69,7 @@ class TestPeripheral:
         disconnected_event: type[PeripheralDisconnected]
     ) -> None:
         event: Optional[PeripheralDisconnected] = None
-        peripheral = cls('test')
+        peripheral = self.instantiate(cls, 'test')
 
         class App(EventLoop):
             def __init__(self) -> None:
@@ -93,14 +96,14 @@ class TestPeripheral:
         assert not peripheral.is_connected
 
     def test_connect_already_connected(self, cls: type[Peripheral]) -> None:
-        peripheral = cls('test')
+        peripheral = self.instantiate(cls, 'test')
         peripheral.connect()
         with pytest.raises(RuntimeError) as excinfo:
             peripheral.connect()
         assert str(excinfo.value) == 'peripheral is already connected'
 
     def test_connect_already_disconnected(self, cls: type[Peripheral]) -> None:
-        peripheral = cls('test')
+        peripheral = self.instantiate(cls, 'test')
         with pytest.raises(RuntimeError) as excinfo:
             peripheral.disconnect()
         assert str(excinfo.value) == 'peripheral is already disconnected'

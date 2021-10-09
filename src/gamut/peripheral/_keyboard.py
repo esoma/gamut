@@ -32,6 +32,7 @@ from sdl2 import (SDL_KEYDOWN, SDL_KEYUP, SDL_SCANCODE_UNKNOWN,
 
 if TYPE_CHECKING:
     # gamut
+    from ._controller import Controller
     from ._mouse import Mouse
 
 
@@ -1225,7 +1226,8 @@ class Keyboard(Peripheral):
 def sdl_window_event_focus_gained(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[KeyboardFocused]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
@@ -1244,7 +1246,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_FOCUS_GAINED] = (
 def sdl_window_event_focus_lost(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> KeyboardLostFocus:
     assert keyboard._window is not None
     keyboard._window = None
@@ -1259,7 +1262,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_FOCUS_LOST] = (
 def sdl_key_down_event_callback(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[KeyboardKeyPressed]:
     if sdl_event.key.repeat != 0:
         return None
@@ -1282,7 +1286,8 @@ sdl_event_callback_map[SDL_KEYDOWN] = sdl_key_down_event_callback
 def sdl_key_up_event_callback(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[KeyboardKeyReleased]:
     assert sdl_event.key.repeat == 0
     sdl_scancode = sdl_event.key.keysym.scancode

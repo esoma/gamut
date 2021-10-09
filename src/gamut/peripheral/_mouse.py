@@ -34,6 +34,7 @@ from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
 
 if TYPE_CHECKING:
     # gamut
+    from ._controller import Controller
     from ._keyboard import Keyboard
 
 sdl_button_to_gamut_button_name: dict[int, str] = {
@@ -261,7 +262,8 @@ class Mouse(Peripheral):
 def sdl_window_event_leave(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> MouseMoved:
     assert mouse._window is not None
     assert mouse._position is not None
@@ -276,7 +278,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_LEAVE] = sdl_window_event_leave
 def sdl_mouse_motion_event_callback(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[MouseMoved]:
     if sdl_event.motion.which == SDL_TOUCH_MOUSEID:
         return None
@@ -295,7 +298,8 @@ sdl_event_callback_map[SDL_MOUSEMOTION] = sdl_mouse_motion_event_callback
 def sdl_mouse_button_down_event_callback(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[MouseButtonPressed]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
@@ -316,7 +320,8 @@ sdl_event_callback_map[SDL_MOUSEBUTTONDOWN] = (
 def sdl_mouse_button_up_event_callback(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[MouseButtonReleased]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
@@ -337,7 +342,8 @@ sdl_event_callback_map[SDL_MOUSEBUTTONUP] = (
 def sdl_mouse_wheel_event(
     sdl_event: Any,
     mouse: Mouse,
-    keyboard: Keyboard
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
 ) -> Optional[Union[MouseScrolledVertically, MouseScrolledHorizontally]]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None

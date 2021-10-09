@@ -13,13 +13,14 @@ from gamut._sdl import sdl_event_callback_map
 from gamut.event import Bind
 from gamut.event import Event as BaseEvent
 from gamut.event import EventLoop, EventLoopEnd, EventLoopEvent, EventLoopStart
-from gamut.peripheral import Keyboard, Mouse
+from gamut.peripheral import Controller, Keyboard, Mouse
 # python
 from ctypes import byref as c_byref
-from typing import Any, ContextManager, Optional, TypeVar
+from typing import Any, ContextManager, Optional, Sequence, TypeVar
 # pysdl2
 from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
-                  SDL_PollEvent, SDL_QuitSubSystem, SDL_WaitEvent)
+                  SDL_INIT_JOYSTICK, SDL_PollEvent, SDL_QuitSubSystem,
+                  SDL_WaitEvent)
 
 R = TypeVar('R')
 
@@ -70,6 +71,7 @@ class Application(EventLoop[R]):
 
         self._mouse = Mouse('primary')
         self._keyboard = Keyboard('primary')
+        self._controllers: dict[Any, Controller] = {}
 
     def run_context(self) -> ContextManager:
         return ApplicationRunContext((
@@ -82,6 +84,10 @@ class Application(EventLoop[R]):
         if event:
             return event
         return self._poll_sdl(block=block)
+
+    @property
+    def controllers(self) -> Sequence[Controller]:
+        return tuple(self._controllers.values())
 
     @property
     def mouse(self) -> Mouse:
@@ -103,7 +109,7 @@ class Application(EventLoop[R]):
             callback = sdl_event_callback_map[event.type]
         except KeyError:
             return None
-        return callback(event, self._mouse, self._keyboard)
+        return callback(event, self._mouse, self._keyboard, self._controllers)
 
     async def _connect_peripherals(self, event: ApplicationStart) -> None:
         self._mouse.connect().send()
@@ -123,7 +129,7 @@ class ApplicationRunContext:
         self._binds = binds
 
     def __enter__(self) -> None:
-        if SDL_Init(SDL_INIT_EVENTS) != 0:
+        if SDL_Init(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK) != 0:
             raise RuntimeError(SDL_GetError().decode('utf8'))
         for bind in self._binds:
             bind.__enter__()
@@ -131,4 +137,4 @@ class ApplicationRunContext:
     def __exit__(self, *args: Any) -> None:
         for bind in self._binds:
             bind.__exit__(*args)
-        SDL_QuitSubSystem(SDL_INIT_EVENTS)
+        SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK)
