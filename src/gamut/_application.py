@@ -122,6 +122,10 @@ class Application(EventLoop[R]):
         self._keyboard.disconnect().send()
         self._mouse.disconnect().send()
 
+        for controller in self._controllers.values():
+            controller.disconnect().send()
+        self._controllers = {}
+
 
 class ApplicationRunContext:
 

@@ -26,18 +26,20 @@ module = ['OpenGL.GL', 'sdl2']
 ignore_missing_imports = true
 
 [tool.isort]
+known_evdev = 'evdev'
 known_pytest = 'pytest'
 known_mypy = 'mypy'
 known_setuptools = 'setuptools'
 known_sdl2 = 'sdl2'
 known_opengl = 'OpenGL'
 
-sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'MYPY', 'OPENGL',
-            'SDL2', 'PYTEST', 'SETUPTOOLS', 'THIRDPARTY']
-no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'MYPY', 'OPENGL',
-                   'SDL2', 'PYTEST', 'SETUPTOOLS', 'THIRDPARTY']
+sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV', 'MYPY',
+            'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'THIRDPARTY']
+no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV', 'MYPY',
+                   'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'THIRDPARTY']
 
 import_heading_localfolder = 'gamut'
+import_heading_evdev = 'evdev'
 import_heading_firstparty = 'gamut'
 import_heading_stdlib = 'python'
 import_heading_mypy = 'mypy'

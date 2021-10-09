@@ -1,9 +1,14 @@
 
 # gamut
 from .test_peripheral import TestPeripheral
+from .virtual import (skip_if_any_real_controllers,
+                      skip_if_virtual_controller_nyi, VirtualController)
 # gamut
+from gamut import Application
 from gamut.peripheral import (Controller, ControllerConnected,
                               ControllerDisconnected, Peripheral)
+# python
+from typing import Optional
 # pytest
 import pytest
 
@@ -65,3 +70,131 @@ def test_axis_repr(axis_index: int) -> None:
     assert repr(axis) == (
         f'<gamut.peripheral.ControllerAxis {axis_index!r} for {controller!r}>'
     )
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("button_count", [1, 4])
+@pytest.mark.parametrize("axis_count", [1, 4])
+def test_poll_joy_device_added_event_prior_to_application_start(
+    button_count: int,
+    axis_count: int
+) -> None:
+    connected_event: Optional[ControllerConnected] = None
+
+    with VirtualController('test', button_count, axis_count) as vc:
+        class TestApplication(Application):
+            async def main(self) -> None:
+                nonlocal connected_event
+                assert not self.controllers
+                connected_event = await ControllerConnected
+                assert len(self.controllers) == 1
+
+        app = TestApplication()
+        app.run()
+
+    assert isinstance(connected_event, ControllerConnected)
+    controller = connected_event.controller
+    assert isinstance(controller, Controller)
+    assert controller.name == 'test'
+    assert len(controller.buttons) == button_count
+    assert len(controller.axes) == axis_count
+    assert not controller.is_connected
+    assert not app.controllers
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("button_count", [1, 4])
+@pytest.mark.parametrize("axis_count", [1, 4])
+def test_poll_joy_device_added_event_after_application_start(
+    button_count: int,
+    axis_count: int
+) -> None:
+    connected_event: Optional[ControllerConnected] = None
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            with VirtualController('test', button_count, axis_count) as vc:
+                nonlocal connected_event
+                assert not self.controllers
+                connected_event = await ControllerConnected
+                assert len(self.controllers) == 1
+
+    app = TestApplication()
+    app.run()
+    assert isinstance(connected_event, ControllerConnected)
+    controller = connected_event.controller
+    assert isinstance(controller, Controller)
+    assert controller.name == 'test'
+    assert len(controller.buttons) == button_count
+    assert len(controller.axes) == axis_count
+    assert not controller.is_connected
+    assert not app.controllers
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("button_count", [1, 4])
+@pytest.mark.parametrize("axis_count", [1, 4])
+def test_poll_joy_device_removed_event_added_prior_to_application_start(
+    button_count: int,
+    axis_count: int
+) -> None:
+    controller: Optional[Controller] = None
+    disconnected_event: Optional[ControllerDisconnected] = None
+
+    with VirtualController('test', button_count, axis_count) as vc:
+        class TestApplication(Application):
+            async def main(self) -> None:
+                nonlocal controller
+                nonlocal disconnected_event
+                assert not self.controllers
+                connected_event = await ControllerConnected
+                controller = connected_event.controller
+                vc.close()
+                disconnected_event = await ControllerDisconnected
+
+        app = TestApplication()
+        app.run()
+
+    assert isinstance(disconnected_event, ControllerDisconnected)
+    assert isinstance(controller, Controller)
+    assert controller.name == 'test'
+    assert len(controller.buttons) == button_count
+    assert len(controller.axes) == axis_count
+    assert not controller.is_connected
+    assert not app.controllers
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("button_count", [1, 4])
+@pytest.mark.parametrize("axis_count", [1, 4])
+def test_poll_joy_device_removed_event_added_after_to_application_start(
+    button_count: int,
+    axis_count: int
+) -> None:
+    controller: Optional[Controller] = None
+    disconnected_event: Optional[ControllerDisconnected] = None
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal controller
+            nonlocal disconnected_event
+            assert not self.controllers
+            with VirtualController('test', button_count, axis_count) as vc:
+                connected_event = await ControllerConnected
+                controller = connected_event.controller
+            disconnected_event = await ControllerDisconnected
+
+    app = TestApplication()
+    app.run()
+
+    assert isinstance(disconnected_event, ControllerDisconnected)
+    assert isinstance(controller, Controller)
+    assert controller.name == 'test'
+    assert len(controller.buttons) == button_count
+    assert len(controller.axes) == axis_count
+    assert not controller.is_connected
+    assert not app.controllers

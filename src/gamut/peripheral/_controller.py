@@ -195,6 +195,8 @@ def sdl_joy_device_removed_event_callback(
 
     sdl_joystick = SDL_JoystickFromInstanceID(sdl_joystick_index)
     if not sdl_joystick:
+        if sdl_joystick_index not in controllers:
+            return None
         raise RuntimeError(SDL_GetError().decode('utf8'))
     SDL_JoystickClose(sdl_joystick)
 
