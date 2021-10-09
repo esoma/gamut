@@ -9,7 +9,7 @@ __all__ = [
 from sys import platform
 from typing import TypeVar
 # pysdl2
-from sdl2 import (SDL_Init, SDL_INIT_JOYSTICK, SDL_NumJoysticks,
+from sdl2 import (SDL_GetError, SDL_Init, SDL_INIT_JOYSTICK, SDL_NumJoysticks,
                   SDL_QuitSubSystem)
 
 if platform == 'linux':
@@ -33,9 +33,11 @@ def skip_if_virtual_controller_nyi(func: T) -> T:
     return func
 
 
-SDL_Init(SDL_INIT_JOYSTICK)
-any_real_controllers = bool(SDL_NumJoysticks())
-SDL_QuitSubSystem(SDL_INIT_JOYSTICK)
+if SDL_Init(SDL_INIT_JOYSTICK) == 0:
+    any_real_controllers = SDL_NumJoysticks() > 0
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK)
+else:
+    raise RuntimeError(SDL_GetError().decode('utf8'))
 
 def skip_if_any_real_controllers(func: T) -> T:
     if any_real_controllers:
