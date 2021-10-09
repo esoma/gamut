@@ -30,6 +30,7 @@ class VirtualController:
             EV_KEY: BUTTONS[:button_count],
             EV_ABS: AXES[:axis_count],
         }, name=name)
+        self._uinput.syn()
 
     def __enter__(self) -> VirtualController:
         return self
@@ -37,8 +38,8 @@ class VirtualController:
     def __exit__(self, *args: Any) -> None:
         self.close()
 
-    def __del__(self) -> None:
-        self.close()
-
     def close(self) -> None:
-        self._uinput.close()
+        if self._uinput is not None:
+            self._uinput.syn()
+            self._uinput.close()
+            self._uinput = None
