@@ -47,6 +47,7 @@ jobs:
     - name: Enable uinput for all users
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
+        sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
 
     - name: Test

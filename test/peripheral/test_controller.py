@@ -8,7 +8,7 @@ from gamut import Application
 from gamut.peripheral import (Controller, ControllerConnected,
                               ControllerDisconnected, Peripheral)
 # python
-from typing import Optional
+from typing import Any, Optional
 # pytest
 import pytest
 
@@ -82,26 +82,26 @@ def test_poll_joy_device_added_event_prior_to_application_start(
 ) -> None:
     connected_event: Optional[ControllerConnected] = None
 
-    with VirtualController('test', button_count, axis_count) as vc:
-        class TestApplication(Application):
-            async def main(self) -> None:
-                nonlocal connected_event
-                assert not self.controllers
-                connected_event = await ControllerConnected
-                assert len(self.controllers) == 1
+    # with VirtualController('test', button_count, axis_count) as vc:
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal connected_event
+            assert not self.controllers
+            connected_event = await ControllerConnected
+            assert len(self.controllers) == 1
 
-            async def poll(self, block=False):
-                # python
-                import time
-                start = time.monotonic()
-                while True:
-                    event = await super().poll(block=False)
-                    if event:
-                        return event
-                    assert time.monotonic() - start < 2
+        async def poll(self, block: Any = False) -> Any:
+            # python
+            import time
+            start = time.monotonic()
+            while True:
+                event = await super().poll(block=False)
+                if event:
+                    return event
+                assert time.monotonic() - start < 2
 
-        app = TestApplication()
-        app.run()
+    app = TestApplication()
+    app.run()
 
     assert isinstance(connected_event, ControllerConnected)
     controller = connected_event.controller
