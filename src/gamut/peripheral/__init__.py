@@ -45,7 +45,8 @@ __all__ = [
 from ._controller import (Controller, ControllerAxis, ControllerAxisMoved,
                           ControllerButton, ControllerButtonEvent,
                           ControllerButtonPressed, ControllerButtonReleased,
-                          ControllerConnected, ControllerDisconnected)
+                          ControllerConnected, ControllerDisconnected,
+                          ControllerEvent)
 from ._keyboard import (Keyboard, KeyboardConnected, KeyboardDisconnected,
                         KeyboardEvent, KeyboardFocused, KeyboardKey,
                         KeyboardKeyEvent, KeyboardKeyPressed,
