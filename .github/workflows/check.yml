@@ -29,6 +29,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Setup uinput/input
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        sudo modprobe uinput
+        sudo chmod a+rw /dev/uinput
+        sudo usermod -a -G input $USER
+
     - name: Set up Python ${{ matrix.python-version }}-${{ matrix.python-arch }}
       uses: actions/setup-python@v2
       with:
@@ -51,9 +58,7 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         sudo apt-get install xvfb
-        sudo modprobe uinput
-        sudo chmod a+rw /dev/uinput
-        sudo sg input -c "xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v"
+        xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v
 
     - name: Test (Other Platforms)
       if: ${{ matrix.os != 'ubuntu-latest' }}
