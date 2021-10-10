@@ -50,6 +50,7 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
+        newgrp input
 
     - name: Test
       uses: GabrielBB/xvfb-action@v1
