@@ -51,7 +51,7 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        sudo -u $USER xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v
+        sudo -E -u $USER xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v
 
     - name: Test (Other Platforms)
       if: ${{ matrix.os != 'ubuntu-latest' }}
