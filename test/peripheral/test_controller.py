@@ -5,12 +5,34 @@ from .virtual import (skip_if_any_real_controllers,
                       skip_if_virtual_controller_nyi, VirtualController)
 # gamut
 from gamut import Application
-from gamut.peripheral import (Controller, ControllerConnected,
+from gamut.peripheral import (Controller, ControllerButton,
+                              ControllerButtonPressed,
+                              ControllerButtonReleased, ControllerConnected,
                               ControllerDisconnected, Peripheral)
 # python
+import ctypes
 from typing import Optional
+# pysdl2
+from sdl2 import (SDL_Event, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
+                  SDL_JoystickClose, SDL_JoystickInstanceID, SDL_JoystickOpen,
+                  SDL_PushEvent)
 # pytest
 import pytest
+
+
+def send_sdl_joystick_button_event(
+    sdl_device_index: int,
+    button_index: int,
+    pressed: bool
+) -> None:
+    sdl_joystick = SDL_JoystickOpen(sdl_device_index)
+    sdl_joystick_id = SDL_JoystickInstanceID(sdl_joystick)
+    SDL_JoystickClose(sdl_joystick)
+    sdl_event = SDL_Event()
+    sdl_event.type = SDL_JOYBUTTONDOWN if pressed else SDL_JOYBUTTONUP
+    sdl_event.jbutton.which = sdl_joystick_id
+    sdl_event.jbutton.button = button_index
+    SDL_PushEvent(ctypes.byref(sdl_event))
 
 
 class TestController(TestPeripheral):
@@ -198,3 +220,64 @@ def test_poll_joy_device_removed_event_added_after_to_application_start(
     assert len(controller.axes) == axis_count
     assert not controller.is_connected
     assert not app.controllers
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("button_index", [0, 1, 2, 3])
+def test_poll_joy_button_down_event(button_index: int) -> None:
+    pressed_event: Optional[ControllerButtonPressed] = None
+    button: Optional[ControllerButton]
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal pressed_event
+            nonlocal button
+            controller = (await ControllerConnected).controller
+            send_sdl_joystick_button_event(0, button_index, True)
+            button = controller.buttons[button_index]
+            assert not button.is_pressed
+            pressed_event = await button.Pressed
+            assert button.is_pressed
+
+    with VirtualController('test', 4, 2) as vc:
+        app = TestApplication()
+        app.run()
+
+    assert isinstance(pressed_event, ControllerButtonPressed)
+    assert isinstance(button, ControllerButton)
+    assert button.index == button_index
+    assert button.is_pressed
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("button_index", [0, 1, 2, 3])
+def test_poll_joy_button_up_event(button_index: int) -> None:
+    released_event: Optional[ControllerButtonReleased] = None
+    button: Optional[ControllerButton]
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal released_event
+            nonlocal button
+            controller = (await ControllerConnected).controller
+
+            send_sdl_joystick_button_event(0, button_index, True)
+            button = controller.buttons[button_index]
+            assert not button.is_pressed
+            await button.Pressed
+            assert button.is_pressed
+
+            send_sdl_joystick_button_event(0, button_index, False)
+            released_event = await button.Released
+            assert not button.is_pressed
+
+    with VirtualController('test', 4, 2) as vc:
+        app = TestApplication()
+        app.run()
+
+    assert isinstance(released_event, ControllerButtonReleased)
+    assert isinstance(button, ControllerButton)
+    assert button.index == button_index
+    assert not button.is_pressed

@@ -14,11 +14,11 @@ from gamut._sdl import sdl_event_callback_map
 from typing import Any, Optional, Sequence, TYPE_CHECKING
 from weakref import ref
 # pysdl2
-from sdl2 import (SDL_GetError, SDL_JOYDEVICEADDED, SDL_JOYDEVICEREMOVED,
-                  SDL_JoystickClose, SDL_JoystickFromInstanceID,
-                  SDL_JoystickInstanceID, SDL_JoystickName,
-                  SDL_JoystickNumAxes, SDL_JoystickNumButtons,
-                  SDL_JoystickOpen)
+from sdl2 import (SDL_GetError, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
+                  SDL_JOYDEVICEADDED, SDL_JOYDEVICEREMOVED, SDL_JoystickClose,
+                  SDL_JoystickFromInstanceID, SDL_JoystickInstanceID,
+                  SDL_JoystickName, SDL_JoystickNumAxes,
+                  SDL_JoystickNumButtons, SDL_JoystickOpen)
 
 if TYPE_CHECKING:
     # gamut
@@ -42,6 +42,23 @@ class ControllerConnected(ControllerEvent, PeripheralConnected,
 
 class ControllerDisconnected(ControllerEvent, PeripheralDisconnected,
     peripheral=...
+):
+    pass
+
+
+class ControllerButtonEvent(ControllerEvent, peripheral=..., button=...):
+    button: ControllerButton
+    is_pressed: bool
+
+
+class ControllerButtonPressed(ControllerButtonEvent,
+    peripheral=..., button=..., is_pressed=True
+):
+    pass
+
+
+class ControllerButtonReleased(ControllerButtonEvent,
+    peripheral=..., button=..., is_pressed=False
 ):
     pass
 
@@ -72,10 +89,33 @@ class ControllerAxis:
 
 class ControllerButton:
 
+    Event: type[ControllerButtonEvent]
+    Pressed: type[ControllerButtonPressed]
+    Released: type[ControllerButtonReleased]
+
     def __init__(self, controller: Controller, index: int):
         self._index = index
         self._is_pressed = False
         self._controller: ref[Controller] = ref(controller)
+        class Event( # type: ignore
+            ControllerButtonEvent,
+            controller.Event, # type: ignore
+            button=self
+        ):
+            pass
+        self.Event = Event
+        class Pressed( # type: ignore
+            ControllerButtonPressed,
+            Event
+        ):
+            pass
+        self.Pressed = Pressed
+        class Released( # type: ignore
+            ControllerButtonReleased,
+            Event
+        ):
+            pass
+        self.Released = Released
 
     def __repr__(self) -> str:
         identifier = repr(self._index)
@@ -210,3 +250,39 @@ assert SDL_JOYDEVICEREMOVED not in sdl_event_callback_map
 sdl_event_callback_map[SDL_JOYDEVICEREMOVED] = (
     sdl_joy_device_removed_event_callback
 )
+
+
+def sdl_joy_button_down_event_callback(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
+) -> ControllerButtonPressed:
+    sdl_joystick_index: int = sdl_event.jbutton.which
+    controller = controllers[sdl_joystick_index]
+    button = controller.buttons[sdl_event.jbutton.button]
+    assert isinstance(button, ControllerButton)
+    button._is_pressed = True
+    return button.Pressed()
+
+
+assert SDL_JOYBUTTONDOWN not in sdl_event_callback_map
+sdl_event_callback_map[SDL_JOYBUTTONDOWN] = sdl_joy_button_down_event_callback
+
+
+def sdl_joy_button_up_event_callback(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
+) -> ControllerButtonReleased:
+    sdl_joystick_index: int = sdl_event.jbutton.which
+    controller = controllers[sdl_joystick_index]
+    button = controller.buttons[sdl_event.jbutton.button]
+    assert isinstance(button, ControllerButton)
+    button._is_pressed = False
+    return button.Released()
+
+
+assert SDL_JOYBUTTONUP not in sdl_event_callback_map
+sdl_event_callback_map[SDL_JOYBUTTONUP] = sdl_joy_button_up_event_callback

@@ -4,6 +4,10 @@ from __future__ import annotations
 __all__ = [
     'Controller',
     'ControllerConnected',
+    'ControllerButton',
+    'ControllerButtonEvent',
+    'ControllerButtonPressed',
+    'ControllerButtonReleased',
     'ControllerDisconnected',
     'Keyboard',
     'KeyboardKey',
@@ -35,8 +39,9 @@ __all__ = [
 ]
 
 # gamut
-from ._controller import (Controller, ControllerConnected,
-                          ControllerDisconnected)
+from ._controller import (Controller, ControllerButton, ControllerButtonEvent,
+                          ControllerButtonPressed, ControllerButtonReleased,
+                          ControllerConnected, ControllerDisconnected)
 from ._keyboard import (Keyboard, KeyboardConnected, KeyboardDisconnected,
                         KeyboardEvent, KeyboardFocused, KeyboardKey,
                         KeyboardKeyEvent, KeyboardKeyPressed,
