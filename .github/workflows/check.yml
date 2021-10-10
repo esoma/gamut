@@ -49,6 +49,7 @@ jobs:
       run: |
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
+        sudo usermod -a -G input $USER
 
     - name: Test
       uses: GabrielBB/xvfb-action@v1
