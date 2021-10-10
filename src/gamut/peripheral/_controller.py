@@ -3,6 +3,15 @@ from __future__ import annotations
 
 __all__ = [
     'Controller',
+    'ControllerAxis',
+    'ControllerAxisMoved',
+    'ControllerConnected',
+    'ControllerButton',
+    'ControllerButtonEvent',
+    'ControllerButtonPressed',
+    'ControllerButtonReleased',
+    'ControllerDisconnected',
+    'ControllerEvent',
 ]
 
 # gamut

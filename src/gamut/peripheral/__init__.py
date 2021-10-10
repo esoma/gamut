@@ -11,6 +11,7 @@ __all__ = [
     'ControllerButtonPressed',
     'ControllerButtonReleased',
     'ControllerDisconnected',
+    'ControllerEvent',
     'Keyboard',
     'KeyboardKey',
     'KeyboardKeyEvent',
