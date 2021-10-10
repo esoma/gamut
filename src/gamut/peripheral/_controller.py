@@ -14,11 +14,12 @@ from gamut._sdl import sdl_event_callback_map
 from typing import Any, Optional, Sequence, TYPE_CHECKING
 from weakref import ref
 # pysdl2
-from sdl2 import (SDL_GetError, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
-                  SDL_JOYDEVICEADDED, SDL_JOYDEVICEREMOVED, SDL_JoystickClose,
-                  SDL_JoystickFromInstanceID, SDL_JoystickInstanceID,
-                  SDL_JoystickName, SDL_JoystickNumAxes,
-                  SDL_JoystickNumButtons, SDL_JoystickOpen)
+from sdl2 import (SDL_GetError, SDL_JOYAXISMOTION, SDL_JOYBUTTONDOWN,
+                  SDL_JOYBUTTONUP, SDL_JOYDEVICEADDED, SDL_JOYDEVICEREMOVED,
+                  SDL_JoystickClose, SDL_JoystickFromInstanceID,
+                  SDL_JoystickInstanceID, SDL_JoystickName,
+                  SDL_JoystickNumAxes, SDL_JoystickNumButtons,
+                  SDL_JoystickOpen)
 
 if TYPE_CHECKING:
     # gamut
@@ -63,12 +64,27 @@ class ControllerButtonReleased(ControllerButtonEvent,
     pass
 
 
+class ControllerAxisMoved(ControllerEvent, peripheral=..., axis=...):
+    axis: ControllerAxis
+    position: float
+
+
 class ControllerAxis:
+
+    Moved: type[ControllerAxisMoved]
 
     def __init__(self, controller: Controller, index: int):
         self._index = index
         self._position = 0.0
         self._controller: ref[Controller] = ref(controller)
+
+        class Moved( # type: ignore
+            ControllerAxisMoved,
+            controller.Event, # type: ignore
+            axis=self
+        ):
+            pass
+        self.Moved = Moved
 
     def __repr__(self) -> str:
         identifier = repr(self._index)
@@ -286,3 +302,21 @@ def sdl_joy_button_up_event_callback(
 
 assert SDL_JOYBUTTONUP not in sdl_event_callback_map
 sdl_event_callback_map[SDL_JOYBUTTONUP] = sdl_joy_button_up_event_callback
+
+
+def sdl_joy_axis_event_callback(
+    sdl_event: Any,
+    mouse: Mouse,
+    keyboard: Keyboard,
+    controllers: dict[Any, Controller]
+) -> ControllerAxisMoved:
+    sdl_joystick_index: int = sdl_event.jaxis.which
+    controller = controllers[sdl_joystick_index]
+    axis = controller.axes[sdl_event.jaxis.axis]
+    assert isinstance(axis, ControllerAxis)
+    axis._position = sdl_event.jaxis.value / 32767.0
+    return axis.Moved(axis._position)
+
+
+assert SDL_JOYAXISMOTION not in sdl_event_callback_map
+sdl_event_callback_map[SDL_JOYAXISMOTION] = sdl_joy_axis_event_callback

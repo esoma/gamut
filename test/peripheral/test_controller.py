@@ -5,17 +5,17 @@ from .virtual import (skip_if_any_real_controllers,
                       skip_if_virtual_controller_nyi, VirtualController)
 # gamut
 from gamut import Application
-from gamut.peripheral import (Controller, ControllerButton,
-                              ControllerButtonPressed,
+from gamut.peripheral import (Controller, ControllerAxis, ControllerAxisMoved,
+                              ControllerButton, ControllerButtonPressed,
                               ControllerButtonReleased, ControllerConnected,
                               ControllerDisconnected, Peripheral)
 # python
 import ctypes
 from typing import Optional
 # pysdl2
-from sdl2 import (SDL_Event, SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
-                  SDL_JoystickClose, SDL_JoystickInstanceID, SDL_JoystickOpen,
-                  SDL_PushEvent)
+from sdl2 import (SDL_Event, SDL_JOYAXISMOTION, SDL_JOYBUTTONDOWN,
+                  SDL_JOYBUTTONUP, SDL_JoystickClose, SDL_JoystickInstanceID,
+                  SDL_JoystickOpen, SDL_PushEvent)
 # pytest
 import pytest
 
@@ -32,6 +32,22 @@ def send_sdl_joystick_button_event(
     sdl_event.type = SDL_JOYBUTTONDOWN if pressed else SDL_JOYBUTTONUP
     sdl_event.jbutton.which = sdl_joystick_id
     sdl_event.jbutton.button = button_index
+    SDL_PushEvent(ctypes.byref(sdl_event))
+
+
+def send_sdl_joystick_axis_moved_event(
+    sdl_device_index: int,
+    axis_index: int,
+    position: float
+) -> None:
+    sdl_joystick = SDL_JoystickOpen(sdl_device_index)
+    sdl_joystick_id = SDL_JoystickInstanceID(sdl_joystick)
+    SDL_JoystickClose(sdl_joystick)
+    sdl_event = SDL_Event()
+    sdl_event.type = SDL_JOYAXISMOTION
+    sdl_event.jaxis.which = sdl_joystick_id
+    sdl_event.jaxis.axis = axis_index
+    sdl_event.jaxis.value = int(position * 32767)
     SDL_PushEvent(ctypes.byref(sdl_event))
 
 
@@ -281,3 +297,36 @@ def test_poll_joy_button_up_event(button_index: int) -> None:
     assert isinstance(button, ControllerButton)
     assert button.index == button_index
     assert not button.is_pressed
+
+
+@skip_if_any_real_controllers
+@skip_if_virtual_controller_nyi
+@pytest.mark.parametrize("axis_index", [0, 1, 2, 3])
+@pytest.mark.parametrize("axis_position", [-1.0, -.5, 0.0, .5, 1.0])
+def test_poll_joy_axis_moved_event(
+    axis_index: int,
+    axis_position: float
+) -> None:
+    moved_event: Optional[ControllerAxisMoved] = None
+    axis: Optional[ControllerAxis]
+
+    class TestApplication(Application):
+        async def main(self) -> None:
+            nonlocal moved_event
+            nonlocal axis
+            controller = (await ControllerConnected).controller
+
+            send_sdl_joystick_axis_moved_event(0, axis_index, axis_position)
+            axis = controller.axes[axis_index]
+            assert axis.position == 0.0
+            moved_event = await axis.Moved
+            assert pytest.approx(axis.position, axis_position)
+
+    with VirtualController('test', 4, 4) as vc:
+        app = TestApplication()
+        app.run()
+
+    assert isinstance(moved_event, ControllerAxisMoved)
+    assert isinstance(axis, ControllerAxis)
+    assert axis.index == axis_index
+    assert pytest.approx(axis.position, axis_position)
