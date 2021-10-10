@@ -35,6 +35,7 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
+        sudo -u $USER -s
 
     - name: Set up Python ${{ matrix.python-version }}-${{ matrix.python-arch }}
       uses: actions/setup-python@v2
