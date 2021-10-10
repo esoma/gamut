@@ -50,8 +50,7 @@ jobs:
         sudo apt-get install xvfb
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
-        sudo usermod -a -G input $USER
-        sudo su - $USER -mc "xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v"
+        sg input -c "xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v"
 
     - name: Test (Other Platforms)
       if: ${{ matrix.os != 'ubuntu-latest' }}
