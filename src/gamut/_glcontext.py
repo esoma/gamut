@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['get_gl_context', 'GlContext']
 
 # python
+from time import sleep
 from typing import Any, Optional
 from weakref import ref
 # pysdl2
@@ -20,8 +21,12 @@ class SdlVideo:
 
     def __init__(self) -> None:
         self._is_closed = True
-        if SDL_Init(SDL_INIT_VIDEO) != 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
+        for i in range(10):
+            if SDL_Init(SDL_INIT_VIDEO) == 0:
+                break
+            sleep(.1)
+        else:
+            raise RuntimeError(SDL_GetError())
         self._is_closed = False
 
     def __del__(self) -> None:
