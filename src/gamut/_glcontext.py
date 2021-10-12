@@ -4,14 +4,16 @@ from __future__ import annotations
 __all__ = ['get_gl_context', 'GlContext']
 
 # python
+from time import sleep
 from typing import Any, Optional
 from weakref import ref
 # pysdl2
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
-                  SDL_GL_SetAttribute, SDL_Init, SDL_INIT_VIDEO,
-                  SDL_QuitSubSystem, SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
+                  SDL_GL_SetAttribute, SDL_Init, SDL_INIT_EVENTS,
+                  SDL_INIT_VIDEO, SDL_QuitSubSystem, SDL_WINDOW_HIDDEN,
+                  SDL_WINDOW_OPENGL)
 
 singleton: Optional[ref[GlContext]] = None
 
@@ -20,8 +22,27 @@ class SdlVideo:
 
     def __init__(self) -> None:
         self._is_closed = True
-        if SDL_Init(SDL_INIT_VIDEO) != 0:
+
+        # when rapidly initializing and quitting the video subsystem (as in
+        # testing it has been observed in linux while using xvfb that sometimes
+        # it will fail to initialize
+        #
+        # so we will try a couple times, waiting in between each try if there
+        # is no available video device
+        for i in range(10):
+            if SDL_Init(SDL_INIT_VIDEO) == 0:
+                break
+            if SDL_GetError() != b'No available video device':
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+            # video initialization implies events initialization, but SDL_Init
+            # doesn't quit the events subsystem if SDL_Init has an error, so
+            # we must manually do so
+            # https://github.com/libsdl-org/SDL/issues/4826
+            SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            sleep(.1)
+        else:
             raise RuntimeError(SDL_GetError().decode('utf8'))
+
         self._is_closed = False
 
     def __del__(self) -> None:
