@@ -15,8 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        python-version: [3.9]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.9, 3.10-dev]
         python-arch: [x86, x64]
 
         exclude:
@@ -51,7 +51,7 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        while sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml -v -x test/test_window.py; do :; done
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml
 
     - name: Test (Other Platforms)
       if: ${{ matrix.os != 'ubuntu-latest' }}

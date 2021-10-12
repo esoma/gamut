@@ -23,12 +23,21 @@ class SdlVideo:
     def __init__(self) -> None:
         self._is_closed = True
 
-        # when rapidly initializing and quitting the video subsystem
+        # when rapidly initializing and quitting the video subsystem (as in
+        # testing it has been observed in linux while using xvfb that sometimes
+        # it will fail to initialize
+        #
+        # so we will try a couple times, waiting in between each try if there
+        # is no available video device
         for i in range(10):
             if SDL_Init(SDL_INIT_VIDEO) == 0:
                 break
             if SDL_GetError() != b'No available video device':
                 break
+            # video initialization implies events initialization, but SDL_Init
+            # doesn't quit the events subsystem if SDL_Init has an error, so
+            # we must manually do so
+            # https://github.com/libsdl-org/SDL/issues/4826
             SDL_QuitSubSystem(SDL_INIT_EVENTS)
             sleep(.1)
         else:
