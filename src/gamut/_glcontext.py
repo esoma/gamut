@@ -33,7 +33,7 @@ class SdlVideo:
             if SDL_Init(SDL_INIT_VIDEO) == 0:
                 break
             if SDL_GetError() != b'No available video device':
-                break
+                raise RuntimeError(SDL_GetError().decode('utf8'))
             # video initialization implies events initialization, but SDL_Init
             # doesn't quit the events subsystem if SDL_Init has an error, so
             # we must manually do so
