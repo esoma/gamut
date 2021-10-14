@@ -200,8 +200,8 @@ def get_window_from_sdl_id(id: int) -> Window:
 
 def sdl_window_event_close_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[WindowClose]:
     try:
@@ -218,8 +218,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_CLOSE] = (
 
 def sdl_window_event_hidden_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[WindowHidden]:
     try:
@@ -236,8 +236,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_HIDDEN] = (
 
 def sdl_window_event_moved_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[WindowMoved]:
     try:
@@ -255,8 +255,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_MOVED] = (
 
 def sdl_window_event_resized_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[WindowResized]:
     try:
@@ -274,8 +274,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_SIZE_CHANGED] = (
 
 def sdl_window_event_shown_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[WindowShown]:
     try:

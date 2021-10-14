@@ -208,8 +208,8 @@ class Controller(Peripheral):
 
 def sdl_joy_device_added_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> ControllerConnected:
     sdl_device_index: int = sdl_event.jdevice.which
@@ -252,8 +252,8 @@ sdl_event_callback_map[SDL_JOYDEVICEADDED] = (
 
 def sdl_joy_device_removed_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[ControllerDisconnected]:
     sdl_joystick_index: int = sdl_event.jdevice.which
@@ -279,8 +279,8 @@ sdl_event_callback_map[SDL_JOYDEVICEREMOVED] = (
 
 def sdl_joy_button_down_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> ControllerButtonPressed:
     sdl_joystick_index: int = sdl_event.jbutton.which
@@ -297,8 +297,8 @@ sdl_event_callback_map[SDL_JOYBUTTONDOWN] = sdl_joy_button_down_event_callback
 
 def sdl_joy_button_up_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> ControllerButtonReleased:
     sdl_joystick_index: int = sdl_event.jbutton.which
@@ -315,8 +315,8 @@ sdl_event_callback_map[SDL_JOYBUTTONUP] = sdl_joy_button_up_event_callback
 
 def sdl_joy_axis_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> ControllerAxisMoved:
     sdl_joystick_index: int = sdl_event.jaxis.which
