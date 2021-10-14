@@ -19,7 +19,8 @@ __all__ = [
 from ._peripheral import (Peripheral, PeripheralConnected,
                           PeripheralDisconnected, PeripheralEvent)
 # gamut
-from gamut._sdl import sdl_event_callback_map, sdl_window_event_callback_map
+from gamut._sdl import (sdl_event_callback_map, SDL_KEYBOARD_KEY,
+                        sdl_window_event_callback_map)
 from gamut._window import get_window_from_sdl_id, Window
 # python
 import platform
@@ -1225,14 +1226,15 @@ class Keyboard(Peripheral):
 
 def sdl_window_event_focus_gained(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[KeyboardFocused]:
     try:
         window = get_window_from_sdl_id(sdl_event.window.windowID)
     except KeyError:
         return None
+    keyboard = keyboards[SDL_KEYBOARD_KEY]
     assert keyboard._window is None
     keyboard._window = window
     return keyboard.Focused(window)
@@ -1245,10 +1247,11 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_FOCUS_GAINED] = (
 
 def sdl_window_event_focus_lost(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> KeyboardLostFocus:
+    keyboard = keyboards[SDL_KEYBOARD_KEY]
     assert keyboard._window is not None
     keyboard._window = None
     return keyboard.LostFocus()
@@ -1261,8 +1264,8 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_FOCUS_LOST] = (
 
 def sdl_key_down_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[KeyboardKeyPressed]:
     if sdl_event.key.repeat != 0:
@@ -1271,6 +1274,7 @@ def sdl_key_down_event_callback(
     if sdl_scancode == SDL_SCANCODE_UNKNOWN:
         return None
 
+    keyboard = keyboards[SDL_KEYBOARD_KEY]
     key: PressableKeyboardKey = getattr(
         keyboard.Key,
         sdl_scancode_to_gamut_key_name[sdl_scancode]
@@ -1285,8 +1289,8 @@ sdl_event_callback_map[SDL_KEYDOWN] = sdl_key_down_event_callback
 
 def sdl_key_up_event_callback(
     sdl_event: Any,
-    mouse: Mouse,
-    keyboard: Keyboard,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[KeyboardKeyReleased]:
     assert sdl_event.key.repeat == 0
@@ -1294,6 +1298,7 @@ def sdl_key_up_event_callback(
     if sdl_scancode == SDL_SCANCODE_UNKNOWN:
         return None
 
+    keyboard = keyboards[SDL_KEYBOARD_KEY]
     key: PressableKeyboardKey = getattr(
         keyboard.Key,
         sdl_scancode_to_gamut_key_name[sdl_scancode]

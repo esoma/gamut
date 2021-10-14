@@ -1,8 +1,9 @@
 
 # gamut
+from ..application import TestApplication as Application
 from .test_peripheral import TestPeripheral
 # gamut
-from gamut import Application, Window
+from gamut import Window
 from gamut.peripheral import (Mouse, MouseButton, MouseButtonPressed,
                               MouseButtonReleased, MouseConnected,
                               MouseDisconnected, MouseMoved,
@@ -127,10 +128,11 @@ def test_poll_motion_event(x: int, y: int) -> None:
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal moved_event
+            mouse = (await MouseConnected).mouse
             send_sdl_mouse_motion_event(window, x, y)
-            moved_event = await self.mouse.Moved
-            assert self.mouse.position == (x, y)
-            assert self.mouse.window is window
+            moved_event = await mouse.Moved
+            assert mouse.position == (x, y)
+            assert mouse.window is window
 
     app = TestApplication()
     app.run()
@@ -146,12 +148,13 @@ def test_poll_window_leave_event() -> None:
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal moved_event
+            mouse = (await MouseConnected).mouse
             send_sdl_mouse_motion_event(window, 1, 1)
-            await self.mouse.Moved
+            await mouse.Moved
             send_sdl_window_leave_event()
-            moved_event = await self.mouse.Moved
-            assert self.mouse.position is None
-            assert self.mouse.window is None
+            moved_event = await mouse.Moved
+            assert mouse.position is None
+            assert mouse.window is None
 
     app = TestApplication()
     app.run()
@@ -184,11 +187,12 @@ def test_poll_scroll_event(
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal scrolled_event
+            mouse = (await MouseConnected).mouse
             send_sdl_mouse_wheel_event(window, x=x, y=y, flipped=flipped)
-            scrolled_event = await (
-                self.mouse.ScrolledHorizontally |
-                self.mouse.ScrolledVertically
-            )
+            if x:
+                scrolled_event = await mouse.ScrolledHorizontally
+            else:
+                scrolled_event = await mouse.ScrolledVertically
 
     app = TestApplication()
     app.run()
@@ -216,7 +220,8 @@ def test_poll_button_down_event(sdl_button: int, button_name: str) -> None:
         async def main(self) -> None:
             nonlocal button
             nonlocal pressed_event
-            button = getattr(self.mouse.Button, button_name)
+            mouse = (await MouseConnected).mouse
+            button = getattr(mouse.Button, button_name)
             assert isinstance(button, PressableMouseButton)
             send_sdl_mouse_button_event(sdl_button, True)
             pressed_event = await button.Pressed
@@ -247,7 +252,8 @@ def test_poll_button_up_event(sdl_button: int, button_name: str) -> None:
         async def main(self) -> None:
             nonlocal button
             nonlocal released_event
-            button = getattr(self.mouse.Button, button_name)
+            mouse = (await MouseConnected).mouse
+            button = getattr(mouse.Button, button_name)
             assert isinstance(button, PressableMouseButton)
             send_sdl_mouse_button_event(sdl_button, True)
             await button.Pressed

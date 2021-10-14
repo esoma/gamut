@@ -1,8 +1,9 @@
 
 # gamut
+from ..application import TestApplication as Application
 from .test_peripheral import TestPeripheral
 # gamut
-from gamut import Application, Window
+from gamut import Window
 from gamut.peripheral import (Keyboard, KeyboardConnected,
                               KeyboardDisconnected, KeyboardFocused,
                               KeyboardKey, KeyboardKeyPressed,
@@ -361,10 +362,11 @@ def test_poll_window_focus_gained_event() -> None:
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal focused_event
-            assert self.keyboard.window is None
+            keyboard = (await KeyboardConnected).keyboard
+            assert keyboard.window is None
             send_sdl_window_focus_gained_event(window)
-            focused_event = await self.keyboard.Focused
-            assert self.keyboard.window is window
+            focused_event = await keyboard.Focused
+            assert keyboard.window is window
 
     app = TestApplication()
     app.run()
@@ -379,12 +381,13 @@ def test_poll_window_focus_lost_event() -> None:
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal lost_focus_event
-            assert self.keyboard.window is None
+            keyboard = (await KeyboardConnected).keyboard
+            assert keyboard.window is None
             send_sdl_window_focus_gained_event(window)
-            await self.keyboard.Focused
+            await keyboard.Focused
             send_sdl_window_focus_lost_event()
-            lost_focus_event = await self.keyboard.LostFocus
-            assert self.keyboard.window is None
+            lost_focus_event = await keyboard.LostFocus
+            assert keyboard.window is None
 
     app = TestApplication()
     app.run()
@@ -403,7 +406,8 @@ def test_poll_key_down_event(sdl_scancode: int, key_name: str) -> None:
         async def main(self) -> None:
             nonlocal key
             nonlocal pressed_event
-            key = getattr(self.keyboard.Key, key_name)
+            keyboard = (await KeyboardConnected).keyboard
+            key = getattr(keyboard.Key, key_name)
             assert isinstance(key, PressableKeyboardKey)
             send_sdl_keyboard_key_event(sdl_scancode, True)
             pressed_event = await key.Pressed
@@ -430,7 +434,8 @@ def test_poll_key_up_event(sdl_scancode: int, key_name: str) -> None:
         async def main(self) -> None:
             nonlocal key
             nonlocal released_event
-            key = getattr(self.keyboard.Key, key_name)
+            keyboard = (await KeyboardConnected).keyboard
+            key = getattr(keyboard.Key, key_name)
             assert isinstance(key, PressableKeyboardKey)
             send_sdl_keyboard_key_event(sdl_scancode, True)
             await key.Pressed

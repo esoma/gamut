@@ -40,27 +40,29 @@ def test_mouse() -> None:
     class App(Application):
 
         async def main(self) -> None:
-            assert self.mouse.is_connected
+            assert not self.mice
+            await MouseConnected
+            assert self.mice
+            assert len(self.mice) == 1
+            assert self.mice[0].is_connected
 
         async def connected(self, event: MouseConnected) -> None:
             nonlocal connected_event
             assert connected_event is None
             connected_event = event
-            assert self.mouse.is_connected
 
         async def disconnected(self, event: MouseDisconnected) -> None:
             nonlocal disconnected_event
             assert disconnected_event is None
             disconnected_event = event
-            assert not self.mouse.is_connected
 
         def run_context(self) -> ContextManager:
             super_cm = super().run_context()
             class TestContextManager:
                 def __init__(cm_self) -> None:
                     cm_self.binds: list[Bind] = [
-                        Bind.on(self.mouse.Connected, self.connected),
-                        Bind.on(self.mouse.Disconnected, self.disconnected)
+                        Bind.on(MouseConnected, self.connected),
+                        Bind.on(MouseDisconnected, self.disconnected)
                     ]
                 def __enter__(cm_self) -> None:
                     super_cm.__enter__()
@@ -73,15 +75,12 @@ def test_mouse() -> None:
             return TestContextManager()
 
     app = App()
-    assert not app.mouse.is_connected
-    assert connected_event is None
-    assert disconnected_event is None
+    assert not app.mice
     app.run()
-    assert not app.mouse.is_connected
-    assert isinstance(connected_event, app.mouse.Connected)
-    assert connected_event.mouse is app.mouse # type: ignore
-    assert isinstance(disconnected_event, app.mouse.Disconnected)
-    assert disconnected_event.mouse is app.mouse
+    assert not app.mice
+    assert isinstance(connected_event, MouseConnected)
+    assert isinstance(disconnected_event, MouseDisconnected)
+    assert connected_event.mouse is disconnected_event.mouse
 
 
 def test_keyboard() -> None:
@@ -91,27 +90,29 @@ def test_keyboard() -> None:
     class App(Application):
 
         async def main(self) -> None:
-            assert self.keyboard.is_connected
+            assert not self.keyboards
+            await KeyboardConnected
+            assert self.keyboards
+            assert len(self.keyboards) == 1
+            assert self.keyboards[0].is_connected
 
         async def connected(self, event: KeyboardConnected) -> None:
             nonlocal connected_event
             assert connected_event is None
             connected_event = event
-            assert self.keyboard.is_connected
 
         async def disconnected(self, event: KeyboardDisconnected) -> None:
             nonlocal disconnected_event
             assert disconnected_event is None
             disconnected_event = event
-            assert not self.keyboard.is_connected
 
         def run_context(self) -> ContextManager:
             super_cm = super().run_context()
             class TestContextManager:
                 def __init__(cm_self) -> None:
                     cm_self.binds: list[Bind] = [
-                        Bind.on(self.keyboard.Connected, self.connected),
-                        Bind.on(self.keyboard.Disconnected, self.disconnected)
+                        Bind.on(KeyboardConnected, self.connected),
+                        Bind.on(KeyboardDisconnected, self.disconnected)
                     ]
                 def __enter__(cm_self) -> None:
                     super_cm.__enter__()
@@ -124,12 +125,9 @@ def test_keyboard() -> None:
             return TestContextManager()
 
     app = App()
-    assert not app.keyboard.is_connected
-    assert connected_event is None
-    assert disconnected_event is None
+    assert not app.keyboards
     app.run()
-    assert not app.keyboard.is_connected
-    assert isinstance(connected_event, app.keyboard.Connected)
-    assert connected_event.keyboard is app.keyboard # type: ignore
-    assert isinstance(disconnected_event, app.keyboard.Disconnected)
-    assert disconnected_event.keyboard is app.keyboard
+    assert not app.keyboards
+    assert isinstance(connected_event, KeyboardConnected)
+    assert isinstance(disconnected_event, KeyboardDisconnected)
+    assert connected_event.keyboard is disconnected_event.keyboard
