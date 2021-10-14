@@ -6,9 +6,13 @@ import re
 import textwrap
 from typing import Callable
 # mypy
+import mypy
 import mypy.api
 # pytest
 import pytest
+
+if mypy.__file__.endswith('.py'):
+    pytestmark = pytest.mark.skip('mypy is pure python')
 
 mypy_error_pattern = re.compile(r'<string>:(\d+): (.+)')
 
