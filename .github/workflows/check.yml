@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.9, 3.10-dev]
+        python-version: [3.9, 3.10]
         python-arch: [x86, x64]
 
         exclude:
