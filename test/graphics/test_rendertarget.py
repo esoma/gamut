@@ -18,27 +18,6 @@ def test_window_render_target() -> None:
     assert render_target.window is window
     assert render_target.size == window.size
 
-    colors = read_color_from_render_target(
-        render_target,
-        0, 0,
-        *render_target.size
-    )
-    assert all(c == (0.0, 0.0, 0.0, 1.0) for row in colors for c in row)
-
-    depths = read_depth_from_render_target(
-        render_target,
-        0, 0,
-        *render_target.size
-    )
-    assert all(d == 0.0 for row in depths for d in row)
-
-    stencils = read_stencil_from_render_target(
-        render_target,
-        0, 0,
-        *render_target.size
-    )
-    assert all(s == 0 for row in stencils for s in row)
-
     window.close()
     assert render_target.window is window
     with pytest.raises(RuntimeError):
