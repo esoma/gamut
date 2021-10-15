@@ -22,10 +22,11 @@ from gamut.event import Event as _Event
 from ctypes import byref as c_byref
 from ctypes import c_int
 from enum import Enum
+import sys
 from typing import Any, ClassVar, Optional, TYPE_CHECKING
 from weakref import WeakValueDictionary
 # pyopengl
-from OpenGL.GL import glViewport
+from OpenGL.GL import GL_DRAW_FRAMEBUFFER, glBindFramebuffer, glViewport
 # pysdl2
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GetWindowFlags, SDL_GetWindowID, SDL_GetWindowSize,
@@ -148,10 +149,22 @@ class Window:
         while True:
             if SDL_GL_SetSwapInterval(synchronization.value) == 0:
                 break
+            # not all systems support adaptive vsync, so try regular vsync
+            # instead
             if synchronization == WindowBufferSynchronization.ADAPTIVE_VSYNC:
                 synchronization = WindowBufferSynchronization.VSYNC
             else:
-                raise RuntimeError(SDL_GetError().decode('utf8'))
+                # not all systems are double buffered, so setting any swap
+                # interval will result in an error
+                # we don't actually need to swap the window in this case
+                return
+        # according to SDL docs:
+        # On macOS, make sure you bind 0 to the draw framebuffer before
+        # swapping the window, otherwise nothing will happen. If you aren't
+        # using glBindFramebuffer(), this is the default and you won't have to
+        # do anything extra.
+        if sys.platform == 'darwin':
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
         SDL_GL_SwapWindow(self._sdl)
 
     @property
