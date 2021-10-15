@@ -47,7 +47,7 @@ jobs:
     - name: Patch OpenGL
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        copy .github/opengl32.dll opengl32.dll
+        set PATH=%cd%\.github;%PATH%
 
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
