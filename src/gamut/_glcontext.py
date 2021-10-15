@@ -9,6 +9,7 @@ from typing import Any, Optional
 from weakref import ref
 # pysdl2
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
+                  SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
                   SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE, SDL_Init,
@@ -73,6 +74,10 @@ class GlContext:
         if self._sdl_window is None:
             raise RuntimeError(SDL_GetError().decode('utf8'))
 
+        if SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
+        if SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
         if SDL_GL_SetAttribute(
             SDL_GL_CONTEXT_PROFILE_MASK,
             SDL_GL_CONTEXT_PROFILE_CORE
