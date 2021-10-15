@@ -59,8 +59,15 @@ jobs:
         sudo usermod -a -G input $USER
         sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml
 
-    - name: Test (Other Platforms)
-      if: ${{ matrix.os != 'ubuntu-latest' }}
+    - name: Test (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        set PATH=%cd%\.github;%PATH%
+        python -m pytest --cov=gamut --cov-report=xml
+      shell: cmd
+
+    - name: Test (Mac OS)
+      if: ${{ matrix.os != 'macos-latest' }}
       run: |
         python -m pytest --cov=gamut --cov-report=xml
 
