@@ -1,7 +1,8 @@
 
 # gamut
-from gamut import (Application, Window, WindowClose, WindowHidden, WindowMoved,
-                   WindowResized, WindowShown)
+from gamut import (Application, Window, WindowBufferSynchronization,
+                   WindowClose, WindowHidden, WindowMoved, WindowResized,
+                   WindowShown)
 # python
 import ctypes
 from typing import Any, Optional
@@ -266,3 +267,9 @@ def test_poll_shown_event() -> None:
     assert shown_event is not None
     assert isinstance(shown_event, WindowShown)
     assert shown_event.window is window
+
+
+@pytest.mark.parametrize("synchronization", list(WindowBufferSynchronization))
+def test_flip_buffer(synchronization: WindowBufferSynchronization) -> None:
+    window = Window()
+    window.flip_buffer(synchronization)
