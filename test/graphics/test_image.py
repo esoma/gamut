@@ -1,13 +1,35 @@
 
 # gamut
-# gamut
 from gamut.graphics import Image, Texture2d, TextureComponents
 # python
 from pathlib import Path
+from typing import Callable
+# pytest
+import pytest
 
 
-def test_gamut_gif(resources: Path) -> None:
-    image = Image(resources / 'gamut.gif')
+def load_image_path(path: Path) -> Image:
+    return Image(path)
+
+
+def load_image_str(path: Path) -> Image:
+    return Image(str(path))
+
+
+def load_image_file(path: Path) -> Image:
+    return Image(open(path, 'rb'))
+
+
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_gif(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut.gif')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 3
@@ -19,8 +41,16 @@ def test_gamut_gif(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_jpg(resources: Path) -> None:
-    image = Image(resources / 'gamut.jpg')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_jpg(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut.jpg')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 3
@@ -32,8 +62,16 @@ def test_gamut_jpg(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_tga(resources: Path) -> None:
-    image = Image(resources / 'gamut.tga')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_tga(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut.tga')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 4
@@ -45,8 +83,16 @@ def test_gamut_tga(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_tif(resources: Path) -> None:
-    image = Image(resources / 'gamut.tif')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_tif(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut.tif')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 4
@@ -58,8 +104,16 @@ def test_gamut_tif(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_gray8_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_gray8.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_gray8_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_gray8.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 1
@@ -71,8 +125,16 @@ def test_gamut_gray8_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_gray16_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_gray16.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_gray16_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_gray16.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 1
@@ -84,8 +146,16 @@ def test_gamut_gray16_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_graya8_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_graya8.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_graya8_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_graya8.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 4
@@ -97,8 +167,16 @@ def test_gamut_graya8_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_graya16_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_graya16.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_graya16_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_graya16.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 4
@@ -110,8 +188,16 @@ def test_gamut_graya16_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_rgb8_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_rgb8.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_rgb8_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_rgb8.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 3
@@ -123,8 +209,16 @@ def test_gamut_rgb8_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_rgb16_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_rgb16.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_rgb16_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_rgb16.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 3
@@ -136,8 +230,16 @@ def test_gamut_rgb16_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_rgba8_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_rgba8.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_rgba8_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_rgba8.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 4
@@ -149,8 +251,16 @@ def test_gamut_rgba8_png(resources: Path) -> None:
     assert texture.is_open
 
 
-def test_gamut_rgba16_png(resources: Path) -> None:
-    image = Image(resources / 'gamut_rgba16.png')
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_gamut_rgba16_png(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut_rgba16.png')
     assert image.is_open
     assert image.size == (100, 100)
     assert image.components == 4
