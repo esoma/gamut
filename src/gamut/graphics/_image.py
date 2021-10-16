@@ -1,5 +1,5 @@
 
-__all__ = ['Image']
+__all__ = ['Image', 'ImageInvalidError']
 
 # gamut
 from ._texture2d import Texture2d, TextureComponents, TextureDataType
@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import BinaryIO, Final, Union
 from PIL import Image as PilImage
 from PIL import ImageMath as PilImageMath
+from PIL import UnidentifiedImageError as PilUnidentifiedImageError
 
 PIL_MODE_TO_TEXTURE_COMPONENTS: Final = {
     'L': TextureComponents.R,
@@ -33,10 +34,17 @@ PIL_CONVERT: Final = {
 }
 
 
+class ImageInvalidError(RuntimeError):
+    pass
+
+
 class Image:
 
     def __init__(self, file: Union[str, Path, BinaryIO]):
-        self._pil = PilImage.open(file)
+        try:
+            self._pil = PilImage.open(file)
+        except PilUnidentifiedImageError as ex:
+            raise ImageInvalidError(str(ex))
 
         # we "normalize" the image to an R, RGB, or RGBA mode so that the
         # bytes representation is predictable
@@ -57,7 +65,7 @@ class Image:
             try:
                 convert_mode = PIL_CONVERT[convert_mode]
             except KeyError:
-                raise RuntimeError('invalid image')
+                raise ImageInvalidError('unable to normalize image')
         if convert_mode != self._pil.mode:
             self._pil = self._pil.convert(mode=convert_mode)
 
@@ -89,6 +97,7 @@ class Image:
 
     @property
     def components(self) -> int:
+        self._ensure_open()
         return self._components
 
     @property

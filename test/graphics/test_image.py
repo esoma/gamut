@@ -1,7 +1,9 @@
 
 # gamut
-from gamut.graphics import Image, Texture2d, TextureComponents
+from gamut.graphics import (Image, ImageInvalidError, Texture2d,
+                            TextureComponents)
 # python
+import io
 from pathlib import Path
 from typing import Callable
 # pytest
@@ -18,6 +20,55 @@ def load_image_str(path: Path) -> Image:
 
 def load_image_file(path: Path) -> Image:
     return Image(open(path, 'rb'))
+
+
+@pytest.mark.parametrize("load_image", [
+    load_image_path,
+    load_image_str,
+    load_image_file,
+])
+def test_close(
+    load_image: Callable[[Path], Image],
+    resources: Path
+) -> None:
+    image = load_image(resources / 'gamut.gif')
+    assert image.is_open
+
+    image.close()
+    assert not image.is_open
+
+    image.close()
+
+    with pytest.raises(RuntimeError) as excinfo:
+        image.size
+    assert str(excinfo.value) == 'image is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        image.to_texture()
+    assert str(excinfo.value) == 'image is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        image.to_bytes()
+    assert str(excinfo.value) == 'image is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        image.components
+    assert str(excinfo.value) == 'image is closed'
+
+
+def test_non_image() -> None:
+    with pytest.raises(ImageInvalidError):
+        Image(io.BytesIO(b'not an image'))
+
+
+def test_invalid_path(resources: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        Image(resources / '__invalid_path_name__')
+
+
+def test_invalid_path_str(resources: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        Image(str(resources / '__invalid_path_name__'))
 
 
 @pytest.mark.parametrize("load_image", [

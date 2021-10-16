@@ -3,6 +3,7 @@ __all__ = [
     'clear_render_target',
     'Color',
     'Image',
+    'ImageInvalidError',
     'read_color_from_render_target',
     'read_depth_from_render_target',
     'read_stencil_from_render_target',
@@ -17,7 +18,7 @@ __all__ = [
 
 # gamut
 from ._color import Color
-from ._image import Image
+from ._image import Image, ImageInvalidError
 from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             read_depth_from_render_target,
                             read_stencil_from_render_target,
