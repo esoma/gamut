@@ -1,11 +1,15 @@
 
 # gamut
+# gamut
 from gamut import Window
 from gamut.graphics import (clear_render_target, Color,
                             read_color_from_render_target,
                             read_depth_from_render_target,
-                            read_stencil_from_render_target,
-                            TextureRenderTarget, WindowRenderTarget)
+                            read_stencil_from_render_target, Texture2d,
+                            TextureComponents, TextureDataType,
+                            TextureRenderTarget,
+                            TextureRenderTargetDepthStencil,
+                            WindowRenderTarget)
 # python
 from typing import Union
 # pytest
@@ -28,13 +32,21 @@ def create_render_target(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]]
 ) -> Union[TextureRenderTarget, WindowRenderTarget]:
     if cls is TextureRenderTarget:
-        return TextureRenderTarget()
+        texture = Texture2d(
+            100, 100,
+            TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+            b'\x00' * 100 * 100 * 4
+        )
+        return TextureRenderTarget(
+            [texture],
+            depth_stencil=TextureRenderTargetDepthStencil.DEPTH_STENCIL
+        )
     elif cls is WindowRenderTarget:
         return WindowRenderTarget(Window())
     raise NotImplementedError()
 
 
-@pytest.mark.parametrize("cls", [WindowRenderTarget])
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
 @pytest.mark.parametrize("color", [
     Color(0, 0, 0, 0),
     Color(.25, .4, .6, .8),

@@ -1,8 +1,10 @@
 
 # gamut
+# gamut
 from gamut.event._event import reset_events
 # python
 import gc
+from pathlib import Path
 from typing import Any, Generator
 # pysdl2
 from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
@@ -10,6 +12,11 @@ from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
                   SDL_INIT_VIDEO, SDL_WasInit)
 # pytest
 import pytest
+
+
+@pytest.fixture
+def resources() -> Path:
+    return Path(__file__).parent / 'resources'
 
 
 @pytest.fixture(autouse=True)
