@@ -106,6 +106,10 @@ def test_eq(cmp: Any) -> None:
     Color(0.0, .25, .5, 1.0),
     (0.0, .25, .5, 1.0),
     [0.0, .25, .5, 1.0],
+    None,
+    object(),
+    1,
+    'test',
 ])
 def test_not_eq(cmp: Any) -> None:
     color = Color(0.0, 0.0, 0.0, 0.0)
