@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 __all__ = [
+    'get_sdl_window_from_window',
     'get_window_from_sdl_id',
     'Window',
+    'WindowBufferSynchronization',
     'WindowClose',
     'WindowEvent',
     'WindowHidden',
@@ -19,14 +21,17 @@ from gamut.event import Event as _Event
 # python
 from ctypes import byref as c_byref
 from ctypes import c_int
+from enum import Enum
+import sys
 from typing import Any, ClassVar, Optional, TYPE_CHECKING
 from weakref import WeakValueDictionary
 # pyopengl
-from OpenGL.GL import glViewport
+from OpenGL.GL import GL_DRAW_FRAMEBUFFER, glBindFramebuffer, glViewport
 # pysdl2
-from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetWindowFlags,
-                  SDL_GetWindowID, SDL_GetWindowSize, SDL_GetWindowTitle,
-                  SDL_HideWindow, SDL_SetWindowBordered,
+from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
+                  SDL_GetWindowFlags, SDL_GetWindowID, SDL_GetWindowSize,
+                  SDL_GetWindowTitle, SDL_GL_SetSwapInterval,
+                  SDL_GL_SwapWindow, SDL_HideWindow, SDL_SetWindowBordered,
                   SDL_SetWindowFullscreen, SDL_SetWindowPosition,
                   SDL_SetWindowSize, SDL_SetWindowTitle, SDL_ShowWindow,
                   SDL_WINDOW_BORDERLESS, SDL_WINDOW_FULLSCREEN_DESKTOP,
@@ -64,6 +69,12 @@ class WindowShown(WindowEvent, window=...):
     pass
 
 
+class WindowBufferSynchronization(Enum):
+    IMMEDIATE = 0
+    VSYNC = 1
+    ADAPTIVE_VSYNC = -1
+
+
 class Window:
 
     _id_map: ClassVar[WeakValueDictionary[int, Window]] = WeakValueDictionary()
@@ -83,6 +94,8 @@ class Window:
             100, 100,
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
         )
+        if not self._sdl:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
 
         class Event(WindowEvent, window=self):
             pass
@@ -103,7 +116,10 @@ class Window:
             pass
         self.Shown = Shown
 
-        Window._id_map[SDL_GetWindowID(self._sdl)] = self
+        sdl_window_id = SDL_GetWindowID(self._sdl)
+        if sdl_window_id == 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
+        Window._id_map[sdl_window_id] = self
 
     def __del__(self) -> None:
         self.close()
@@ -123,6 +139,33 @@ class Window:
         if self._sdl is not None:
             SDL_DestroyWindow(self._sdl)
             self._sdl = None
+
+    def flip_buffer(
+        self,
+        synchronization: WindowBufferSynchronization =
+            WindowBufferSynchronization.IMMEDIATE
+    ) -> None:
+        assert synchronization.value in [-1, 0, 1]
+        while True:
+            if SDL_GL_SetSwapInterval(synchronization.value) == 0:
+                break
+            # not all systems support adaptive vsync, so try regular vsync
+            # instead
+            if synchronization == WindowBufferSynchronization.ADAPTIVE_VSYNC:
+                synchronization = WindowBufferSynchronization.VSYNC
+            else:
+                # not all systems are double buffered, so setting any swap
+                # interval will result in an error
+                # we don't actually need to swap the window in this case
+                return
+        # according to SDL docs:
+        # On macOS, make sure you bind 0 to the draw framebuffer before
+        # swapping the window, otherwise nothing will happen. If you aren't
+        # using glBindFramebuffer(), this is the default and you won't have to
+        # do anything extra.
+        if sys.platform == 'darwin':
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
+        SDL_GL_SwapWindow(self._sdl)
 
     @property
     def is_bordered(self) -> bool:
@@ -196,6 +239,11 @@ class Window:
 
 def get_window_from_sdl_id(id: int) -> Window:
     return Window._id_map[id]
+
+
+def get_sdl_window_from_window(window: Window) -> Any:
+    window._ensure_open()
+    return window._sdl
 
 
 def sdl_window_event_close_callback(

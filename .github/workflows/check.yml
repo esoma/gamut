@@ -26,6 +26,9 @@ jobs:
           - os: macos-latest
             python-arch: x86
 
+          - os: macos-latest
+            python-version: '3.10'
+
     steps:
     - uses: actions/checkout@v2
 
@@ -44,6 +47,20 @@ jobs:
       run: |
         python -m pip install .[test]
 
+    - name: Install Mesa x64
+      if: ${{ matrix.os == 'windows-latest' && matrix.python-arch == 'x64' }}
+      run: |
+        curl.exe -L --output mesa.7z --url https://downloads.fdossena.com/geth.php?r=mesa64-latest
+        "C:\Program Files\7-Zip\7z.exe" x mesa.7z
+      shell: cmd
+
+    - name: Install Mesa x86
+      if: ${{ matrix.os == 'windows-latest' && matrix.python-arch == 'x86' }}
+      run: |
+        curl.exe -L --output mesa.7z --url https://downloads.fdossena.com/geth.php?r=mesa-latest
+        "C:\Program Files\7-Zip\7z.exe" x mesa.7z
+      shell: cmd
+
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
@@ -53,8 +70,15 @@ jobs:
         sudo usermod -a -G input $USER
         sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml
 
-    - name: Test (Other Platforms)
-      if: ${{ matrix.os != 'ubuntu-latest' }}
+    - name: Test (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        set PATH=%cd%;%PATH%
+        python -m pytest --cov=gamut --cov-report=xml
+      shell: cmd
+
+    - name: Test (Mac OS)
+      if: ${{ matrix.os == 'macos-latest' }}
       run: |
         python -m pytest --cov=gamut --cov-report=xml
 
