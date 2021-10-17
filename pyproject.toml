@@ -22,7 +22,15 @@ warn_unreachable = true
 warn_unused_configs = true
 
 [[tool.mypy.overrides]]
-module = ['OpenGL.GL', 'OpenGL.GL.framebufferobjects', 'PIL', 'sdl2']
+module = [
+    'glm',
+    'OpenGL',
+    'OpenGL.GL',
+    'OpenGL.GL.framebufferobjects',
+    'OpenGL.GL.shaders',
+    'PIL',
+    'sdl2'
+]
 ignore_missing_imports = true
 
 [tool.isort]
@@ -34,13 +42,14 @@ known_sdl2 = 'sdl2'
 known_opengl = 'OpenGL'
 known_pil = 'PIL'
 known_numpy = 'numpy'
+known_glm = 'glm'
 
 sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV', 'MYPY',
-            'NUMPY', 'PIL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
+            'NUMPY', 'PIL', 'GLM', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
             'THIRDPARTY']
 no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV', 'MYPY',
-                   'NUMPY', 'PIL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
-                   'THIRDPARTY']
+                   'NUMPY', 'PIL', 'GLM', 'OPENGL', 'SDL2', 'PYTEST',
+                   'SETUPTOOLS', 'THIRDPARTY']
 
 import_heading_localfolder = 'gamut'
 import_heading_evdev = 'evdev'
@@ -49,6 +58,7 @@ import_heading_stdlib = 'python'
 import_heading_mypy = 'mypy'
 import_heading_numpy = 'numpy'
 import_heading_pillow = 'pillow'
+import_heading_glm = 'pyglm'
 import_heading_opengl = 'pyopengl'
 import_heading_sdl2 = 'pysdl2'
 import_heading_pytest = 'pytest'
