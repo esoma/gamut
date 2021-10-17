@@ -18,10 +18,10 @@ from OpenGL.GL import (GL_BYTE, GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL, GL_FLOAT,
                        GL_INT, GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED,
                        GL_RG, GL_RGB, GL_RGBA, GL_SHORT, GL_STREAM_READ,
                        GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT,
-                       GL_UNSIGNED_SHORT, glBindBuffer, glBindTexture,
-                       glBufferData, glDeleteTextures, glGenBuffers,
-                       glGenerateMipmap, glGenTextures, glMapBuffer,
-                       glTexImage2D, glUnmapBuffer)
+                       GL_UNSIGNED_INT_24_8, GL_UNSIGNED_SHORT, glBindBuffer,
+                       glBindTexture, glBufferData, glDeleteTextures,
+                       glGenBuffers, glGenerateMipmap, glGenTextures,
+                       glMapBuffer, glTexImage2D, glUnmapBuffer)
 
 
 class TextureComponents(Enum):
@@ -43,13 +43,15 @@ class TextureDataType(Enum):
     FLOAT = GL_FLOAT
 
 
+
+
 TEXTURE_COMPONENTS_COUNT: Final = {
     TextureComponents.R: 1,
     TextureComponents.RG: 2,
     TextureComponents.RGB: 3,
     TextureComponents.RGBA: 4,
     TextureComponents.D: 1,
-    TextureComponents.DS: 2
+    TextureComponents.DS: 1
 }
 
 
@@ -84,6 +86,15 @@ class Texture2d:
         self._size = (width, height)
         self._components = components
 
+        gl_data_type = data_type.value
+        if components == TextureComponents.DS:
+            if data_type != TextureDataType.UNSIGNED_INT:
+                raise ValueError(
+                    f'data_type must be {TextureDataType.UNSIGNED_INT} when '
+                    f'components is {TextureComponents.DS}'
+                )
+            gl_data_type = GL_UNSIGNED_INT_24_8
+
         self._gl_context: Optional[GlContext] = get_gl_context()
         self._gl = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self._gl)
@@ -93,9 +104,12 @@ class Texture2d:
             components.value,
             width, height,
             0,
-            components.value, data_type.value, data
+            components.value, gl_data_type, data
         )
-        glGenerateMipmap(GL_TEXTURE_2D)
+        # depth/stencil textures cannot have mipmaps, raises an invalid
+        # operation error on some platforms
+        if components != TextureComponents.DS:
+            glGenerateMipmap(GL_TEXTURE_2D)
 
     def close(self) -> None:
         self._gl_context = None

@@ -11,7 +11,9 @@ from gamut.graphics import (clear_render_target, Color,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
 # python
-from typing import Union
+from ctypes import c_uint
+from ctypes import sizeof as c_sizeof
+from typing import Optional, Union
 # pytest
 import pytest
 
@@ -38,28 +40,38 @@ def test_window_render_target() -> None:
 
 @pytest.mark.parametrize(
     "depth_stencil",
-    list(TextureRenderTargetDepthStencil)
+    [*TextureRenderTargetDepthStencil, None]
 )
 def test_texture_render_target(
-    depth_stencil: TextureRenderTargetDepthStencil
+    depth_stencil: Optional[TextureRenderTargetDepthStencil]
 ) -> None:
     texture = Texture2d(
         100, 100,
         TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
         b'\x00' * 100 * 100 * 4
     )
-    render_target = TextureRenderTarget([texture], depth_stencil)
+    actual_depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] = (
+        Texture2d(
+            100, 100,
+            TextureComponents.DS, TextureDataType.UNSIGNED_INT,
+            b'\x00' * 100 * 100 * c_sizeof(c_uint)
+        )
+    )
+    if depth_stencil is not None:
+        actual_depth_stencil = depth_stencil
+
+    render_target = TextureRenderTarget([texture], actual_depth_stencil)
 
     assert len(render_target.colors) == 1
     assert render_target.colors[0] == texture
-    assert render_target.depth_stencil == depth_stencil
+    assert render_target.depth_stencil == actual_depth_stencil
     assert render_target.size == (100, 100)
     assert render_target.is_open
 
     render_target.close()
     assert len(render_target.colors) == 1
     assert render_target.colors[0] == texture
-    assert render_target.depth_stencil == depth_stencil
+    assert render_target.depth_stencil == actual_depth_stencil
     assert render_target.size == (100, 100)
     assert not render_target.is_open
 

@@ -14,7 +14,7 @@ __all__ = [
 
 # gamut
 from ._color import Color
-from ._texture2d import Texture2d
+from ._texture2d import Texture2d, TextureComponents
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
 from gamut._window import get_sdl_window_from_window, Window
@@ -31,13 +31,18 @@ from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        GL_DRAW_FRAMEBUFFER, GL_FLOAT, GL_FRAMEBUFFER,
                        GL_FRAMEBUFFER_COMPLETE, GL_INT, GL_READ_FRAMEBUFFER,
                        GL_RENDERBUFFER, GL_RGBA, GL_STENCIL_BUFFER_BIT,
-                       GL_STENCIL_INDEX, GL_TEXTURE_2D, glBindFramebuffer,
-                       glBindRenderbuffer, glCheckFramebufferStatus, glClear,
-                       glClearColor, glClearDepthf, glClearStencil,
-                       glDeleteFramebuffers, glDeleteRenderbuffers,
-                       glFramebufferRenderbuffer, glFramebufferTexture2D,
-                       glGenFramebuffers, glGenRenderbuffers, glReadPixels,
-                       glRenderbufferStorage, glViewport)
+                       GL_STENCIL_INDEX, GL_TEXTURE_2D,
+                       glCheckFramebufferStatus, glClear, glClearColor,
+                       glClearDepthf, glClearStencil, glReadPixels, glViewport)
+from OpenGL.GL.framebufferobjects import (glBindFramebuffer,
+                                          glBindRenderbuffer,
+                                          glDeleteFramebuffers,
+                                          glDeleteRenderbuffers,
+                                          glFramebufferRenderbuffer,
+                                          glFramebufferTexture2D,
+                                          glGenFramebuffers,
+                                          glGenRenderbuffers,
+                                          glRenderbufferStorage)
 # pysdl2
 from sdl2 import SDL_GL_GetDrawableSize, SDL_GL_MakeCurrent
 
@@ -56,8 +61,6 @@ class TextureRenderTarget:
         depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] =
             TextureRenderTargetDepthStencil.NONE
     ):
-        assert isinstance(depth_stencil, TextureRenderTargetDepthStencil)
-
         self._gl_context: Optional[GlContext] = get_gl_context()
 
         self._colors = tuple(colors)
@@ -82,7 +85,24 @@ class TextureRenderTarget:
                 0
             )
 
-        if depth_stencil != TextureRenderTargetDepthStencil.NONE:
+        if isinstance(depth_stencil, Texture2d):
+            if depth_stencil.components == TextureComponents.D:
+                attachment = GL_DEPTH_ATTACHMENT
+            elif depth_stencil.components == TextureComponents.DS:
+                attachment = GL_DEPTH_STENCIL_ATTACHMENT
+            else:
+                raise ValueError(
+                    f'depth_stencil texture must either be '
+                    f'{TextureComponents.D} or {TextureComponents.DS}'
+                )
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                attachment,
+                GL_TEXTURE_2D,
+                depth_stencil._gl,
+                0
+            )
+        elif depth_stencil != TextureRenderTargetDepthStencil.NONE:
             if depth_stencil == TextureRenderTargetDepthStencil.DEPTH_STENCIL:
                 sized_internal_format = GL_DEPTH24_STENCIL8
                 attachment = GL_DEPTH_STENCIL_ATTACHMENT
