@@ -43,8 +43,6 @@ class TextureDataType(Enum):
     FLOAT = GL_FLOAT
 
 
-
-
 TEXTURE_COMPONENTS_COUNT: Final = {
     TextureComponents.R: 1,
     TextureComponents.RG: 2,
@@ -75,13 +73,29 @@ class Texture2d:
         data_type: TextureDataType,
         data: bytes
     ):
-        width = int(width)
-        height = int(height)
-        data = bytes(data)
+        if not isinstance(width, int):
+            raise TypeError('width must be an int')
+        if not isinstance(height, int):
+            raise TypeError('height must be an int')
+        if not isinstance(components, TextureComponents):
+            raise TypeError(f'components must be {TextureComponents}')
+        if not isinstance(data_type, TextureDataType):
+            raise TypeError(f'data_type must be {TextureDataType}')
+        if not isinstance(data, bytes):
+            raise TypeError(f'data must be bytes')
+
         if width < 1:
             raise ValueError('width must be > 0')
         if height < 1:
             raise ValueError('height must be > 0')
+
+        expected_data_length = (
+            width * height *
+            TEXTURE_COMPONENTS_COUNT[components] *
+            TEXTURE_DATA_TYPE_SIZE[data_type]
+        )
+        if len(data) != expected_data_length:
+            raise ValueError('too much or not enough data')
 
         self._size = (width, height)
         self._components = components
@@ -107,15 +121,18 @@ class Texture2d:
             components.value, gl_data_type, data
         )
         # depth/stencil textures cannot have mipmaps, raises an invalid
-        # operation error on some platforms
+        # operation error on some platforms, probably a noop on others
         if components != TextureComponents.DS:
             glGenerateMipmap(GL_TEXTURE_2D)
 
+    def __del__(self) -> None:
+        self.close()
+
     def close(self) -> None:
-        self._gl_context = None
         if hasattr(self, '_gl') and self._gl is not None:
             glDeleteTextures(1, [self._gl])
             self._gl = None
+        self._gl_context = None
 
     @property
     def components(self) -> TextureComponents:

@@ -1,6 +1,5 @@
 
 # gamut
-# gamut
 from gamut import Window
 from gamut.graphics import (clear_render_target, Color,
                             read_color_from_render_target,
