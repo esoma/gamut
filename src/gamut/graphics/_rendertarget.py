@@ -142,7 +142,13 @@ class WindowRenderTarget:
 
     def __init__(self, window: Window) -> None:
         self._window = window
-        self._gl_context = get_gl_context()
+        self._gl_context: Optional[GlContext] = get_gl_context()
+
+    def __del__(self) -> None:
+        self.close()
+
+    def close(self) -> None:
+        self._gl_context = None
 
     @property
     def size(self) -> tuple[int, int]:
@@ -156,12 +162,19 @@ class WindowRenderTarget:
     def window(self) -> Window:
         return self._window
 
+    @property
+    def is_open(self) -> bool:
+        return self._gl_context is not None
+
 
 def use_render_target(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     write: bool,
     read: bool
 ) -> None:
+    if not render_target.is_open:
+        raise RuntimeError('render target is closed')
+
     if write and read:
         target = GL_FRAMEBUFFER
     elif write:
@@ -170,15 +183,16 @@ def use_render_target(
         target = GL_READ_FRAMEBUFFER
     else:
         return
+
     if isinstance(render_target, WindowRenderTarget):
+        gl_context = render_target._gl_context
+        assert gl_context is not None
         sdl_window = get_sdl_window_from_window(render_target.window)
-        SDL_GL_MakeCurrent(
-            sdl_window,
-            render_target._gl_context._sdl_gl_context
-        )
+        SDL_GL_MakeCurrent(sdl_window, gl_context._sdl_gl_context)
         glBindFramebuffer(target, 0)
         glViewport(0, 0, *render_target.size)
     elif isinstance(render_target, TextureRenderTarget):
+        assert render_target._gl is not None
         glBindFramebuffer(GL_FRAMEBUFFER, render_target._gl)
         glViewport(0, 0, *render_target.size)
     else:

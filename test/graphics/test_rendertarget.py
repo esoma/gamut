@@ -21,11 +21,19 @@ def test_window_render_target() -> None:
     render_target = WindowRenderTarget(window)
     assert render_target.window is window
     assert render_target.size == window.size
+    assert render_target.is_open
+
+    render_target.close()
+    assert render_target.window is window
+    assert render_target.size == window.size
+    assert not render_target.is_open
 
     window.close()
     assert render_target.window is window
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError) as excinfo:
         render_target.size
+    assert str(excinfo.value) == 'window is closed'
+    assert not render_target.is_open
 
 
 @pytest.mark.parametrize(
