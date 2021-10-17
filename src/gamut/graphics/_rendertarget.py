@@ -16,7 +16,7 @@ __all__ = [
 from ._color import Color
 from ._texture2d import Texture2d
 # gamut
-from gamut._glcontext import get_gl_context
+from gamut._glcontext import get_gl_context, GlContext
 from gamut._window import get_sdl_window_from_window, Window
 # python
 from ctypes import byref as c_byref
@@ -34,6 +34,7 @@ from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        GL_STENCIL_INDEX, GL_TEXTURE_2D, glBindFramebuffer,
                        glBindRenderbuffer, glCheckFramebufferStatus, glClear,
                        glClearColor, glClearDepthf, glClearStencil,
+                       glDeleteFramebuffers, glDeleteRenderbuffers,
                        glFramebufferRenderbuffer, glFramebufferTexture2D,
                        glGenFramebuffers, glGenRenderbuffers, glReadPixels,
                        glRenderbufferStorage, glViewport)
@@ -57,9 +58,10 @@ class TextureRenderTarget:
     ):
         assert isinstance(depth_stencil, TextureRenderTargetDepthStencil)
 
-        self._gl_context = get_gl_context()
+        self._gl_context: Optional[GlContext] = get_gl_context()
 
-        self._colors = colors
+        self._colors = tuple(colors)
+        self._depth_stencil = depth_stencil
         self._ds_gl: Optional[int] = None
 
         if not colors:
@@ -104,13 +106,36 @@ class TextureRenderTarget:
         if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
             raise RuntimeError('framebuffer incomplete')
 
+    def __del__(self) -> None:
+        self.close()
+
+    def close(self) -> None:
+        if hasattr(self, "_ds_gl") and self._ds_gl is not None:
+            glDeleteRenderbuffers(1, [self._ds_gl])
+            self._ds_gl = None
+        if hasattr(self, "_gl") and self._gl is not None:
+            glDeleteFramebuffers(1, [self._gl])
+            self._gl = None
+        self._gl_context = None
+
     @property
     def colors(self) -> Sequence[Texture2d]:
         return self._colors
 
     @property
+    def depth_stencil(self) -> Union[
+        TextureRenderTargetDepthStencil,
+        Texture2d
+    ]:
+        return self._depth_stencil
+
+    @property
     def size(self) -> tuple[int, int]:
         return self._size
+
+    @property
+    def is_open(self) -> bool:
+        return self._gl_context is not None
 
 
 class WindowRenderTarget:

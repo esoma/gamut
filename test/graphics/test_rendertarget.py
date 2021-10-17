@@ -28,6 +28,63 @@ def test_window_render_target() -> None:
         render_target.size
 
 
+@pytest.mark.parametrize(
+    "depth_stencil",
+    list(TextureRenderTargetDepthStencil)
+)
+def test_texture_render_target(
+    depth_stencil: TextureRenderTargetDepthStencil
+) -> None:
+    texture = Texture2d(
+        100, 100,
+        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        b'\x00' * 100 * 100 * 4
+    )
+    render_target = TextureRenderTarget([texture], depth_stencil)
+
+    assert len(render_target.colors) == 1
+    assert render_target.colors[0] == texture
+    assert render_target.depth_stencil == depth_stencil
+    assert render_target.size == (100, 100)
+    assert render_target.is_open
+
+    render_target.close()
+    assert len(render_target.colors) == 1
+    assert render_target.colors[0] == texture
+    assert render_target.depth_stencil == depth_stencil
+    assert render_target.size == (100, 100)
+    assert not render_target.is_open
+
+
+def test_texture_render_target_no_colors() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        TextureRenderTarget([])
+    assert str(excinfo.value) == 'at least 1 color texture must be supplied'
+
+
+@pytest.mark.parametrize("width, height", [
+    [101, 100],
+    [100, 101],
+])
+def test_texture_render_target_different_color_sizes(
+    width: int,
+    height: int
+) -> None:
+    texture1 = Texture2d(
+        100, 100,
+        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        b'\x00' * 100 * 100 * 4
+    )
+    texture2 = Texture2d(
+        width, height,
+        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        b'\x00' * width * height * 4
+    )
+    with pytest.raises(ValueError) as excinfo:
+        TextureRenderTarget([texture1, texture2])
+    assert str(excinfo.value) == 'all textures must have the same size'
+
+
 def create_render_target(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]]
 ) -> Union[TextureRenderTarget, WindowRenderTarget]:
@@ -39,7 +96,7 @@ def create_render_target(
         )
         return TextureRenderTarget(
             [texture],
-            depth_stencil=TextureRenderTargetDepthStencil.DEPTH_STENCIL
+            TextureRenderTargetDepthStencil.DEPTH_STENCIL
         )
     elif cls is WindowRenderTarget:
         return WindowRenderTarget(Window())
