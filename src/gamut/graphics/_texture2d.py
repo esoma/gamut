@@ -13,15 +13,18 @@ from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof
 from enum import Enum
 from typing import Final, Optional
+# numpy
+from numpy import array as np_array
 # pyopengl
 from OpenGL.GL import (GL_BYTE, GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL, GL_FLOAT,
                        GL_INT, GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED,
                        GL_RG, GL_RGB, GL_RGBA, GL_SHORT, GL_STREAM_READ,
                        GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT,
                        GL_UNSIGNED_INT_24_8, GL_UNSIGNED_SHORT, glBindBuffer,
-                       glBindTexture, glBufferData, glDeleteTextures,
-                       glGenBuffers, glGenerateMipmap, glGenTextures,
-                       glMapBuffer, glTexImage2D, glUnmapBuffer)
+                       glBindTexture, glBufferData, glDeleteBuffers,
+                       glDeleteTextures, glGenBuffers, glGenerateMipmap,
+                       glGenTextures, glGetTexImage, glMapBuffer, glTexImage2D,
+                       glUnmapBuffer)
 
 
 class TextureComponents(Enum):
@@ -130,7 +133,7 @@ class Texture2d:
 
     def close(self) -> None:
         if hasattr(self, '_gl') and self._gl is not None:
-            glDeleteTextures(1, [self._gl])
+            glDeleteTextures(np_array([self._gl]))
             self._gl = None
         self._gl_context = None
 
@@ -147,10 +150,30 @@ class Texture2d:
         return self._gl is not None
 
 
+Texture2d.__module__ = 'gamut.graphics'
+
+
 class TextureView:
 
     def __init__(self, texture: Texture2d, data_type: TextureDataType):
-        self._texture = texture
+        if not isinstance(texture, Texture2d):
+            raise TypeError(f'texture must be {Texture2d}')
+        if not isinstance(data_type, TextureDataType):
+            raise TypeError(f'data_type must be {TextureDataType}')
+
+        if not texture.is_open:
+            raise RuntimeError('texture is closed')
+
+        gl_data_type = data_type.value
+        if texture.components == TextureComponents.DS:
+            if data_type != TextureDataType.UNSIGNED_INT:
+                raise ValueError(
+                    f'data_type must be {TextureDataType.UNSIGNED_INT} when '
+                    f'components is {TextureComponents.DS}'
+                )
+            gl_data_type = GL_UNSIGNED_INT_24_8
+
+        self._texture: Optional[Texture2d] = texture
         self._gl_context: Optional[GlContext] = get_gl_context()
         self._gl = glGenBuffers(1)
 
@@ -169,27 +192,42 @@ class TextureView:
         )
 
         glBindTexture(GL_TEXTURE_2D, self._texture._gl)
+        glGetTexImage(
+            GL_TEXTURE_2D,
+            0,
+            texture.components.value,
+            gl_data_type,
+            0
+        )
         self._map: Optional[c_void_p] = c_void_p(glMapBuffer(
             GL_PIXEL_PACK_BUFFER,
             GL_READ_ONLY
         ))
+
+    def _ensure_open(self) -> None:
+        if self._gl is None:
+            raise RuntimeError('texture view is closed')
 
     def close(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
             glBindBuffer(GL_PIXEL_PACK_BUFFER, self._gl)
             glUnmapBuffer(GL_PIXEL_PACK_BUFFER)
         if hasattr(self, '_gl') and self._gl is not None:
-            glDeleteTextures(1, [self._gl])
+            glDeleteBuffers(1, [self._gl])
             self._gl = None
+        self._texture = None
         self._gl_context = None
 
     def __len__(self) -> int:
+        self._ensure_open()
         return self._length
 
     @property
     def bytes(self) -> bytes:
-        if self._map is None:
-            raise RuntimeError('closed')
+        self._ensure_open()
+        if not self.texture.is_open:
+            raise RuntimeError('texture is closed')
+        assert self._map is not None
         return bytes(c_cast(
             self._map,
             c_pointer(c_byte * self._length),
@@ -197,4 +235,10 @@ class TextureView:
 
     @property
     def texture(self) -> Texture2d:
+        self._ensure_open()
+        assert self._texture is not None
         return self._texture
+
+    @property
+    def is_open(self) -> bool:
+        return self._gl is not None
