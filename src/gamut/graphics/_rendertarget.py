@@ -7,43 +7,168 @@ __all__ = [
     'read_depth_from_render_target',
     'read_stencil_from_render_target',
     'TextureRenderTarget',
+    'TextureRenderTargetDepthStencil',
     'use_render_target',
     'WindowRenderTarget',
 ]
 
 # gamut
 from ._color import Color
+from ._texture2d import Texture2d, TextureComponents
 # gamut
-from gamut._glcontext import get_gl_context
+from gamut._glcontext import get_gl_context, GlContext
 from gamut._window import get_sdl_window_from_window, Window
 # python
 from ctypes import byref as c_byref
 from ctypes import c_int
-from typing import Optional, Union
+from enum import Enum
+from typing import Optional, Sequence, Union
 # pyopengl
-from OpenGL.GL import (GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT,
-                       GL_DEPTH_COMPONENT, GL_DRAW_FRAMEBUFFER, GL_FLOAT,
-                       GL_FRAMEBUFFER, GL_INT, GL_READ_FRAMEBUFFER, GL_RGBA,
-                       GL_STENCIL_BUFFER_BIT, GL_STENCIL_INDEX,
-                       glBindFramebuffer, glClear, glClearColor, glClearDepthf,
-                       glClearStencil, glReadPixels, glViewport)
+from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
+                       GL_DEPTH24_STENCIL8, GL_DEPTH_ATTACHMENT,
+                       GL_DEPTH_BUFFER_BIT, GL_DEPTH_COMPONENT,
+                       GL_DEPTH_COMPONENT24, GL_DEPTH_STENCIL_ATTACHMENT,
+                       GL_DRAW_FRAMEBUFFER, GL_FLOAT, GL_FRAMEBUFFER,
+                       GL_FRAMEBUFFER_COMPLETE, GL_INT, GL_READ_FRAMEBUFFER,
+                       GL_RENDERBUFFER, GL_RGBA, GL_STENCIL_BUFFER_BIT,
+                       GL_STENCIL_INDEX, GL_TEXTURE_2D,
+                       glCheckFramebufferStatus, glClear, glClearColor,
+                       glClearDepthf, glClearStencil, glReadPixels, glViewport)
+from OpenGL.GL.framebufferobjects import (glBindFramebuffer,
+                                          glBindRenderbuffer,
+                                          glDeleteFramebuffers,
+                                          glDeleteRenderbuffers,
+                                          glFramebufferRenderbuffer,
+                                          glFramebufferTexture2D,
+                                          glGenFramebuffers,
+                                          glGenRenderbuffers,
+                                          glRenderbufferStorage)
 # pysdl2
 from sdl2 import SDL_GL_GetDrawableSize, SDL_GL_MakeCurrent
 
 
+class TextureRenderTargetDepthStencil(Enum):
+    NONE = 0
+    DEPTH = 1
+    DEPTH_STENCIL = 2
+
+
 class TextureRenderTarget:
+
+    def __init__(
+        self,
+        colors: Sequence[Texture2d],
+        depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] =
+            TextureRenderTargetDepthStencil.NONE
+    ):
+        self._gl_context: Optional[GlContext] = get_gl_context()
+
+        self._colors = tuple(colors)
+        self._depth_stencil = depth_stencil
+        self._ds_gl: Optional[int] = None
+
+        if not colors:
+            raise ValueError('at least 1 color texture must be supplied')
+        sizes = {t.size for t in colors}
+        if len(sizes) != 1:
+            raise ValueError('all textures must have the same size')
+        self._size = list(sizes)[0]
+
+        self._gl = glGenFramebuffers(1)
+        glBindFramebuffer(GL_FRAMEBUFFER, self._gl)
+        for i, color_texture in enumerate(colors):
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0 + i,
+                GL_TEXTURE_2D,
+                color_texture._gl,
+                0
+            )
+
+        if isinstance(depth_stencil, Texture2d):
+            if depth_stencil.components == TextureComponents.D:
+                attachment = GL_DEPTH_ATTACHMENT
+            elif depth_stencil.components == TextureComponents.DS:
+                attachment = GL_DEPTH_STENCIL_ATTACHMENT
+            else:
+                raise ValueError(
+                    f'depth_stencil texture must either be '
+                    f'{TextureComponents.D} or {TextureComponents.DS}'
+                )
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                attachment,
+                GL_TEXTURE_2D,
+                depth_stencil._gl,
+                0
+            )
+        elif depth_stencil != TextureRenderTargetDepthStencil.NONE:
+            if depth_stencil == TextureRenderTargetDepthStencil.DEPTH_STENCIL:
+                sized_internal_format = GL_DEPTH24_STENCIL8
+                attachment = GL_DEPTH_STENCIL_ATTACHMENT
+            else:
+                assert depth_stencil == TextureRenderTargetDepthStencil.DEPTH
+                sized_internal_format = GL_DEPTH_COMPONENT24
+                attachment = GL_DEPTH_ATTACHMENT
+            self._ds_gl = glGenRenderbuffers(1)
+            glBindRenderbuffer(GL_RENDERBUFFER, self._ds_gl)
+            glRenderbufferStorage(
+                GL_RENDERBUFFER,
+                sized_internal_format,
+                *self._size
+            )
+            glFramebufferRenderbuffer(
+                GL_FRAMEBUFFER,
+                attachment,
+                GL_RENDERBUFFER,
+                self._ds_gl
+            )
+        if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
+            raise RuntimeError('framebuffer incomplete')
+
+    def __del__(self) -> None:
+        self.close()
+
+    def close(self) -> None:
+        if hasattr(self, "_ds_gl") and self._ds_gl is not None:
+            glDeleteRenderbuffers(1, [self._ds_gl])
+            self._ds_gl = None
+        if hasattr(self, "_gl") and self._gl is not None:
+            glDeleteFramebuffers(1, [self._gl])
+            self._gl = None
+        self._gl_context = None
+
+    @property
+    def colors(self) -> Sequence[Texture2d]:
+        return self._colors
+
+    @property
+    def depth_stencil(self) -> Union[
+        TextureRenderTargetDepthStencil,
+        Texture2d
+    ]:
+        return self._depth_stencil
 
     @property
     def size(self) -> tuple[int, int]:
-        return (0, 0)
+        return self._size
+
+    @property
+    def is_open(self) -> bool:
+        return self._gl_context is not None
 
 
 class WindowRenderTarget:
 
     def __init__(self, window: Window) -> None:
-        super().__init__()
         self._window = window
-        self._gl_context = get_gl_context()
+        self._gl_context: Optional[GlContext] = get_gl_context()
+
+    def __del__(self) -> None:
+        self.close()
+
+    def close(self) -> None:
+        self._gl_context = None
 
     @property
     def size(self) -> tuple[int, int]:
@@ -57,12 +182,19 @@ class WindowRenderTarget:
     def window(self) -> Window:
         return self._window
 
+    @property
+    def is_open(self) -> bool:
+        return self._gl_context is not None
+
 
 def use_render_target(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     write: bool,
     read: bool
 ) -> None:
+    if not render_target.is_open:
+        raise RuntimeError('render target is closed')
+
     if write and read:
         target = GL_FRAMEBUFFER
     elif write:
@@ -71,16 +203,18 @@ def use_render_target(
         target = GL_READ_FRAMEBUFFER
     else:
         return
+
     if isinstance(render_target, WindowRenderTarget):
+        gl_context = render_target._gl_context
+        assert gl_context is not None
         sdl_window = get_sdl_window_from_window(render_target.window)
-        SDL_GL_MakeCurrent(
-            sdl_window,
-            render_target._gl_context._sdl_gl_context
-        )
+        SDL_GL_MakeCurrent(sdl_window, gl_context._sdl_gl_context)
         glBindFramebuffer(target, 0)
         glViewport(0, 0, *render_target.size)
     elif isinstance(render_target, TextureRenderTarget):
-        raise NotImplementedError()
+        assert render_target._gl is not None
+        glBindFramebuffer(GL_FRAMEBUFFER, render_target._gl)
+        glViewport(0, 0, *render_target.size)
     else:
         raise TypeError(
             f'expected {TextureRenderTarget!r} or {WindowRenderTarget!r}'

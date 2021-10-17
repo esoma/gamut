@@ -7,6 +7,8 @@ __all__ = ['get_gl_context', 'GlContext']
 from time import sleep
 from typing import Any, Optional
 from weakref import ref
+# pyopengl
+from OpenGL.GL import GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, glPixelStorei
 # pysdl2
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
@@ -82,6 +84,9 @@ class GlContext:
         if self._sdl_gl_context is None:
             raise RuntimeError(SDL_GetError().decode('utf8'))
         assert isinstance(self._sdl_gl_context, int)
+
+        glPixelStorei(GL_PACK_ALIGNMENT, 1)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
 
     def __del__(self) -> None:
         if self._sdl_window is not None:

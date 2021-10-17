@@ -4,10 +4,15 @@ from gamut import Window
 from gamut.graphics import (clear_render_target, Color,
                             read_color_from_render_target,
                             read_depth_from_render_target,
-                            read_stencil_from_render_target,
-                            TextureRenderTarget, WindowRenderTarget)
+                            read_stencil_from_render_target, Texture2d,
+                            TextureComponents, TextureDataType,
+                            TextureRenderTarget,
+                            TextureRenderTargetDepthStencil,
+                            WindowRenderTarget)
 # python
-from typing import Union
+from ctypes import c_uint
+from ctypes import sizeof as c_sizeof
+from typing import Optional, Union
 # pytest
 import pytest
 
@@ -17,24 +22,107 @@ def test_window_render_target() -> None:
     render_target = WindowRenderTarget(window)
     assert render_target.window is window
     assert render_target.size == window.size
+    assert render_target.is_open
+
+    render_target.close()
+    assert render_target.window is window
+    assert render_target.size == window.size
+    assert not render_target.is_open
 
     window.close()
     assert render_target.window is window
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError) as excinfo:
         render_target.size
+    assert str(excinfo.value) == 'window is closed'
+    assert not render_target.is_open
+
+
+@pytest.mark.parametrize(
+    "depth_stencil",
+    [*TextureRenderTargetDepthStencil, None]
+)
+def test_texture_render_target(
+    depth_stencil: Optional[TextureRenderTargetDepthStencil]
+) -> None:
+    texture = Texture2d(
+        100, 100,
+        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        b'\x00' * 100 * 100 * 4
+    )
+    actual_depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] = (
+        Texture2d(
+            100, 100,
+            TextureComponents.DS, TextureDataType.UNSIGNED_INT,
+            b'\x00' * 100 * 100 * c_sizeof(c_uint)
+        )
+    )
+    if depth_stencil is not None:
+        actual_depth_stencil = depth_stencil
+
+    render_target = TextureRenderTarget([texture], actual_depth_stencil)
+
+    assert len(render_target.colors) == 1
+    assert render_target.colors[0] == texture
+    assert render_target.depth_stencil == actual_depth_stencil
+    assert render_target.size == (100, 100)
+    assert render_target.is_open
+
+    render_target.close()
+    assert len(render_target.colors) == 1
+    assert render_target.colors[0] == texture
+    assert render_target.depth_stencil == actual_depth_stencil
+    assert render_target.size == (100, 100)
+    assert not render_target.is_open
+
+
+def test_texture_render_target_no_colors() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        TextureRenderTarget([])
+    assert str(excinfo.value) == 'at least 1 color texture must be supplied'
+
+
+@pytest.mark.parametrize("width, height", [
+    [101, 100],
+    [100, 101],
+])
+def test_texture_render_target_different_color_sizes(
+    width: int,
+    height: int
+) -> None:
+    texture1 = Texture2d(
+        100, 100,
+        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        b'\x00' * 100 * 100 * 4
+    )
+    texture2 = Texture2d(
+        width, height,
+        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        b'\x00' * width * height * 4
+    )
+    with pytest.raises(ValueError) as excinfo:
+        TextureRenderTarget([texture1, texture2])
+    assert str(excinfo.value) == 'all textures must have the same size'
 
 
 def create_render_target(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]]
 ) -> Union[TextureRenderTarget, WindowRenderTarget]:
     if cls is TextureRenderTarget:
-        return TextureRenderTarget()
+        texture = Texture2d(
+            100, 100,
+            TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+            b'\x00' * 100 * 100 * 4
+        )
+        return TextureRenderTarget(
+            [texture],
+            TextureRenderTargetDepthStencil.DEPTH_STENCIL
+        )
     elif cls is WindowRenderTarget:
         return WindowRenderTarget(Window())
     raise NotImplementedError()
 
 
-@pytest.mark.parametrize("cls", [WindowRenderTarget])
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
 @pytest.mark.parametrize("color", [
     Color(0, 0, 0, 0),
     Color(.25, .4, .6, .8),
@@ -82,3 +170,14 @@ def test_clear(
         *render_target.size
     )
     assert all(pytest.approx(s, stencil) for row in stencils for s in row)
+
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_clear_closed(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]]
+) -> None:
+    render_target = create_render_target(cls)
+    render_target.close()
+    with pytest.raises(RuntimeError) as excinfo:
+        clear_render_target(render_target)
+    assert str(excinfo.value) == 'render target is closed'
