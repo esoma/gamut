@@ -159,3 +159,14 @@ def test_clear(
         *render_target.size
     )
     assert all(pytest.approx(s, stencil) for row in stencils for s in row)
+
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_clear_closed(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]]
+) -> None:
+    render_target = create_render_target(cls)
+    render_target.close()
+    with pytest.raises(RuntimeError) as excinfo:
+        clear_render_target(render_target)
+    assert str(excinfo.value) == 'render target is closed'
