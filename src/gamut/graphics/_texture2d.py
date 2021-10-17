@@ -204,9 +204,12 @@ class TextureView:
             GL_READ_ONLY
         ))
 
-    def _ensure_open(self) -> None:
+    def _ensure_open(self, *, include_texture: bool = True) -> None:
         if self._gl is None:
             raise RuntimeError('texture view is closed')
+        assert self._texture is not None
+        if include_texture and not self._texture.is_open:
+            raise RuntimeError('texture is closed')
 
     def close(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
@@ -225,8 +228,6 @@ class TextureView:
     @property
     def bytes(self) -> bytes:
         self._ensure_open()
-        if not self.texture.is_open:
-            raise RuntimeError('texture is closed')
         assert self._map is not None
         return bytes(c_cast(
             self._map,
@@ -235,7 +236,7 @@ class TextureView:
 
     @property
     def texture(self) -> Texture2d:
-        self._ensure_open()
+        self._ensure_open(include_texture=False)
         assert self._texture is not None
         return self._texture
 

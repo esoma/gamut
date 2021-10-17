@@ -314,7 +314,7 @@ def test_texture_view_depth_stencil_invalid_output_data_type(
     )
 
 
-def test_texture_view_texture_closed() -> None:
+def test_create_texture_view_texture_closed() -> None:
     texture = Texture2d(
         1, 1,
         TextureComponents.R,
@@ -324,6 +324,28 @@ def test_texture_view_texture_closed() -> None:
     texture.close()
     with pytest.raises(RuntimeError) as excinfo:
         TextureView(texture, TextureDataType.BYTE)
+    assert str(excinfo.value) == 'texture is closed'
+
+
+def test_texture_view_texture_closed() -> None:
+    texture = Texture2d(
+        1, 1,
+        TextureComponents.R,
+        TextureDataType.BYTE,
+        b'\x00'
+    )
+    view = TextureView(texture, TextureDataType.BYTE)
+
+    texture.close()
+    assert view.is_open
+    assert view.texture is texture
+
+    with pytest.raises(RuntimeError) as excinfo:
+        len(view)
+    assert str(excinfo.value) == 'texture is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        view.bytes
     assert str(excinfo.value) == 'texture is closed'
 
 
