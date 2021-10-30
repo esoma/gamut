@@ -97,6 +97,10 @@ class GlContext:
             self._sdl_gl_context = None
 
     @property
+    def is_open(self) -> bool:
+        return self._sdl_gl_context is not None
+
+    @property
     def sdl_gl_context(self) -> int:
         assert self._sdl_gl_context is not None
         return self._sdl_gl_context
