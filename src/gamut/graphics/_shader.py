@@ -128,7 +128,9 @@ class Shader:
 
     def close(self) -> None:
         if hasattr(self, "_gl") and self._gl is not None:
-            glDeleteProgram(self._gl)
+            assert self._gl_context is not None
+            if self._gl_context.is_open:
+                glDeleteProgram(self._gl)
             self._gl = None
         self._gl_context = None
 

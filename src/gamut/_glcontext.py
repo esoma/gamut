@@ -34,13 +34,13 @@ class SdlVideo:
         for i in range(10):
             if SDL_Init(SDL_INIT_VIDEO) == 0:
                 break
-            if SDL_GetError() != b'No available video device':
-                raise RuntimeError(SDL_GetError().decode('utf8'))
             # video initialization implies events initialization, but SDL_Init
             # doesn't quit the events subsystem if SDL_Init has an error, so
             # we must manually do so
             # https://github.com/libsdl-org/SDL/issues/4826
             SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            if SDL_GetError() != b'No available video device':
+                raise RuntimeError(SDL_GetError().decode('utf8'))
             sleep(.1)
         else:
             raise RuntimeError(SDL_GetError().decode('utf8'))
