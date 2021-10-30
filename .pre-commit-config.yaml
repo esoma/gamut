@@ -11,7 +11,7 @@ repos:
         entry: python .pre-commit-mypy.py
         args: [--config-file=pyproject.toml, --no-incremental]
         exclude: setup.py
-        additional_dependencies: ['pytest']
+        additional_dependencies: ['pyglm-typing', 'pytest']
 -   repo: https://github.com/pycqa/isort
     rev: '5.9.3'
     hooks:

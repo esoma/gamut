@@ -23,7 +23,6 @@ warn_unused_configs = true
 
 [[tool.mypy.overrides]]
 module = [
-    #'glm',
     'OpenGL',
     'OpenGL.GL',
     'OpenGL.GL.framebufferobjects',
