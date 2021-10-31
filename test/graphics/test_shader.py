@@ -131,10 +131,7 @@ def test_vector_attributes(
         array_def = ''
         x_value = 'attr_name.x'
         y_value = '0'
-    shader = Shader(vertex=f'''#version 140
-    #extension GL_ARB_explicit_attrib_location : enable
-    #extension GL_ARB_gpu_shader_fp64 : enable
-    #extension GL_ARB_vertex_attrib_64bit : enable
+    shader = Shader(vertex=f'''#version 410 core
     {layout} in {prefix}vec{components} attr_name{array_def};
     void main()
     {{
@@ -174,10 +171,7 @@ def test_matrix_attributes(
         array_def = ''
         x_value = 'attr_name[0][0]'
         y_value = '0'
-    shader = Shader(vertex=f'''#version 140
-    #extension GL_ARB_explicit_attrib_location : enable
-    #extension GL_ARB_gpu_shader_fp64 : enable
-    #extension GL_ARB_vertex_attrib_64bit : enable
+    shader = Shader(vertex=f'''#version 410 core
     {layout} in {prefix}mat{rows}x{columns} attr_name{array_def};
     void main()
     {{
