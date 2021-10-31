@@ -1,10 +1,13 @@
 
 # gamut
+from gamut import Window
 from gamut.graphics import Shader, ShaderAttribute
 # python
 from typing import Any, Optional
 # pyglm
 import glm
+# pyopengl
+from OpenGL.GL import GL_MAX_VARYING_VECTORS, glGetIntegerv
 # pytest
 import pytest
 
@@ -44,16 +47,18 @@ def test_compile_error(stage: str) -> None:
 
 
 def test_link_error() -> None:
+    w = Window()
+    size = glGetIntegerv(GL_MAX_VARYING_VECTORS) + 2
     with pytest.raises(RuntimeError) as excinfo:
         Shader(
-            vertex=b'''
+            vertex=f'''
             #version 410
-            in vec4 pos[999];
+            in vec4 pos[{size}];
             void main()
-            {
+            {{
                 gl_Position = pos[0];
-            }
-            '''
+            }}
+            '''.encode('utf-8')
         )
     assert str(excinfo.value).startswith(f'Failed to link:\n')
 
