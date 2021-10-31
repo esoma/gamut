@@ -33,7 +33,7 @@ def test_invalid_fragment_type(fragment: Any) -> None:
 def test_compile_error(stage: str) -> None:
     with pytest.raises(RuntimeError) as excinfo:
         Shader(**{
-            stage: b'''#version 140
+            stage: b'''#version 410
             void main()
             {
                 what--what
@@ -47,7 +47,7 @@ def test_link_error() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         Shader(
             vertex=b'''
-            #version 140
+            #version 410
             in vec4 pos[99];
             void main()
             {
@@ -59,7 +59,7 @@ def test_link_error() -> None:
 
 
 def test_vertex_only() -> None:
-    shader = Shader(vertex=b'''#version 140
+    shader = Shader(vertex=b'''#version 410
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -69,7 +69,7 @@ def test_vertex_only() -> None:
 
 
 def test_fragment_only() -> None:
-    shader = Shader(fragment=b'''#version 140
+    shader = Shader(fragment=b'''#version 410
     out vec4 FragColor;
     void main()
     {
@@ -80,7 +80,7 @@ def test_fragment_only() -> None:
 
 
 def test_vertex_and_fragment() -> None:
-    shader = Shader(vertex=b'''#version 140
+    shader = Shader(vertex=b'''#version 410
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -96,7 +96,7 @@ def test_vertex_and_fragment() -> None:
 
 
 def test_close() -> None:
-    shader = Shader(vertex=b'''#version 140
+    shader = Shader(vertex=b'''#version 410
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
