@@ -48,7 +48,7 @@ def test_link_error() -> None:
         Shader(
             vertex=b'''
             #version 410
-            in vec4 pos[99];
+            in vec4 pos[999];
             void main()
             {
                 gl_Position = pos[0];
