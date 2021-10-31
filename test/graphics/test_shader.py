@@ -33,7 +33,7 @@ def test_invalid_fragment_type(fragment: Any) -> None:
 def test_compile_error(stage: str) -> None:
     with pytest.raises(RuntimeError) as excinfo:
         Shader(**{
-            stage: b'''#version 330
+            stage: b'''#version 140
             void main()
             {
                 what--what
@@ -47,7 +47,7 @@ def test_link_error() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         Shader(
             vertex=b'''
-            #version 330
+            #version 140
             in vec4 pos[99];
             void main()
             {
@@ -59,7 +59,7 @@ def test_link_error() -> None:
 
 
 def test_vertex_only() -> None:
-    shader = Shader(vertex=b'''#version 330
+    shader = Shader(vertex=b'''#version 140
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -69,7 +69,7 @@ def test_vertex_only() -> None:
 
 
 def test_fragment_only() -> None:
-    shader = Shader(fragment=b'''#version 330
+    shader = Shader(fragment=b'''#version 140
     out vec4 FragColor;
     void main()
     {
@@ -80,7 +80,7 @@ def test_fragment_only() -> None:
 
 
 def test_vertex_and_fragment() -> None:
-    shader = Shader(vertex=b'''#version 330
+    shader = Shader(vertex=b'''#version 140
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -96,7 +96,7 @@ def test_vertex_and_fragment() -> None:
 
 
 def test_close() -> None:
-    shader = Shader(vertex=b'''#version 330
+    shader = Shader(vertex=b'''#version 140
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -131,14 +131,10 @@ def test_vector_attributes(
         array_def = ''
         x_value = 'attr_name.x'
         y_value = '0'
-    print(f'''#version 410
-    {layout} in {prefix}vec{components} attr_name{array_def};
-    void main()
-    {{
-        gl_Position = vec4({x_value}, {y_value}, 0, 1);
-    }}
-    ''')
-    shader = Shader(vertex=f'''#version 410
+    shader = Shader(vertex=f'''#version 140
+    #extension GL_ARB_explicit_attrib_location : enable
+    #extension GL_ARB_gpu_shader_fp64 : enable
+    #extension GL_ARB_vertex_attrib_64bit : enable
     {layout} in {prefix}vec{components} attr_name{array_def};
     void main()
     {{
@@ -178,7 +174,10 @@ def test_matrix_attributes(
         array_def = ''
         x_value = 'attr_name[0][0]'
         y_value = '0'
-    shader = Shader(vertex=f'''#version 410
+    shader = Shader(vertex=f'''#version 140
+    #extension GL_ARB_explicit_attrib_location : enable
+    #extension GL_ARB_gpu_shader_fp64 : enable
+    #extension GL_ARB_vertex_attrib_64bit : enable
     {layout} in {prefix}mat{rows}x{columns} attr_name{array_def};
     void main()
     {{
