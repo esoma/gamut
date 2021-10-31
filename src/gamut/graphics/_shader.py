@@ -1,12 +1,12 @@
 
 from __future__ import annotations
 
-__all__ = ['Shader']
+__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform']
 
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
 # python
-from typing import Final, Optional
+from typing import Final, Generic, Optional, TypeVar, Union
 # pyglm
 import glm
 # pyopengl
@@ -24,6 +24,8 @@ from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                glGetProgramInfoLog, glGetProgramiv,
                                glGetShaderInfoLog, glGetShaderiv,
                                glLinkProgram, glShaderSource)
+
+TT = TypeVar('TT', bound=type)
 
 
 class Shader:
@@ -44,19 +46,22 @@ class Shader:
 
         stages: list[int] = []
 
-        def add_stage(code: bytes, type: int) -> None:
+        def add_stage(name: str, code: bytes, type: int) -> None:
             gl = glCreateShader(type)
             stages.append(gl)
             glShaderSource(gl, code)
             glCompileShader(gl)
             if not glGetShaderiv(gl, GL_COMPILE_STATUS):
-                raise RuntimeError(glGetShaderInfoLog(gl).decode('utf8'))
+                raise RuntimeError(
+                    f'{name} stage failed to compile:\n' +
+                    glGetShaderInfoLog(gl).decode('utf8')
+                )
 
         try:
             if vertex is not None:
-                add_stage(vertex, GL_VERTEX_SHADER)
+                add_stage('vertex', vertex, GL_VERTEX_SHADER)
             if fragment is not None:
-                add_stage(fragment, GL_FRAGMENT_SHADER)
+                add_stage('fragment', fragment, GL_FRAGMENT_SHADER)
 
             self._gl = glCreateProgram()
             for stage in stages:
@@ -64,12 +69,15 @@ class Shader:
             glLinkProgram(self._gl)
 
             if glGetProgramiv(self._gl, GL_LINK_STATUS) == GL_FALSE:
-                raise RuntimeError(glGetProgramInfoLog(self._gl))
+                raise RuntimeError(
+                    'Failed to link:\n' +
+                    glGetProgramInfoLog(self._gl).decode('utf8')
+                )
         finally:
             for stage in stages:
                 glDeleteShader(stage)
 
-        attributes = []
+        attributes: list[ShaderAttribute] = []
         max_attr_length = glGetProgramiv(
             self._gl,
             GL_ACTIVE_ATTRIBUTE_MAX_LENGTH
@@ -86,7 +94,7 @@ class Shader:
             )
             name = name.value[:length.value]
             location = glGetAttribLocation(self._gl, name)
-            attributes.append((
+            attributes.append(ShaderAttribute(
                 name.decode('utf8').rstrip('[0]'),
                 GL_TYPE_TO_PY[type.value],
                 size.value,
@@ -94,7 +102,7 @@ class Shader:
             ))
         self._attributes = tuple(attributes)
 
-        uniforms = []
+        uniforms: list[ShaderUniform] = []
         max_uni_length = glGetProgramiv(
             self._gl,
             GL_ACTIVE_UNIFORM_MAX_LENGTH
@@ -111,7 +119,7 @@ class Shader:
             )
             name = name.value[:length.value]
             location = glGetUniformLocation(self._gl, name)
-            uniforms.append((
+            uniforms.append(ShaderUniform(
                 name.decode('utf8').rstrip('[0]'),
                 GL_TYPE_TO_PY[type.value],
                 size.value,
@@ -119,8 +127,16 @@ class Shader:
             ))
         self._uniforms = tuple(uniforms)
 
+        self._inputs: dict[str, Union[ShaderAttribute, ShaderUniform]] = {
+            **{attribute.name: attribute for attribute in attributes},
+            **{uniform.name: uniform for uniform in uniforms},
+        }
+
     def __del__(self) -> None:
         self.close()
+
+    def __getitem__(self, name: str) -> Union[ShaderAttribute, ShaderUniform]:
+        return self._inputs[name]
 
     def _ensure_open(self) -> None:
         if self._gl is None:
@@ -135,18 +151,80 @@ class Shader:
         self._gl_context = None
 
     @property
-    def attributes(self) -> tuple:
+    def attributes(self) -> tuple[ShaderAttribute, ...]:
         self._ensure_open()
         return self._attributes
 
     @property
-    def uniforms(self) -> tuple:
+    def uniforms(self) -> tuple[ShaderUniform, ...]:
         self._ensure_open()
         return self._uniforms
 
     @property
     def is_open(self) -> bool:
         return self._gl is not None
+
+
+class ShaderAttribute(Generic[TT]):
+
+    def __init__(
+        self,
+        name: str,
+        type: TT,
+        size: int,
+        location: int
+    ) -> None:
+        self._name = name
+        self._type = type
+        self._size = size
+        self._location = location
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> TT:
+        return self._type
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @property
+    def location(self) -> int:
+        return self._location
+
+
+class ShaderUniform(Generic[TT]):
+
+    def __init__(
+        self,
+        name: str,
+        type: TT,
+        size: int,
+        location: int
+    ) -> None:
+        self._name = name
+        self._type = type
+        self._size = size
+        self._location = location
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> TT:
+        return self._type
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @property
+    def location(self) -> int:
+        return self._location
 
 
 GL_TYPE_TO_PY: Final = {

@@ -8,6 +8,8 @@ __all__ = [
     'read_depth_from_render_target',
     'read_stencil_from_render_target',
     'Shader',
+    'ShaderAttribute',
+    'ShaderUniform',
     'TextureComponents',
     'TextureDataType',
     'Texture2d',
@@ -26,6 +28,6 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from ._shader import Shader
+from ._shader import Shader, ShaderAttribute, ShaderUniform
 from ._texture2d import (Texture2d, TextureComponents, TextureDataType,
                          TextureView)
