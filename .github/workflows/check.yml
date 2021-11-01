@@ -17,15 +17,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.9, '3.10']
-        python-arch: [x86, x64]
+        python-arch: [x64]
 
         exclude:
-          - os: ubuntu-latest
-            python-arch: x86
-
-          - os: macos-latest
-            python-arch: x86
-
           - os: macos-latest
             python-version: '3.10'
 
@@ -47,21 +41,12 @@ jobs:
       run: |
         python -m pip install .[test]
 
-    - name: Install Mesa x64
-      if: ${{ matrix.os == 'windows-latest' && matrix.python-arch == 'x64' }}
+    - name: Install Mesa
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
         curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/21.2.4/mesa3d-21.2.4-release-msvc.7z
         "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/opengl32.dll
         "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/libglapi.dll
-        dir
-      shell: cmd
-
-    - name: Install Mesa x86
-      if: ${{ matrix.os == 'windows-latest' && matrix.python-arch == 'x86' }}
-      run: |
-        curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/21.2.4/mesa3d-21.2.4-release-msvc.7z
-        "C:\Program Files\7-Zip\7z.exe" e mesa.7z x86/opengl32.dll
-        "C:\Program Files\7-Zip\7z.exe" e mesa.7z x86/libglapi.dll
         dir
       shell: cmd
 
