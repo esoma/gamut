@@ -58,7 +58,15 @@ def test_link_error() -> None:
             {{
                 gl_Position = pos[{size - 1}];
             }}
-            '''.encode('utf-8')
+            '''.encode('utf-8'),
+            fragment=b'''
+            #version 410
+            out vec4 FragColor;
+            void main()
+            {
+                FragColor = vec4(0, 0, 0, 1);
+            }
+            '''
         )
     assert str(excinfo.value).startswith(f'Failed to link:\n')
 
