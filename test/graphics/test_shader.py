@@ -56,7 +56,7 @@ def test_link_error() -> None:
             in vec4 pos[{size}];
             void main()
             {{
-                gl_Position = pos[0];
+                gl_Position = pos[{size - 1}];
             }}
             '''.encode('utf-8')
         )
