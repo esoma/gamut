@@ -160,7 +160,7 @@ def test_matrix_attributes(
     prefix: str,
     array: bool,
 ) -> None:
-    # macos has problems with mat3+x3+ in arrays?
+    # macos has problems with dmat3+x3+ in arrays?
     if (sys.platform == 'darwin' and prefix == 'd' and
         columns >= 3 and rows >= 3 and array):
         pytest.xfail()
