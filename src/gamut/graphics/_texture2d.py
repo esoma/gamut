@@ -133,7 +133,9 @@ class Texture2d:
 
     def close(self) -> None:
         if hasattr(self, '_gl') and self._gl is not None:
-            glDeleteTextures(np_array([self._gl]))
+            assert self._gl_context
+            if self._gl_context.is_open:
+                glDeleteTextures(np_array([self._gl]))
             self._gl = None
         self._gl_context = None
 
