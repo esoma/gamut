@@ -1,5 +1,7 @@
 
 __all__ = [
+    'Buffer',
+    'BufferView',
     'clear_render_target',
     'Color',
     'Image',
@@ -20,6 +22,7 @@ __all__ = [
 ]
 
 # gamut
+from ._buffer import Buffer, BufferView
 from ._color import Color
 from ._image import Image, ImageInvalidError
 from ._rendertarget import (clear_render_target, read_color_from_render_target,
