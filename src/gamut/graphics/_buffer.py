@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Buffer', 'BufferView']
+__all__ = ['Buffer', 'BufferFrequency', 'BufferNature', 'BufferView']
 
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
@@ -53,6 +53,9 @@ FREQUENCY_NATURE_TO_GL_ACCESS: Final = {
 
 GLM_POD_TO_STRUCT_NAME: Final[dict[Any, str]] = {
     glm.float32: 'f',
+    glm.double: 'd',
+    glm.int32: 'i',
+    glm.uint32: 'I',
 }
 
 
@@ -91,6 +94,7 @@ class Buffer:
 
     def _ensure_mapped(self) -> None:
         assert self.is_open
+        assert self._length > 0
         if self._map is not None:
             return
         glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
@@ -115,6 +119,9 @@ class Buffer:
 
     @property
     def bytes(self) -> bytes:
+        self._ensure_open()
+        if self._length == 0:
+            return b''
         self._ensure_mapped()
         assert self._map is not None
         return bytes(c_cast(
@@ -137,7 +144,21 @@ class Buffer:
         return self._gl is not None
 
 
-BVT = TypeVar('BVT', glm.float32, glm.vec1, glm.vec2, glm.vec3)
+BVT = TypeVar('BVT',
+    glm.float32, glm.double, glm.int32, glm.uint32,
+    glm.vec2, glm.dvec2, glm.ivec2, glm.uvec2,
+    glm.vec3, glm.dvec3, glm.ivec3, glm.uvec3,
+    glm.vec4, glm.dvec4, glm.ivec4, glm.uvec4,
+    glm.mat2x2, glm.dmat2x2, glm.imat2x2, glm.umat2x2,
+    glm.mat2x3, glm.dmat2x3, glm.imat2x3, glm.umat2x3,
+    glm.mat2x4, glm.dmat2x4, glm.imat2x4, glm.umat2x4,
+    glm.mat3x2, glm.dmat3x2, glm.imat3x2, glm.umat3x2,
+    glm.mat3x3, glm.dmat3x3, glm.imat3x3, glm.umat3x3,
+    glm.mat3x4, glm.dmat3x4, glm.imat3x4, glm.umat3x4,
+    glm.mat4x2, glm.dmat4x2, glm.imat4x2, glm.umat4x2,
+    glm.mat4x3, glm.dmat4x3, glm.imat4x3, glm.umat4x3,
+    glm.mat4x4, glm.dmat4x4, glm.imat4x4, glm.umat4x4,
+)
 
 
 class BufferView(Generic[BVT]):
@@ -150,11 +171,17 @@ class BufferView(Generic[BVT]):
         stride: Optional[int] = None,
         offset: int = 0
     ) -> None:
+        buffer._ensure_open()
+
         self._buffer: Optional[Buffer] = buffer
         self._data_type: type[BVT] = data_type
         if stride is None:
             stride = glm_sizeof(data_type)
+        if stride < 1:
+            raise ValueError('stride must be greater than 0')
         self._stride = stride
+        if offset < 0:
+            raise ValueError('offset must be 0 or greater')
         self._offset = offset
 
     def __del__(self) -> None:
@@ -168,12 +195,15 @@ class BufferView(Generic[BVT]):
     def __iter__(self) -> Generator[BVT, None, None]:
         self._ensure_open()
         assert self._buffer is not None
+        if len(self._buffer) == 0:
+            return
         self._buffer._ensure_mapped()
         assert self._buffer._map is not None
+
         for i in range(len(self)):
             assert self._buffer._map.value is not None
             data_bytes = bytes(c_cast(
-                self._buffer._map.value + (self._stride * i),
+                self._buffer._map.value + self._offset + (self._stride * i),
                 c_pointer(c_byte * glm_sizeof(self._data_type)),
             ).contents)
             try:
