@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform', 'use_shader']
+__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform']
 
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
@@ -273,5 +273,44 @@ GL_TYPE_TO_PY: Final = {
     OpenGL.GL.GL_DOUBLE_MAT4x2: glm.dmat4x2,
     OpenGL.GL.GL_DOUBLE_MAT4x3: glm.dmat4x3,
 
+    OpenGL.GL.GL_SAMPLER_1D: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_1D: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_1D: glm.int32,
     OpenGL.GL.GL_SAMPLER_2D: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_2D: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D: glm.int32,
+    OpenGL.GL.GL_SAMPLER_3D: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_3D: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_3D: glm.int32,
+    OpenGL.GL.GL_SAMPLER_CUBE: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_CUBE: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_CUBE: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_RECT: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_2D_RECT: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_RECT: glm.int32,
+    OpenGL.GL.GL_SAMPLER_1D_ARRAY: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_1D_ARRAY: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_ARRAY: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_2D_ARRAY: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: glm.int32,
+    OpenGL.GL.GL_SAMPLER_CUBE_MAP_ARRAY: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_CUBE_MAP_ARRAY: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY: glm.int32,
+    OpenGL.GL.GL_SAMPLER_BUFFER: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_BUFFER: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_BUFFER: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_MULTISAMPLE: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_2D_MULTISAMPLE: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_MULTISAMPLE_ARRAY: glm.int32,
+    OpenGL.GL.GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: glm.int32,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: glm.int32,
+    OpenGL.GL.GL_SAMPLER_1D_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_CUBE_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_RECT_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_1D_ARRAY_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_2D_ARRAY_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW: glm.int32,
 }
