@@ -2,6 +2,7 @@
 # gamut
 from gamut.graphics import Shader, ShaderAttribute
 # python
+import sys
 from typing import Any, Optional
 # pyglm
 import glm
@@ -159,6 +160,11 @@ def test_matrix_attributes(
     prefix: str,
     array: bool,
 ) -> None:
+    # macos has problems with mat3+x3+ in arrays?
+    if (sys.platform == 'darwin' and prefix == 'd' and
+        columns >= 3 and rows >= 3 and array):
+        pytest.xfail()
+
     if location is None:
         layout = ''
     else:
@@ -178,6 +184,7 @@ def test_matrix_attributes(
         gl_Position = vec4({x_value}, {y_value}, 0, 1);
     }}
     '''.encode('utf-8'))
+    print(shader.attributes)
     attr = shader["attr_name"]
     assert len(shader.attributes) == 1
     assert shader.attributes[0] is attr
