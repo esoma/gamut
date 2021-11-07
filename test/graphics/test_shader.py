@@ -1,6 +1,7 @@
 
 # gamut
-from gamut.graphics import Shader, ShaderAttribute
+from gamut._glcontext import get_gl_context
+from gamut.graphics import Shader, ShaderAttribute, ShaderUniform
 # python
 import sys
 from typing import Any, Optional
@@ -34,7 +35,7 @@ def test_invalid_fragment_type(fragment: Any) -> None:
 def test_compile_error(stage: str) -> None:
     with pytest.raises(RuntimeError) as excinfo:
         Shader(**{
-            stage: b'''#version 410
+            stage: b'''#version 140
             void main()
             {
                 what--what
@@ -48,7 +49,7 @@ def test_link_error() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         Shader(
             vertex=f'''
-            #version 410
+            #version 140
             vec4 some_function_that_doesnt_exist();
             void main()
             {{
@@ -60,7 +61,7 @@ def test_link_error() -> None:
 
 
 def test_vertex_only() -> None:
-    shader = Shader(vertex=b'''#version 410
+    shader = Shader(vertex=b'''#version 140
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -70,7 +71,7 @@ def test_vertex_only() -> None:
 
 
 def test_fragment_only() -> None:
-    shader = Shader(fragment=b'''#version 410
+    shader = Shader(fragment=b'''#version 140
     out vec4 FragColor;
     void main()
     {
@@ -81,7 +82,7 @@ def test_fragment_only() -> None:
 
 
 def test_vertex_and_fragment() -> None:
-    shader = Shader(vertex=b'''#version 410
+    shader = Shader(vertex=b'''#version 140
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -97,7 +98,7 @@ def test_vertex_and_fragment() -> None:
 
 
 def test_close() -> None:
-    shader = Shader(vertex=b'''#version 410
+    shader = Shader(vertex=b'''#version 140
     void main()
     {
         gl_Position = vec4(0, 0, 0, 1);
@@ -108,6 +109,116 @@ def test_close() -> None:
     assert not shader.is_open
     shader.close()
     assert not shader.is_open
+
+    with pytest.raises(RuntimeError) as excinfo:
+        shader.attributes
+    assert str(excinfo.value) == 'shader is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        shader.uniforms
+    assert str(excinfo.value) == 'shader is closed'
+
+
+@pytest.mark.parametrize("location", [None, 1])
+@pytest.mark.parametrize("glsl_type, python_type", [
+    ('float', glm.float32),
+    ('double', glm.double),
+    ('int', glm.int32),
+    ('uint', glm.uint32),
+])
+@pytest.mark.parametrize("array", [False, True])
+def test_pod_attributes(
+    location: Optional[int],
+    glsl_type: str,
+    python_type: Any,
+    array: bool,
+) -> None:
+    glsl_version = '140'
+    if location is not None or array:
+        glsl_version = '330 core'
+        if get_gl_context().version < (3, 3):
+            pytest.xfail()
+
+    if glsl_type == 'double':
+        glsl_version = '410 core'
+        if get_gl_context().version < (4, 1):
+            pytest.xfail()
+
+    if location is None:
+        layout = ''
+    else:
+        layout = f'layout(location={location})'
+    if array:
+        array_def = '[2]'
+        x_value = 'attr_name[0]'
+        y_value = 'attr_name[1]'
+    else:
+        array_def = ''
+        x_value = 'attr_name'
+        y_value = '0'
+    shader = Shader(vertex=f'''#version {glsl_version}
+    {layout} in {glsl_type} attr_name{array_def};
+    void main()
+    {{
+        gl_Position = vec4({x_value}, {y_value}, 0, 1);
+    }}
+    '''.encode('utf-8'))
+    attr = shader["attr_name"]
+    assert len(shader.attributes) == 1
+    assert shader.attributes[0] is attr
+    assert isinstance(attr, ShaderAttribute)
+    assert attr.name == "attr_name"
+    assert attr.type is python_type
+    assert attr.size == (2 if array else 1)
+    assert attr.location == (0 if location is None else location)
+
+
+@pytest.mark.parametrize("location", [None, 1])
+@pytest.mark.parametrize("glsl_type, python_type", [
+    ('float', glm.float32),
+    ('double', glm.double),
+    ('int', glm.int32),
+    ('uint', glm.uint32),
+    ('bool', glm.bool_),
+])
+@pytest.mark.parametrize("array", [False, True])
+def test_pod_uniforms(
+    location: Optional[int],
+    glsl_type: str,
+    python_type: Any,
+    array: bool,
+) -> None:
+    if location is not None and get_gl_context().version < (4, 3):
+        pytest.xfail()
+
+    if location is None:
+        layout = ''
+    else:
+        layout = f'layout(location={location})'
+    if array:
+        array_def = '[2]'
+        x_value = 'uni_name[0]'
+        y_value = 'uni_name[1]'
+    else:
+        array_def = ''
+        x_value = 'uni_name'
+        y_value = '0'
+    shader = Shader(vertex=f'''#version 410 core
+    #extension GL_ARB_explicit_uniform_location : enable
+    {layout} uniform {glsl_type} uni_name{array_def};
+    void main()
+    {{
+        gl_Position = vec4({x_value}, {y_value}, 0, 1);
+    }}
+    '''.encode('utf-8'))
+    uni = shader["uni_name"]
+    assert len(shader.uniforms) == 1
+    assert shader.uniforms[0] is uni
+    assert isinstance(uni, ShaderUniform)
+    assert uni.name == "uni_name"
+    assert uni.type is python_type
+    assert uni.size == (2 if array else 1)
+    assert uni.location == (0 if location is None else location)
 
 
 @pytest.mark.parametrize("location", [None, 1])

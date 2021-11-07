@@ -8,7 +8,8 @@ from time import sleep
 from typing import Any, Optional
 from weakref import ref
 # pyopengl
-from OpenGL.GL import GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, glPixelStorei
+from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
+                       glGetString, glPixelStorei)
 # pysdl2
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
@@ -76,22 +77,34 @@ class GlContext:
         if self._sdl_window is None:
             raise RuntimeError(SDL_GetError().decode('utf8'))
 
-        if SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4) != 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
-        if SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1) != 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
-        if SDL_GL_SetAttribute(
-            SDL_GL_CONTEXT_PROFILE_MASK,
-            SDL_GL_CONTEXT_PROFILE_CORE
-        ) != 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
-        self._sdl_gl_context = SDL_GL_CreateContext(self._sdl_window)
+        for major, minor in [
+            (4, 3), (4, 2), (4, 1), (4, 0),
+            (3, 3), (3, 2), (3, 1),
+        ]:
+            if SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+            if SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+            if SDL_GL_SetAttribute(
+                SDL_GL_CONTEXT_PROFILE_MASK,
+                SDL_GL_CONTEXT_PROFILE_CORE
+            ) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+            self._sdl_gl_context = SDL_GL_CreateContext(self._sdl_window)
+            if self._sdl_gl_context is not None:
+                break
         if self._sdl_gl_context is None:
             raise RuntimeError(SDL_GetError().decode('utf8'))
         assert isinstance(self._sdl_gl_context, int)
 
         glPixelStorei(GL_PACK_ALIGNMENT, 1)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+
+        gl_version = glGetString(GL_VERSION).decode('utf8')
+        self._version: tuple[int, int] = tuple( # type: ignore
+            int(v)
+            for v in gl_version.split(' ')[0].split('.')[:2]
+        )
 
     def __del__(self) -> None:
         if self._sdl_window is not None:
@@ -109,6 +122,10 @@ class GlContext:
     def sdl_gl_context(self) -> int:
         assert self._sdl_gl_context is not None
         return self._sdl_gl_context
+
+    @property
+    def version(self) -> tuple[int, int]:
+        return self._version
 
 
 def get_gl_context() -> GlContext:

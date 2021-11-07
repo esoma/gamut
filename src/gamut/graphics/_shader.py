@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform']
+__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform', 'use_shader']
 
 # gamut
 from gamut._glcontext import get_gl_context, GlContext
@@ -228,27 +228,27 @@ class ShaderUniform(Generic[TT]):
 
 
 GL_TYPE_TO_PY: Final = {
-    OpenGL.GL.GL_FLOAT: glm.vec1,
+    OpenGL.GL.GL_FLOAT: glm.float32,
     OpenGL.GL.GL_FLOAT_VEC2: glm.vec2,
     OpenGL.GL.GL_FLOAT_VEC3: glm.vec3,
     OpenGL.GL.GL_FLOAT_VEC4: glm.vec4,
 
-    OpenGL.GL.GL_DOUBLE: glm.dvec1,
+    OpenGL.GL.GL_DOUBLE: glm.double,
     OpenGL.GL.GL_DOUBLE_VEC2: glm.dvec2,
     OpenGL.GL.GL_DOUBLE_VEC3: glm.dvec3,
     OpenGL.GL.GL_DOUBLE_VEC4: glm.dvec4,
 
-    OpenGL.GL.GL_INT: glm.ivec1,
+    OpenGL.GL.GL_INT: glm.int32,
     OpenGL.GL.GL_INT_VEC2: glm.ivec2,
     OpenGL.GL.GL_INT_VEC3: glm.ivec3,
     OpenGL.GL.GL_INT_VEC4: glm.ivec4,
 
-    OpenGL.GL.GL_UNSIGNED_INT: glm.uvec1,
+    OpenGL.GL.GL_UNSIGNED_INT: glm.uint32,
     OpenGL.GL.GL_UNSIGNED_INT_VEC2: glm.uvec2,
     OpenGL.GL.GL_UNSIGNED_INT_VEC3: glm.uvec3,
     OpenGL.GL.GL_UNSIGNED_INT_VEC4: glm.uvec4,
 
-    OpenGL.GL.GL_BOOL: glm.bvec1,
+    OpenGL.GL.GL_BOOL: glm.bool_,
     OpenGL.GL.GL_BOOL_VEC2: glm.bvec2,
     OpenGL.GL.GL_BOOL_VEC3: glm.bvec3,
     OpenGL.GL.GL_BOOL_VEC4: glm.bvec4,
@@ -273,5 +273,5 @@ GL_TYPE_TO_PY: Final = {
     OpenGL.GL.GL_DOUBLE_MAT4x2: glm.dmat4x2,
     OpenGL.GL.GL_DOUBLE_MAT4x3: glm.dmat4x3,
 
-    OpenGL.GL.GL_SAMPLER_2D: glm.ivec1,
+    OpenGL.GL.GL_SAMPLER_2D: glm.int32,
 }
