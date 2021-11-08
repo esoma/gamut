@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform']
 
 # gamut
-from gamut._glcontext import get_gl_context, GlContext
+from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from typing import Final, Generic, Optional, TypeVar, Union
 # pyglm
@@ -35,14 +35,14 @@ class Shader:
         vertex: Optional[bytes] = None,
         fragment: Optional[bytes] = None,
     ):
+        self._gl_context = require_gl_context()
+
         if vertex is None and fragment is None:
             raise TypeError('vertex or fragment must be provided')
         if vertex is not None and not isinstance(vertex, bytes):
             raise TypeError('vertex must be bytes')
         if fragment is not None and not isinstance(fragment, bytes):
             raise TypeError('fragment must be bytes')
-
-        self._gl_context: Optional[GlContext] = get_gl_context()
 
         stages: list[int] = []
 
@@ -144,11 +144,9 @@ class Shader:
 
     def close(self) -> None:
         if hasattr(self, "_gl") and self._gl is not None:
-            assert self._gl_context is not None
-            if self._gl_context.is_open:
-                glDeleteProgram(self._gl)
+            glDeleteProgram(self._gl)
             self._gl = None
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     @property
     def attributes(self) -> tuple[ShaderAttribute, ...]:

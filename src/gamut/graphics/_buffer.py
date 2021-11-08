@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['Buffer', 'BufferFrequency', 'BufferNature', 'BufferView']
 
 # gamut
-from gamut._glcontext import get_gl_context, GlContext
+from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
@@ -68,7 +68,7 @@ class Buffer:
         frequency: BufferFrequency = BufferFrequency.STATIC,
         nature: BufferNature = BufferNature.DRAW,
     ):
-        self._gl_context: Optional[GlContext] = get_gl_context()
+        self._gl_context = require_gl_context()
 
         self._gl = glGenBuffers(1)
         gl_access = FREQUENCY_NATURE_TO_GL_ACCESS[(frequency, nature)]
@@ -105,17 +105,13 @@ class Buffer:
 
     def close(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
-            assert self._gl_context
-            if self._gl_context.is_open:
-                glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
-                glUnmapBuffer(GL_COPY_READ_BUFFER)
+            glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
+            glUnmapBuffer(GL_COPY_READ_BUFFER)
             self._map = None
         if hasattr(self, '_gl') and self._gl is not None:
-            assert self._gl_context
-            if self._gl_context.is_open:
-                glDeleteBuffers(1, np_array([self._gl]))
+            glDeleteBuffers(1, np_array([self._gl]))
             self._gl = None
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     @property
     def bytes(self) -> bytes:

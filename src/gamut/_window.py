@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 # gamut
-from gamut._glcontext import get_gl_context, GlContext
+from gamut._glcontext import release_gl_context, require_gl_context
 from gamut._sdl import sdl_window_event_callback_map
 from gamut.event import Event as _Event
 # python
@@ -87,7 +87,8 @@ class Window:
     Shown: type[WindowShown]
 
     def __init__(self) -> None:
-        self._gl_context: Optional[GlContext] = get_gl_context()
+        self._gl_context = require_gl_context()
+
         self._sdl = SDL_CreateWindow(
             b'',
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -135,10 +136,10 @@ class Window:
             raise RuntimeError('window is closed')
 
     def close(self) -> None:
-        self._gl_context = None
         if self._sdl is not None:
             SDL_DestroyWindow(self._sdl)
             self._sdl = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     def flip_buffer(
         self,
