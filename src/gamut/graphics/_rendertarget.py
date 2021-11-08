@@ -156,20 +156,20 @@ class TextureRenderTarget:
 
     @property
     def is_open(self) -> bool:
-        return self._gl_context is not None
+        return bool(self._gl_context)
 
 
 class WindowRenderTarget:
 
     def __init__(self, window: Window) -> None:
-        require_gl_context()
+        self._gl_context = require_gl_context()
         self._window = window
 
     def __del__(self) -> None:
         self.close()
 
     def close(self) -> None:
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     @property
     def size(self) -> tuple[int, int]:
@@ -185,7 +185,7 @@ class WindowRenderTarget:
 
     @property
     def is_open(self) -> bool:
-        return self._gl_context is not None
+        return bool(self._gl_context)
 
 
 def use_render_target(

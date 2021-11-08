@@ -1,5 +1,6 @@
 
 # gamut
+from gamut import Window
 from gamut._glcontext import get_gl_context
 from gamut.graphics import Shader, ShaderAttribute, ShaderUniform
 # python
@@ -133,6 +134,7 @@ def test_pod_attributes(
     python_type: Any,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
     if location is not None or array:
         glsl_version = '330 core'
@@ -188,6 +190,7 @@ def test_pod_uniforms(
     python_type: Any,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if glsl_type == 'double':
@@ -252,6 +255,7 @@ def test_sampler_uniforms(
     components: int,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if postfix in ['2DMS', '2DMSArray']:
@@ -321,6 +325,7 @@ def test_shadow_sampler_uniforms(
     components: int,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if location is not None:
@@ -370,6 +375,7 @@ def test_vector_attributes(
     prefix: str,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if location is not None:
@@ -426,6 +432,7 @@ def test_vector_uniforms(
     prefix: str,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if prefix == 'd':
@@ -478,6 +485,7 @@ def test_matrix_attributes(
     prefix: str,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if location is not None:
@@ -540,6 +548,7 @@ def test_matrix_uniforms(
     prefix: str,
     array: bool,
 ) -> None:
+    _ = Window()
     glsl_version = '140'
 
     if prefix == 'd':

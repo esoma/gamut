@@ -101,28 +101,28 @@ class GlContext:
         return self._version
 
 
-def release_gl_context(one: int) -> int:
+def release_gl_context(gl_context_marker: Any) -> Any:
     global singleton
     global refs
-    if one != 1:
-        return 0
+    if gl_context_marker != 1:
+        return False
     assert singleton is not None
     assert refs > 0
     refs -= 1
     if refs == 0:
         singleton.close()
         singleton = None
-    return 0
+    return False
 
 
-def require_gl_context() -> int:
+def require_gl_context() -> Any:
     global refs
     global singleton
     if singleton is None:
         assert refs == 0
         singleton = GlContext()
     refs += 1
-    return 1
+    return True
 
 
 def get_gl_context() -> GlContext:

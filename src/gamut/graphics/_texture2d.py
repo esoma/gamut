@@ -206,6 +206,9 @@ class TextureView:
             GL_READ_ONLY
         ))
 
+    def __del__(self) -> None:
+        self.close()
+
     def _ensure_open(self, *, include_texture: bool = True) -> None:
         if self._gl is None:
             raise RuntimeError('texture view is closed')
@@ -215,8 +218,10 @@ class TextureView:
 
     def close(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
+            assert self._gl
             glBindBuffer(GL_PIXEL_PACK_BUFFER, self._gl)
             glUnmapBuffer(GL_PIXEL_PACK_BUFFER)
+            self._map = None
         if hasattr(self, '_gl') and self._gl is not None:
             glDeleteBuffers(1, [self._gl])
             self._gl = None
