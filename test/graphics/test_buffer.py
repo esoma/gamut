@@ -1,6 +1,10 @@
 
 # gamut
-from gamut.graphics import Buffer, BufferFrequency, BufferNature, BufferView
+from gamut import Window
+from gamut._glcontext import get_gl_context
+from gamut.graphics import (Buffer, BufferFrequency, BufferNature, BufferView,
+                            BufferViewMap, Shader)
+from gamut.graphics._buffer import use_buffer_view_map_with_shader
 # python
 from struct import unpack as c_unpack
 from typing import Any, Final, Optional
@@ -71,29 +75,6 @@ def test_bytes(data: bytes) -> None:
     assert buffer.bytes == data
 
 
-def test_close() -> None:
-    buffer = Buffer()
-    assert buffer.is_open
-    buffer.close()
-    assert not buffer.is_open
-
-    with pytest.raises(RuntimeError) as excinfo:
-        buffer.bytes
-    assert str(excinfo.value) == 'buffer is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        buffer.frequency
-    assert str(excinfo.value) == 'buffer is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        buffer.nature
-    assert str(excinfo.value) == 'buffer is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        len(buffer)
-    assert str(excinfo.value) == 'buffer is closed'
-
-
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
 def test_view_init(data_type: Any) -> None:
     buffer = Buffer()
@@ -102,70 +83,8 @@ def test_view_init(data_type: Any) -> None:
     assert view.type is data_type
     assert view.stride == glm.sizeof(data_type)
     assert view.offset == 0
-    assert view.is_open
+    assert view.instancing_divisor is None
     assert len(view) == 0
-
-
-def test_view_init_with_closed_buffer() -> None:
-    buffer = Buffer()
-    buffer.close()
-
-    with pytest.raises(RuntimeError) as excinfo:
-        BufferView(buffer, glm.float32)
-    assert str(excinfo.value) == 'buffer is closed'
-
-
-def test_view_buffer_closed() -> None:
-    buffer = Buffer()
-    view = BufferView(buffer, glm.float32)
-    buffer.close()
-    assert view.buffer is buffer
-    assert view.type is glm.float32
-    assert view.stride == glm.sizeof(glm.float32)
-    assert view.offset == 0
-    assert view.is_open
-
-    with pytest.raises(RuntimeError) as excinfo:
-        len(view)
-    assert str(excinfo.value) == 'buffer is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        list(view)
-    assert str(excinfo.value) == 'buffer is closed'
-
-
-def test_view_closed() -> None:
-    buffer = Buffer()
-    view = BufferView(buffer, glm.float32)
-    view.close()
-
-    assert buffer.is_open
-
-    with pytest.raises(RuntimeError) as excinfo:
-        view.buffer
-    assert str(excinfo.value) == 'buffer view is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        view.type
-    assert str(excinfo.value) == 'buffer view is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        view.stride
-    assert str(excinfo.value) == 'buffer view is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        view.offset
-    assert str(excinfo.value) == 'buffer view is closed'
-
-    assert not view.is_open
-
-    with pytest.raises(RuntimeError) as excinfo:
-        len(view)
-    assert str(excinfo.value) == 'buffer view is closed'
-
-    with pytest.raises(RuntimeError) as excinfo:
-        list(view)
-    assert str(excinfo.value) == 'buffer view is closed'
 
 
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
@@ -189,13 +108,26 @@ def test_view_negative_offset(offset: int) -> None:
     assert str(excinfo.value) == 'offset must be 0 or greater'
 
 
+@pytest.mark.parametrize("instancing_divisor", [-100, -1, 0])
+def test_view_non_positive_instancing_divisor(instancing_divisor: int) -> None:
+    with pytest.raises(ValueError) as excinfo:
+        BufferView(
+            Buffer(),
+            glm.float32,
+            instancing_divisor=instancing_divisor
+        )
+    assert str(excinfo.value) == 'instancing divisor must be greater than 0'
+
+
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
 @pytest.mark.parametrize("add_stride", [None, 1, 2, 4])
 @pytest.mark.parametrize("offset", [0, 1, 2, 4])
+@pytest.mark.parametrize("instancing_divisor", [None, 1, 2])
 def test_view_read(
     data_type: Any,
     add_stride: Optional[int],
-    offset: int
+    offset: int,
+    instancing_divisor: Optional[int]
 ) -> None:
     data = bytes(range(200))
     stride = glm.sizeof(data_type)
@@ -212,6 +144,70 @@ def test_view_read(
         except KeyError:
             expected_python_data.append(data_type.from_bytes(data_bytes))
 
-    view = BufferView(Buffer(data), data_type, stride=stride, offset=offset)
+    view = BufferView(
+        Buffer(data),
+        data_type,
+        stride=stride,
+        offset=offset,
+        instancing_divisor=instancing_divisor
+    )
     assert len(view) == expected_length
     assert list(view) == expected_python_data
+
+
+def test_view_map_read_only_mapping() -> None:
+    bv_1 = BufferView(Buffer(), glm.float32)
+    bv_2 = BufferView(Buffer(), glm.float32)
+    map = {
+        "vbo_1": bv_1,
+        "vbo_2": bv_2,
+    }
+    bvm = BufferViewMap(map)
+
+    assert len(bvm) == 2
+    assert bvm["vbo_1"] is bv_1
+    assert bvm["vbo_2"] is bv_2
+    with pytest.raises(KeyError):
+        bvm["vbo_3"]
+
+    with pytest.raises(TypeError):
+        bvm["vbo_1"] = BufferView(Buffer(), glm.float32) # type: ignore
+
+    map.clear()
+    assert len(bvm) == 2
+    assert bvm["vbo_1"] is bv_1
+    assert bvm["vbo_2"] is bv_2
+
+
+@pytest.mark.parametrize("view_data_type", VIEW_DATA_TYPES)
+@pytest.mark.parametrize("shader_data_type", ['float', 'double', 'int'])
+@pytest.mark.parametrize("instancing_divisor", [None, 1])
+def test_use_buffer_view_map_with_shader(
+    view_data_type: Any,
+    shader_data_type: str,
+    instancing_divisor: Optional[int],
+) -> None:
+    _ = Window()
+    glsl_version = '140'
+    if shader_data_type == 'double':
+        glsl_version = '410 core'
+        if get_gl_context().version < (4, 1):
+            pytest.xfail()
+
+    bvm = BufferViewMap({
+        "attr": BufferView(
+            Buffer(),
+            view_data_type,
+            instancing_divisor=instancing_divisor
+        )
+    })
+    shader = Shader(vertex=f"""
+    #version {glsl_version}
+    in {shader_data_type} attr;
+    in {shader_data_type} attr_not_mapped;
+    void main()
+    {{
+        gl_Position = vec4(attr, attr_not_mapped, 0, 1);
+    }}
+    """.encode('utf-8'))
+    use_buffer_view_map_with_shader(bvm, shader)
