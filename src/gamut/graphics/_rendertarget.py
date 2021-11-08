@@ -16,7 +16,8 @@ __all__ = [
 from ._color import Color
 from ._texture2d import Texture2d, TextureComponents
 # gamut
-from gamut._glcontext import get_gl_context, GlContext
+from gamut._glcontext import (get_gl_context, release_gl_context,
+                              require_gl_context)
 from gamut._window import get_sdl_window_from_window, Window
 # python
 from ctypes import byref as c_byref
@@ -61,7 +62,7 @@ class TextureRenderTarget:
         depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] =
             TextureRenderTargetDepthStencil.NONE
     ):
-        self._gl_context: Optional[GlContext] = get_gl_context()
+        self._gl_context = require_gl_context()
 
         self._colors = tuple(colors)
         self._depth_stencil = depth_stencil
@@ -136,7 +137,7 @@ class TextureRenderTarget:
         if hasattr(self, "_gl") and self._gl is not None:
             glDeleteFramebuffers(1, [self._gl])
             self._gl = None
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     @property
     def colors(self) -> Sequence[Texture2d]:
@@ -155,20 +156,20 @@ class TextureRenderTarget:
 
     @property
     def is_open(self) -> bool:
-        return self._gl_context is not None
+        return bool(self._gl_context)
 
 
 class WindowRenderTarget:
 
     def __init__(self, window: Window) -> None:
+        self._gl_context = require_gl_context()
         self._window = window
-        self._gl_context: Optional[GlContext] = get_gl_context()
 
     def __del__(self) -> None:
         self.close()
 
     def close(self) -> None:
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     @property
     def size(self) -> tuple[int, int]:
@@ -184,7 +185,7 @@ class WindowRenderTarget:
 
     @property
     def is_open(self) -> bool:
-        return self._gl_context is not None
+        return bool(self._gl_context)
 
 
 def use_render_target(
@@ -205,8 +206,7 @@ def use_render_target(
         return
 
     if isinstance(render_target, WindowRenderTarget):
-        gl_context = render_target._gl_context
-        assert gl_context is not None
+        gl_context = get_gl_context()
         sdl_window = get_sdl_window_from_window(render_target.window)
         SDL_GL_MakeCurrent(sdl_window, gl_context._sdl_gl_context)
         glBindFramebuffer(target, 0)

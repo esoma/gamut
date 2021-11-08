@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['TextureComponents', 'TextureDataType', 'TextureView', 'Texture2d']
 
 # gamut
-from gamut._glcontext import get_gl_context, GlContext
+from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from ctypes import (c_byte, c_float, c_int, c_short, c_ubyte, c_uint, c_ushort,
                     c_void_p)
@@ -76,6 +76,8 @@ class Texture2d:
         data_type: TextureDataType,
         data: bytes
     ):
+        self._gl_context = require_gl_context()
+
         if not isinstance(width, int):
             raise TypeError('width must be an int')
         if not isinstance(height, int):
@@ -112,7 +114,6 @@ class Texture2d:
                 )
             gl_data_type = GL_UNSIGNED_INT_24_8
 
-        self._gl_context: Optional[GlContext] = get_gl_context()
         self._gl = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self._gl)
         glTexImage2D(
@@ -133,11 +134,9 @@ class Texture2d:
 
     def close(self) -> None:
         if hasattr(self, '_gl') and self._gl is not None:
-            assert self._gl_context
-            if self._gl_context.is_open:
-                glDeleteTextures(np_array([self._gl]))
+            glDeleteTextures(np_array([self._gl]))
             self._gl = None
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     @property
     def components(self) -> TextureComponents:
@@ -158,6 +157,8 @@ Texture2d.__module__ = 'gamut.graphics'
 class TextureView:
 
     def __init__(self, texture: Texture2d, data_type: TextureDataType):
+        self._gl_context = require_gl_context()
+
         if not isinstance(texture, Texture2d):
             raise TypeError(f'texture must be {Texture2d}')
         if not isinstance(data_type, TextureDataType):
@@ -176,7 +177,6 @@ class TextureView:
             gl_data_type = GL_UNSIGNED_INT_24_8
 
         self._texture: Optional[Texture2d] = texture
-        self._gl_context: Optional[GlContext] = get_gl_context()
         self._gl = glGenBuffers(1)
 
         self._length = (
@@ -206,6 +206,9 @@ class TextureView:
             GL_READ_ONLY
         ))
 
+    def __del__(self) -> None:
+        self.close()
+
     def _ensure_open(self, *, include_texture: bool = True) -> None:
         if self._gl is None:
             raise RuntimeError('texture view is closed')
@@ -215,13 +218,15 @@ class TextureView:
 
     def close(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
+            assert self._gl
             glBindBuffer(GL_PIXEL_PACK_BUFFER, self._gl)
             glUnmapBuffer(GL_PIXEL_PACK_BUFFER)
+            self._map = None
         if hasattr(self, '_gl') and self._gl is not None:
             glDeleteBuffers(1, [self._gl])
             self._gl = None
         self._texture = None
-        self._gl_context = None
+        self._gl_context = release_gl_context(self._gl_context)
 
     def __len__(self) -> int:
         self._ensure_open()
