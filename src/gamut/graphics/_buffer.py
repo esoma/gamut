@@ -276,7 +276,7 @@ class GlVertexArray:
                 )
             for location_offset in range(locations):
                 location = attribute.location + location_offset
-                if buffer_view:
+                if buffer_view is not None:
                     if attr_gl_type == GL_FLOAT:
                         glVertexAttribPointer(
                             location,
