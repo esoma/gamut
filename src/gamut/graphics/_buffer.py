@@ -31,15 +31,16 @@ from glm import sizeof as glm_sizeof
 import OpenGL.GL
 from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_DYNAMIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
-                       GL_FALSE, GL_FLOAT, GL_READ_ONLY, GL_STATIC_COPY,
+                       GL_FALSE, GL_INT, GL_READ_ONLY, GL_STATIC_COPY,
                        GL_STATIC_DRAW, GL_STATIC_READ, GL_STREAM_COPY,
-                       GL_STREAM_DRAW, GL_STREAM_READ, glBindBuffer,
-                       glBindVertexArray, glBufferData, glDeleteBuffers,
-                       glDeleteVertexArrays, glDisableVertexAttribArray,
-                       glEnableVertexAttribArray, glGenBuffers,
-                       glGenVertexArrays, glMapBuffer, glUnmapBuffer,
-                       glVertexAttribDivisor, glVertexAttribIPointer,
-                       glVertexAttribLPointer, glVertexAttribPointer)
+                       GL_STREAM_DRAW, GL_STREAM_READ, GL_UNSIGNED_INT,
+                       glBindBuffer, glBindVertexArray, glBufferData,
+                       glDeleteBuffers, glDeleteVertexArrays,
+                       glDisableVertexAttribArray, glEnableVertexAttribArray,
+                       glGenBuffers, glGenVertexArrays, glMapBuffer,
+                       glUnmapBuffer, glVertexAttribDivisor,
+                       glVertexAttribIPointer, glVertexAttribLPointer,
+                       glVertexAttribPointer)
 
 
 class BufferFrequency(Enum):
@@ -277,16 +278,10 @@ class GlVertexArray:
             for location_offset in range(locations):
                 location = attribute.location + location_offset
                 if buffer_view is not None:
-                    if attr_gl_type == GL_FLOAT:
-                        glVertexAttribPointer(
-                            location,
-                            count,
-                            view_gl_type,
-                            GL_FALSE,
-                            buffer_view.stride,
-                            c_void_p(buffer_view.offset)
-                        )
-                    elif attr_gl_type == GL_DOUBLE:
+                    if (
+                        attr_gl_type == GL_DOUBLE and
+                        view_gl_type == GL_DOUBLE
+                    ):
                         glVertexAttribLPointer(
                             location,
                             count,
@@ -294,11 +289,23 @@ class GlVertexArray:
                             buffer_view.stride,
                             c_void_p(buffer_view.offset)
                         )
-                    else:
+                    elif (
+                        attr_gl_type in (GL_INT, GL_UNSIGNED_INT) and
+                        view_gl_type in (GL_INT, GL_UNSIGNED_INT)
+                    ):
                         glVertexAttribIPointer(
                             location,
                             count,
                             view_gl_type,
+                            buffer_view.stride,
+                            c_void_p(buffer_view.offset)
+                        )
+                    else:
+                        glVertexAttribPointer(
+                            location,
+                            count,
+                            view_gl_type,
+                            GL_FALSE,
                             buffer_view.stride,
                             c_void_p(buffer_view.offset)
                         )
