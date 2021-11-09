@@ -1,8 +1,17 @@
 
 from __future__ import annotations
 
-__all__ = ['Buffer', 'BufferFrequency', 'BufferNature', 'BufferView']
+__all__ = [
+    'Buffer',
+    'BufferFrequency',
+    'BufferNature',
+    'BufferView',
+    'BufferViewMap',
+    'use_buffer_view_map_with_shader',
+]
 
+# gamut
+from ._shader import Shader
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
@@ -12,18 +21,26 @@ from ctypes import cast as c_cast
 from enum import Enum
 from struct import unpack as c_unpack
 from typing import Any, Final, Generator, Generic, Optional, TypeVar
+from weakref import ref, WeakKeyDictionary
 # numpy
 from numpy import array as np_array
 # pyglm
 import glm
 from glm import sizeof as glm_sizeof
 # pyopengl
-from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DYNAMIC_COPY,
-                       GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, GL_READ_ONLY,
-                       GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
-                       GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
-                       glBindBuffer, glBufferData, glDeleteBuffers,
-                       glGenBuffers, glMapBuffer, glUnmapBuffer)
+import OpenGL.GL
+from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
+                       GL_DYNAMIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
+                       GL_FALSE, GL_INT, GL_READ_ONLY, GL_STATIC_COPY,
+                       GL_STATIC_DRAW, GL_STATIC_READ, GL_STREAM_COPY,
+                       GL_STREAM_DRAW, GL_STREAM_READ, GL_UNSIGNED_INT,
+                       glBindBuffer, glBindVertexArray, glBufferData,
+                       glDeleteBuffers, glDeleteVertexArrays,
+                       glDisableVertexAttribArray, glEnableVertexAttribArray,
+                       glGenBuffers, glGenVertexArrays, glMapBuffer,
+                       glUnmapBuffer, glVertexAttribDivisor,
+                       glVertexAttribIPointer, glVertexAttribLPointer,
+                       glVertexAttribPointer)
 
 
 class BufferFrequency(Enum):
@@ -82,28 +99,6 @@ class Buffer:
         self._nature = nature
 
     def __del__(self) -> None:
-        self.close()
-
-    def __len__(self) -> int:
-        self._ensure_open()
-        return self._length
-
-    def _ensure_open(self) -> None:
-        if self._gl is None:
-            raise RuntimeError('buffer is closed')
-
-    def _ensure_mapped(self) -> None:
-        assert self.is_open
-        assert self._length > 0
-        if self._map is not None:
-            return
-        glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
-        self._map = c_void_p(glMapBuffer(
-            GL_COPY_READ_BUFFER,
-            GL_READ_ONLY
-        ))
-
-    def close(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
             glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
             glUnmapBuffer(GL_COPY_READ_BUFFER)
@@ -113,9 +108,21 @@ class Buffer:
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
 
+    def __len__(self) -> int:
+        return self._length
+
+    def _ensure_mapped(self) -> None:
+        assert self._length > 0
+        if self._map is not None:
+            return
+        glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
+        self._map = c_void_p(glMapBuffer(
+            GL_COPY_READ_BUFFER,
+            GL_READ_ONLY
+        ))
+
     @property
     def bytes(self) -> bytes:
-        self._ensure_open()
         if self._length == 0:
             return b''
         self._ensure_mapped()
@@ -127,17 +134,11 @@ class Buffer:
 
     @property
     def frequency(self) -> BufferFrequency:
-        self._ensure_open()
         return self._frequency
 
     @property
     def nature(self) -> BufferNature:
-        self._ensure_open()
         return self._nature
-
-    @property
-    def is_open(self) -> bool:
-        return self._gl is not None
 
 
 BVT = TypeVar('BVT',
@@ -165,11 +166,10 @@ class BufferView(Generic[BVT]):
         data_type: type[BVT],
         *,
         stride: Optional[int] = None,
-        offset: int = 0
+        offset: int = 0,
+        instancing_divisor: Optional[int] = None,
     ) -> None:
-        buffer._ensure_open()
-
-        self._buffer: Optional[Buffer] = buffer
+        self._buffer = buffer
         self._data_type: type[BVT] = data_type
         if stride is None:
             stride = glm_sizeof(data_type)
@@ -179,18 +179,14 @@ class BufferView(Generic[BVT]):
         if offset < 0:
             raise ValueError('offset must be 0 or greater')
         self._offset = offset
-
-    def __del__(self) -> None:
-        self.close()
+        if instancing_divisor is not None and instancing_divisor < 1:
+            raise ValueError('instancing divisor must be greater than 0')
+        self._instancing_divisor = instancing_divisor
 
     def __len__(self) -> int:
-        self._ensure_open(include_buffer=False)
-        assert self._buffer is not None
         return (len(self._buffer) - self._offset) // self._stride
 
     def __iter__(self) -> Generator[BVT, None, None]:
-        self._ensure_open()
-        assert self._buffer is not None
         if len(self._buffer) == 0:
             return
         self._buffer._ensure_mapped()
@@ -209,37 +205,196 @@ class BufferView(Generic[BVT]):
                 data = self._data_type.from_bytes(data_bytes) # type: ignore
             yield data # type: ignore
 
-    def _ensure_open(self, *, include_buffer: bool = True) -> None:
-        if self._buffer is None:
-            raise RuntimeError('buffer view is closed')
-        assert self._buffer is not None
-        if include_buffer and not self._buffer.is_open:
-            raise RuntimeError('buffer is closed')
-
-    def close(self) -> None:
-        self._buffer = None
-
     @property
     def buffer(self) -> Buffer:
-        self._ensure_open(include_buffer=False)
-        assert self._buffer is not None
         return self._buffer
 
     @property
     def type(self) -> type[BVT]:
-        self._ensure_open(include_buffer=False)
         return self._data_type
 
     @property
     def stride(self) -> int:
-        self._ensure_open(include_buffer=False)
         return self._stride
 
     @property
     def offset(self) -> int:
-        self._ensure_open(include_buffer=False)
         return self._offset
 
     @property
-    def is_open(self) -> bool:
-        return self._buffer is not None
+    def instancing_divisor(self) -> Optional[int]:
+        return self._instancing_divisor
+
+
+class BufferViewMap:
+
+    def __init__(self, mapping: dict[str, BufferView], /) -> None:
+        self._mapping = mapping.copy()
+        self._shader_mapping: WeakKeyDictionary[Shader, GlVertexArray] = (
+            WeakKeyDictionary()
+        )
+
+    def __len__(self) -> int:
+        return len(self._mapping)
+
+    def __getitem__(self, key: str) -> BufferView:
+        return self._mapping[key]
+
+    def _get_gl_vertex_array_for_shader(self, shader: Shader) -> GlVertexArray:
+        try:
+            return self._shader_mapping[shader]
+        except KeyError:
+            pass
+        gl_vertex_array = self._shader_mapping[shader] = GlVertexArray(
+            shader,
+            self._mapping
+        )
+        return gl_vertex_array
+
+
+_gl_vertex_array_in_use: Optional[ref[GlVertexArray]] = None
+
+
+class GlVertexArray:
+
+    def __init__(self, shader: Shader, mapping: dict[str, BufferView]) -> None:
+        self._gl_context = require_gl_context()
+        self._gl = glGenVertexArrays(1)
+        self.use()
+        for attribute in shader.attributes:
+            buffer_view: Optional[BufferView] = None
+            try:
+                buffer_view = mapping[attribute.name]
+            except KeyError:
+                pass
+            else:
+                glBindBuffer(GL_ARRAY_BUFFER, buffer_view.buffer._gl)
+                attr_gl_type = (
+                    BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[attribute.type]
+                )[0]
+                view_gl_type, count, locations = (
+                    BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[buffer_view.type]
+                )
+            for location_offset in range(locations):
+                location = attribute.location + location_offset
+                if buffer_view is not None:
+                    if (
+                        attr_gl_type == GL_DOUBLE and
+                        view_gl_type == GL_DOUBLE
+                    ):
+                        glVertexAttribLPointer(
+                            location,
+                            count,
+                            view_gl_type,
+                            buffer_view.stride,
+                            c_void_p(buffer_view.offset)
+                        )
+                    elif (
+                        attr_gl_type in (GL_INT, GL_UNSIGNED_INT) and
+                        view_gl_type in (GL_INT, GL_UNSIGNED_INT)
+                    ):
+                        glVertexAttribIPointer(
+                            location,
+                            count,
+                            view_gl_type,
+                            buffer_view.stride,
+                            c_void_p(buffer_view.offset)
+                        )
+                    else:
+                        glVertexAttribPointer(
+                            location,
+                            count,
+                            view_gl_type,
+                            GL_FALSE,
+                            buffer_view.stride,
+                            c_void_p(buffer_view.offset)
+                        )
+                    glEnableVertexAttribArray(location)
+                    if buffer_view.instancing_divisor is not None:
+                        glVertexAttribDivisor(
+                            location,
+                            buffer_view.instancing_divisor
+                        )
+                else:
+                    glDisableVertexAttribArray(location)
+
+    def use(self) -> None:
+        global _gl_vertex_array_in_use
+        if _gl_vertex_array_in_use and _gl_vertex_array_in_use() is self:
+            return
+        glBindVertexArray(self._gl)
+        _gl_vertex_array_in_use = ref(self)
+
+    def __del__(self) -> None:
+        global _gl_vertex_array_in_use
+        if _gl_vertex_array_in_use and _gl_vertex_array_in_use() is self:
+            glBindVertexArray(0)
+            _gl_vertex_array_in_use = None
+        if self._gl:
+            glDeleteVertexArrays(1, [self._gl])
+            self._gl = None
+        self._gl_context = release_gl_context(self._gl_context)
+
+
+BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER: Final = {
+    glm.float32: (OpenGL.GL.GL_FLOAT, 1, 1),
+    glm.double: (OpenGL.GL.GL_DOUBLE, 1, 1),
+    glm.int32: (OpenGL.GL.GL_INT, 1, 1),
+    glm.uint32: (OpenGL.GL.GL_UNSIGNED_INT, 1, 1),
+    glm.vec2: (OpenGL.GL.GL_FLOAT, 2, 1),
+    glm.dvec2: (OpenGL.GL.GL_DOUBLE, 2, 1),
+    glm.ivec2: (OpenGL.GL.GL_INT, 2, 1),
+    glm.uvec2: (OpenGL.GL.GL_UNSIGNED_INT, 2, 1),
+    glm.vec3: (OpenGL.GL.GL_FLOAT, 3, 1),
+    glm.dvec3: (OpenGL.GL.GL_DOUBLE, 3, 1),
+    glm.ivec3: (OpenGL.GL.GL_INT, 3, 1),
+    glm.uvec3: (OpenGL.GL.GL_UNSIGNED_INT, 3, 1),
+    glm.vec4: (OpenGL.GL.GL_FLOAT, 4, 1),
+    glm.dvec4: (OpenGL.GL.GL_DOUBLE, 4, 1),
+    glm.ivec4: (OpenGL.GL.GL_INT, 4, 1),
+    glm.uvec4: (OpenGL.GL.GL_UNSIGNED_INT, 4, 1),
+    glm.mat2x2: (OpenGL.GL.GL_FLOAT, 2, 2),
+    glm.dmat2x2: (OpenGL.GL.GL_DOUBLE, 2, 2),
+    glm.imat2x2: (OpenGL.GL.GL_INT, 2, 2),
+    glm.umat2x2: (OpenGL.GL.GL_UNSIGNED_INT, 2, 2),
+    glm.mat2x3: (OpenGL.GL.GL_FLOAT, 2, 3),
+    glm.dmat2x3: (OpenGL.GL.GL_DOUBLE, 2, 3),
+    glm.imat2x3: (OpenGL.GL.GL_INT, 2, 3),
+    glm.umat2x3: (OpenGL.GL.GL_UNSIGNED_INT, 2, 3),
+    glm.mat2x4: (OpenGL.GL.GL_FLOAT, 2, 4),
+    glm.dmat2x4: (OpenGL.GL.GL_DOUBLE, 2, 4),
+    glm.imat2x4: (OpenGL.GL.GL_INT, 2, 4),
+    glm.umat2x4: (OpenGL.GL.GL_UNSIGNED_INT, 2, 4),
+    glm.mat3x2: (OpenGL.GL.GL_FLOAT, 3, 2),
+    glm.dmat3x2: (OpenGL.GL.GL_DOUBLE, 3, 2),
+    glm.imat3x2: (OpenGL.GL.GL_INT, 3, 2),
+    glm.umat3x2: (OpenGL.GL.GL_UNSIGNED_INT, 3, 2),
+    glm.mat3x3: (OpenGL.GL.GL_FLOAT, 3, 3),
+    glm.dmat3x3: (OpenGL.GL.GL_DOUBLE, 3, 3),
+    glm.imat3x3: (OpenGL.GL.GL_INT, 3, 3),
+    glm.umat3x3: (OpenGL.GL.GL_UNSIGNED_INT, 3, 3),
+    glm.mat3x4: (OpenGL.GL.GL_FLOAT, 3, 4),
+    glm.dmat3x4: (OpenGL.GL.GL_DOUBLE, 3, 4),
+    glm.imat3x4: (OpenGL.GL.GL_INT, 3, 4),
+    glm.umat3x4: (OpenGL.GL.GL_UNSIGNED_INT, 3, 4),
+    glm.mat4x2: (OpenGL.GL.GL_FLOAT, 4, 2),
+    glm.dmat4x2: (OpenGL.GL.GL_DOUBLE, 4, 2),
+    glm.imat4x2: (OpenGL.GL.GL_INT, 4, 2),
+    glm.umat4x2: (OpenGL.GL.GL_UNSIGNED_INT, 4, 2),
+    glm.mat4x3: (OpenGL.GL.GL_FLOAT, 4, 3),
+    glm.dmat4x3: (OpenGL.GL.GL_DOUBLE, 4, 3),
+    glm.imat4x3: (OpenGL.GL.GL_INT, 4, 3),
+    glm.umat4x3: (OpenGL.GL.GL_UNSIGNED_INT, 4, 3),
+    glm.mat4x4: (OpenGL.GL.GL_FLOAT, 4, 4),
+    glm.dmat4x4: (OpenGL.GL.GL_DOUBLE, 4, 4),
+    glm.imat4x4: (OpenGL.GL.GL_INT, 4, 4),
+    glm.umat4x4: (OpenGL.GL.GL_UNSIGNED_INT, 4, 4),
+}
+
+
+def use_buffer_view_map_with_shader(
+    view_map: BufferViewMap,
+    shader: Shader
+) -> None:
+    gl_vertex_array = view_map._get_gl_vertex_array_for_shader(shader)
+    gl_vertex_array.use()
