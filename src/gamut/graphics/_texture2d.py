@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['TextureComponents', 'TextureDataType', 'TextureView', 'Texture2d']
 
 # gamut
+from ._texture import Texture
+# gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from ctypes import (c_byte, c_float, c_int, c_short, c_ubyte, c_uint, c_ushort,
@@ -67,7 +69,7 @@ TEXTURE_DATA_TYPE_SIZE: Final = {
 }
 
 
-class Texture2d:
+class Texture2d(Texture):
 
     def __init__(
         self,

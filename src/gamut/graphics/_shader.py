@@ -1,21 +1,26 @@
 
 from __future__ import annotations
 
-__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform']
+__all__ = ['Shader', 'ShaderAttribute', 'ShaderUniform', 'use_shader']
 
+# gamut
+from ._texture import Texture
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
-from typing import Final, Generic, Optional, TypeVar, Union
+from typing import Any, Final, Generic, Optional, Type, TypeVar, Union
+from weakref import ref
 # pyglm
 import glm
+from glm import array as glm_array
+from glm import value_ptr as glm_value_ptr
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
-                       GL_FALSE, GLchar, glDeleteProgram, GLenum,
-                       glGetActiveUniform, glGetUniformLocation, GLint,
-                       GLsizei)
+                       GL_CURRENT_PROGRAM, GL_FALSE, GLchar, glDeleteProgram,
+                       GLenum, glGetActiveUniform, glGetIntegerv,
+                       glGetUniformLocation, GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_LINK_STATUS, GL_VERTEX_SHADER,
                                glAttachShader, glCompileShader,
@@ -23,9 +28,22 @@ from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                glGetActiveAttrib, glGetAttribLocation,
                                glGetProgramInfoLog, glGetProgramiv,
                                glGetShaderInfoLog, glGetShaderiv,
-                               glLinkProgram, glShaderSource)
+                               glLinkProgram, glShaderSource, glUseProgram)
 
-TT = TypeVar('TT', bound=type)
+T = TypeVar('T',
+    glm.float32, glm.vec2, glm.vec3, glm.vec4,
+    glm.double, glm.dvec2, glm.dvec3, glm.dvec4,
+    glm.int32, glm.ivec2, glm.ivec3, glm.ivec4,
+    glm.uint32, glm.uvec2, glm.uvec3, glm.uvec4,
+    glm.bool_,
+    glm.mat2x2, glm.mat2x3, glm.mat2x4,
+    glm.mat3x2, glm.mat3x3, glm.mat3x4,
+    glm.mat4x2, glm.mat4x3, glm.mat4x4,
+    glm.dmat2x2, glm.dmat2x3, glm.dmat2x4,
+    glm.dmat3x2, glm.dmat3x3, glm.dmat3x4,
+    glm.dmat4x2, glm.dmat4x3, glm.dmat4x4,
+    Texture,
+)
 
 
 class Shader:
@@ -142,11 +160,94 @@ class Shader:
         if self._gl is None:
             raise RuntimeError('shader is closed')
 
+    def _set_uniform(
+        self,
+        uniform: ShaderUniform[Any],
+        value: Union[
+            glm.float32, glm.array[glm.float32],
+            glm.vec2, glm.array[glm.vec2],
+            glm.vec3, glm.array[glm.vec3],
+            glm.vec4, glm.array[glm.vec4],
+            glm.double, glm.array[glm.double],
+            glm.dvec2, glm.array[glm.dvec2],
+            glm.dvec3, glm.array[glm.dvec3],
+            glm.dvec4, glm.array[glm.dvec4],
+            glm.int32, glm.array[glm.int32],
+            glm.ivec2, glm.array[glm.ivec2],
+            glm.ivec3, glm.array[glm.ivec3],
+            glm.ivec4, glm.array[glm.ivec4],
+            glm.uint32, glm.array[glm.uint32],
+            glm.uvec2, glm.array[glm.uvec2],
+            glm.uvec3, glm.array[glm.uvec3],
+            glm.uvec4, glm.array[glm.uvec4],
+            glm.bool_,
+            glm.mat2x2, glm.array[glm.mat2x2],
+            glm.mat2x3, glm.array[glm.mat2x3],
+            glm.mat2x4, glm.array[glm.mat2x4],
+            glm.mat3x2, glm.array[glm.mat3x2],
+            glm.mat3x3, glm.array[glm.mat3x3],
+            glm.mat3x4, glm.array[glm.mat3x4],
+            glm.mat4x2, glm.array[glm.mat4x2],
+            glm.mat4x3, glm.array[glm.mat4x3],
+            glm.mat4x4, glm.array[glm.mat4x4],
+            glm.dmat2x2, glm.array[glm.dmat2x2],
+            glm.dmat2x3, glm.array[glm.dmat2x3],
+            glm.dmat2x4, glm.array[glm.dmat2x4],
+            glm.dmat3x2, glm.array[glm.dmat3x2],
+            glm.dmat3x3, glm.array[glm.dmat3x3],
+            glm.dmat3x4, glm.array[glm.dmat3x4],
+            glm.dmat4x2, glm.array[glm.dmat4x2],
+            glm.dmat4x3, glm.array[glm.dmat4x3],
+            glm.dmat4x4, glm.array[glm.dmat4x4],
+        ]
+    ) -> None:
+        assert glGetIntegerv(GL_CURRENT_PROGRAM) == self._gl
+        assert uniform in self._uniforms
+        input_value: Any = None
+
+        if uniform.size > 1:
+            if not isinstance(value, glm_array):
+                raise ValueError(
+                    f'expected {glm.array} for {uniform.name} '
+                    f'(got {type(value)})'
+                )
+            if not issubclass(value.element_type, uniform._set_type):
+                raise ValueError(
+                    f'expected array of {uniform._set_type} '
+                    f'for {uniform.name} '
+                    f'(got array of {value.element_type})'
+                )
+            if len(value) != uniform.size:
+                raise ValueError(
+                    f'expected array of length {uniform.size} '
+                    f'for {uniform.name} '
+                    f'(got array of length {len(value)})'
+                )
+            input_value = value.ptr
+        else:
+            assert uniform.size == 1
+            if not isinstance(value, uniform._set_type):
+                raise ValueError(
+                    f'expected {uniform._set_type} for {uniform.name} '
+                    f'(got {type(value)})'
+                )
+            if uniform._set_type in POD_UNIFORM_TYPES:
+                input_value = value.value
+            else:
+                input_value = glm_value_ptr(value)
+
+        uniform._setter(uniform.location, uniform.size, input_value)
+
     def close(self) -> None:
+        global shader_in_use
+        if shader_in_use and shader_in_use() is self:
+            glUseProgram(0)
+            shader_in_use = None
         if hasattr(self, "_gl") and self._gl is not None:
             glDeleteProgram(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
+
 
     @property
     def attributes(self) -> tuple[ShaderAttribute, ...]:
@@ -163,17 +264,17 @@ class Shader:
         return self._gl is not None
 
 
-class ShaderAttribute(Generic[TT]):
+class ShaderAttribute(Generic[T]):
 
     def __init__(
         self,
         name: str,
-        type: TT,
+        type: Type[T],
         size: int,
         location: int
     ) -> None:
         self._name = name
-        self._type = type
+        self._type: Type[T] = type
         self._size = size
         self._location = location
 
@@ -182,7 +283,7 @@ class ShaderAttribute(Generic[TT]):
         return self._name
 
     @property
-    def type(self) -> TT:
+    def type(self) -> Type[T]:
         return self._type
 
     @property
@@ -194,26 +295,28 @@ class ShaderAttribute(Generic[TT]):
         return self._location
 
 
-class ShaderUniform(Generic[TT]):
+class ShaderUniform(Generic[T]):
 
     def __init__(
         self,
         name: str,
-        type: TT,
+        type: Type[T],
         size: int,
         location: int
     ) -> None:
         self._name = name
-        self._type = type
+        self._type: Type[T] = type
         self._size = size
         self._location = location
+        self._setter = TYPE_TO_UNIFORM_SETTER[self._type]
+        self._set_type: Any = glm.int32 if type is Texture else type
 
     @property
     def name(self) -> str:
         return self._name
 
     @property
-    def type(self) -> TT:
+    def type(self) -> Type[T]:
         return self._type
 
     @property
@@ -223,6 +326,80 @@ class ShaderUniform(Generic[TT]):
     @property
     def location(self) -> int:
         return self._location
+
+
+shader_in_use: Optional[ref[Shader]] = None
+
+
+def use_shader(shader: Shader) -> None:
+    global shader_in_use
+    shader._ensure_open()
+    if shader_in_use and shader_in_use() is shader:
+        return
+    glUseProgram(shader._gl)
+    shader_in_use = ref(shader)
+
+
+POD_UNIFORM_TYPES: Final = {
+    glm.float32,
+    glm.double,
+    glm.int32,
+    glm.uint32,
+    glm.bool_,
+}
+
+
+def wrap_uniform_matrix(f: Any) -> Any:
+    def _(location: Any, count: Any, value: Any) -> None:
+        f(location, count, GL_FALSE, value)
+    return _
+
+
+TYPE_TO_UNIFORM_SETTER: Final[dict[Any, Any]] = {
+    glm.float32: OpenGL.GL.glUniform1fv,
+    glm.vec2: OpenGL.GL.glUniform2fv,
+    glm.vec3: OpenGL.GL.glUniform3fv,
+    glm.vec4: OpenGL.GL.glUniform4fv,
+
+    glm.double: OpenGL.GL.glUniform1dv,
+    glm.dvec2: OpenGL.GL.glUniform2dv,
+    glm.dvec3: OpenGL.GL.glUniform3dv,
+    glm.dvec4: OpenGL.GL.glUniform4dv,
+
+    glm.int32: OpenGL.GL.glUniform1iv,
+    glm.ivec2: OpenGL.GL.glUniform2iv,
+    glm.ivec3: OpenGL.GL.glUniform3iv,
+    glm.ivec4: OpenGL.GL.glUniform4iv,
+
+    glm.uint32: OpenGL.GL.glUniform1uiv,
+    glm.uvec2: OpenGL.GL.glUniform2uiv,
+    glm.uvec3: OpenGL.GL.glUniform3uiv,
+    glm.uvec4: OpenGL.GL.glUniform4uiv,
+
+    glm.bool_: OpenGL.GL.glUniform1iv,
+
+    glm.mat2x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2fv),
+    glm.mat2x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x3fv),
+    glm.mat2x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x4fv),
+    glm.mat3x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x2fv),
+    glm.mat3x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3fv),
+    glm.mat3x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x4fv),
+    glm.mat4x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x2fv),
+    glm.mat4x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x3fv),
+    glm.mat4x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4fv),
+
+    glm.dmat2x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2dv),
+    glm.dmat2x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x3dv),
+    glm.dmat2x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x4dv),
+    glm.dmat3x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x2dv),
+    glm.dmat3x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3dv),
+    glm.dmat3x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x4dv),
+    glm.dmat4x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x2dv),
+    glm.dmat4x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x3dv),
+    glm.dmat4x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4dv),
+
+    Texture: OpenGL.GL.glUniform1iv,
+}
 
 
 GL_TYPE_TO_PY: Final = {
@@ -247,9 +424,6 @@ GL_TYPE_TO_PY: Final = {
     OpenGL.GL.GL_UNSIGNED_INT_VEC4: glm.uvec4,
 
     OpenGL.GL.GL_BOOL: glm.bool_,
-    OpenGL.GL.GL_BOOL_VEC2: glm.bvec2,
-    OpenGL.GL.GL_BOOL_VEC3: glm.bvec3,
-    OpenGL.GL.GL_BOOL_VEC4: glm.bvec4,
 
     OpenGL.GL.GL_FLOAT_MAT2: glm.mat2x2,
     OpenGL.GL.GL_FLOAT_MAT3: glm.mat3x3,
@@ -271,43 +445,43 @@ GL_TYPE_TO_PY: Final = {
     OpenGL.GL.GL_DOUBLE_MAT4x2: glm.dmat4x2,
     OpenGL.GL.GL_DOUBLE_MAT4x3: glm.dmat4x3,
 
-    OpenGL.GL.GL_SAMPLER_1D: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_1D: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_1D: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_2D: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D: glm.int32,
-    OpenGL.GL.GL_SAMPLER_3D: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_3D: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_3D: glm.int32,
-    OpenGL.GL.GL_SAMPLER_CUBE: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_CUBE: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_CUBE: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_RECT: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_2D_RECT: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_RECT: glm.int32,
-    OpenGL.GL.GL_SAMPLER_1D_ARRAY: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_1D_ARRAY: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_ARRAY: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_2D_ARRAY: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: glm.int32,
-    OpenGL.GL.GL_SAMPLER_CUBE_MAP_ARRAY: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_CUBE_MAP_ARRAY: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY: glm.int32,
-    OpenGL.GL.GL_SAMPLER_BUFFER: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_BUFFER: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_BUFFER: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_MULTISAMPLE: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_2D_MULTISAMPLE: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_MULTISAMPLE_ARRAY: glm.int32,
-    OpenGL.GL.GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: glm.int32,
-    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: glm.int32,
-    OpenGL.GL.GL_SAMPLER_1D_SHADOW: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_SHADOW: glm.int32,
-    OpenGL.GL.GL_SAMPLER_CUBE_SHADOW: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_RECT_SHADOW: glm.int32,
-    OpenGL.GL.GL_SAMPLER_1D_ARRAY_SHADOW: glm.int32,
-    OpenGL.GL.GL_SAMPLER_2D_ARRAY_SHADOW: glm.int32,
+    OpenGL.GL.GL_SAMPLER_1D: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_1D: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_1D: Texture,
+    OpenGL.GL.GL_SAMPLER_2D: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_2D: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D: Texture,
+    OpenGL.GL.GL_SAMPLER_3D: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_3D: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_3D: Texture,
+    OpenGL.GL.GL_SAMPLER_CUBE: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_CUBE: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_CUBE: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_RECT: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_2D_RECT: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_RECT: Texture,
+    OpenGL.GL.GL_SAMPLER_1D_ARRAY: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_1D_ARRAY: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_1D_ARRAY: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_ARRAY: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_2D_ARRAY: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_ARRAY: Texture,
+    OpenGL.GL.GL_SAMPLER_CUBE_MAP_ARRAY: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_CUBE_MAP_ARRAY: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY: Texture,
+    OpenGL.GL.GL_SAMPLER_BUFFER: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_BUFFER: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_BUFFER: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_MULTISAMPLE: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_2D_MULTISAMPLE: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_MULTISAMPLE_ARRAY: Texture,
+    OpenGL.GL.GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: Texture,
+    OpenGL.GL.GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY: Texture,
+    OpenGL.GL.GL_SAMPLER_1D_SHADOW: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_SHADOW: Texture,
+    OpenGL.GL.GL_SAMPLER_CUBE_SHADOW: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_RECT_SHADOW: Texture,
+    OpenGL.GL.GL_SAMPLER_1D_ARRAY_SHADOW: Texture,
+    OpenGL.GL.GL_SAMPLER_2D_ARRAY_SHADOW: Texture,
 }
