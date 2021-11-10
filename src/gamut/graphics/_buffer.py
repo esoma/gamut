@@ -8,10 +8,9 @@ __all__ = [
     'BufferView',
     'BufferViewMap',
     'use_buffer_view_map_with_shader',
+    'use_buffer_view_as_element_indexes',
 ]
 
-# gamut
-from ._shader import Shader
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
@@ -20,7 +19,9 @@ from ctypes import c_byte, c_void_p
 from ctypes import cast as c_cast
 from enum import Enum
 from struct import unpack as c_unpack
-from typing import Any, Final, Generator, Generic, Optional, TypeVar
+from typing import (Any, Final, Generator, Generic, Optional, TYPE_CHECKING,
+                    TypeVar)
+from warnings import warn
 from weakref import ref, WeakKeyDictionary
 # numpy
 from numpy import array as np_array
@@ -31,16 +32,20 @@ from glm import sizeof as glm_sizeof
 import OpenGL.GL
 from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_DYNAMIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
-                       GL_FALSE, GL_INT, GL_READ_ONLY, GL_STATIC_COPY,
-                       GL_STATIC_DRAW, GL_STATIC_READ, GL_STREAM_COPY,
-                       GL_STREAM_DRAW, GL_STREAM_READ, GL_UNSIGNED_INT,
-                       glBindBuffer, glBindVertexArray, glBufferData,
-                       glDeleteBuffers, glDeleteVertexArrays,
+                       GL_ELEMENT_ARRAY_BUFFER, GL_FALSE, GL_INT, GL_READ_ONLY,
+                       GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
+                       GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
+                       GL_UNSIGNED_INT, glBindBuffer, glBindVertexArray,
+                       glBufferData, glDeleteBuffers, glDeleteVertexArrays,
                        glDisableVertexAttribArray, glEnableVertexAttribArray,
                        glGenBuffers, glGenVertexArrays, glMapBuffer,
                        glUnmapBuffer, glVertexAttribDivisor,
                        glVertexAttribIPointer, glVertexAttribLPointer,
                        glVertexAttribPointer)
+
+if TYPE_CHECKING:
+    # gamut
+    from ._shader import Shader
 
 
 class BufferFrequency(Enum):
@@ -266,7 +271,7 @@ class GlVertexArray:
             try:
                 buffer_view = mapping[attribute.name]
             except KeyError:
-                pass
+                locations = 1
             else:
                 glBindBuffer(GL_ARRAY_BUFFER, buffer_view.buffer._gl)
                 attr_gl_type = (
@@ -317,6 +322,7 @@ class GlVertexArray:
                         )
                 else:
                     glDisableVertexAttribArray(location)
+                    warn(f'missing attribute: {attribute.name}')
 
     def use(self) -> None:
         global gl_vertex_array_in_use
@@ -398,3 +404,26 @@ def use_buffer_view_map_with_shader(
 ) -> None:
     gl_vertex_array = view_map._get_gl_vertex_array_for_shader(shader)
     gl_vertex_array.use()
+
+
+def use_buffer_view_as_element_indexes(view: BufferView[glm.uint32]) -> Any:
+    if view.type is not glm.uint32:
+        raise ValueError(
+            f'view buffer with type {view.type} cannot be used for indexing'
+        )
+    if view.stride != glm_sizeof(view.type):
+        raise ValueError(
+            'view buffer with a stride different from its type cannot be used '
+            'for indexing'
+        )
+    if view.offset != 0:
+        raise ValueError(
+            'view buffer with an offset other than 0 cannot be used for '
+            'indexing'
+        )
+    if view.instancing_divisor is not None:
+        raise ValueError(
+            'view buffer with instancing_divisor cannot be used for indexing'
+        )
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, view.buffer._gl)
+    return BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[view.type][0]

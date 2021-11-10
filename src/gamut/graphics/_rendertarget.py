@@ -45,7 +45,7 @@ from OpenGL.GL.framebufferobjects import (glBindFramebuffer,
                                           glGenRenderbuffers,
                                           glRenderbufferStorage)
 # pysdl2
-from sdl2 import SDL_GL_GetDrawableSize, SDL_GL_MakeCurrent
+from sdl2 import SDL_GL_GetDrawableSize
 
 
 class TextureRenderTargetDepthStencil(Enum):
@@ -208,7 +208,7 @@ def use_render_target(
     if isinstance(render_target, WindowRenderTarget):
         gl_context = get_gl_context()
         sdl_window = get_sdl_window_from_window(render_target.window)
-        SDL_GL_MakeCurrent(sdl_window, gl_context._sdl_gl_context)
+        gl_context.set_sdl_window(sdl_window)
         glBindFramebuffer(target, 0)
         glViewport(0, 0, *render_target.size)
     elif isinstance(render_target, TextureRenderTarget):

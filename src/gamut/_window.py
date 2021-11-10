@@ -15,7 +15,8 @@ __all__ = [
 ]
 
 # gamut
-from gamut._glcontext import release_gl_context, require_gl_context
+from gamut._glcontext import (get_gl_context, release_gl_context,
+                              require_gl_context)
 from gamut._sdl import sdl_window_event_callback_map
 from gamut.event import Event as _Event
 # python
@@ -137,6 +138,7 @@ class Window:
 
     def close(self) -> None:
         if self._sdl is not None:
+            get_gl_context().unset_sdl_window(self._sdl)
             SDL_DestroyWindow(self._sdl)
             self._sdl = None
         self._gl_context = release_gl_context(self._gl_context)
