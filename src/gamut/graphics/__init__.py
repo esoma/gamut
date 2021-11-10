@@ -15,6 +15,7 @@ __all__ = [
     'Shader',
     'ShaderAttribute',
     'ShaderUniform',
+    'Texture',
     'TextureComponents',
     'TextureDataType',
     'Texture2d',
@@ -38,3 +39,4 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
 from ._shader import Shader, ShaderAttribute, ShaderUniform
 from ._texture2d import (Texture2d, TextureComponents, TextureDataType,
                          TextureView)
+from ._texture import Texture

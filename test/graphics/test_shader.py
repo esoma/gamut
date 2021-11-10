@@ -2,7 +2,8 @@
 # gamut
 from gamut import Window
 from gamut._glcontext import get_gl_context
-from gamut.graphics import Shader, ShaderAttribute, ShaderUniform
+from gamut.graphics import Shader, ShaderAttribute, ShaderUniform, Texture
+from gamut.graphics._shader import use_shader
 # python
 import sys
 from typing import Any, Optional
@@ -231,6 +232,37 @@ def test_pod_uniforms(
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
 
+    use_shader(shader)
+    if array:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.array} for uni_name (got {type(None)})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(
+                uni,
+                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+            )
+        assert str(excinfo.value) == (
+            f'expected array of {python_type} for uni_name '
+            f'(got array of {glm.uint8})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, glm.array.from_numbers(python_type, 0))
+        assert str(excinfo.value) == (
+            f'expected array of length 2 for uni_name '
+            f'(got array of length 1)'
+        )
+        shader._set_uniform(uni, glm.array.from_numbers(python_type, 0, 100))
+    else:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {python_type} for uni_name (got {type(None)})'
+        )
+        shader._set_uniform(uni, python_type(100))
+
 
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("prefix", ['', 'i', 'u'])
@@ -305,9 +337,41 @@ def test_sampler_uniforms(
     assert shader.uniforms[0] is uni
     assert isinstance(uni, ShaderUniform)
     assert uni.name == "uni_name"
-    assert uni.type is glm.int32
+    assert uni.type is Texture
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
+
+    use_shader(shader)
+    if array:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.array} for uni_name (got {type(None)})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(
+                uni,
+                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+            )
+        assert str(excinfo.value) == (
+            f'expected array of {glm.int32} for uni_name '
+            f'(got array of {glm.uint8})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0))
+        assert str(excinfo.value) == (
+            f'expected array of length 2 for uni_name '
+            f'(got array of length 1)'
+        )
+        shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0, 100))
+    else:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.int32} for uni_name (got {type(None)})'
+        )
+        shader._set_uniform(uni, glm.int32(100))
+
 
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("postfix, components", [
@@ -360,9 +424,40 @@ def test_shadow_sampler_uniforms(
     assert shader.uniforms[0] is uni
     assert isinstance(uni, ShaderUniform)
     assert uni.name == "uni_name"
-    assert uni.type is glm.int32
+    assert uni.type is Texture
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
+
+    use_shader(shader)
+    if array:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.array} for uni_name (got {type(None)})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(
+                uni,
+                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+            )
+        assert str(excinfo.value) == (
+            f'expected array of {glm.int32} for uni_name '
+            f'(got array of {glm.uint8})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0))
+        assert str(excinfo.value) == (
+            f'expected array of length 2 for uni_name '
+            f'(got array of length 1)'
+        )
+        shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0, 100))
+    else:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.int32} for uni_name (got {type(None)})'
+        )
+        shader._set_uniform(uni, glm.int32(100))
 
 
 @pytest.mark.parametrize("location", [None, 1])
@@ -472,6 +567,38 @@ def test_vector_uniforms(
     assert uni.type is getattr(glm, f'{prefix}vec{components}')
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
+
+    python_type = getattr(glm, f'{prefix}vec{components}')
+    use_shader(shader)
+    if array:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.array} for uni_name (got {type(None)})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(
+                uni,
+                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+            )
+        assert str(excinfo.value) == (
+            f'expected array of {python_type} for uni_name '
+            f'(got array of {glm.uint8})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, glm.array(python_type(25)))
+        assert str(excinfo.value) == (
+            f'expected array of length 2 for uni_name '
+            f'(got array of length 1)'
+        )
+        shader._set_uniform(uni, glm.array(python_type(25)).repeat(2))
+    else:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {python_type} for uni_name (got {type(None)})'
+        )
+        shader._set_uniform(uni, python_type(100))
 
 
 @pytest.mark.parametrize("location", [None, 1])
@@ -588,3 +715,35 @@ def test_matrix_uniforms(
     assert uni.type is getattr(glm, f'{prefix}mat{rows}x{columns}')
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
+
+    python_type = getattr(glm, f'{prefix}mat{rows}x{columns}')
+    use_shader(shader)
+    if array:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {glm.array} for uni_name (got {type(None)})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(
+                uni,
+                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+            )
+        assert str(excinfo.value) == (
+            f'expected array of {python_type} for uni_name '
+            f'(got array of {glm.uint8})'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, glm.array(python_type(25)))
+        assert str(excinfo.value) == (
+            f'expected array of length 2 for uni_name '
+            f'(got array of length 1)'
+        )
+        shader._set_uniform(uni, glm.array(python_type(25)).repeat(2))
+    else:
+        with pytest.raises(ValueError) as excinfo:
+            shader._set_uniform(uni, None) # type: ignore
+        assert str(excinfo.value) == (
+            f'expected {python_type} for uni_name (got {type(None)})'
+        )
+        shader._set_uniform(uni, python_type(100))

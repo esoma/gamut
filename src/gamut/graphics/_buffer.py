@@ -252,7 +252,7 @@ class BufferViewMap:
         return gl_vertex_array
 
 
-_gl_vertex_array_in_use: Optional[ref[GlVertexArray]] = None
+gl_vertex_array_in_use: Optional[ref[GlVertexArray]] = None
 
 
 class GlVertexArray:
@@ -319,17 +319,17 @@ class GlVertexArray:
                     glDisableVertexAttribArray(location)
 
     def use(self) -> None:
-        global _gl_vertex_array_in_use
-        if _gl_vertex_array_in_use and _gl_vertex_array_in_use() is self:
+        global gl_vertex_array_in_use
+        if gl_vertex_array_in_use and gl_vertex_array_in_use() is self:
             return
         glBindVertexArray(self._gl)
-        _gl_vertex_array_in_use = ref(self)
+        gl_vertex_array_in_use = ref(self)
 
     def __del__(self) -> None:
-        global _gl_vertex_array_in_use
-        if _gl_vertex_array_in_use and _gl_vertex_array_in_use() is self:
+        global gl_vertex_array_in_use
+        if gl_vertex_array_in_use and gl_vertex_array_in_use() is self:
             glBindVertexArray(0)
-            _gl_vertex_array_in_use = None
+            gl_vertex_array_in_use = None
         if self._gl:
             glDeleteVertexArrays(1, [self._gl])
             self._gl = None
