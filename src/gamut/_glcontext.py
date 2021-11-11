@@ -19,8 +19,8 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
                   SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
-                  SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE, SDL_Init,
-                  SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_QuitSubSystem,
+                  SDL_GL_MakeCurrent, SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE,
+                  SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_QuitSubSystem,
                   SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
 
 singleton: Optional[GlContext] = None
@@ -43,7 +43,7 @@ class GlContext:
         init_sdl_video()
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1)
 
-        self._sdl_window = SDL_CreateWindow(
+        self._sdl_gl_window = self._sdl_window = SDL_CreateWindow(
             b'', 0, 0, 0, 0,
             SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
         )
@@ -85,7 +85,18 @@ class GlContext:
         if self._sdl_window is not None:
             SDL_DestroyWindow(self._sdl_window)
             self._sdl_window = None
+            self._sdl_gl_window = None
         deinit_sdl_video()
+
+    def set_sdl_window(self, sdl_window: Any) -> None:
+        if self._sdl_gl_window != sdl_window:
+            SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context)
+            self._sdl_gl_window = sdl_window
+
+    def unset_sdl_window(self, sdl_window: Any) -> None:
+        if self._sdl_gl_window == sdl_window:
+            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+            self._sdl_gl_window = self._sdl_window
 
     @property
     def is_open(self) -> bool:
