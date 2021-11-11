@@ -21,7 +21,6 @@ from enum import Enum
 from struct import unpack as c_unpack
 from typing import (Any, Final, Generator, Generic, Optional, TYPE_CHECKING,
                     TypeVar)
-from warnings import warn
 from weakref import ref, WeakKeyDictionary
 # numpy
 from numpy import array as np_array
@@ -37,11 +36,10 @@ from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
                        GL_UNSIGNED_INT, glBindBuffer, glBindVertexArray,
                        glBufferData, glDeleteBuffers, glDeleteVertexArrays,
-                       glDisableVertexAttribArray, glEnableVertexAttribArray,
-                       glGenBuffers, glGenVertexArrays, glMapBuffer,
-                       glUnmapBuffer, glVertexAttribDivisor,
-                       glVertexAttribIPointer, glVertexAttribLPointer,
-                       glVertexAttribPointer)
+                       glEnableVertexAttribArray, glGenBuffers,
+                       glGenVertexArrays, glMapBuffer, glUnmapBuffer,
+                       glVertexAttribDivisor, glVertexAttribIPointer,
+                       glVertexAttribLPointer, glVertexAttribPointer)
 
 if TYPE_CHECKING:
     # gamut
@@ -321,8 +319,7 @@ class GlVertexArray:
                             buffer_view.instancing_divisor
                         )
                 else:
-                    glDisableVertexAttribArray(location)
-                    warn(f'missing attribute: {attribute.name}')
+                    raise ValueError(f'missing attribute: {attribute.name}')
 
     def use(self) -> None:
         global gl_vertex_array_in_use

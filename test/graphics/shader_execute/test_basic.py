@@ -128,7 +128,7 @@ def test_missing_attribute(
         }
         """,
     )
-    with pytest.warns(UserWarning) as warnings:
+    with pytest.raises(ValueError) as excinfo:
         execute_shader(
             render_target,
             shader,
@@ -144,10 +144,7 @@ def test_missing_attribute(
             },
             index_range=(0, 4),
         )
-    assert len(warnings) == 1
-    warning = warnings[0].message
-    assert isinstance(warning, UserWarning)
-    assert warning.args == ('missing attribute: z',)
+    assert str(excinfo.value) == 'missing attribute: z'
 
 
 @pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
