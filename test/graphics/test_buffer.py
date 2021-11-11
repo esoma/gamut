@@ -204,10 +204,9 @@ def test_use_buffer_view_map_with_shader(
     shader = Shader(vertex=f"""
     #version {glsl_version}
     in {shader_data_type} attr;
-    in {shader_data_type} attr_not_mapped;
     void main()
     {{
-        gl_Position = vec4(attr, attr_not_mapped, 0, 1);
+        gl_Position = vec4(attr, 0, 0, 1);
     }}
     """.encode('utf-8'))
     use_buffer_view_map_with_shader(bvm, shader)
