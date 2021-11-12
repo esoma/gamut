@@ -5,7 +5,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, execute_shader,
                             PrimitiveMode, read_color_from_render_target,
                             Shader, Texture2d, TextureComponents,
-                            TextureDataType, TextureRenderTarget,
+                            TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
 # python
@@ -25,7 +25,7 @@ def create_render_target(
     if cls is TextureRenderTarget:
         texture = Texture2d(
             10, 10,
-            TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+            TextureComponents.RGBA, glm.uint8,
             b'\x00' * 10 * 10 * 4
         )
         return TextureRenderTarget(
