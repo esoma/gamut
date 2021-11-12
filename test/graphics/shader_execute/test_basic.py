@@ -10,7 +10,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             WindowRenderTarget)
 # python
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 # pyglm
 import glm
 # pytest
@@ -155,25 +155,30 @@ def test_missing_attribute(
     Color(0, 1, 0),
     Color(0, 0, 1),
 ])
-@pytest.mark.parametrize("index_key", ["index_range", "index_buffer_view"])
+@pytest.mark.parametrize("index_type", [
+    None,
+    glm.uint8,
+    glm.uint16,
+    glm.uint32
+])
 def test_basic(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
     primitive_mode: PrimitiveMode,
     color: Color,
-    index_key: str,
+    index_type: Any,
 ) -> None:
     render_target = create_render_target(cls)
     clear_render_target(render_target, color=Color(0, 0, 0, 0))
 
     index_range: Optional[tuple[int, int]] = None
     index_buffer_view: Optional[BufferView[glm.uint32]] = None
-    if index_key == "index_range":
+    if index_type is None:
         index_range = (0, 4)
     else:
         index_buffer_view = BufferView(Buffer(glm.array.from_numbers(
-            glm.uint32,
+            index_type,
             0, 1, 2, 3,
-        ).to_bytes()), glm.uint32)
+        ).to_bytes()), index_type)
 
     shader = Shader(
         vertex=b"""
