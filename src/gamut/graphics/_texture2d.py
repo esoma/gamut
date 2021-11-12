@@ -1,32 +1,32 @@
 
 from __future__ import annotations
 
-__all__ = ['TextureComponents', 'TextureDataType', 'TextureView', 'Texture2d']
+__all__ = ['TextureComponents', 'TextureView', 'Texture2d']
 
 # gamut
-from ._texture import Texture
+from ._texture import (Texture, TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE,
+                       TEXTURE_DATA_TYPES, TextureDataType)
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
-from ctypes import (c_byte, c_float, c_int, c_short, c_ubyte, c_uint, c_ushort,
-                    c_void_p)
 from ctypes import POINTER as c_pointer
+from ctypes import c_byte, c_void_p
 from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof
 from enum import Enum
 from typing import Final, Optional
 # numpy
 from numpy import array as np_array
+# pyglm
+from glm import uint32
 # pyopengl
-from OpenGL.GL import (GL_BYTE, GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL, GL_FLOAT,
-                       GL_INT, GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED,
-                       GL_RG, GL_RGB, GL_RGBA, GL_SHORT, GL_STREAM_READ,
-                       GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_UNSIGNED_INT,
-                       GL_UNSIGNED_INT_24_8, GL_UNSIGNED_SHORT, glBindBuffer,
-                       glBindTexture, glBufferData, glDeleteBuffers,
-                       glDeleteTextures, glGenBuffers, glGenerateMipmap,
-                       glGenTextures, glGetTexImage, glMapBuffer, glTexImage2D,
-                       glUnmapBuffer)
+from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL,
+                       GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED, GL_RG,
+                       GL_RGB, GL_RGBA, GL_STREAM_READ, GL_TEXTURE_2D,
+                       GL_UNSIGNED_INT_24_8, glBindBuffer, glBindTexture,
+                       glBufferData, glDeleteBuffers, glDeleteTextures,
+                       glGenBuffers, glGenerateMipmap, glGenTextures,
+                       glGetTexImage, glMapBuffer, glTexImage2D, glUnmapBuffer)
 
 
 class TextureComponents(Enum):
@@ -36,16 +36,6 @@ class TextureComponents(Enum):
     RGBA = GL_RGBA
     D = GL_DEPTH_COMPONENT
     DS = GL_DEPTH_STENCIL
-
-
-class TextureDataType(Enum):
-    UNSIGNED_BYTE = GL_UNSIGNED_BYTE
-    BYTE = GL_BYTE
-    UNSIGNED_SHORT = GL_UNSIGNED_SHORT
-    SHORT = GL_SHORT
-    UNSIGNED_INT = GL_UNSIGNED_INT
-    INT = GL_INT
-    FLOAT = GL_FLOAT
 
 
 TEXTURE_COMPONENTS_COUNT: Final = {
@@ -58,24 +48,13 @@ TEXTURE_COMPONENTS_COUNT: Final = {
 }
 
 
-TEXTURE_DATA_TYPE_SIZE: Final = {
-    TextureDataType.UNSIGNED_BYTE: c_sizeof(c_ubyte),
-    TextureDataType.BYTE: c_sizeof(c_byte),
-    TextureDataType.UNSIGNED_SHORT: c_sizeof(c_ushort),
-    TextureDataType.SHORT: c_sizeof(c_short),
-    TextureDataType.UNSIGNED_INT: c_sizeof(c_uint),
-    TextureDataType.INT: c_sizeof(c_int),
-    TextureDataType.FLOAT: c_sizeof(c_float),
-}
-
-
 class Texture2d(Texture):
 
     def __init__(
         self,
         width: int, height: int,
         components: TextureComponents,
-        data_type: TextureDataType,
+        data_type: type[TextureDataType],
         data: bytes
     ):
         self._gl_context = require_gl_context()
@@ -86,8 +65,11 @@ class Texture2d(Texture):
             raise TypeError('height must be an int')
         if not isinstance(components, TextureComponents):
             raise TypeError(f'components must be {TextureComponents}')
-        if not isinstance(data_type, TextureDataType):
-            raise TypeError(f'data_type must be {TextureDataType}')
+        if data_type not in TEXTURE_DATA_TYPES:
+            data_types = ", ".join(sorted((
+                str(t) for t in TEXTURE_DATA_TYPES
+            )))
+            raise TypeError(f'data_type must be {data_types}')
         if not isinstance(data, bytes):
             raise TypeError(f'data must be bytes')
 
@@ -99,7 +81,7 @@ class Texture2d(Texture):
         expected_data_length = (
             width * height *
             TEXTURE_COMPONENTS_COUNT[components] *
-            TEXTURE_DATA_TYPE_SIZE[data_type]
+            c_sizeof(data_type)
         )
         if len(data) != expected_data_length:
             raise ValueError('too much or not enough data')
@@ -107,11 +89,11 @@ class Texture2d(Texture):
         self._size = (width, height)
         self._components = components
 
-        gl_data_type = data_type.value
+        gl_data_type = TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE[data_type]
         if components == TextureComponents.DS:
-            if data_type != TextureDataType.UNSIGNED_INT:
+            if data_type != uint32:
                 raise ValueError(
-                    f'data_type must be {TextureDataType.UNSIGNED_INT} when '
+                    f'data_type must be {uint32} when '
                     f'components is {TextureComponents.DS}'
                 )
             gl_data_type = GL_UNSIGNED_INT_24_8
@@ -158,22 +140,25 @@ Texture2d.__module__ = 'gamut.graphics'
 
 class TextureView:
 
-    def __init__(self, texture: Texture2d, data_type: TextureDataType):
+    def __init__(self, texture: Texture2d, data_type: type[TextureDataType]):
         self._gl_context = require_gl_context()
 
         if not isinstance(texture, Texture2d):
             raise TypeError(f'texture must be {Texture2d}')
-        if not isinstance(data_type, TextureDataType):
-            raise TypeError(f'data_type must be {TextureDataType}')
+        if data_type not in TEXTURE_DATA_TYPES:
+            data_types = ", ".join(sorted((
+                str(t) for t in TEXTURE_DATA_TYPES
+            )))
+            raise TypeError(f'data_type must be {data_types}')
 
         if not texture.is_open:
             raise RuntimeError('texture is closed')
 
-        gl_data_type = data_type.value
+        gl_data_type = TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE[data_type]
         if texture.components == TextureComponents.DS:
-            if data_type != TextureDataType.UNSIGNED_INT:
+            if data_type != uint32:
                 raise ValueError(
-                    f'data_type must be {TextureDataType.UNSIGNED_INT} when '
+                    f'data_type must be {uint32} when '
                     f'components is {TextureComponents.DS}'
                 )
             gl_data_type = GL_UNSIGNED_INT_24_8
@@ -184,7 +169,7 @@ class TextureView:
         self._length = (
             texture.size[0] * texture.size[1] *
             TEXTURE_COMPONENTS_COUNT[texture.components] *
-            TEXTURE_DATA_TYPE_SIZE[data_type]
+            c_sizeof(data_type)
         )
 
         glBindBuffer(GL_PIXEL_PACK_BUFFER, self._gl)

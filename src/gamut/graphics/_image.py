@@ -2,13 +2,15 @@
 __all__ = ['Image', 'ImageInvalidError']
 
 # gamut
-from ._texture2d import Texture2d, TextureComponents, TextureDataType
+from ._texture2d import Texture2d, TextureComponents
 # python
 from pathlib import Path
 from typing import BinaryIO, Final, Union
 from PIL import Image as PilImage
 from PIL import ImageMath as PilImageMath
 from PIL import UnidentifiedImageError as PilUnidentifiedImageError
+# pyglm
+from glm import uint8
 
 PIL_MODE_TO_TEXTURE_COMPONENTS: Final = {
     'L': TextureComponents.R,
@@ -86,7 +88,7 @@ class Image:
         return Texture2d(
             *self.size,
             PIL_MODE_TO_TEXTURE_COMPONENTS[self._pil.mode],
-            TextureDataType.UNSIGNED_BYTE,
+            uint8,
             self.to_bytes()
         )
 

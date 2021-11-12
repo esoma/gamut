@@ -5,14 +5,15 @@ from gamut.graphics import (clear_render_target, Color,
                             read_color_from_render_target,
                             read_depth_from_render_target,
                             read_stencil_from_render_target, Texture2d,
-                            TextureComponents, TextureDataType,
-                            TextureRenderTarget,
+                            TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
 # python
 from ctypes import c_uint
 from ctypes import sizeof as c_sizeof
 from typing import Optional, Union
+# pyglm
+import glm
 # pytest
 import pytest
 
@@ -46,13 +47,13 @@ def test_texture_render_target(
 ) -> None:
     texture = Texture2d(
         100, 100,
-        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        TextureComponents.RGBA, glm.uint8,
         b'\x00' * 100 * 100 * 4
     )
     actual_depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] = (
         Texture2d(
             100, 100,
-            TextureComponents.DS, TextureDataType.UNSIGNED_INT,
+            TextureComponents.DS, glm.uint32,
             b'\x00' * 100 * 100 * c_sizeof(c_uint)
         )
     )
@@ -91,12 +92,12 @@ def test_texture_render_target_different_color_sizes(
 ) -> None:
     texture1 = Texture2d(
         100, 100,
-        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        TextureComponents.RGBA, glm.uint8,
         b'\x00' * 100 * 100 * 4
     )
     texture2 = Texture2d(
         width, height,
-        TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+        TextureComponents.RGBA, glm.uint8,
         b'\x00' * width * height * 4
     )
     with pytest.raises(ValueError) as excinfo:
@@ -110,7 +111,7 @@ def create_render_target(
     if cls is TextureRenderTarget:
         texture = Texture2d(
             100, 100,
-            TextureComponents.RGBA, TextureDataType.UNSIGNED_BYTE,
+            TextureComponents.RGBA, glm.uint8,
             b'\x00' * 100 * 100 * 4
         )
         return TextureRenderTarget(
