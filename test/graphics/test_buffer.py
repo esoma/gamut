@@ -14,7 +14,10 @@ import glm
 import pytest
 
 VIEW_DATA_TYPES: Final = (
-    glm.float32, glm.double, glm.int32, glm.uint32,
+    glm.float32, glm.double,
+    glm.int8, glm.uint8,
+    glm.int16, glm.uint16,
+    glm.int32, glm.uint32,
     glm.vec2, glm.dvec2, glm.ivec2, glm.uvec2,
     glm.vec3, glm.dvec3, glm.ivec3, glm.uvec3,
     glm.vec4, glm.dvec4, glm.ivec4, glm.uvec4,
@@ -33,6 +36,10 @@ VIEW_DATA_TYPES: Final = (
 GLM_POD_TO_STRUCT_NAME: Final[dict[Any, str]] = {
     glm.float32: 'f',
     glm.double: 'd',
+    glm.int8: 'b',
+    glm.uint8: 'B',
+    glm.int16: 'h',
+    glm.uint16: 'H',
     glm.int32: 'i',
     glm.uint32: 'I',
 }

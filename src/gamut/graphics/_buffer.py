@@ -20,7 +20,7 @@ from ctypes import cast as c_cast
 from enum import Enum
 from struct import unpack as c_unpack
 from typing import (Any, Final, Generator, Generic, Optional, TYPE_CHECKING,
-                    TypeVar)
+                    TypeVar, Union)
 from weakref import ref, WeakKeyDictionary
 # numpy
 from numpy import array as np_array
@@ -31,11 +31,11 @@ from glm import sizeof as glm_sizeof
 import OpenGL.GL
 from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_DYNAMIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
-                       GL_ELEMENT_ARRAY_BUFFER, GL_FALSE, GL_INT, GL_READ_ONLY,
+                       GL_ELEMENT_ARRAY_BUFFER, GL_FALSE, GL_READ_ONLY,
                        GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
                        GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
-                       GL_UNSIGNED_INT, glBindBuffer, glBindVertexArray,
-                       glBufferData, glDeleteBuffers, glDeleteVertexArrays,
+                       glBindBuffer, glBindVertexArray, glBufferData,
+                       glDeleteBuffers, glDeleteVertexArrays,
                        glEnableVertexAttribArray, glGenBuffers,
                        glGenVertexArrays, glMapBuffer, glUnmapBuffer,
                        glVertexAttribDivisor, glVertexAttribIPointer,
@@ -74,6 +74,10 @@ FREQUENCY_NATURE_TO_GL_ACCESS: Final = {
 GLM_POD_TO_STRUCT_NAME: Final[dict[Any, str]] = {
     glm.float32: 'f',
     glm.double: 'd',
+    glm.int8: 'b',
+    glm.uint8: 'B',
+    glm.int16: 'h',
+    glm.uint16: 'H',
     glm.int32: 'i',
     glm.uint32: 'I',
 }
@@ -145,7 +149,10 @@ class Buffer:
 
 
 BVT = TypeVar('BVT',
-    glm.float32, glm.double, glm.int32, glm.uint32,
+    glm.float32, glm.double,
+    glm.int8, glm.uint8,
+    glm.int16, glm.uint16,
+    glm.int32, glm.uint32,
     glm.vec2, glm.dvec2, glm.ivec2, glm.uvec2,
     glm.vec3, glm.dvec3, glm.ivec3, glm.uvec3,
     glm.vec4, glm.dvec4, glm.ivec4, glm.uvec4,
@@ -258,6 +265,13 @@ class BufferViewMap:
 gl_vertex_array_in_use: Optional[ref[GlVertexArray]] = None
 
 
+GL_INT_TYPES: Final = set([
+    OpenGL.GL.GL_BYTE, OpenGL.GL.GL_UNSIGNED_BYTE,
+    OpenGL.GL.GL_SHORT, OpenGL.GL.GL_UNSIGNED_SHORT,
+    OpenGL.GL.GL_INT, OpenGL.GL.GL_UNSIGNED_INT,
+])
+
+
 class GlVertexArray:
 
     def __init__(self, shader: Shader, mapping: dict[str, BufferView]) -> None:
@@ -293,8 +307,8 @@ class GlVertexArray:
                             c_void_p(buffer_view.offset)
                         )
                     elif (
-                        attr_gl_type in (GL_INT, GL_UNSIGNED_INT) and
-                        view_gl_type in (GL_INT, GL_UNSIGNED_INT)
+                        attr_gl_type in GL_INT_TYPES and
+                        view_gl_type in GL_INT_TYPES
                     ):
                         glVertexAttribIPointer(
                             location,
@@ -342,6 +356,10 @@ class GlVertexArray:
 BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER: Final = {
     glm.float32: (OpenGL.GL.GL_FLOAT, 1, 1),
     glm.double: (OpenGL.GL.GL_DOUBLE, 1, 1),
+    glm.int8: (OpenGL.GL.GL_BYTE, 1, 1),
+    glm.uint8: (OpenGL.GL.GL_UNSIGNED_BYTE, 1, 1),
+    glm.int16: (OpenGL.GL.GL_SHORT, 1, 1),
+    glm.uint16: (OpenGL.GL.GL_UNSIGNED_SHORT, 1, 1),
     glm.int32: (OpenGL.GL.GL_INT, 1, 1),
     glm.uint32: (OpenGL.GL.GL_UNSIGNED_INT, 1, 1),
     glm.vec2: (OpenGL.GL.GL_FLOAT, 2, 1),
@@ -403,8 +421,17 @@ def use_buffer_view_map_with_shader(
     gl_vertex_array.use()
 
 
-def use_buffer_view_as_element_indexes(view: BufferView[glm.uint32]) -> Any:
-    if view.type is not glm.uint32:
+INDEX_TYPES: Final = {glm.uint8, glm.uint16, glm.uint32}
+
+
+def use_buffer_view_as_element_indexes(
+    view: Union[
+        BufferView[glm.uint8],
+        BufferView[glm.uint16],
+        BufferView[glm.uint32]
+    ]
+) -> Any:
+    if view.type not in INDEX_TYPES:
         raise ValueError(
             f'view buffer with type {view.type} cannot be used for indexing'
         )
