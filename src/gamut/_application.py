@@ -20,8 +20,8 @@ from ctypes import byref as c_byref
 from typing import Any, ContextManager, Optional, Sequence, TypeVar
 # pysdl2
 from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
-                  SDL_INIT_JOYSTICK, SDL_PollEvent, SDL_QuitSubSystem,
-                  SDL_WaitEvent)
+                  SDL_INIT_JOYSTICK, SDL_PollEvent, SDL_PushEvent,
+                  SDL_QuitSubSystem, SDL_USEREVENT, SDL_WaitEvent)
 
 R = TypeVar('R')
 
@@ -34,13 +34,11 @@ class ApplicationEvent(EventLoopEvent, event_loop=...):
         return self.event_loop
 
 
-class ApplicationStart(ApplicationEvent, EventLoopStart,
-                            event_loop=...):
+class ApplicationStart(ApplicationEvent, EventLoopStart, event_loop=...):
     pass
 
 
-class ApplicationEnd(ApplicationEvent, EventLoopEnd,
-                          event_loop=...):
+class ApplicationEnd(ApplicationEvent, EventLoopEnd, event_loop=...):
     pass
 
 
@@ -85,7 +83,7 @@ class Application(EventLoop[R]):
         ))
 
     async def poll(self, block: bool = True) -> Optional[BaseEvent]:
-        event = await super().poll()
+        event = await super().poll(block=False)
         if event:
             return event
         if not self._mouse_created:
@@ -97,6 +95,12 @@ class Application(EventLoop[R]):
             keyboard = Keyboard('primary')
             return keyboard.connect()
         return self._poll_sdl(block=block)
+
+    def queue_event(self, event: BaseEvent) -> None:
+        super().queue_event(event)
+        sdl_event = SDL_Event()
+        sdl_event.type = SDL_USEREVENT
+        SDL_PushEvent(c_byref(sdl_event))
 
     @property
     def controllers(self) -> Sequence[Controller]:

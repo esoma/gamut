@@ -51,7 +51,7 @@ class TestPeripheral:
                 event = await connected_event
                 assert peripheral.is_connected
 
-            async def poll(self) -> Optional[Event]:
+            async def poll(self, block: bool = True) -> Optional[Event]:
                 if self.peripheral_connect_sent:
                     return None
                 self.peripheral_connect_sent = True
@@ -82,7 +82,7 @@ class TestPeripheral:
                 event = await disconnected_event
                 assert not peripheral.is_connected
 
-            async def poll(self) -> Optional[Event]:
+            async def poll(self, block: bool = True) -> Optional[Event]:
                 if self.peripheral_disconnect_sent:
                     return None
                 self.peripheral_disconnect_sent = True
