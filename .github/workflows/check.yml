@@ -49,6 +49,9 @@ jobs:
         "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/libglapi.dll
         dir
       shell: cmd
+      
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
 
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
