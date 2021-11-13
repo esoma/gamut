@@ -49,9 +49,9 @@ jobs:
         "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/libglapi.dll
         dir
       shell: cmd
-      
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
