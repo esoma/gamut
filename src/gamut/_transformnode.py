@@ -35,7 +35,6 @@ class TransformNode:
             if node in chain:
                 raise ValueError('transform parent/child relationship cycle')
 
-
     @property
     def local_transform(self) -> mat4:
         return mat4(self._local_transform)
