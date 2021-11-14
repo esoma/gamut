@@ -2,7 +2,8 @@
 # gamut
 from gamut import Window
 from gamut._glcontext import get_gl_context
-from gamut.graphics import Shader, ShaderAttribute, ShaderUniform, Texture
+from gamut.graphics import (Shader, ShaderAttribute, ShaderUniform, Texture,
+                            Texture2d, TextureComponents)
 from gamut.graphics._shader import use_shader
 # python
 import sys
@@ -346,31 +347,38 @@ def test_sampler_uniforms(
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.array} for uni_name (got {type(None)})'
+            f'expected sequence of {Texture} for uni_name (got {type(None)})'
         )
+        bad_value = glm.array.from_numbers(glm.uint8, 0, 100)
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
-                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+                bad_value, # type: ignore
             )
         assert str(excinfo.value) == (
-            f'expected array of {glm.int32} for uni_name '
-            f'(got array of {glm.uint8})'
+            f'expected sequence of {Texture} for uni_name '
+            f'(found {bad_value[0]} in sequence)'
         )
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0))
         assert str(excinfo.value) == (
-            f'expected array of length 2 for uni_name '
-            f'(got array of length 1)'
+            f'expected sequence of length 2 for uni_name '
+            f'(got sequence of length 1)'
         )
-        shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0, 100))
+        shader._set_uniform(uni, [
+            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00'),
+            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+        ])
     else:
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.int32} for uni_name (got {type(None)})'
+            f'expected {Texture} for uni_name (got {type(None)})'
         )
-        shader._set_uniform(uni, glm.int32(100))
+        shader._set_uniform(
+            uni,
+            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+        )
 
 
 @pytest.mark.parametrize("location", [None, 1])
@@ -433,31 +441,38 @@ def test_shadow_sampler_uniforms(
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.array} for uni_name (got {type(None)})'
+            f'expected sequence of {Texture} for uni_name (got {type(None)})'
         )
+        bad_value = glm.array.from_numbers(glm.uint8, 0, 100)
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
-                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+                bad_value, # type: ignore
             )
         assert str(excinfo.value) == (
-            f'expected array of {glm.int32} for uni_name '
-            f'(got array of {glm.uint8})'
+            f'expected sequence of {Texture} for uni_name '
+            f'(found {bad_value[0]} in sequence)'
         )
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0))
         assert str(excinfo.value) == (
-            f'expected array of length 2 for uni_name '
-            f'(got array of length 1)'
+            f'expected sequence of length 2 for uni_name '
+            f'(got sequence of length 1)'
         )
-        shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0, 100))
+        shader._set_uniform(uni, [
+            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00'),
+            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+        ])
     else:
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.int32} for uni_name (got {type(None)})'
+            f'expected {Texture} for uni_name (got {type(None)})'
         )
-        shader._set_uniform(uni, glm.int32(100))
+        shader._set_uniform(
+            uni,
+            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+        )
 
 
 @pytest.mark.parametrize("location", [None, 1])
