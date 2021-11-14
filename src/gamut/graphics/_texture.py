@@ -17,11 +17,11 @@ import OpenGL.GL
 
 
 class Texture(ABC):
-    
+
     @abstractmethod
     def _bind(self, index: int) -> None:
         ...
-    
+
 
 TextureDataType = Union[
     glm.uint8, glm.int8,

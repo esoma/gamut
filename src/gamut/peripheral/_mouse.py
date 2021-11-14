@@ -28,11 +28,11 @@ from typing import Any, Optional, TYPE_CHECKING, Union
 from weakref import ref
 # pysdl2
 from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
-                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_MOUSEBUTTONDOWN,
+                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_FALSE, SDL_GetError,
+                  SDL_GetRelativeMouseMode, SDL_MOUSEBUTTONDOWN,
                   SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_MOUSEWHEEL,
-                  SDL_MOUSEWHEEL_FLIPPED, SDL_TOUCH_MOUSEID,
-                  SDL_WINDOWEVENT_LEAVE, SDL_SetRelativeMouseMode, SDL_TRUE,
-                  SDL_FALSE, SDL_GetRelativeMouseMode, SDL_GetError)
+                  SDL_MOUSEWHEEL_FLIPPED, SDL_SetRelativeMouseMode,
+                  SDL_TOUCH_MOUSEID, SDL_TRUE, SDL_WINDOWEVENT_LEAVE)
 
 if TYPE_CHECKING:
     # gamut
@@ -252,11 +252,11 @@ class Mouse(Peripheral):
 
     def __repr__(self) -> str:
         return f'<gamut.peripheral.Mouse {self._name!r}>'
-        
+
     @property
     def relative(self) -> bool:
         return SDL_GetRelativeMouseMode() == SDL_TRUE
-        
+
     @relative.setter
     def relative(self, value: bool) -> None:
         if SDL_SetRelativeMouseMode(SDL_TRUE if value else SDL_FALSE) == -1:

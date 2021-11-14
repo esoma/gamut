@@ -27,17 +27,17 @@ from typing import (Any, Final, Generic, Optional, overload, Type, TypeVar,
 from weakref import ref
 # pyglm
 import glm
-from glm import int32
 from glm import array as glm_array
+from glm import int32
 from glm import value_ptr as glm_value_ptr
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
-                       GL_CURRENT_PROGRAM, GL_FALSE, GLchar, glDeleteProgram,
-                       glDrawArrays, glDrawElements, GLenum,
-                       glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
-                       GLint, GLsizei, glEnable, GL_DEPTH_TEST)
+                       GL_CURRENT_PROGRAM, GL_DEPTH_TEST, GL_FALSE, GLchar,
+                       glDeleteProgram, glDrawArrays, glDrawElements, glEnable,
+                       GLenum, glGetActiveUniform, glGetIntegerv,
+                       glGetUniformLocation, GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_LINK_STATUS, GL_VERTEX_SHADER,
                                glAttachShader, glCompileShader,
@@ -176,7 +176,7 @@ class Shader:
             **{attribute.name: attribute for attribute in attributes},
             **{uniform.name: uniform for uniform in uniforms},
         }
-        
+
         self._next_texture_index = 0
 
     def __del__(self) -> None:
@@ -234,7 +234,7 @@ class Shader:
         assert glGetIntegerv(GL_CURRENT_PROGRAM) == self._gl
         assert uniform in self._uniforms
         input_value: Any = None
-        
+
         if uniform.type is Texture:
             if not isinstance(value, Texture):
                 raise ValueError(
@@ -546,7 +546,7 @@ def execute_shader(
             )
 
     glEnable(GL_DEPTH_TEST)
-    
+
     use_render_target(render_target, True, False)
     use_shader(shader)
 

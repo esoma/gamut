@@ -22,11 +22,12 @@ from glm import uint32
 # pyopengl
 from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL,
                        GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED, GL_RG,
-                       GL_RGB, GL_RGBA, GL_STREAM_READ, GL_TEXTURE_2D,
-                       GL_UNSIGNED_INT_24_8, glBindBuffer, glBindTexture,
-                       glBufferData, glDeleteBuffers, glDeleteTextures,
-                       glGenBuffers, glGenerateMipmap, glGenTextures,
-                       glGetTexImage, glMapBuffer, glTexImage2D, glUnmapBuffer, GL_TEXTURE0, glActiveTexture)
+                       GL_RGB, GL_RGBA, GL_STREAM_READ, GL_TEXTURE0,
+                       GL_TEXTURE_2D, GL_UNSIGNED_INT_24_8, glActiveTexture,
+                       glBindBuffer, glBindTexture, glBufferData,
+                       glDeleteBuffers, glDeleteTextures, glGenBuffers,
+                       glGenerateMipmap, glGenTextures, glGetTexImage,
+                       glMapBuffer, glTexImage2D, glUnmapBuffer)
 
 
 class TextureComponents(Enum):
