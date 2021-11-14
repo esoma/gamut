@@ -1,5 +1,6 @@
 
 __all__ = [
+    'bind_texture',
     'Texture',
     'TextureDataType',
     'TEXTURE_DATA_TYPES',
@@ -7,6 +8,7 @@ __all__ = [
 ]
 
 # python
+from abc import ABC, abstractmethod
 from typing import Any, Final, Union
 # pyglm
 import glm
@@ -14,8 +16,11 @@ import glm
 import OpenGL.GL
 
 
-class Texture:
-    pass
+class Texture(ABC):
+
+    @abstractmethod
+    def _bind(self, index: int) -> None:
+        ...
 
 
 TextureDataType = Union[
@@ -38,3 +43,7 @@ TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE: Final[dict[type[TextureDataType], Any]] = {
 
 
 TEXTURE_DATA_TYPES = set(TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE.keys())
+
+
+def bind_texture(texture: Texture, index: int) -> None:
+    texture._bind(index)
