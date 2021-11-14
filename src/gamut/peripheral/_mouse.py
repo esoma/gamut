@@ -20,6 +20,7 @@ __all__ = [
 from ._peripheral import (Peripheral, PeripheralConnected,
                           PeripheralDisconnected, PeripheralEvent)
 # gamut
+from gamut._glcontext import release_gl_context, require_gl_context
 from gamut._sdl import (sdl_event_callback_map, SDL_MOUSE_KEY,
                         sdl_window_event_callback_map)
 from gamut._window import get_window_from_sdl_id, Window
@@ -28,7 +29,7 @@ from typing import Any, Optional, TYPE_CHECKING, Union
 from weakref import ref
 # pysdl2
 from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
-                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_FALSE, SDL_GetError,
+                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_FALSE,
                   SDL_GetRelativeMouseMode, SDL_MOUSEBUTTONDOWN,
                   SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_MOUSEWHEEL,
                   SDL_MOUSEWHEEL_FLIPPED, SDL_SetRelativeMouseMode,
@@ -210,6 +211,10 @@ class Mouse(Peripheral):
 
     def __init__(self, name: str):
         super().__init__(name)
+        # mouse doesn't technically require a GL context, but for relative mode
+        # to work the SDL video subsystem must be initialized
+        self._gl_context = require_gl_context()
+
         class Event(MouseEvent, self.Event): # type: ignore
             pass
         self.Event = Event
@@ -250,12 +255,16 @@ class Mouse(Peripheral):
         self._position: Optional[tuple[int, int]] = None
         self._window: Optional[Window] = None
 
+    def __del__(self) -> None:
+        if hasattr(self, "_gl_context"):
+            self._gl_context = release_gl_context(self._gl_context)
+
     def __repr__(self) -> str:
         return f'<gamut.peripheral.Mouse {self._name!r}>'
 
     @property
     def relative(self) -> bool:
-        return SDL_GetRelativeMouseMode() == SDL_TRUE
+        return bool(SDL_GetRelativeMouseMode() == SDL_TRUE)
 
     @relative.setter
     def relative(self, value: bool) -> None:

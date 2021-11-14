@@ -22,8 +22,8 @@ from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from ctypes import c_void_p
 from enum import Enum
-from typing import (Any, Final, Generic, Optional, overload, Type, TypeVar,
-                    Union)
+from typing import (Any, Final, Generic, Optional, overload, Sequence, Type,
+                    TypeVar, Union)
 from weakref import ref
 # pyglm
 import glm
@@ -228,7 +228,7 @@ class Shader:
             glm.dmat4x2, glm.array[glm.dmat4x2],
             glm.dmat4x3, glm.array[glm.dmat4x3],
             glm.dmat4x4, glm.array[glm.dmat4x4],
-            Texture,
+            Texture, Sequence[Texture],
         ],
     ) -> None:
         assert glGetIntegerv(GL_CURRENT_PROGRAM) == self._gl
@@ -236,45 +236,75 @@ class Shader:
         input_value: Any = None
 
         if uniform.type is Texture:
-            if not isinstance(value, Texture):
-                raise ValueError(
-                    f'expected {Texture} for {uniform.name} '
-                    f'got {type(value)}'
-                )
-            bind_texture(value, self._next_texture_index)
-            value = int32(self._next_texture_index)
-            self._next_texture_index += 1
-
-        if uniform.size > 1:
-            if not isinstance(value, glm_array):
-                raise ValueError(
-                    f'expected {glm.array} for {uniform.name} '
-                    f'(got {type(value)})'
-                )
-            if not issubclass(value.element_type, uniform._set_type):
-                raise ValueError(
-                    f'expected array of {uniform._set_type} '
-                    f'for {uniform.name} '
-                    f'(got array of {value.element_type})'
-                )
-            if len(value) != uniform.size:
-                raise ValueError(
-                    f'expected array of length {uniform.size} '
-                    f'for {uniform.name} '
-                    f'(got array of length {len(value)})'
-                )
-            input_value = value.ptr
-        else:
-            assert uniform.size == 1
-            if not isinstance(value, uniform._set_type):
-                raise ValueError(
-                    f'expected {uniform._set_type} for {uniform.name} '
-                    f'(got {type(value)})'
-                )
-            if uniform._set_type in POD_UNIFORM_TYPES:
-                input_value = value.value
+            if uniform.size > 1:
+                try:
+                    length = len(value) # type: ignore
+                    value_iter = iter(value) # type: ignore
+                except TypeError:
+                    raise ValueError(
+                        f'expected sequence of {Texture} for {uniform.name} '
+                        f'(got {type(value)})'
+                    )
+                if length != uniform.size:
+                    raise ValueError(
+                        f'expected sequence of length {uniform.size} '
+                        f'for {uniform.name} '
+                        f'(got sequence of length {length})'
+                    )
+                texture_values: list[int] = []
+                for texture in value_iter:
+                    if not isinstance(texture, Texture):
+                        raise ValueError(
+                            f'expected sequence of {Texture} '
+                            f'for {uniform.name} '
+                            f'(found {texture} in sequence)'
+                        )
+                    bind_texture(texture, self._next_texture_index)
+                    texture_values.append(self._next_texture_index)
+                    self._next_texture_index += 1
+                value = glm_array.from_numbers(int32, *texture_values)
+                input_value = value.ptr
             else:
-                input_value = glm_value_ptr(value)
+                if not isinstance(value, Texture):
+                    raise ValueError(
+                        f'expected {Texture} for {uniform.name} '
+                        f'(got {type(value)})'
+                    )
+                bind_texture(value, self._next_texture_index)
+                value = int32(self._next_texture_index)
+                self._next_texture_index += 1
+                input_value = value.value
+        else:
+            if uniform.size > 1:
+                if not isinstance(value, glm_array):
+                    raise ValueError(
+                        f'expected {glm.array} for {uniform.name} '
+                        f'(got {type(value)})'
+                    )
+                if not issubclass(value.element_type, uniform._set_type):
+                    raise ValueError(
+                        f'expected array of {uniform._set_type} '
+                        f'for {uniform.name} '
+                        f'(got array of {value.element_type})'
+                    )
+                if len(value) != uniform.size:
+                    raise ValueError(
+                        f'expected array of length {uniform.size} '
+                        f'for {uniform.name} '
+                        f'(got array of length {len(value)})'
+                    )
+                input_value = value.ptr
+            else:
+                assert uniform.size == 1
+                if not isinstance(value, uniform._set_type):
+                    raise ValueError(
+                        f'expected {uniform._set_type} for {uniform.name} '
+                        f'(got {type(value)})'
+                    )
+                if uniform._set_type in POD_UNIFORM_TYPES:
+                    input_value = value.value
+                else:
+                    input_value = glm_value_ptr(value)
 
         uniform._setter(uniform.location, uniform.size, input_value)
 
@@ -423,7 +453,7 @@ def execute_shader(
         glm.dmat4x2, glm.array[glm.dmat4x2],
         glm.dmat4x3, glm.array[glm.dmat4x3],
         glm.dmat4x4, glm.array[glm.dmat4x4],
-        Texture,
+        Texture, Sequence[Texture],
     ]],
     *,
     index_range: Optional[tuple[int, int]] = None,
@@ -473,7 +503,7 @@ def execute_shader(
         glm.dmat4x2, glm.array[glm.dmat4x2],
         glm.dmat4x3, glm.array[glm.dmat4x3],
         glm.dmat4x4, glm.array[glm.dmat4x4],
-        Texture,
+        Texture, Sequence[Texture],
     ]],
     *,
     index_buffer_view: Optional[BufferView[glm.uint32]] = None,
@@ -522,7 +552,7 @@ def execute_shader(
         glm.dmat4x2, glm.array[glm.dmat4x2],
         glm.dmat4x3, glm.array[glm.dmat4x3],
         glm.dmat4x4, glm.array[glm.dmat4x4],
-        Texture,
+        Texture, Sequence[Texture]
     ]],
     *,
     index_range: Optional[tuple[int, int]] = None,

@@ -168,7 +168,7 @@ def test_basic(
     index_type: Any,
 ) -> None:
     render_target = create_render_target(cls)
-    clear_render_target(render_target, color=Color(0, 0, 0, 0))
+    clear_render_target(render_target, color=Color(0, 0, 0, 0), depth=True)
 
     index_range: Optional[tuple[int, int]] = None
     index_buffer_view: Optional[BufferView[glm.uint32]] = None
