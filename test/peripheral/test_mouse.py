@@ -22,13 +22,19 @@ from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
 import pytest
 
 
-def send_sdl_mouse_motion_event(window: Window, x: int, y: int) -> None:
+def send_sdl_mouse_motion_event(
+    window: Window,
+    x: int, y: int,
+    xrel: int, yrel: int
+) -> None:
     sdl_event = SDL_Event()
     sdl_event.type = SDL_MOUSEMOTION
     sdl_event.motion.which = 0
     sdl_event.motion.windowID = SDL_GetWindowID(window._sdl)
     sdl_event.motion.x = x
     sdl_event.motion.y = y
+    sdl_event.motion.xrel = xrel
+    sdl_event.motion.yrel = yrel
     SDL_PushEvent(ctypes.byref(sdl_event))
 
 
@@ -79,6 +85,7 @@ class TestMouse(TestPeripheral):
 
 def test_defaults() -> None:
     mouse = Mouse('test')
+    assert mouse.relative is False
     assert mouse.position is None
     assert mouse.window is None
     assert mouse.Button.left.is_pressed is False
@@ -86,6 +93,15 @@ def test_defaults() -> None:
     assert mouse.Button.right.is_pressed is False
     assert mouse.Button.front.is_pressed is False
     assert mouse.Button.back.is_pressed is False
+
+
+def test_relative() -> None:
+    mouse = Mouse('test')
+    assert mouse.relative is False
+    mouse.relative = True
+    assert mouse.relative is True
+    mouse.relative = False
+    assert mouse.relative is False
 
 
 @pytest.mark.parametrize("name", ['', 'test', 'Primary'])
@@ -121,7 +137,9 @@ def test_button_name(name: str) -> None:
 
 @pytest.mark.parametrize("x", [0, 20, 80, 100])
 @pytest.mark.parametrize("y", [0, 20, 80, 100])
-def test_poll_motion_event(x: int, y: int) -> None:
+@pytest.mark.parametrize("xrel", [-1, 0, 1])
+@pytest.mark.parametrize("yrel", [-1, 0, 1])
+def test_poll_motion_event(x: int, y: int, xrel: int, yrel: int) -> None:
     window = Window()
     moved_event: Optional[MouseMoved] = None
 
@@ -129,7 +147,7 @@ def test_poll_motion_event(x: int, y: int) -> None:
         async def main(self) -> None:
             nonlocal moved_event
             mouse = (await MouseConnected).mouse
-            send_sdl_mouse_motion_event(window, x, y)
+            send_sdl_mouse_motion_event(window, x, y, xrel, yrel)
             moved_event = await mouse.Moved
             assert mouse.position == (x, y)
             assert mouse.window is window
@@ -138,6 +156,7 @@ def test_poll_motion_event(x: int, y: int) -> None:
     app.run()
     assert isinstance(moved_event, MouseMoved)
     assert moved_event.position == (x, y)
+    assert moved_event.delta == (xrel, yrel)
     assert moved_event.window is window
 
 
@@ -149,7 +168,7 @@ def test_poll_window_leave_event() -> None:
         async def main(self) -> None:
             nonlocal moved_event
             mouse = (await MouseConnected).mouse
-            send_sdl_mouse_motion_event(window, 1, 1)
+            send_sdl_mouse_motion_event(window, 1, 1, 1, 1)
             await mouse.Moved
             send_sdl_window_leave_event()
             moved_event = await mouse.Moved
@@ -160,6 +179,7 @@ def test_poll_window_leave_event() -> None:
     app.run()
     assert isinstance(moved_event, MouseMoved)
     assert moved_event.position is None
+    assert moved_event.delta is None
     assert moved_event.window is None
 
 

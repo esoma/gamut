@@ -20,6 +20,7 @@ __all__ = [
 from ._peripheral import (Peripheral, PeripheralConnected,
                           PeripheralDisconnected, PeripheralEvent)
 # gamut
+from gamut._glcontext import release_gl_context, require_gl_context
 from gamut._sdl import (sdl_event_callback_map, SDL_MOUSE_KEY,
                         sdl_window_event_callback_map)
 from gamut._window import get_window_from_sdl_id, Window
@@ -28,10 +29,11 @@ from typing import Any, Optional, TYPE_CHECKING, Union
 from weakref import ref
 # pysdl2
 from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
-                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_MOUSEBUTTONDOWN,
+                  SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_FALSE,
+                  SDL_GetRelativeMouseMode, SDL_MOUSEBUTTONDOWN,
                   SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION, SDL_MOUSEWHEEL,
-                  SDL_MOUSEWHEEL_FLIPPED, SDL_TOUCH_MOUSEID,
-                  SDL_WINDOWEVENT_LEAVE)
+                  SDL_MOUSEWHEEL_FLIPPED, SDL_SetRelativeMouseMode,
+                  SDL_TOUCH_MOUSEID, SDL_TRUE, SDL_WINDOWEVENT_LEAVE)
 
 if TYPE_CHECKING:
     # gamut
@@ -82,6 +84,7 @@ class MouseDisconnected(MouseEvent, PeripheralDisconnected, peripheral=...):
 
 class MouseMoved(MouseEvent, peripheral=...):
     position: Optional[tuple[int, int]]
+    delta: Optional[tuple[int, int]]
     window: Optional[Window]
 
 
@@ -208,6 +211,10 @@ class Mouse(Peripheral):
 
     def __init__(self, name: str):
         super().__init__(name)
+        # mouse doesn't technically require a GL context, but for relative mode
+        # to work the SDL video subsystem must be initialized
+        self._gl_context = require_gl_context()
+
         class Event(MouseEvent, self.Event): # type: ignore
             pass
         self.Event = Event
@@ -248,8 +255,21 @@ class Mouse(Peripheral):
         self._position: Optional[tuple[int, int]] = None
         self._window: Optional[Window] = None
 
+    def __del__(self) -> None:
+        if hasattr(self, "_gl_context"):
+            self._gl_context = release_gl_context(self._gl_context)
+
     def __repr__(self) -> str:
         return f'<gamut.peripheral.Mouse {self._name!r}>'
+
+    @property
+    def relative(self) -> bool:
+        return bool(SDL_GetRelativeMouseMode() == SDL_TRUE)
+
+    @relative.setter
+    def relative(self, value: bool) -> None:
+        if SDL_SetRelativeMouseMode(SDL_TRUE if value else SDL_FALSE) == -1:
+            raise RuntimeError('relative mode is not supported')
 
     @property
     def position(self) -> Optional[tuple[int, int]]:
@@ -265,13 +285,14 @@ def sdl_window_event_leave(
     mice: dict[Any, Mouse],
     keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
-) -> MouseMoved:
+) -> Optional[MouseMoved]:
     mouse = mice[SDL_MOUSE_KEY]
-    assert mouse._window is not None
+    if mouse._window is None:
+        return None
     assert mouse._position is not None
     mouse._position = None
     mouse._window = None
-    return mouse.Moved(mouse._position, mouse._window)
+    return mouse.Moved(mouse._position, None, mouse._window)
 
 assert SDL_WINDOWEVENT_LEAVE not in sdl_window_event_callback_map
 sdl_window_event_callback_map[SDL_WINDOWEVENT_LEAVE] = sdl_window_event_leave
@@ -291,8 +312,9 @@ def sdl_mouse_motion_event_callback(
         return None
     mouse = mice[SDL_MOUSE_KEY]
     mouse._position = (sdl_event.motion.x, sdl_event.motion.y)
+    delta = (sdl_event.motion.xrel, sdl_event.motion.yrel)
     mouse._window = window
-    return mouse.Moved(mouse._position, mouse._window)
+    return mouse.Moved(mouse._position, delta, mouse._window)
 
 assert SDL_MOUSEMOTION not in sdl_event_callback_map
 sdl_event_callback_map[SDL_MOUSEMOTION] = sdl_mouse_motion_event_callback
