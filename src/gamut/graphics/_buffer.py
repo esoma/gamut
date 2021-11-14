@@ -348,7 +348,7 @@ class GlVertexArray:
             glBindVertexArray(0)
             gl_vertex_array_in_use = None
         if self._gl:
-            glDeleteVertexArrays(1, [self._gl])
+            glDeleteVertexArrays(1, np_array([self._gl]))
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
 

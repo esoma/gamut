@@ -26,7 +26,7 @@ from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL,
                        GL_UNSIGNED_INT_24_8, glBindBuffer, glBindTexture,
                        glBufferData, glDeleteBuffers, glDeleteTextures,
                        glGenBuffers, glGenerateMipmap, glGenTextures,
-                       glGetTexImage, glMapBuffer, glTexImage2D, glUnmapBuffer)
+                       glGetTexImage, glMapBuffer, glTexImage2D, glUnmapBuffer, GL_TEXTURE0, glActiveTexture)
 
 
 class TextureComponents(Enum):
@@ -115,6 +115,10 @@ class Texture2d(Texture):
 
     def __del__(self) -> None:
         self.close()
+
+    def _bind(self, index: int) -> None:
+        glActiveTexture(GL_TEXTURE0 + index)
+        glBindTexture(GL_TEXTURE_2D, self._gl)
 
     def close(self) -> None:
         if hasattr(self, '_gl') and self._gl is not None:

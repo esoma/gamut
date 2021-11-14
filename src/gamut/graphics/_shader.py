@@ -16,7 +16,7 @@ from ._buffer import (BufferView, BufferViewMap,
                       use_buffer_view_map_with_shader)
 from ._rendertarget import (TextureRenderTarget, use_render_target,
                             WindowRenderTarget)
-from ._texture import Texture
+from ._texture import bind_texture, Texture
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
@@ -27,6 +27,7 @@ from typing import (Any, Final, Generic, Optional, overload, Type, TypeVar,
 from weakref import ref
 # pyglm
 import glm
+from glm import int32
 from glm import array as glm_array
 from glm import value_ptr as glm_value_ptr
 # pyopengl
@@ -36,7 +37,7 @@ from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_CURRENT_PROGRAM, GL_FALSE, GLchar, glDeleteProgram,
                        glDrawArrays, glDrawElements, GLenum,
                        glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
-                       GLint, GLsizei)
+                       GLint, GLsizei, glEnable, GL_DEPTH_TEST)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_LINK_STATUS, GL_VERTEX_SHADER,
                                glAttachShader, glCompileShader,
@@ -49,7 +50,7 @@ from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
 T = TypeVar('T',
     glm.float32, glm.vec2, glm.vec3, glm.vec4,
     glm.double, glm.dvec2, glm.dvec3, glm.dvec4,
-    glm.int32, glm.ivec2, glm.ivec3, glm.ivec4,
+    int32, glm.ivec2, glm.ivec3, glm.ivec4,
     glm.uint32, glm.uvec2, glm.uvec3, glm.uvec4,
     glm.bool_,
     glm.mat2x2, glm.mat2x3, glm.mat2x4,
@@ -175,6 +176,8 @@ class Shader:
             **{attribute.name: attribute for attribute in attributes},
             **{uniform.name: uniform for uniform in uniforms},
         }
+        
+        self._next_texture_index = 0
 
     def __del__(self) -> None:
         self.close()
@@ -198,7 +201,7 @@ class Shader:
             glm.dvec2, glm.array[glm.dvec2],
             glm.dvec3, glm.array[glm.dvec3],
             glm.dvec4, glm.array[glm.dvec4],
-            glm.int32, glm.array[glm.int32],
+            int32, glm.array[int32],
             glm.ivec2, glm.array[glm.ivec2],
             glm.ivec3, glm.array[glm.ivec3],
             glm.ivec4, glm.array[glm.ivec4],
@@ -225,11 +228,22 @@ class Shader:
             glm.dmat4x2, glm.array[glm.dmat4x2],
             glm.dmat4x3, glm.array[glm.dmat4x3],
             glm.dmat4x4, glm.array[glm.dmat4x4],
+            Texture,
         ],
     ) -> None:
         assert glGetIntegerv(GL_CURRENT_PROGRAM) == self._gl
         assert uniform in self._uniforms
         input_value: Any = None
+        
+        if uniform.type is Texture:
+            if not isinstance(value, Texture):
+                raise ValueError(
+                    f'expected {Texture} for {uniform.name} '
+                    f'got {type(value)}'
+                )
+            bind_texture(value, self._next_texture_index)
+            value = int32(self._next_texture_index)
+            self._next_texture_index += 1
 
         if uniform.size > 1:
             if not isinstance(value, glm_array):
@@ -335,7 +349,7 @@ class ShaderUniform(Generic[T]):
         self._size = size
         self._location = location
         self._setter = TYPE_TO_UNIFORM_SETTER[self._type]
-        self._set_type: Any = glm.int32 if type is Texture else type
+        self._set_type: Any = int32 if type is Texture else type
 
     @property
     def name(self) -> str:
@@ -359,6 +373,7 @@ shader_in_use: Optional[ref[Shader]] = None
 
 def use_shader(shader: Shader) -> None:
     global shader_in_use
+    shader._next_texture_index = 0
     shader._ensure_open()
     if shader_in_use and shader_in_use() is shader:
         return
@@ -381,7 +396,7 @@ def execute_shader(
         glm.dvec2, glm.array[glm.dvec2],
         glm.dvec3, glm.array[glm.dvec3],
         glm.dvec4, glm.array[glm.dvec4],
-        glm.int32, glm.array[glm.int32],
+        int32, glm.array[int32],
         glm.ivec2, glm.array[glm.ivec2],
         glm.ivec3, glm.array[glm.ivec3],
         glm.ivec4, glm.array[glm.ivec4],
@@ -408,6 +423,7 @@ def execute_shader(
         glm.dmat4x2, glm.array[glm.dmat4x2],
         glm.dmat4x3, glm.array[glm.dmat4x3],
         glm.dmat4x4, glm.array[glm.dmat4x4],
+        Texture,
     ]],
     *,
     index_range: Optional[tuple[int, int]] = None,
@@ -430,7 +446,7 @@ def execute_shader(
         glm.dvec2, glm.array[glm.dvec2],
         glm.dvec3, glm.array[glm.dvec3],
         glm.dvec4, glm.array[glm.dvec4],
-        glm.int32, glm.array[glm.int32],
+        int32, glm.array[int32],
         glm.ivec2, glm.array[glm.ivec2],
         glm.ivec3, glm.array[glm.ivec3],
         glm.ivec4, glm.array[glm.ivec4],
@@ -457,6 +473,7 @@ def execute_shader(
         glm.dmat4x2, glm.array[glm.dmat4x2],
         glm.dmat4x3, glm.array[glm.dmat4x3],
         glm.dmat4x4, glm.array[glm.dmat4x4],
+        Texture,
     ]],
     *,
     index_buffer_view: Optional[BufferView[glm.uint32]] = None,
@@ -478,7 +495,7 @@ def execute_shader(
         glm.dvec2, glm.array[glm.dvec2],
         glm.dvec3, glm.array[glm.dvec3],
         glm.dvec4, glm.array[glm.dvec4],
-        glm.int32, glm.array[glm.int32],
+        int32, glm.array[int32],
         glm.ivec2, glm.array[glm.ivec2],
         glm.ivec3, glm.array[glm.ivec3],
         glm.ivec4, glm.array[glm.ivec4],
@@ -505,6 +522,7 @@ def execute_shader(
         glm.dmat4x2, glm.array[glm.dmat4x2],
         glm.dmat4x3, glm.array[glm.dmat4x3],
         glm.dmat4x4, glm.array[glm.dmat4x4],
+        Texture,
     ]],
     *,
     index_range: Optional[tuple[int, int]] = None,
@@ -527,6 +545,8 @@ def execute_shader(
                 f'shader does not accept a uniform called "{uniform_name}"'
             )
 
+    glEnable(GL_DEPTH_TEST)
+    
     use_render_target(render_target, True, False)
     use_shader(shader)
 
@@ -558,7 +578,7 @@ def execute_shader(
 POD_UNIFORM_TYPES: Final = {
     glm.float32,
     glm.double,
-    glm.int32,
+    int32,
     glm.uint32,
     glm.bool_,
 }
@@ -581,7 +601,7 @@ TYPE_TO_UNIFORM_SETTER: Final[dict[Any, Any]] = {
     glm.dvec3: OpenGL.GL.glUniform3dv,
     glm.dvec4: OpenGL.GL.glUniform4dv,
 
-    glm.int32: OpenGL.GL.glUniform1iv,
+    int32: OpenGL.GL.glUniform1iv,
     glm.ivec2: OpenGL.GL.glUniform2iv,
     glm.ivec3: OpenGL.GL.glUniform3iv,
     glm.ivec4: OpenGL.GL.glUniform4iv,
@@ -628,7 +648,7 @@ GL_TYPE_TO_PY: Final = {
     OpenGL.GL.GL_DOUBLE_VEC3: glm.dvec3,
     OpenGL.GL.GL_DOUBLE_VEC4: glm.dvec4,
 
-    OpenGL.GL.GL_INT: glm.int32,
+    OpenGL.GL.GL_INT: int32,
     OpenGL.GL.GL_INT_VEC2: glm.ivec2,
     OpenGL.GL.GL_INT_VEC3: glm.ivec3,
     OpenGL.GL.GL_INT_VEC4: glm.ivec4,
