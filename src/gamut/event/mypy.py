@@ -4,18 +4,23 @@ __all__ = ['Plugin']
 # python
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, Callable, Generator, Optional, Type
+import json
+import os
+from typing import Any, Callable, Final, Generator, Optional, Type
 # mypy
 from mypy.nodes import (ARG_NAMED, ARG_OPT, ARG_POS, Argument, AssignmentStmt,
                         EllipsisExpr, Expression, FuncDef, is_class_var,
                         NameExpr, TempNode, Var)
 from mypy.plugin import ClassDefContext, MethodSigContext
 from mypy.plugin import Plugin as _Plugin
+from mypy.plugin import ReportConfigContext
 from mypy.plugins.common import add_method
 from mypy.semanal import SemanticAnalyzer
 from mypy.types import AnyType, CallableType, get_proper_type, NoneType
 from mypy.types import Type as MypyType
 from mypy.types import TypeOfAny
+
+CACHE_FILE: Final = '.gamut_mypy_cache/gamut.event.mypy.Plugin.json'
 
 
 class Plugin(_Plugin):
@@ -23,6 +28,31 @@ class Plugin(_Plugin):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._context = _Context()
+        try:
+            os.mkdir('.gamut_mypy_cache')
+        except FileExistsError:
+            pass
+        with open('.gamut_mypy_cache/.gitignore', 'w') as f:
+            f.write('*\n')
+        with open('.gamut_mypy_cache/CACHEDIR.TAG', 'w') as f:
+            f.write('Signature: 8a477f597d28d172789f06886806bc55')
+        try:
+            with open(CACHE_FILE) as f:
+                self._cache = set(json.load(f))
+        except Exception:
+            self._cache = set()
+
+    def report_config_data(self, ctx: ReportConfigContext) -> Any:
+        if ctx.is_check:
+            return ctx.path in self._cache
+        else:
+            with open(CACHE_FILE, 'w') as f:
+                json.dump(list({
+                    path
+                    for path, _ in
+                    self._context.events_by_line.keys()
+                } | self._cache), f)
+        return False
 
     def get_base_class_hook(
         self, fullname: str
