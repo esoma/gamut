@@ -15,6 +15,8 @@ from ._task import Task, TaskStatus
 from ._taskmanager import TaskManager
 # python
 from abc import ABC, abstractmethod
+from queue import Empty as QueueEmpty
+from queue import Queue
 from typing import Any, ContextManager, Generic, Optional, TypeVar
 
 R = TypeVar('R')
@@ -40,6 +42,7 @@ class EventLoop(ABC, Generic[R]):
 
     def __init__(self) -> None:
         super().__init__()
+        self._event_queue: Queue[BaseEvent] = Queue()
         class Event(EventLoopEvent, event_loop=self):
             pass
         self.Event = Event
@@ -57,6 +60,7 @@ class EventLoop(ABC, Generic[R]):
         return DoNothingContextManager()
 
     def run(self) -> R:
+        self._event_queue = Queue()
         with (
             TaskManager() as task_manager,
             Bind.mutex(self._OutOfEvents, self.__poll),
@@ -87,8 +91,14 @@ class EventLoop(ABC, Generic[R]):
         if event:
             await event.asend()
 
-    async def poll(self) -> Optional[BaseEvent]:
-        return None
+    async def poll(self, block: bool = True) -> Optional[BaseEvent]:
+        try:
+            return self._event_queue.get(block=block)
+        except QueueEmpty:
+            return None
+
+    def queue_event(self, event: BaseEvent) -> None:
+        self._event_queue.put(event)
 
 
 class DoNothingContextManager:

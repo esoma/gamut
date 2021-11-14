@@ -88,8 +88,22 @@ class TestEventLoop:
                 event = await TestEvent
                 return event.text
 
-            async def poll(self) -> Optional[Event]:
+            async def poll(self, block: bool = True) -> Optional[Event]:
                 return TestEvent("test")
+
+        app = TestEventLoop()
+        assert app.run() == "test"
+
+
+    def test_queue_event(self, cls: type[EventLoop]) -> None:
+        class TestEvent(Event):
+            text: str
+
+        class TestEventLoop(cls): # type: ignore
+            async def main(self) -> str:
+                self.queue_event(TestEvent("test"))
+                event = await TestEvent
+                return event.text
 
         app = TestEventLoop()
         assert app.run() == "test"
