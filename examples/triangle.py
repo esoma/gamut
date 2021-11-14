@@ -56,7 +56,11 @@ class App(Application):
             await self.window.Close
 
     async def draw(self, draw: Draw) -> None:
-        clear_render_target(self.window_render_target, color=Color(0, 0, 0))
+        clear_render_target(
+            self.window_render_target,
+            color=Color(0, 0, 0),
+            depth=True,
+        )
         self.triangle_transform *= rotate(.02, vec3(0, 0, -1))
         execute_shader(
             self.window_render_target,
