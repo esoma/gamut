@@ -661,7 +661,7 @@ def execute_shader(
 
     if index_buffer_view is None:
         assert index_range is not None
-        if instances:
+        if instances > 1:
             glDrawArraysInstanced(
                 primitive_mode.value,
                 index_range[0],
@@ -676,7 +676,7 @@ def execute_shader(
             )
     else:
         index_gl_type = use_buffer_view_as_element_indexes(index_buffer_view)
-        if instances:
+        if instances > 1:
             glDrawElementsInstanced(
                 primitive_mode.value,
                 len(index_buffer_view),
