@@ -239,11 +239,17 @@ def read_depth_from_render_target(
     x: int, y: int,
     width: int, height: int,
 ) -> list[list[float]]:
+    if isinstance(render_target, TextureRenderTarget):
+        if (render_target.depth_stencil ==
+            TextureRenderTargetDepthStencil.NONE):
+            raise ValueError(
+                'cannot read depth from a render target with no depth buffer'
+            )
     use_render_target(render_target, False, True)
     pixels = glReadPixels(x, y, width, height, GL_DEPTH_COMPONENT, GL_FLOAT)
     return [
         [column for column in row]
-        for row in pixels
+        for row in (pixels * 2) - 1
     ]
 
 
@@ -267,6 +273,13 @@ def clear_render_target(
     depth: Optional[float] = None,
     stencil: Optional[int] = None
 ) -> None:
+    if depth is not None and isinstance(render_target, TextureRenderTarget):
+        if (render_target.depth_stencil ==
+            TextureRenderTargetDepthStencil.NONE):
+            raise ValueError(
+                'cannot clear depth on a render target with no depth buffer'
+            )
+
     use_render_target(render_target, True, False)
 
     mask = 0
@@ -274,7 +287,7 @@ def clear_render_target(
         glClearColor(color.red, color.blue, color.green, 1.0)
         mask |= GL_COLOR_BUFFER_BIT
     if depth is not None:
-        glClearDepthf(depth)
+        glClearDepthf((depth + 1) / 2.0)
         mask |= GL_DEPTH_BUFFER_BIT
     if stencil is not None:
         glClearStencil(stencil)

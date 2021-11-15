@@ -59,7 +59,7 @@ class App(Application):
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
-            depth=True,
+            depth=0,
         )
         self.triangle_transform *= rotate(.02, vec3(0, 0, -1))
         execute_shader(

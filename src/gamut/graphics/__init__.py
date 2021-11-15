@@ -7,6 +7,7 @@ __all__ = [
     'BufferViewMap',
     'clear_render_target',
     'Color',
+    'DepthTest',
     'execute_shader',
     'Image',
     'ImageInvalidError',
@@ -38,7 +39,7 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from ._shader import (execute_shader, PrimitiveMode, Shader, ShaderAttribute,
-                      ShaderUniform)
+from ._shader import (DepthTest, execute_shader, PrimitiveMode, Shader,
+                      ShaderAttribute, ShaderUniform)
 from ._texture2d import Texture2d, TextureComponents, TextureView
 from ._texture import Texture, TextureDataType

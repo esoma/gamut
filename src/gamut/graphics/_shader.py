@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 __all__ = [
+    'DepthTest',
     'execute_shader',
     'PrimitiveMode',
     'Shader',
@@ -14,7 +15,8 @@ __all__ = [
 from ._buffer import (BufferView, BufferViewMap,
                       use_buffer_view_as_element_indexes,
                       use_buffer_view_map_with_shader)
-from ._rendertarget import (TextureRenderTarget, use_render_target,
+from ._rendertarget import (TextureRenderTarget,
+                            TextureRenderTargetDepthStencil, use_render_target,
                             WindowRenderTarget)
 from ._texture import bind_texture, Texture
 # gamut
@@ -35,9 +37,10 @@ import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
                        GL_CURRENT_PROGRAM, GL_DEPTH_TEST, GL_FALSE, GLchar,
-                       glDeleteProgram, glDrawArrays, glDrawElements, glEnable,
-                       GLenum, glGetActiveUniform, glGetIntegerv,
-                       glGetUniformLocation, GLint, GLsizei)
+                       glDeleteProgram, glDepthFunc, glDepthMask, glDisable,
+                       glDrawArrays, glDrawElements, glEnable, GLenum,
+                       glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
+                       GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_LINK_STATUS, GL_VERTEX_SHADER,
                                glAttachShader, glCompileShader,
@@ -71,6 +74,17 @@ class PrimitiveMode(Enum):
     TRIANGLE = OpenGL.GL.GL_TRIANGLES
     TRIANGLE_STRIP = OpenGL.GL.GL_TRIANGLE_STRIP
     TRIANGLE_FAN = OpenGL.GL.GL_TRIANGLE_FAN
+
+
+class DepthTest(Enum):
+    NEVER = int(OpenGL.GL.GL_NEVER)
+    ALWAYS = int(OpenGL.GL.GL_ALWAYS)
+    LESS = int(OpenGL.GL.GL_LESS)
+    LESS_EQUAL = int(OpenGL.GL.GL_LEQUAL)
+    GREATER = int(OpenGL.GL.GL_GREATER)
+    GREATER_EQUAL = int(OpenGL.GL.GL_GEQUAL)
+    EQUAL = int(OpenGL.GL.GL_EQUAL)
+    NOT_EQUAL = int(OpenGL.GL.GL_NOTEQUAL)
 
 
 class Shader:
@@ -456,6 +470,8 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
+    depth_test: DepthTest = DepthTest.ALWAYS,
+    depth_write: bool = False,
     index_range: Optional[tuple[int, int]] = None,
 ) -> None:
     ...
@@ -506,6 +522,8 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
+    depth_test: DepthTest = DepthTest.ALWAYS,
+    depth_write: bool = False,
     index_buffer_view: Optional[Union[
         BufferView[glm.uint8],
         BufferView[glm.uint16],
@@ -559,6 +577,8 @@ def execute_shader(
         Texture, Sequence[Texture]
     ]],
     *,
+    depth_test: DepthTest = DepthTest.ALWAYS,
+    depth_write: bool = False,
     index_range: Optional[tuple[int, int]] = None,
     index_buffer_view: Optional[Union[
         BufferView[glm.uint8],
@@ -582,18 +602,36 @@ def execute_shader(
             raise ValueError(
                 f'shader does not accept a uniform called "{uniform_name}"'
             )
+    uniform_values: list[tuple[ShaderUniform, Any]] = []
+    for uniform in shader.uniforms:
+        try:
+            value = uniforms[uniform.name]
+        except KeyError:
+            raise ValueError(f'missing uniform: {uniform.name}')
+        uniform_values.append((uniform, value))
 
-    glEnable(GL_DEPTH_TEST)
+    if depth_test == DepthTest.NEVER:
+        return
+    if not depth_write and depth_test == DepthTest.ALWAYS:
+        glDisable(GL_DEPTH_TEST)
+    else:
+        if isinstance(render_target, TextureRenderTarget):
+            if (render_target.depth_stencil ==
+                TextureRenderTargetDepthStencil.NONE):
+                raise ValueError(
+                    f'cannot execute shader with {depth_test=} and '
+                    f'{depth_write=} on TextureRenderTarget without a depth '
+                    f'buffer'
+                )
+        glEnable(GL_DEPTH_TEST)
+        glDepthMask(bool(depth_write))
+        glDepthFunc(depth_test.value)
 
     use_render_target(render_target, True, False)
     use_shader(shader)
 
-    for uniform in shader.uniforms:
-        try:
-            uniform_value = uniforms[uniform.name]
-        except KeyError:
-            raise ValueError(f'missing uniform: {uniform.name}')
-        shader._set_uniform(uniform, uniform_value)
+    for uniform, value in uniform_values:
+        shader._set_uniform(uniform, value)
     use_buffer_view_map_with_shader(buffer_view_map, shader)
 
     if index_buffer_view is None:
