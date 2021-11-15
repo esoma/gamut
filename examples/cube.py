@@ -6,7 +6,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, execute_shader, Image,
                             PrimitiveMode, Shader, WindowRenderTarget)
 from gamut.peripheral import (KeyboardConnected, KeyboardKey,
-                              KeyboardKeyPressed, MouseMoved)
+                              KeyboardKeyPressed, MouseMoved, MouseConnected)
 # python
 from datetime import timedelta
 from pathlib import Path
