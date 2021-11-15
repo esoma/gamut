@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = [
     'DepthTest',
     'execute_shader',
+    'FaceCull',
     'PrimitiveMode',
     'Shader',
     'ShaderAttribute',
@@ -37,13 +38,14 @@ from glm import value_ptr as glm_value_ptr
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
-                       GL_BLEND, GL_CURRENT_PROGRAM, GL_DEPTH_TEST, GL_FALSE,
-                       glBlendColor, glBlendEquation, glBlendFuncSeparate,
-                       GLchar, glDeleteProgram, glDepthFunc, glDepthMask,
-                       glDisable, glDrawArrays, glDrawArraysInstanced,
-                       glDrawElements, glDrawElementsInstanced, glEnable,
-                       GLenum, glGetActiveUniform, glGetIntegerv,
-                       glGetUniformLocation, GLint, GLsizei)
+                       GL_BLEND, GL_CULL_FACE, GL_CURRENT_PROGRAM,
+                       GL_DEPTH_TEST, GL_FALSE, glBlendColor, glBlendEquation,
+                       glBlendFuncSeparate, GLchar, glCullFace,
+                       glDeleteProgram, glDepthFunc, glDepthMask, glDisable,
+                       glDrawArrays, glDrawArraysInstanced, glDrawElements,
+                       glDrawElementsInstanced, glEnable, GLenum,
+                       glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
+                       GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_LINK_STATUS, GL_VERTEX_SHADER,
                                glAttachShader, glCompileShader,
@@ -113,6 +115,12 @@ class BlendFunction(Enum):
     SUBTRACT_REVERSED = int(OpenGL.GL.GL_FUNC_REVERSE_SUBTRACT)
     MIN = int(OpenGL.GL.GL_MIN)
     MAX = int(OpenGL.GL.GL_MAX)
+
+
+class FaceCull(Enum):
+    NONE = 0
+    FRONT = int(OpenGL.GL.GL_FRONT)
+    BACK = int(OpenGL.GL.GL_BACK)
 
 
 class Shader:
@@ -500,6 +508,7 @@ def execute_shader(
     *,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
+    face_cull: FaceCull = FaceCull.NONE,
     instances: int = 1,
     index_range: Optional[tuple[int, int]] = None,
 ) -> None:
@@ -553,6 +562,7 @@ def execute_shader(
     *,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
+    face_cull: FaceCull = FaceCull.NONE,
     instances: int = 1,
     index_buffer_view: Optional[Union[
         BufferView[glm.uint8],
@@ -615,6 +625,7 @@ def execute_shader(
     blend_color: Optional[Color] = None,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
+    face_cull: FaceCull = FaceCull.NONE,
     instances: int = 1,
     index_range: Optional[tuple[int, int]] = None,
     index_buffer_view: Optional[Union[
@@ -690,6 +701,12 @@ def execute_shader(
         )
         glBlendEquation(blend_function.value)
         glBlendColor(*blend_color)
+
+    if face_cull == FaceCull.NONE:
+        glDisable(GL_CULL_FACE)
+    else:
+        glEnable(GL_CULL_FACE)
+        glCullFace(face_cull.value)
 
     use_render_target(render_target, True, False)
     use_shader(shader)
