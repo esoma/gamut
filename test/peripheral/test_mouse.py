@@ -233,6 +233,7 @@ def test_poll_scroll_event(
 ])
 def test_poll_button_down_event(sdl_button: int, button_name: str) -> None:
     window = Window()
+    generic_pressed_event: Optional[MouseButtonPressed] = None
     pressed_event: Optional[MouseButtonPressed] = None
     button: Optional[PressableMouseButton] = None
 
@@ -240,20 +241,34 @@ def test_poll_button_down_event(sdl_button: int, button_name: str) -> None:
         async def main(self) -> None:
             nonlocal button
             nonlocal pressed_event
+            nonlocal generic_pressed_event
             mouse = (await MouseConnected).mouse
             button = getattr(mouse.Button, button_name)
             assert isinstance(button, PressableMouseButton)
+            generic_button = getattr(MouseButton, button_name)
+            assert isinstance(generic_button, MouseButton)
+
             send_sdl_mouse_button_event(sdl_button, True)
             pressed_event = await button.Pressed
             assert pressed_event.button is button
             assert button.is_pressed
 
+            send_sdl_mouse_button_event(sdl_button, False)
+
+            send_sdl_mouse_button_event(sdl_button, True)
+            generic_pressed_event = await generic_button.Pressed
+            assert generic_pressed_event.button is button
+            assert button.is_pressed
+
     app = TestApplication()
     app.run()
+    assert isinstance(generic_pressed_event, MouseButtonPressed)
     assert isinstance(pressed_event, MouseButtonPressed)
     assert isinstance(button, PressableMouseButton)
     assert pressed_event.button is button
     assert pressed_event.is_pressed is True
+    assert generic_pressed_event.button is button
+    assert generic_pressed_event.is_pressed is True
 
 
 @pytest.mark.parametrize("sdl_button, button_name", [
@@ -265,6 +280,7 @@ def test_poll_button_down_event(sdl_button: int, button_name: str) -> None:
 ])
 def test_poll_button_up_event(sdl_button: int, button_name: str) -> None:
     window = Window()
+    generic_released_event: Optional[MouseButtonReleased] = None
     released_event: Optional[MouseButtonReleased] = None
     button: Optional[PressableMouseButton] = None
 
@@ -272,19 +288,35 @@ def test_poll_button_up_event(sdl_button: int, button_name: str) -> None:
         async def main(self) -> None:
             nonlocal button
             nonlocal released_event
+            nonlocal generic_released_event
             mouse = (await MouseConnected).mouse
             button = getattr(mouse.Button, button_name)
             assert isinstance(button, PressableMouseButton)
+            generic_button = getattr(MouseButton, button_name)
+            assert isinstance(generic_button, MouseButton)
+
             send_sdl_mouse_button_event(sdl_button, True)
             await button.Pressed
+
             send_sdl_mouse_button_event(sdl_button, False)
             released_event = await button.Released
             assert released_event.button is button
             assert not button.is_pressed
 
+            send_sdl_mouse_button_event(sdl_button, True)
+            await button.Pressed
+
+            send_sdl_mouse_button_event(sdl_button, False)
+            generic_released_event = await generic_button.Released
+            assert generic_released_event.button is button
+            assert not button.is_pressed
+
     app = TestApplication()
     app.run()
+    assert isinstance(generic_released_event, MouseButtonReleased)
     assert isinstance(released_event, MouseButtonReleased)
     assert isinstance(button, PressableMouseButton)
     assert released_event.button is button
     assert released_event.is_pressed is False
+    assert generic_released_event.button is button
+    assert generic_released_event.is_pressed is False

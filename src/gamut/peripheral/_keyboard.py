@@ -883,38 +883,39 @@ class KeyboardKey(BaseKeyboardKey):
     def __init__(self, name: str, keyboard: Optional[Keyboard] = None):
         super().__init__(name, keyboard=keyboard)
         if keyboard:
+            generic_key = getattr(KeyboardKey, name)
             class EventWithKeyboard( # type: ignore
-                KeyboardKeyEvent,
+                generic_key.Event, # type: ignore
                 keyboard.Event, # type: ignore
                 key=self
             ):
                 pass
             self.Event = EventWithKeyboard
-            class PressedWithKeyboard( # type: ignore
-                KeyboardKeyPressed,
+            class PressedWithKeyboard(
+                generic_key.Pressed, # type: ignore
                 EventWithKeyboard
             ):
                 pass
             self.Pressed = PressedWithKeyboard
-            class ReleasedWithKeyboard( # type: ignore
-                KeyboardKeyReleased,
+            class ReleasedWithKeyboard(
+                generic_key.Released, # type: ignore
                 EventWithKeyboard
             ):
                 pass
             self.Released = ReleasedWithKeyboard
         else:
             class EventNoKeyboard(KeyboardKeyEvent,
-                peripheral=..., key=self
+                peripheral=..., key=...
             ):
                 pass
             self.Event = EventNoKeyboard
             class PressedNoKeyboard(KeyboardKeyPressed, EventNoKeyboard,
-                peripheral=...
+                peripheral=..., key=...
             ):
                 pass
             self.Pressed = PressedNoKeyboard
             class ReleasedNoKeyboard(KeyboardKeyReleased, EventNoKeyboard,
-                peripheral=...
+                peripheral=..., key=...
             ):
                 pass
             self.Released = ReleasedNoKeyboard

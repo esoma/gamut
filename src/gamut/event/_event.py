@@ -379,7 +379,6 @@ class Event(metaclass=EventType):
         task_manager = TaskManager.get_current()
         if task_manager is None:
             raise RuntimeError('no active task manager')
-
         tasks: list[Task[E]] = []
         for cls in inspect.getmro(self.__class__):
             if not issubclass(cls, Event):

@@ -399,6 +399,7 @@ def test_poll_window_focus_lost_event() -> None:
     sdl_scancode_to_gamut_key_name.items()
 )
 def test_poll_key_down_event(sdl_scancode: int, key_name: str) -> None:
+    generic_pressed_event: Optional[KeyboardKeyPressed] = None
     pressed_event: Optional[KeyboardKeyPressed] = None
     key: Optional[PressableKeyboardKey] = None
 
@@ -406,20 +407,34 @@ def test_poll_key_down_event(sdl_scancode: int, key_name: str) -> None:
         async def main(self) -> None:
             nonlocal key
             nonlocal pressed_event
+            nonlocal generic_pressed_event
             keyboard = (await KeyboardConnected).keyboard
             key = getattr(keyboard.Key, key_name)
             assert isinstance(key, PressableKeyboardKey)
+            generic_key = getattr(KeyboardKey, key_name)
+            assert isinstance(generic_key, KeyboardKey)
+
             send_sdl_keyboard_key_event(sdl_scancode, True)
             pressed_event = await key.Pressed
             assert pressed_event.key is key
             assert key.is_pressed
 
+            send_sdl_keyboard_key_event(sdl_scancode, False)
+
+            send_sdl_keyboard_key_event(sdl_scancode, True)
+            generic_pressed_event = await generic_key.Pressed
+            assert generic_pressed_event.key is key
+            assert key.is_pressed
+
     app = TestApplication()
     app.run()
+    assert isinstance(generic_pressed_event, KeyboardKeyPressed)
     assert isinstance(pressed_event, KeyboardKeyPressed)
     assert isinstance(key, PressableKeyboardKey)
     assert pressed_event.key is key
     assert pressed_event.is_pressed is True
+    assert generic_pressed_event.key is key
+    assert generic_pressed_event.is_pressed is True
 
 
 @pytest.mark.parametrize(
@@ -427,6 +442,7 @@ def test_poll_key_down_event(sdl_scancode: int, key_name: str) -> None:
     sdl_scancode_to_gamut_key_name.items()
 )
 def test_poll_key_up_event(sdl_scancode: int, key_name: str) -> None:
+    generic_released_event: Optional[KeyboardKeyReleased] = None
     released_event: Optional[KeyboardKeyReleased] = None
     key: Optional[PressableKeyboardKey] = None
 
@@ -434,19 +450,36 @@ def test_poll_key_up_event(sdl_scancode: int, key_name: str) -> None:
         async def main(self) -> None:
             nonlocal key
             nonlocal released_event
+            nonlocal generic_released_event
             keyboard = (await KeyboardConnected).keyboard
             key = getattr(keyboard.Key, key_name)
             assert isinstance(key, PressableKeyboardKey)
+            generic_key = getattr(KeyboardKey, key_name)
+            assert isinstance(key, KeyboardKey)
+
             send_sdl_keyboard_key_event(sdl_scancode, True)
             await key.Pressed
+
             send_sdl_keyboard_key_event(sdl_scancode, False)
             released_event = await key.Released
             assert released_event.key is key
             assert not key.is_pressed
 
+            send_sdl_keyboard_key_event(sdl_scancode, True)
+            await key.Pressed
+
+            send_sdl_keyboard_key_event(sdl_scancode, False)
+            generic_released_event = await generic_key.Released
+            assert isinstance(generic_released_event, KeyboardKeyReleased)
+            assert generic_released_event.key is key
+            assert not key.is_pressed
+
     app = TestApplication()
     app.run()
+    assert isinstance(generic_released_event, KeyboardKeyReleased)
     assert isinstance(released_event, KeyboardKeyReleased)
     assert isinstance(key, PressableKeyboardKey)
     assert released_event.key is key
     assert released_event.is_pressed is False
+    assert generic_released_event.key is key
+    assert generic_released_event.is_pressed is False

@@ -144,38 +144,39 @@ class MouseButton(BaseMouseButton):
     def __init__(self, name: str, mouse: Optional[Mouse] = None):
         super().__init__(name, mouse=mouse)
         if mouse:
+            generic_button = getattr(MouseButton, name)
             class EventWithMouse( # type: ignore
-                MouseButtonEvent,
+                generic_button.Event, # type: ignore
                 mouse.Event, # type: ignore
                 button=self
             ):
                 pass
             self.Event = EventWithMouse
-            class PressedWithMouse( # type: ignore
-                MouseButtonPressed,
+            class PressedWithMouse(
+                generic_button.Pressed, # type: ignore
                 EventWithMouse
             ):
                 pass
             self.Pressed = PressedWithMouse
-            class ReleasedWithMouse( # type: ignore
-                MouseButtonReleased,
+            class ReleasedWithMouse(
+                generic_button.Released, # type: ignore
                 EventWithMouse
             ):
                 pass
             self.Released = ReleasedWithMouse
         else:
             class EventNoMouse(MouseButtonEvent,
-                peripheral=..., button=self
+                peripheral=..., button=...
             ):
                 pass
             self.Event = EventNoMouse
             class PressedNoMouse(MouseButtonPressed, EventNoMouse,
-                peripheral=...
+                peripheral=..., button=...
             ):
                 pass
             self.Pressed = PressedNoMouse
             class ReleasedNoMouse(MouseButtonReleased, EventNoMouse,
-                peripheral=...
+                peripheral=..., button=...
             ):
                 pass
             self.Released = ReleasedNoMouse
