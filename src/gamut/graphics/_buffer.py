@@ -295,6 +295,10 @@ class GlVertexArray:
             for location_offset in range(locations):
                 location = attribute.location + location_offset
                 if buffer_view is not None:
+                    offset = (
+                        buffer_view.offset +
+                        ((buffer_view.stride // locations) * location_offset)
+                    )
                     if (
                         attr_gl_type == GL_DOUBLE and
                         view_gl_type == GL_DOUBLE
@@ -304,7 +308,7 @@ class GlVertexArray:
                             count,
                             view_gl_type,
                             buffer_view.stride,
-                            c_void_p(buffer_view.offset)
+                            c_void_p(offset)
                         )
                     elif (
                         attr_gl_type in GL_INT_TYPES and
@@ -315,7 +319,7 @@ class GlVertexArray:
                             count,
                             view_gl_type,
                             buffer_view.stride,
-                            c_void_p(buffer_view.offset)
+                            c_void_p(offset)
                         )
                     else:
                         glVertexAttribPointer(
@@ -324,7 +328,7 @@ class GlVertexArray:
                             view_gl_type,
                             GL_FALSE,
                             buffer_view.stride,
-                            c_void_p(buffer_view.offset)
+                            c_void_p(offset)
                         )
                     glEnableVertexAttribArray(location)
                     if buffer_view.instancing_divisor is not None:

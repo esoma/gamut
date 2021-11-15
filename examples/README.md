@@ -11,3 +11,8 @@ Demonstrates rendering a rotating textured cube and moving the player's
 perspective with the mouse and keyboard.
 
 ![](screenshots/cube.py.png)
+
+## instancing.py
+Demonstrates rendering a million textured cubes using instanced rendering.
+
+![](screenshots/instancing.py.png)

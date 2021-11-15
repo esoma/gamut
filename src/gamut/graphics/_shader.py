@@ -38,7 +38,8 @@ from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
                        GL_CURRENT_PROGRAM, GL_DEPTH_TEST, GL_FALSE, GLchar,
                        glDeleteProgram, glDepthFunc, glDepthMask, glDisable,
-                       glDrawArrays, glDrawElements, glEnable, GLenum,
+                       glDrawArrays, glDrawArraysInstanced, glDrawElements,
+                       glDrawElementsInstanced, glEnable, GLenum,
                        glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
                        GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
@@ -472,6 +473,7 @@ def execute_shader(
     *,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
+    instances: int = 1,
     index_range: Optional[tuple[int, int]] = None,
 ) -> None:
     ...
@@ -524,6 +526,7 @@ def execute_shader(
     *,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
+    instances: int = 1,
     index_buffer_view: Optional[Union[
         BufferView[glm.uint8],
         BufferView[glm.uint16],
@@ -579,6 +582,7 @@ def execute_shader(
     *,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
+    instances: int = 1,
     index_range: Optional[tuple[int, int]] = None,
     index_buffer_view: Optional[Union[
         BufferView[glm.uint8],
@@ -609,6 +613,10 @@ def execute_shader(
         except KeyError:
             raise ValueError(f'missing uniform: {uniform.name}')
         uniform_values.append((uniform, value))
+    if instances < 0:
+        raise ValueError('instances must be 0 or more')
+    elif instances == 0:
+        return
 
     if depth_test == DepthTest.NEVER:
         return
@@ -636,19 +644,36 @@ def execute_shader(
 
     if index_buffer_view is None:
         assert index_range is not None
-        glDrawArrays(
-            primitive_mode.value,
-            index_range[0],
-            index_range[1]
-        )
+        if instances > 1:
+            glDrawArraysInstanced(
+                primitive_mode.value,
+                index_range[0],
+                index_range[1],
+                instances
+            )
+        else:
+            glDrawArrays(
+                primitive_mode.value,
+                index_range[0],
+                index_range[1]
+            )
     else:
         index_gl_type = use_buffer_view_as_element_indexes(index_buffer_view)
-        glDrawElements(
-            primitive_mode.value,
-            len(index_buffer_view),
-            index_gl_type,
-            c_void_p(0),
-        )
+        if instances > 1:
+            glDrawElementsInstanced(
+                primitive_mode.value,
+                len(index_buffer_view),
+                index_gl_type,
+                c_void_p(0),
+                instances,
+            )
+        else:
+            glDrawElements(
+                primitive_mode.value,
+                len(index_buffer_view),
+                index_gl_type,
+                c_void_p(0),
+            )
 
 
 POD_UNIFORM_TYPES: Final = {
