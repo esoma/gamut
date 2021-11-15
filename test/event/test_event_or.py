@@ -7,6 +7,7 @@ from gamut.event._taskmanager import TaskManager
 # python
 import gc
 from itertools import product
+import sys
 from typing import Any, Generator, Type
 # pytest
 import pytest
@@ -34,22 +35,21 @@ def task_manager() -> Generator[TaskManager, None, None]:
 @pytest.mark.parametrize("or_events,event_class", [
     *product(
         [
-            EventA | EventB, OrEvents([EventA], [EventB]),
-            EventB | EventA, OrEvents([EventB], [EventA])
+            EventA | EventB,
+            EventB | EventA,
         ],
         [EventA, EventB]
     ),
     *product(
         [
-            (EventA | EventB) | EventC, OrEvents([EventA, EventB], [EventC]),
-            EventA | (EventB | EventC), OrEvents([EventA], [EventB, EventC]),
+            (EventA | EventB) | EventC,
+            EventA | (EventB | EventC),
         ],
         [EventA, EventB, EventC]
     ),
     *product(
         [
             (EventA | EventB) | (EventC | EventD),
-            OrEvents([EventA, EventB], [EventC, EventD])
         ],
         [EventA, EventB, EventC, EventD]
     )
@@ -138,19 +138,23 @@ def test_created_inside_other_coro(task_manager: TaskManager) -> None:
     assert events[1] == event_2
 
 
-def test_event_or_invalid_type() -> None:
-    with pytest.raises(TypeError) as excinfo:
-        Event | 1 # type: ignore
-    assert str(excinfo.value) == (
-        f'unsupported operand type(s) for |: '
-        f'\'Event\' and \'int\''
-    )
+def test_isinstance() -> None:
+    or_events = EventA | EventB
+    if sys.version_info >= (3, 10):
+        assert isinstance(EventA(), or_events)
+        assert isinstance(EventB(), or_events)
 
 
-def test_or_events_or_invalid_type() -> None:
-    with pytest.raises(TypeError) as excinfo:
-        (EventA | EventB) | 1 # type: ignore
-    assert str(excinfo.value) == (
-        f'unsupported operand type(s) for |: '
-        f'\'OrEvents\' and \'int\''
-    )
+def test_event_or_not_an_event() -> None:
+    union = Event | int
+    if sys.version_info >= (3, 10):
+        assert isinstance(Event(), union)
+        assert isinstance(1, union)
+
+
+def test_or_events_or_not_an_event() -> None:
+    union = (EventA | EventB) | int
+    if sys.version_info >= (3, 10):
+        assert isinstance(EventA(), union)
+        assert isinstance(EventB(), union)
+        assert isinstance(1, union)
