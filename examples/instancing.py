@@ -3,8 +3,9 @@
 from gamut import Application, Timer, TimerExpired, TransformNode, Window
 from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader, Image,
-                            PrimitiveMode, Shader, WindowRenderTarget)
+                            clear_render_target, Color, DepthTest,
+                            execute_shader, Image, PrimitiveMode, Shader,
+                            WindowRenderTarget)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 # python
@@ -13,9 +14,14 @@ from pathlib import Path
 from typing import Final
 # pyglm
 from glm import (array, cos, cross, lookAt, mat4, normalize, perspective, pi,
-                 rotate, sin, uint8, vec2, vec3)
+                 rotate, sin, translate, uint8, vec2, vec3)
 
 DIR: Final = Path(__file__).parent
+
+
+CUBES_X: Final = 100
+CUBES_Y: Final = 100
+CUBES_Z: Final = 100
 
 
 class Draw(TimerExpired):
@@ -26,7 +32,7 @@ class App(Application):
 
     async def main(self) -> None:
         self.window = Window()
-        self.window.title = 'Gamut Cube Example'
+        self.window.title = 'Gamut Instancing Example'
         self.window.resize(800, 800)
         self.window.recenter()
         self.window.is_visible = True
@@ -42,7 +48,7 @@ class App(Application):
             mouse = (await MouseConnected).mouse
         mouse.relative = True
 
-        self.player_position = vec3(0, 0, 5)
+        self.player_position = vec3(0, 0, 200)
         self.player_yaw = -pi() / 2
         self.player_pitch = 0.0
         self.player_node = TransformNode()
@@ -79,7 +85,17 @@ class App(Application):
                     vec2(1, 0),
                 ).to_bytes()),
                 vec2
-            )
+            ),
+            "instance_transform": BufferView(
+                Buffer(array(*(
+                    translate(vec3(x * 4, y * 4, z * -4))
+                    for x in range(CUBES_X)
+                    for y in range(CUBES_Y)
+                    for z in range(CUBES_Z)
+                )).to_bytes()),
+                mat4,
+                instancing_divisor=1,
+            ),
         })
         self.cube_index_buffer_view = BufferView(
             Buffer(array.from_numbers(uint8,
@@ -129,7 +145,7 @@ class App(Application):
         player_frame_speed = (
             (draw.when - draw.previous).total_seconds() /
             (1 / 60.0) *
-            .1
+            .5
         )
         keys = self.keyboard.Key
         if keys.up.is_pressed or keys.w.is_pressed:
@@ -152,7 +168,7 @@ class App(Application):
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
-            depth=True
+            depth=0
         )
         execute_shader(
             self.window_render_target,
@@ -164,7 +180,10 @@ class App(Application):
                 "model_transform": self.cube_transform,
                 "tex": self.cube_texture,
             },
-            index_buffer_view=self.cube_index_buffer_view
+            index_buffer_view=self.cube_index_buffer_view,
+            depth_write=True,
+            depth_test=DepthTest.LESS,
+            instances=CUBES_X * CUBES_Y * CUBES_Z
         )
         self.window.flip_buffer()
 
@@ -173,13 +192,19 @@ vertex_shader = b"""
 #version 140
 in vec3 pos;
 in vec2 uv;
+in mat4 instance_transform;
 out vec2 vertex_uv;
 uniform mat4 camera_transform;
 uniform mat4 model_transform;
 void main()
 {
     vertex_uv = uv;
-    gl_Position = camera_transform * model_transform * vec4(pos, 1.0);
+    gl_Position = (
+        camera_transform *
+        instance_transform *
+        model_transform *
+        vec4(pos, 1.0)
+    );
 }
 """
 
