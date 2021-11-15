@@ -99,9 +99,4 @@ def test_basic(face_cull: FaceCull, expected_color: Color) -> None:
         0, 0,
         *render_target.size
     )
-    print(colors)
-    assert all(
-        c == expected_color
-        for row in colors
-        for c in row
-    )
+    assert all(c == expected_color for row in colors for c in row)
