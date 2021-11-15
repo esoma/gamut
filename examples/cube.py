@@ -5,15 +5,15 @@ from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, execute_shader, Image,
                             PrimitiveMode, Shader, WindowRenderTarget)
-from gamut.peripheral import (KeyboardConnected, KeyboardKey,
-                              KeyboardKeyPressed, MouseConnected, MouseMoved)
+from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
+                              MouseConnected, MouseMoved)
 # python
 from datetime import timedelta
 from pathlib import Path
 from typing import Final
 # pyglm
 from glm import (array, cos, cross, lookAt, mat4, normalize, perspective, pi,
-                 rotate, sin, translate, uint8, vec2, vec3)
+                 rotate, sin, uint8, vec2, vec3)
 
 DIR: Final = Path(__file__).parent
 
@@ -135,9 +135,9 @@ class App(Application):
         if keys.up.is_pressed or keys.w.is_pressed:
             self.player_position += player_frame_speed * player_direction
         if keys.down.is_pressed or keys.s.is_pressed:
-            self.player_position += -player_frame_speed * player_direction
+            self.player_position -= player_frame_speed * player_direction
         if keys.left.is_pressed or keys.a.is_pressed:
-            self.player_position += -player_frame_speed * player_cross_direction
+            self.player_position -= player_frame_speed * player_cross_direction
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
