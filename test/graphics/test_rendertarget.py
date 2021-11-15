@@ -182,3 +182,40 @@ def test_clear_closed(
     with pytest.raises(RuntimeError) as excinfo:
         clear_render_target(render_target)
     assert str(excinfo.value) == 'render target is closed'
+
+
+def test_read_depth_from_render_target_no_depth_buffer() -> None:
+    texture = Texture2d(
+        10, 10,
+        TextureComponents.RGBA, glm.uint8,
+        b'\x00' * 10 * 10 * 4
+    )
+    render_target = TextureRenderTarget(
+        [texture],
+        TextureRenderTargetDepthStencil.NONE
+    )
+    with pytest.raises(ValueError) as excinfo:
+        read_depth_from_render_target(
+            render_target,
+            0, 0,
+            *render_target.size
+        )
+    assert str(excinfo.value) == (
+        'cannot read depth from a render target with no depth buffer'
+    )
+
+def test_clear_render_target_no_depth_buffer() -> None:
+    texture = Texture2d(
+        10, 10,
+        TextureComponents.RGBA, glm.uint8,
+        b'\x00' * 10 * 10 * 4
+    )
+    render_target = TextureRenderTarget(
+        [texture],
+        TextureRenderTargetDepthStencil.NONE
+    )
+    with pytest.raises(ValueError) as excinfo:
+        clear_render_target(render_target, depth=0.0)
+    assert str(excinfo.value) == (
+        'cannot clear depth on a render target with no depth buffer'
+    )
