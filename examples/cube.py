@@ -4,8 +4,8 @@ from gamut import Application, Timer, TimerExpired, TransformNode, Window
 from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
-                            execute_shader, Image, PrimitiveMode, Shader,
-                            WindowRenderTarget)
+                            execute_shader, FaceCull, Image, PrimitiveMode,
+                            Shader, WindowRenderTarget)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 # python
@@ -84,11 +84,11 @@ class App(Application):
         })
         self.cube_index_buffer_view = BufferView(
             Buffer(array.from_numbers(uint8,
-                0, 1, 2, 2, 3, 0,
+                0, 2, 1, 2, 0, 3,
                 4, 5, 6, 6, 7, 4,
-                1, 5, 6, 6, 2, 1,
-                0, 3, 7, 7, 4, 0,
-                0, 4, 5, 5, 1, 0,
+                1, 6, 5, 6, 1, 2,
+                0, 7, 3, 7, 0, 4,
+                0, 5, 4, 5, 0, 1,
                 3, 7, 6, 6, 2, 3,
             ).to_bytes()),
             uint8
@@ -168,6 +168,7 @@ class App(Application):
             index_buffer_view=self.cube_index_buffer_view,
             depth_write=True,
             depth_test=DepthTest.LESS,
+            face_cull=FaceCull.BACK,
         )
         self.window.flip_buffer()
 
