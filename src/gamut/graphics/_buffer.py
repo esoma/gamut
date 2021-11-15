@@ -292,15 +292,13 @@ class GlVertexArray:
                 view_gl_type, count, locations = (
                     BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[buffer_view.type]
                 )
-                buffer_view_offset = buffer_view.offset
-                buffer_view_stride = buffer_view.stride
             for location_offset in range(locations):
                 location = attribute.location + location_offset
-                offset = (
-                    buffer_view_offset +
-                    ((buffer_view_stride // locations) * location_offset)
-                )
                 if buffer_view is not None:
+                    offset = (
+                        buffer_view.offset +
+                        ((buffer_view.stride // locations) * location_offset)
+                    )
                     if (
                         attr_gl_type == GL_DOUBLE and
                         view_gl_type == GL_DOUBLE
