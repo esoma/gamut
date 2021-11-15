@@ -3,8 +3,9 @@
 from gamut import Application, Timer, TimerExpired, TransformNode, Window
 from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader, Image,
-                            PrimitiveMode, Shader, WindowRenderTarget)
+                            clear_render_target, Color, DepthTest,
+                            execute_shader, Image, PrimitiveMode, Shader,
+                            WindowRenderTarget)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 # python
@@ -152,7 +153,7 @@ class App(Application):
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
-            depth=True
+            depth=0
         )
         execute_shader(
             self.window_render_target,
@@ -164,7 +165,9 @@ class App(Application):
                 "model_transform": self.cube_transform,
                 "tex": self.cube_texture,
             },
-            index_buffer_view=self.cube_index_buffer_view
+            index_buffer_view=self.cube_index_buffer_view,
+            depth_write=True,
+            depth_test=DepthTest.LESS,
         )
         self.window.flip_buffer()
 
