@@ -506,7 +506,11 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
-    index_buffer_view: Optional[BufferView[glm.uint32]] = None,
+    index_buffer_view: Optional[Union[
+        BufferView[glm.uint8],
+        BufferView[glm.uint16],
+        BufferView[glm.uint32],
+    ]] = None,
 ) -> None:
     ...
 
@@ -556,7 +560,11 @@ def execute_shader(
     ]],
     *,
     index_range: Optional[tuple[int, int]] = None,
-    index_buffer_view: Optional[BufferView[glm.uint32]] = None,
+    index_buffer_view: Optional[Union[
+        BufferView[glm.uint8],
+        BufferView[glm.uint16],
+        BufferView[glm.uint32],
+    ]] = None,
 ) -> None:
     if index_buffer_view is None and index_range is None:
         raise TypeError('index_buffer_view or index_range must be supplied')
