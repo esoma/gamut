@@ -112,10 +112,15 @@ def remove_sent_callback(
 
 class OrEvents(Generic[ET, ET2], type):
     """OrEvents provide a way to await on multiple Events, only catching the
-    first one that is sent. Typically this is not instantiated directly by
+    first one that is sent.
+
+    Typically this is not instantiated directly by
     the user, instead the bitwise OR operator is used to create one:
 
     EventAorB = EventA | EventB
+
+    This class also acts like a typing Union, so that ORing Events together
+    may still be used with isinstance.
     """
 
     def __new__(cls, name, bases, attrs, events): # type: ignore
