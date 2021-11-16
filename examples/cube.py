@@ -104,7 +104,8 @@ class App(Application):
                 self,
                 timedelta(seconds=1 / 60.0),
                 Draw,
-                repeat=True
+                repeat=True,
+                fixed=True,
             )
             await self.window.Close
 
