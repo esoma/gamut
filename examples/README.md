@@ -16,3 +16,8 @@ perspective with the mouse and keyboard.
 Demonstrates rendering a million textured cubes using instanced rendering.
 
 ![](screenshots/instancing.py.png)
+
+## transparency.py
+Demonstrates rendering a transparent object.
+
+![](screenshots/transparency.py.png)

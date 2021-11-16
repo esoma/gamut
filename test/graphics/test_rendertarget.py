@@ -152,8 +152,8 @@ def test_clear(
     )
     assert all(
         pytest.approx(c.red, color[0]) and
-        pytest.approx(c.blue, color[1]) and
-        pytest.approx(c.green, color[2]) and
+        pytest.approx(c.green, color[1]) and
+        pytest.approx(c.blue, color[2]) and
         c.alpha == 1.0
         for row in colors for c in row
     )

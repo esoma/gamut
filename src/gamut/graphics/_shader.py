@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 __all__ = [
+    'BlendFactor',
+    'BlendFunction',
     'DepthTest',
     'execute_shader',
     'FaceCull',
@@ -506,6 +508,12 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
+    blend_source: BlendFactor = BlendFactor.ZERO,
+    blend_destination: BlendFactor = BlendFactor.ONE,
+    blend_source_alpha: Optional[BlendFactor] = None,
+    blend_destination_alpha: Optional[BlendFactor] = None,
+    blend_function: BlendFunction = BlendFunction.ADD,
+    blend_color: Optional[Color] = None,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -560,6 +568,12 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
+    blend_source: BlendFactor = BlendFactor.ZERO,
+    blend_destination: BlendFactor = BlendFactor.ONE,
+    blend_source_alpha: Optional[BlendFactor] = None,
+    blend_destination_alpha: Optional[BlendFactor] = None,
+    blend_function: BlendFunction = BlendFunction.ADD,
+    blend_color: Optional[Color] = None,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -686,10 +700,10 @@ def execute_shader(
     if blend_color is None:
         blend_color = Color(1, 1, 1, 1)
 
-    if (blend_source == BlendFactor.ZERO and
-        blend_source_alpha == BlendFactor.ZERO and
-        blend_destination == BlendFactor.ONE and
-        blend_destination_alpha == BlendFactor.ONE):
+    if (blend_source == BlendFactor.ONE and
+        blend_source_alpha == BlendFactor.ONE and
+        blend_destination == BlendFactor.ZERO and
+        blend_destination_alpha == BlendFactor.ZERO):
         glDisable(GL_BLEND)
     else:
         glEnable(GL_BLEND)
