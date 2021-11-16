@@ -1235,7 +1235,10 @@ def sdl_window_event_focus_gained(
         window = get_window_from_sdl_id(sdl_event.window.windowID)
     except KeyError:
         return None
-    keyboard = keyboards[SDL_KEYBOARD_KEY]
+    try:
+        keyboard = keyboards[SDL_KEYBOARD_KEY]
+    except KeyError:
+        return None
     assert keyboard._window is None
     keyboard._window = window
     return keyboard.Focused(window)
@@ -1251,8 +1254,11 @@ def sdl_window_event_focus_lost(
     mice: dict[Any, Mouse],
     keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
-) -> KeyboardLostFocus:
-    keyboard = keyboards[SDL_KEYBOARD_KEY]
+) -> Optional[KeyboardLostFocus]:
+    try:
+        keyboard = keyboards[SDL_KEYBOARD_KEY]
+    except KeyError:
+        return None
     assert keyboard._window is not None
     keyboard._window = None
     return keyboard.LostFocus()
@@ -1274,8 +1280,10 @@ def sdl_key_down_event_callback(
     sdl_scancode = sdl_event.key.keysym.scancode
     if sdl_scancode == SDL_SCANCODE_UNKNOWN:
         return None
-
-    keyboard = keyboards[SDL_KEYBOARD_KEY]
+    try:
+        keyboard = keyboards[SDL_KEYBOARD_KEY]
+    except KeyError:
+        return None
     key: PressableKeyboardKey = getattr(
         keyboard.Key,
         sdl_scancode_to_gamut_key_name[sdl_scancode]
@@ -1298,8 +1306,10 @@ def sdl_key_up_event_callback(
     sdl_scancode = sdl_event.key.keysym.scancode
     if sdl_scancode == SDL_SCANCODE_UNKNOWN:
         return None
-
-    keyboard = keyboards[SDL_KEYBOARD_KEY]
+    try:
+        keyboard = keyboards[SDL_KEYBOARD_KEY]
+    except KeyError:
+        return None
     key: PressableKeyboardKey = getattr(
         keyboard.Key,
         sdl_scancode_to_gamut_key_name[sdl_scancode]
