@@ -269,6 +269,14 @@ def test_poll_shown_event() -> None:
     assert shown_event.window is window
 
 
+def test_create_window_in_app_thread() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+    app = TestApp()
+    app.run()
+
+
 @pytest.mark.parametrize("synchronization", list(WindowBufferSynchronization))
 def test_flip_buffer(synchronization: WindowBufferSynchronization) -> None:
     window = Window()

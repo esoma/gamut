@@ -9,6 +9,8 @@ __all__ = [
 ]
 
 # gamut
+from gamut._glcontext import (get_gl_context, release_gl_context,
+                              require_gl_context)
 from gamut._sdl import sdl_event_callback_map, SDL_KEYBOARD_KEY, SDL_MOUSE_KEY
 from gamut.event import Bind
 from gamut.event import Event as BaseEvent
@@ -17,11 +19,13 @@ from gamut.peripheral import (Controller, Keyboard, KeyboardConnected, Mouse,
                               MouseConnected)
 # python
 from ctypes import byref as c_byref
+from threading import Thread
+from threading import get_ident as identify_thread
 from typing import Any, ContextManager, Optional, Sequence, TypeVar
 # pysdl2
 from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
-                  SDL_INIT_JOYSTICK, SDL_PollEvent, SDL_PushEvent,
-                  SDL_QuitSubSystem, SDL_USEREVENT, SDL_WaitEvent)
+                  SDL_INIT_JOYSTICK, SDL_PushEvent, SDL_QuitSubSystem,
+                  SDL_USEREVENT, SDL_WaitEvent)
 
 R = TypeVar('R')
 
@@ -75,6 +79,46 @@ class Application(EventLoop[R]):
         self._keyboards: dict[Any, Keyboard] = {}
         self._controllers: dict[Any, Controller] = {}
 
+        self._running = True
+        self._run_exception: Optional[BaseException] = None
+        self._run_result: Optional[R] = None
+
+    def run(self) -> R:
+        gl_context = require_gl_context()
+        try:
+            if get_gl_context().sdl_video_thread != identify_thread():
+                raise RuntimeError(
+                    'gamut initialization occured outside of this thread, '
+                    'Applications may only run on the thread in which gamut '
+                    'was initialized'
+                )
+            get_gl_context().release_rendering_thread()
+            thread = Thread(target=self._run)
+            self._running = True
+            self._run_exception = None
+            self._run_result = None
+            thread.start()
+            self._poll_sdl()
+            thread.join()
+        finally:
+            self._running = False
+            release_gl_context(gl_context)
+        if self._run_exception is not None:
+            raise self._run_exception
+        return self._run_result # type: ignore
+
+    def _run(self) -> None:
+        get_gl_context().obtain_rendering_thread()
+        try:
+            self._run_result = super().run()
+        except BaseException as ex:
+            self._run_exception = ex
+        finally:
+            sdl_event = SDL_Event()
+            sdl_event.type = SDL_USEREVENT
+            SDL_PushEvent(c_byref(sdl_event))
+            self._running = False
+
     def run_context(self) -> ContextManager:
         return ApplicationRunContext((
             Bind.on(MouseConnected, self._register_mouse),
@@ -83,9 +127,6 @@ class Application(EventLoop[R]):
         ))
 
     async def poll(self, block: bool = True) -> Optional[BaseEvent]:
-        event = await super().poll(block=False)
-        if event:
-            return event
         if not self._mouse_created:
             self._mouse_created = True
             mouse = Mouse('primary')
@@ -94,13 +135,7 @@ class Application(EventLoop[R]):
             self._keyboard_created = True
             keyboard = Keyboard('primary')
             return keyboard.connect()
-        return self._poll_sdl(block=block)
-
-    def queue_event(self, event: BaseEvent) -> None:
-        super().queue_event(event)
-        sdl_event = SDL_Event()
-        sdl_event.type = SDL_USEREVENT
-        SDL_PushEvent(c_byref(sdl_event))
+        return await super().poll(block=True)
 
     @property
     def controllers(self) -> Sequence[Controller]:
@@ -114,19 +149,23 @@ class Application(EventLoop[R]):
     def keyboards(self) -> Sequence[Keyboard]:
         return tuple(self._keyboards.values())
 
-    def _poll_sdl(self, block: bool) -> Optional[BaseEvent]:
-        event = SDL_Event()
-        if block:
-            if SDL_WaitEvent(c_byref(event)) != 1:
+    def _poll_sdl(self) -> None:
+        sdl_event = SDL_Event()
+        while self._running:
+            if SDL_WaitEvent(c_byref(sdl_event)) != 1:
                 raise RuntimeError(SDL_GetError().decode('utf8'))
-        else:
-            if SDL_PollEvent(c_byref(event)) != 1:
-                return None
-        try:
-            callback = sdl_event_callback_map[event.type]
-        except KeyError:
-            return None
-        return callback(event, self._mice, self._keyboards, self._controllers)
+            try:
+                callback = sdl_event_callback_map[sdl_event.type]
+            except KeyError:
+                continue
+            event = callback(
+                sdl_event,
+                self._mice,
+                self._keyboards,
+                self._controllers
+            )
+            if event:
+                self.queue_event(event)
 
     async def _disconnect_peripherals(
         self,
@@ -156,6 +195,8 @@ class Application(EventLoop[R]):
 
 
 class ApplicationRunContext:
+
+    _gl_context: Any
 
     def __init__(self, binds: tuple[Bind, ...]) -> None:
         self._binds = binds

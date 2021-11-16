@@ -8,23 +8,34 @@ __all__ = [
     'release_gl_context',
 ]
 
+# gamut
+from ._sdl import sdl_event_callback_map
 # python
+from ctypes import byref as c_byref
+from threading import Condition
+from threading import get_ident as identify_thread
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 # pyopengl
 from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
                        glGetString, glPixelStorei)
 # pysdl2
-from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
+from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
                   SDL_GL_MakeCurrent, SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE,
-                  SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_QuitSubSystem,
-                  SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
+                  SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_PushEvent,
+                  SDL_QuitSubSystem, SDL_USEREVENT, SDL_WINDOW_HIDDEN,
+                  SDL_WINDOW_OPENGL, SDL_WINDOWPOS_CENTERED)
 
 singleton: Optional[GlContext] = None
 refs: int = 0
+
+
+if TYPE_CHECKING:
+    # gamut
+    from gamut.peripheral import Controller, Keyboard, Mouse
 
 
 class GlContext:
@@ -40,6 +51,16 @@ class GlContext:
     _sdl_gl_context: Optional[int]
 
     def __init__(self) -> None:
+        self._sdl_video_thread = identify_thread()
+        self._rendering_thread: Optional[int] = identify_thread()
+
+        self._window_created = Condition()
+        self._created_window: Any = None
+        self._create_window = False
+
+        self._window_destroyed = Condition()
+        self._destroy_window: Any = None
+
         init_sdl_video()
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1)
 
@@ -98,6 +119,16 @@ class GlContext:
             SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
             self._sdl_gl_window = self._sdl_window
 
+    def release_rendering_thread(self) -> None:
+        self._rendering_thread = None
+        self._sdl_gl_window = None
+        SDL_GL_MakeCurrent(self._sdl_window, 0)
+
+    def obtain_rendering_thread(self) -> None:
+        self._rendering_thread = identify_thread()
+        self._sdl_gl_window = self._sdl_window
+        SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+
     @property
     def is_open(self) -> bool:
         return self._sdl_gl_context is not None
@@ -110,6 +141,73 @@ class GlContext:
     @property
     def version(self) -> tuple[int, int]:
         return self._version
+
+    @property
+    def sdl_video_thread(self) -> int:
+        return self._sdl_video_thread
+
+    def create_window(self) -> Any:
+        assert self._created_window is None
+        if self._sdl_video_thread == identify_thread():
+            return SDL_CreateWindow(
+                b'',
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                100, 100,
+                SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
+            )
+        else:
+            with self._window_created:
+                self._create_window = True
+                sdl_event = SDL_Event()
+                sdl_event.type = SDL_USEREVENT
+                SDL_PushEvent(c_byref(sdl_event))
+                while self._created_window is None:
+                    self._window_created.wait()
+                created_window = self._created_window # type: ignore
+                self._created_window = None
+                return created_window
+
+    def destroy_window(self, sdl_window: Any) -> None:
+        if self._sdl_video_thread == identify_thread():
+            self.unset_sdl_window(sdl_window)
+            SDL_DestroyWindow(sdl_window)
+        else:
+            assert sdl_window is not None
+            with self._window_destroyed:
+                self._destroy_window = sdl_window
+                sdl_event = SDL_Event()
+                sdl_event.type = SDL_USEREVENT
+                SDL_PushEvent(c_byref(sdl_event))
+                while self._destroy_window is not None:
+                    self._window_destroyed.wait()
+
+
+def sdl_user_event_callback(
+    sdl_event: Any,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
+    controllers: dict[Any, Controller]
+) -> None:
+    try:
+        gl_context = get_gl_context()
+    except RuntimeError:
+        return
+    with gl_context._window_created:
+        if gl_context._create_window:
+            assert gl_context._sdl_video_thread == identify_thread()
+            gl_context._create_window = False
+            gl_context._created_window = gl_context.create_window()
+            gl_context._window_created.notify()
+    with gl_context._window_destroyed:
+        if gl_context._destroy_window is not None:
+            assert gl_context._sdl_video_thread == identify_thread()
+            gl_context.destroy_window(gl_context._destroy_window)
+            gl_context._destroy_window = None
+            gl_context._window_destroyed.notify()
+
+
+assert SDL_USEREVENT not in sdl_event_callback_map
+sdl_event_callback_map[SDL_USEREVENT] = sdl_user_event_callback
 
 
 def release_gl_context(gl_context_marker: Any) -> Any:
