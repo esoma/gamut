@@ -284,7 +284,7 @@ def clear_render_target(
 
     mask = 0
     if color is not None:
-        glClearColor(color.red, color.blue, color.green, 1.0)
+        glClearColor(color.red, color.green, color.blue, 1.0)
         mask |= GL_COLOR_BUFFER_BIT
     if depth is not None:
         glClearDepthf((depth + 1) / 2.0)

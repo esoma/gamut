@@ -1,5 +1,7 @@
 
 __all__ = [
+    'BlendFactor',
+    'BlendFunction',
     'Buffer',
     'BufferFrequency',
     'BufferNature',
@@ -40,7 +42,8 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from ._shader import (DepthTest, execute_shader, FaceCull, PrimitiveMode,
-                      Shader, ShaderAttribute, ShaderUniform)
+from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
+                      FaceCull, PrimitiveMode, Shader, ShaderAttribute,
+                      ShaderUniform)
 from ._texture2d import Texture2d, TextureComponents, TextureView
 from ._texture import Texture, TextureDataType

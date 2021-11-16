@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 __all__ = [
+    'BlendFactor',
+    'BlendFunction',
     'DepthTest',
     'execute_shader',
     'FaceCull',
@@ -16,6 +18,7 @@ __all__ = [
 from ._buffer import (BufferView, BufferViewMap,
                       use_buffer_view_as_element_indexes,
                       use_buffer_view_map_with_shader)
+from ._color import Color
 from ._rendertarget import (TextureRenderTarget,
                             TextureRenderTargetDepthStencil, use_render_target,
                             WindowRenderTarget)
@@ -37,10 +40,11 @@ from glm import value_ptr as glm_value_ptr
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
-                       GL_CULL_FACE, GL_CURRENT_PROGRAM, GL_DEPTH_TEST,
-                       GL_FALSE, GLchar, glCullFace, glDeleteProgram,
-                       glDepthFunc, glDepthMask, glDisable, glDrawArrays,
-                       glDrawArraysInstanced, glDrawElements,
+                       GL_BLEND, GL_CULL_FACE, GL_CURRENT_PROGRAM,
+                       GL_DEPTH_TEST, GL_FALSE, glBlendColor, glBlendEquation,
+                       glBlendFuncSeparate, GLchar, glCullFace,
+                       glDeleteProgram, glDepthFunc, glDepthMask, glDisable,
+                       glDrawArrays, glDrawArraysInstanced, glDrawElements,
                        glDrawElementsInstanced, glEnable, GLenum,
                        glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
                        GLint, GLsizei)
@@ -88,6 +92,31 @@ class DepthTest(Enum):
     GREATER_EQUAL = int(OpenGL.GL.GL_GEQUAL)
     EQUAL = int(OpenGL.GL.GL_EQUAL)
     NOT_EQUAL = int(OpenGL.GL.GL_NOTEQUAL)
+
+
+class BlendFactor(Enum):
+    ZERO = int(OpenGL.GL.GL_ZERO)
+    ONE = int(OpenGL.GL.GL_ONE)
+    SOURCE_COLOR = int(OpenGL.GL.GL_SRC_COLOR)
+    ONE_MINUS_SOURCE_COLOR = int(OpenGL.GL.GL_ONE_MINUS_SRC_COLOR)
+    DESTINATION_COLOR = int(OpenGL.GL.GL_DST_COLOR)
+    ONE_MINUS_DESTINATION_COLOR = int(OpenGL.GL.GL_ONE_MINUS_DST_COLOR)
+    SOURCE_ALPHA = int(OpenGL.GL.GL_SRC_ALPHA)
+    ONE_MINUS_SOURCE_ALPHA = int(OpenGL.GL.GL_ONE_MINUS_SRC_ALPHA)
+    DESTINATION_ALPHA = int(OpenGL.GL.GL_DST_ALPHA)
+    ONE_MINUS_DESTINATION_ALPHA = int(OpenGL.GL.GL_ONE_MINUS_DST_ALPHA)
+    BLEND_COLOR = int(OpenGL.GL.GL_CONSTANT_COLOR)
+    ONE_MINUS_BLEND_COLOR = int(OpenGL.GL.GL_ONE_MINUS_CONSTANT_COLOR)
+    BLEND_ALPHA = int(OpenGL.GL.GL_CONSTANT_COLOR)
+    ONE_MINUS_BLEND_ALPHA = int(OpenGL.GL.GL_ONE_MINUS_CONSTANT_ALPHA)
+
+
+class BlendFunction(Enum):
+    ADD = int(OpenGL.GL.GL_FUNC_ADD)
+    SUBTRACT = int(OpenGL.GL.GL_FUNC_SUBTRACT)
+    SUBTRACT_REVERSED = int(OpenGL.GL.GL_FUNC_REVERSE_SUBTRACT)
+    MIN = int(OpenGL.GL.GL_MIN)
+    MAX = int(OpenGL.GL.GL_MAX)
 
 
 class FaceCull(Enum):
@@ -479,6 +508,12 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
+    blend_source: BlendFactor = BlendFactor.ZERO,
+    blend_destination: BlendFactor = BlendFactor.ONE,
+    blend_source_alpha: Optional[BlendFactor] = None,
+    blend_destination_alpha: Optional[BlendFactor] = None,
+    blend_function: BlendFunction = BlendFunction.ADD,
+    blend_color: Optional[Color] = None,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -533,6 +568,12 @@ def execute_shader(
         Texture, Sequence[Texture],
     ]],
     *,
+    blend_source: BlendFactor = BlendFactor.ZERO,
+    blend_destination: BlendFactor = BlendFactor.ONE,
+    blend_source_alpha: Optional[BlendFactor] = None,
+    blend_destination_alpha: Optional[BlendFactor] = None,
+    blend_function: BlendFunction = BlendFunction.ADD,
+    blend_color: Optional[Color] = None,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -590,6 +631,12 @@ def execute_shader(
         Texture, Sequence[Texture]
     ]],
     *,
+    blend_source: BlendFactor = BlendFactor.ONE,
+    blend_destination: BlendFactor = BlendFactor.ZERO,
+    blend_source_alpha: Optional[BlendFactor] = None,
+    blend_destination_alpha: Optional[BlendFactor] = None,
+    blend_function: BlendFunction = BlendFunction.ADD,
+    blend_color: Optional[Color] = None,
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -645,6 +692,29 @@ def execute_shader(
         glEnable(GL_DEPTH_TEST)
         glDepthMask(bool(depth_write))
         glDepthFunc(depth_test.value)
+
+    if blend_source_alpha is None:
+        blend_source_alpha = blend_source
+    if blend_destination_alpha is None:
+        blend_destination_alpha = blend_destination
+    if blend_color is None:
+        blend_color = Color(1, 1, 1, 1)
+
+    if (blend_source == BlendFactor.ONE and
+        blend_source_alpha == BlendFactor.ONE and
+        blend_destination == BlendFactor.ZERO and
+        blend_destination_alpha == BlendFactor.ZERO):
+        glDisable(GL_BLEND)
+    else:
+        glEnable(GL_BLEND)
+        glBlendFuncSeparate(
+            blend_source.value,
+            blend_destination.value,
+            blend_source_alpha.value,
+            blend_destination_alpha.value
+        )
+        glBlendEquation(blend_function.value)
+        glBlendColor(*blend_color)
 
     if face_cull == FaceCull.NONE:
         glDisable(GL_CULL_FACE)
