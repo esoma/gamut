@@ -631,8 +631,8 @@ def execute_shader(
         Texture, Sequence[Texture]
     ]],
     *,
-    blend_source: BlendFactor = BlendFactor.ZERO,
-    blend_destination: BlendFactor = BlendFactor.ONE,
+    blend_source: BlendFactor = BlendFactor.ONE,
+    blend_destination: BlendFactor = BlendFactor.ZERO,
     blend_source_alpha: Optional[BlendFactor] = None,
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
