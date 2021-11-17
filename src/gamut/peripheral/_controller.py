@@ -267,6 +267,8 @@ def sdl_joy_device_removed_event_callback(
 
     controller = controllers.pop(sdl_joystick_index)
 
+    if not controller.is_connected:
+        return None
     event = controller.disconnect()
     assert isinstance(event, ControllerDisconnected)
     return event
