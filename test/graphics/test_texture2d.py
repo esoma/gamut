@@ -1,12 +1,14 @@
 
 # gamut
-from gamut.graphics import (Texture2d, TextureComponents, TextureDataType,
-                            TextureView)
+from gamut import Application
+from gamut.graphics import (Buffer, Texture2d, TextureComponents,
+                            TextureDataType, TextureView)
 from gamut.graphics._texture import TEXTURE_DATA_TYPES
 # python
 from ctypes import sizeof as c_sizeof
 import struct
-from typing import Any, Final
+import threading
+from typing import Any, Final, Optional
 # pyglm
 import glm
 # pytest
@@ -388,3 +390,60 @@ def test_texture_view_close() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         view.bytes
     assert str(excinfo.value) == 'texture view is closed'
+
+
+def test_texture2d_thread_transfer_to_app() -> None:
+    texture = Texture2d(
+        1, 1,
+        TextureComponents.DS,
+        glm.uint32,
+        b'\x00' * c_sizeof(glm.uint32)
+    )
+
+    class App(Application):
+        async def main(self) -> None:
+            texture.close()
+
+    app = App()
+    app.run()
+    assert not texture.is_open
+
+
+def test_texture2d_thread_transfer_to_main() -> None:
+    texture: Optional[Texture2d] = None
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal texture
+            texture = Texture2d(
+                1, 1,
+                TextureComponents.DS,
+                glm.uint32,
+                b'\x00' * c_sizeof(glm.uint32)
+            )
+
+    app = App()
+    app.run()
+    assert texture is not None
+    assert texture.is_open
+    texture.close()
+    assert not texture.is_open
+
+
+def test_texture2d_thread_closed_outside_render_thread() -> None:
+    keep_alive_buffer = Buffer()
+    texture = Texture2d(
+        1, 1,
+        TextureComponents.DS,
+        glm.uint32,
+        b'\x00' * c_sizeof(glm.uint32)
+    )
+
+    def thread_main() -> None:
+        texture.close()
+
+    thread = threading.Thread(target=thread_main)
+    thread.start()
+    thread.join()
+
+    assert not texture.is_open

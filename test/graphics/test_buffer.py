@@ -1,12 +1,14 @@
 
 # gamut
-from gamut import Window
+from gamut import Application, Window
 from gamut._glcontext import get_gl_context
 from gamut.graphics import (Buffer, BufferFrequency, BufferNature, BufferView,
                             BufferViewMap, Shader)
 from gamut.graphics._buffer import use_buffer_view_map_with_shader
 # python
+import gc
 from struct import unpack as c_unpack
+import threading
 from typing import Any, Final, Optional
 # pyglm
 import glm
@@ -217,3 +219,131 @@ def test_use_buffer_view_map_with_shader(
     }}
     """.encode('utf-8'))
     use_buffer_view_map_with_shader(bvm, shader)
+
+
+def test_buffer_thread_transfer_to_app() -> None:
+    buffer: Optional[Buffer] = Buffer(b'123')
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal buffer
+            assert buffer is not None
+            assert buffer.bytes == b'123'
+            buffer = None
+            gc.collect()
+
+    app = App()
+    app.run()
+    assert buffer is None
+
+
+def test_buffer_view_map_transfer_to_app() -> None:
+    bvm: Optional[BufferViewMap] = BufferViewMap({
+        "attr": BufferView(Buffer(), glm.uint8)
+    })
+    shader = Shader(vertex=f"""
+    #version 140
+    in float attr;
+    void main()
+    {{
+        gl_Position = vec4(attr, 0, 0, 1);
+    }}
+    """.encode('utf-8'))
+    assert bvm is not None
+    use_buffer_view_map_with_shader(bvm, shader)
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal bvm
+            bvm = None
+            gc.collect()
+
+    app = App()
+    app.run()
+    assert bvm is None
+
+
+def test_buffer_thread_transfer_to_main() -> None:
+    buffer: Optional[Buffer] = None
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal buffer
+            buffer = Buffer(b'123')
+
+    app = App()
+    app.run()
+    assert buffer is not None
+    assert buffer.bytes == b'123'
+    buffer = None
+    gc.collect()
+
+
+def test_buffer_view_map_transfer_to_main() -> None:
+    bvm: Optional[BufferViewMap] = None
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal bvm
+            bvm = BufferViewMap({
+                "attr": BufferView(Buffer(), glm.uint8)
+            })
+            shader = Shader(vertex=f"""
+            #version 140
+            in float attr;
+            void main()
+            {{
+                gl_Position = vec4(attr, 0, 0, 1);
+            }}
+            """.encode('utf-8'))
+            use_buffer_view_map_with_shader(bvm, shader)
+
+    app = App()
+    app.run()
+    assert bvm is not None
+    bvm = None
+    gc.collect()
+
+
+def test_buffer_thread_destroyed_outside_render_thread() -> None:
+    keep_alive_buffer = Buffer()
+    buffer: Optional[Buffer] = Buffer(b'123')
+
+    def thread_main() -> None:
+        nonlocal buffer
+        buffer = None
+        gc.collect()
+
+    thread = threading.Thread(target=thread_main)
+    thread.start()
+    thread.join()
+
+    assert buffer is None
+
+
+def test_buffer_view_map_thread_destroyed_outside_render_thread() -> None:
+    keep_alive_buffer = Buffer()
+    bvm: Optional[BufferViewMap] = BufferViewMap({
+        "attr": BufferView(Buffer(), glm.uint8)
+    })
+    shader = Shader(vertex=f"""
+    #version 140
+    in float attr;
+    void main()
+    {{
+        gl_Position = vec4(attr, 0, 0, 1);
+    }}
+    """.encode('utf-8'))
+    assert bvm is not None
+    use_buffer_view_map_with_shader(bvm, shader)
+
+    def thread_main() -> None:
+        nonlocal bvm
+        bvm = None
+        gc.collect()
+
+    thread = threading.Thread(target=thread_main)
+    thread.start()
+    thread.join()
+
+    assert bvm is None

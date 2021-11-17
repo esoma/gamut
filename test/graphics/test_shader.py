@@ -1,12 +1,13 @@
 
 # gamut
-from gamut import Window
+from gamut import Application, Window
 from gamut._glcontext import get_gl_context
-from gamut.graphics import (Shader, ShaderAttribute, ShaderUniform, Texture,
-                            Texture2d, TextureComponents)
+from gamut.graphics import (Buffer, Shader, ShaderAttribute, ShaderUniform,
+                            Texture, Texture2d, TextureComponents)
 from gamut.graphics._shader import use_shader
 # python
 import sys
+import threading
 from typing import Any, Optional
 # pyglm
 import glm
@@ -762,3 +763,63 @@ def test_matrix_uniforms(
             f'expected {python_type} for uni_name (got {type(None)})'
         )
         shader._set_uniform(uni, python_type(100))
+
+
+def test_shader_thread_transfer_to_app() -> None:
+    shader = Shader(vertex=f'''
+    #version 140
+    void main()
+    {{
+        gl_Position = vec4(0, 0, 0, 1);
+    }}
+    '''.encode('utf-8'))
+
+    class App(Application):
+        async def main(self) -> None:
+            shader.close()
+
+    app = App()
+    app.run()
+    assert not shader.is_open
+
+
+def test_shader_thread_transfer_to_main() -> None:
+    shader: Optional[Shader] = None
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal shader
+            shader = Shader(vertex=f'''
+            #version 140
+            void main()
+            {{
+                gl_Position = vec4(0, 0, 0, 1);
+            }}
+            '''.encode('utf-8'))
+
+    app = App()
+    app.run()
+    assert shader is not None
+    assert shader.is_open
+    shader.close()
+    assert not shader.is_open
+
+
+def test_shader_thread_closed_outside_render_thread() -> None:
+    keep_alive_buffer = Buffer()
+    shader = Shader(vertex=f'''
+    #version 140
+    void main()
+    {{
+        gl_Position = vec4(0, 0, 0, 1);
+    }}
+    '''.encode('utf-8'))
+
+    def thread_main() -> None:
+        shader.close()
+
+    thread = threading.Thread(target=thread_main)
+    thread.start()
+    thread.join()
+
+    assert not shader.is_open

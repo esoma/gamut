@@ -1,7 +1,7 @@
 
 # gamut
-from gamut import Window
-from gamut.graphics import (clear_render_target, Color,
+from gamut import Application, Window
+from gamut.graphics import (Buffer, clear_render_target, Color,
                             read_color_from_render_target,
                             read_depth_from_render_target,
                             read_stencil_from_render_target, Texture2d,
@@ -11,6 +11,7 @@ from gamut.graphics import (clear_render_target, Color,
 # python
 from ctypes import c_uint
 from ctypes import sizeof as c_sizeof
+import threading
 from typing import Optional, Union
 # pyglm
 import glm
@@ -219,3 +220,58 @@ def test_clear_render_target_no_depth_buffer() -> None:
     assert str(excinfo.value) == (
         'cannot clear depth on a render target with no depth buffer'
     )
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_render_target_transfer_to_app(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
+) -> None:
+    render_target = create_render_target(cls)
+
+    class App(Application):
+        async def main(self) -> None:
+            assert render_target.size >= (100, 100)
+            render_target.close()
+
+    app = App()
+    app.run()
+    assert not render_target.is_open
+
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_render_target_transfer_to_main(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
+) -> None:
+    render_target: Optional[Union[
+        TextureRenderTarget,
+        WindowRenderTarget
+    ]] = None
+
+    class App(Application):
+        async def main(self) -> None:
+            nonlocal render_target
+            render_target = create_render_target(cls)
+
+    app = App()
+    app.run()
+
+    assert render_target is not None
+    assert render_target.size >= (100, 100)
+    render_target.close()
+    assert not render_target.is_open
+
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_render_target_thread_closed_outside_render_thread(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
+) -> None:
+    keep_alive_buffer = Buffer()
+    render_target = create_render_target(cls)
+
+    def thread_main() -> None:
+        render_target.close()
+
+    thread = threading.Thread(target=thread_main)
+    thread.start()
+    thread.join()
+
+    assert not render_target.is_open

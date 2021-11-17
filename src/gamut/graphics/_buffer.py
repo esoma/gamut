@@ -12,7 +12,8 @@ __all__ = [
 ]
 
 # gamut
-from gamut._glcontext import release_gl_context, require_gl_context
+from gamut._glcontext import (get_gl_context, release_gl_context,
+                              require_gl_context)
 # python
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
@@ -22,8 +23,6 @@ from struct import unpack as c_unpack
 from typing import (Any, Final, Generator, Generic, Optional, TYPE_CHECKING,
                     TypeVar, Union)
 from weakref import ref, WeakKeyDictionary
-# numpy
-from numpy import array as np_array
 # pyglm
 import glm
 from glm import sizeof as glm_sizeof
@@ -35,11 +34,10 @@ from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
                        GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
                        glBindBuffer, glBindVertexArray, glBufferData,
-                       glDeleteBuffers, glDeleteVertexArrays,
                        glEnableVertexAttribArray, glGenBuffers,
-                       glGenVertexArrays, glMapBuffer, glUnmapBuffer,
-                       glVertexAttribDivisor, glVertexAttribIPointer,
-                       glVertexAttribLPointer, glVertexAttribPointer)
+                       glGenVertexArrays, glMapBuffer, glVertexAttribDivisor,
+                       glVertexAttribIPointer, glVertexAttribLPointer,
+                       glVertexAttribPointer)
 
 if TYPE_CHECKING:
     # gamut
@@ -107,11 +105,10 @@ class Buffer:
 
     def __del__(self) -> None:
         if hasattr(self, '_map') and self._map is not None:
-            glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
-            glUnmapBuffer(GL_COPY_READ_BUFFER)
+            get_gl_context().unmap_gl_buffer(self._gl)
             self._map = None
         if hasattr(self, '_gl') and self._gl is not None:
-            glDeleteBuffers(1, np_array([self._gl]))
+            get_gl_context().delete_buffer(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
 
@@ -348,11 +345,10 @@ class GlVertexArray:
 
     def __del__(self) -> None:
         global gl_vertex_array_in_use
-        if gl_vertex_array_in_use and gl_vertex_array_in_use() is self:
-            glBindVertexArray(0)
-            gl_vertex_array_in_use = None
         if self._gl:
-            glDeleteVertexArrays(1, np_array([self._gl]))
+            if gl_vertex_array_in_use and gl_vertex_array_in_use() is self:
+                gl_vertex_array_in_use = None
+            get_gl_context().delete_vertex_array(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
 

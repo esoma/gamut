@@ -93,13 +93,16 @@ class Application(EventLoop[R]):
                     'was initialized'
                 )
             get_gl_context().release_rendering_thread()
-            thread = Thread(target=self._run)
-            self._running = True
-            self._run_exception = None
-            self._run_result = None
-            thread.start()
-            self._poll_sdl()
-            thread.join()
+            try:
+                thread = Thread(target=self._run)
+                self._running = True
+                self._run_exception = None
+                self._run_result = None
+                thread.start()
+                self._poll_sdl()
+                thread.join()
+            finally:
+                get_gl_context().obtain_rendering_thread()
         finally:
             self._running = False
             release_gl_context(gl_context)
@@ -114,6 +117,7 @@ class Application(EventLoop[R]):
         except BaseException as ex:
             self._run_exception = ex
         finally:
+            get_gl_context().release_rendering_thread()
             self._running = False
             sdl_event = SDL_Event()
             sdl_event.type = SDL_USEREVENT
