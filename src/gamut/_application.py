@@ -150,22 +150,23 @@ class Application(EventLoop[R]):
         return tuple(self._keyboards.values())
 
     def _poll_sdl(self) -> None:
-        sdl_event = SDL_Event()
-        while self._running:
-            if SDL_WaitEvent(c_byref(sdl_event)) != 1:
-                raise RuntimeError(SDL_GetError().decode('utf8'))
-            try:
-                callback = sdl_event_callback_map[sdl_event.type]
-            except KeyError:
-                continue
-            event = callback(
-                sdl_event,
-                self._mice,
-                self._keyboards,
-                self._controllers
-            )
-            if event:
-                self.queue_event(event)
+        with SdlContext():
+            sdl_event = SDL_Event()
+            while self._running:
+                if SDL_WaitEvent(c_byref(sdl_event)) != 1:
+                    raise RuntimeError(SDL_GetError().decode('utf8'))
+                try:
+                    callback = sdl_event_callback_map[sdl_event.type]
+                except KeyError:
+                    continue
+                event = callback(
+                    sdl_event,
+                    self._mice,
+                    self._keyboards,
+                    self._controllers
+                )
+                if event:
+                    self.queue_event(event)
 
     async def _disconnect_peripherals(
         self,
@@ -202,12 +203,19 @@ class ApplicationRunContext:
         self._binds = binds
 
     def __enter__(self) -> None:
-        if SDL_Init(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK) != 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
         for bind in self._binds:
             bind.__enter__()
 
     def __exit__(self, *args: Any) -> None:
         for bind in self._binds:
             bind.__exit__(*args)
+
+
+class SdlContext:
+
+    def __enter__(self) -> None:
+        if SDL_Init(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
+
+    def __exit__(self, *args: Any) -> None:
         SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK)

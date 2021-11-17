@@ -100,7 +100,10 @@ class GlContext:
         )
 
     def close(self) -> None:
+        if identify_thread() != self._sdl_video_thread:
+            raise RuntimeError('shutdown outside main thread')
         if self._sdl_gl_context is not None:
+            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
             SDL_GL_DeleteContext(self._sdl_gl_context)
             self._sdl_gl_context = None
         if self._sdl_window is not None:
