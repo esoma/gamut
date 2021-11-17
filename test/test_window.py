@@ -113,6 +113,16 @@ def test_set_is_bordered(value: Any) -> None:
     assert window.is_bordered is bool(value)
 
 
+def test_is_bordered_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            assert window.is_bordered
+            window.is_bordered = False
+    app = TestApp()
+    app.run()
+
+
 @pytest.mark.parametrize("value", [
     True, False,
     0, 1,
@@ -124,6 +134,16 @@ def test_set_is_fullscreen(value: Any) -> None:
     window = Window()
     window.is_fullscreen = value
     assert window.is_fullscreen is bool(value)
+
+
+def test_is_fullscreen_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            assert not window.is_fullscreen
+            window.is_fullscreen = True
+    app = TestApp()
+    app.run()
 
 
 @pytest.mark.parametrize("value", [
@@ -139,9 +159,28 @@ def test_set_is_visible(value: Any) -> None:
     assert window.is_visible is bool(value)
 
 
+def test_is_visible_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            assert not window.is_visible
+            window.is_visible = True
+    app = TestApp()
+    app.run()
+
+
 def test_recenter() -> None:
     window = Window()
     window.recenter()
+
+
+def test_recenter_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            window.recenter()
+    app = TestApp()
+    app.run()
 
 
 @pytest.mark.parametrize("x", [0, 1, 100, 1000, .5, 62.1])
@@ -152,6 +191,24 @@ def test_resize(x: int, y: int) -> None:
     assert window.size >= (1, 1)
     assert len(window.size) == 2
     assert all(c.__class__ is int for c in window.size)
+
+
+def test_size_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            assert window.size != (0, 0)
+    app = TestApp()
+    app.run()
+
+
+def test_resize_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            window.resize(200, 200)
+    app = TestApp()
+    app.run()
 
 
 @pytest.mark.parametrize("value", [
@@ -165,6 +222,16 @@ def test_set_title(value: Any) -> None:
     window = Window()
     window.title = value
     assert window.title == str(value)
+
+
+def test_title_in_app() -> None:
+    class TestApp(Application):
+        async def main(self) -> None:
+            window = Window()
+            assert window.title == ''
+            window.title = 'test'
+    app = TestApp()
+    app.run()
 
 
 def test_poll_close_event() -> None:

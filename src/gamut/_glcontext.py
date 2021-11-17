@@ -15,7 +15,7 @@ from ctypes import byref as c_byref
 from threading import Condition
 from threading import get_ident as identify_thread
 from time import sleep
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 # pyopengl
 from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
                        glGetString, glPixelStorei)
@@ -31,6 +31,9 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
 
 singleton: Optional[GlContext] = None
 refs: int = 0
+
+
+R = TypeVar('R')
 
 
 if TYPE_CHECKING:
@@ -148,7 +151,7 @@ class GlContext:
     def sdl_video_thread(self) -> int:
         return self._sdl_video_thread
 
-    def execute(self, func: Callable[[], Any]) -> Any:
+    def execute(self, func: Callable[[], R]) -> R:
         if self._sdl_video_thread == identify_thread():
             return func()
         else:
@@ -162,9 +165,11 @@ class GlContext:
                 SDL_PushEvent(c_byref(sdl_event))
                 while not self._execute_complete:
                     self._execute.wait()
+                self._execute_function = None
+                self._execute_complete = False
                 if self._execute_error:
                     raise self._execute_error
-                return self._execute_result
+                return self._execute_result # type: ignore
 
 
 def sdl_user_event_callback(

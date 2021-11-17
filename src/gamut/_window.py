@@ -187,48 +187,64 @@ class Window:
     @property
     def is_bordered(self) -> bool:
         self._ensure_open()
-        return not SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_BORDERLESS
+        def get_bordered() -> bool:
+            return not bool(
+                SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_BORDERLESS
+            )
+        return get_gl_context().execute(get_bordered)
 
     @is_bordered.setter
     def is_bordered(self, is_bordered: bool) -> None:
         self._ensure_open()
-        SDL_SetWindowBordered(self._sdl, bool(is_bordered))
+        def set_bordered() -> None:
+            SDL_SetWindowBordered(self._sdl, bool(is_bordered))
+        get_gl_context().execute(set_bordered)
 
     @property
     def is_fullscreen(self) -> bool:
         self._ensure_open()
-        return bool(
-            SDL_GetWindowFlags(self._sdl) &
-            SDL_WINDOW_FULLSCREEN_DESKTOP
-        )
+        def get_fullscreen() -> bool:
+            return bool(
+                SDL_GetWindowFlags(self._sdl) &
+                SDL_WINDOW_FULLSCREEN_DESKTOP
+            )
+        return get_gl_context().execute(get_fullscreen)
 
     @is_fullscreen.setter
     def is_fullscreen(self, is_fullscreen: bool) -> None:
         self._ensure_open()
-        SDL_SetWindowFullscreen(
-            self._sdl,
-            SDL_WINDOW_FULLSCREEN_DESKTOP if is_fullscreen else 0
-        )
+        def set_fullscreen() -> None:
+            SDL_SetWindowFullscreen(
+                self._sdl,
+                SDL_WINDOW_FULLSCREEN_DESKTOP if is_fullscreen else 0
+            )
+        get_gl_context().execute(set_fullscreen)
 
     @property
     def is_visible(self) -> bool:
         self._ensure_open()
-        return not SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_HIDDEN
+        def get_is_visible() -> bool:
+            return not SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_HIDDEN
+        return get_gl_context().execute(get_is_visible)
 
     @is_visible.setter
     def is_visible(self, is_visible: bool) -> None:
         self._ensure_open()
-        if is_visible:
-            SDL_ShowWindow(self._sdl)
-        else:
-            SDL_HideWindow(self._sdl)
+        def set_is_visible() -> None:
+            if is_visible:
+                SDL_ShowWindow(self._sdl)
+            else:
+                SDL_HideWindow(self._sdl)
+        get_gl_context().execute(set_is_visible)
 
     def recenter(self) -> None:
         self._ensure_open()
-        SDL_SetWindowPosition(
-            self._sdl,
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
-        )
+        def set_window_position() -> None:
+            SDL_SetWindowPosition(
+                self._sdl,
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
+            )
+        return get_gl_context().execute(set_window_position)
 
     def resize(self, width: int, height: int) -> None:
         self._ensure_open()
@@ -239,21 +255,26 @@ class Window:
     @property
     def size(self) -> tuple[int, int]:
         self._ensure_open()
-        x = c_int()
-        y = c_int()
-        SDL_GetWindowSize(self._sdl, c_byref(x), c_byref(y))
-        return (x.value, y.value)
+        def get_size() -> tuple[int, int]:
+            x = c_int()
+            y = c_int()
+            SDL_GetWindowSize(self._sdl, c_byref(x), c_byref(y))
+            return (x.value, y.value)
+        return get_gl_context().execute(get_size)
 
     @property
     def title(self) -> str:
         self._ensure_open()
-        title: bytes = SDL_GetWindowTitle(self._sdl)
-        return title.decode('utf8')
+        def get_title() -> str:
+            return SDL_GetWindowTitle(self._sdl).decode('utf8') # type: ignore
+        return get_gl_context().execute(get_title)
 
     @title.setter
     def title(self, title: str) -> None:
         self._ensure_open()
-        SDL_SetWindowTitle(self._sdl, str(title).encode('utf8'))
+        def set_title() -> None:
+            SDL_SetWindowTitle(self._sdl, str(title).encode('utf8'))
+        get_gl_context().execute(set_title)
 
 
 def get_window_from_sdl_id(id: int) -> Window:

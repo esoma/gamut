@@ -1259,7 +1259,8 @@ def sdl_window_event_focus_lost(
         keyboard = keyboards[SDL_KEYBOARD_KEY]
     except KeyError:
         return None
-    assert keyboard._window is not None
+    if keyboard._window is None:
+        return None
     keyboard._window = None
     return keyboard.LostFocus()
 
