@@ -30,16 +30,17 @@ from weakref import WeakValueDictionary
 # pyopengl
 from OpenGL.GL import GL_DRAW_FRAMEBUFFER, glBindFramebuffer, glViewport
 # pysdl2
-from sdl2 import (SDL_GetError, SDL_GetWindowFlags, SDL_GetWindowID,
-                  SDL_GetWindowSize, SDL_GetWindowTitle,
-                  SDL_GL_SetSwapInterval, SDL_GL_SwapWindow, SDL_HideWindow,
-                  SDL_SetWindowBordered, SDL_SetWindowFullscreen,
-                  SDL_SetWindowPosition, SDL_SetWindowSize, SDL_SetWindowTitle,
-                  SDL_ShowWindow, SDL_WINDOW_BORDERLESS,
-                  SDL_WINDOW_FULLSCREEN_DESKTOP, SDL_WINDOW_HIDDEN,
-                  SDL_WINDOWEVENT_CLOSE, SDL_WINDOWEVENT_HIDDEN,
-                  SDL_WINDOWEVENT_MOVED, SDL_WINDOWEVENT_SHOWN,
-                  SDL_WINDOWEVENT_SIZE_CHANGED, SDL_WINDOWPOS_CENTERED)
+from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
+                  SDL_GetWindowFlags, SDL_GetWindowID, SDL_GetWindowSize,
+                  SDL_GetWindowTitle, SDL_GL_SetSwapInterval,
+                  SDL_GL_SwapWindow, SDL_HideWindow, SDL_SetWindowBordered,
+                  SDL_SetWindowFullscreen, SDL_SetWindowPosition,
+                  SDL_SetWindowSize, SDL_SetWindowTitle, SDL_ShowWindow,
+                  SDL_WINDOW_BORDERLESS, SDL_WINDOW_FULLSCREEN_DESKTOP,
+                  SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL, SDL_WINDOWEVENT_CLOSE,
+                  SDL_WINDOWEVENT_HIDDEN, SDL_WINDOWEVENT_MOVED,
+                  SDL_WINDOWEVENT_SHOWN, SDL_WINDOWEVENT_SIZE_CHANGED,
+                  SDL_WINDOWPOS_CENTERED)
 
 if TYPE_CHECKING:
     # gamut
@@ -90,7 +91,14 @@ class Window:
     def __init__(self) -> None:
         self._gl_context = require_gl_context()
 
-        self._sdl = get_gl_context().create_window()
+        def create_window() -> Any:
+            return SDL_CreateWindow(
+                b'',
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                100, 100,
+                SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
+            )
+        self._sdl = get_gl_context().execute(create_window)
         if not self._sdl:
             raise RuntimeError(SDL_GetError().decode('utf8'))
 
@@ -141,7 +149,11 @@ class Window:
         if hasattr(self, "_resized_bind"):
             self._resized_bind.close()
         if hasattr(self, "_sdl") and self._sdl is not None:
-            get_gl_context().destroy_window(self._sdl)
+            gl_context = get_gl_context()
+            def destroy_window() -> None:
+                gl_context.unset_sdl_window(self._sdl)
+                SDL_DestroyWindow(self._sdl)
+            gl_context.execute(destroy_window)
             self._sdl = None
         self._gl_context = release_gl_context(self._gl_context)
 
@@ -220,7 +232,9 @@ class Window:
 
     def resize(self, width: int, height: int) -> None:
         self._ensure_open()
-        SDL_SetWindowSize(self._sdl, int(width), int(height))
+        def resize_window() -> None:
+            SDL_SetWindowSize(self._sdl, int(width), int(height))
+        get_gl_context().execute(resize_window)
 
     @property
     def size(self) -> tuple[int, int]:

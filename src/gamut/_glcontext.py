@@ -15,7 +15,7 @@ from ctypes import byref as c_byref
 from threading import Condition
 from threading import get_ident as identify_thread
 from time import sleep
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Callable, Optional, TYPE_CHECKING
 # pyopengl
 from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
                        glGetString, glPixelStorei)
@@ -27,7 +27,7 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_GL_MakeCurrent, SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE,
                   SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_PushEvent,
                   SDL_QuitSubSystem, SDL_USEREVENT, SDL_WINDOW_HIDDEN,
-                  SDL_WINDOW_OPENGL, SDL_WINDOWPOS_CENTERED)
+                  SDL_WINDOW_OPENGL)
 
 singleton: Optional[GlContext] = None
 refs: int = 0
@@ -54,12 +54,11 @@ class GlContext:
         self._sdl_video_thread = identify_thread()
         self._rendering_thread: Optional[int] = identify_thread()
 
-        self._window_created = Condition()
-        self._created_window: Any = None
-        self._create_window = False
-
-        self._window_destroyed = Condition()
-        self._destroy_window: Any = None
+        self._execute = Condition()
+        self._execute_function: Optional[Callable[[], Any]] = None
+        self._execute_complete = False
+        self._execute_result: Any = None
+        self._execute_error: Optional[BaseException] = None
 
         init_sdl_video()
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1)
@@ -149,40 +148,23 @@ class GlContext:
     def sdl_video_thread(self) -> int:
         return self._sdl_video_thread
 
-    def create_window(self) -> Any:
-        assert self._created_window is None
+    def execute(self, func: Callable[[], Any]) -> Any:
         if self._sdl_video_thread == identify_thread():
-            return SDL_CreateWindow(
-                b'',
-                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                100, 100,
-                SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
-            )
+            return func()
         else:
-            with self._window_created:
-                self._create_window = True
+            with self._execute:
+                self._execute_function = func
+                self._execute_complete = False
+                self._execute_error = None
+                self._execute_result = None
                 sdl_event = SDL_Event()
                 sdl_event.type = SDL_USEREVENT
                 SDL_PushEvent(c_byref(sdl_event))
-                while self._created_window is None:
-                    self._window_created.wait()
-                created_window = self._created_window # type: ignore
-                self._created_window = None
-                return created_window
-
-    def destroy_window(self, sdl_window: Any) -> None:
-        if self._sdl_video_thread == identify_thread():
-            self.unset_sdl_window(sdl_window)
-            SDL_DestroyWindow(sdl_window)
-        else:
-            assert sdl_window is not None
-            with self._window_destroyed:
-                self._destroy_window = sdl_window
-                sdl_event = SDL_Event()
-                sdl_event.type = SDL_USEREVENT
-                SDL_PushEvent(c_byref(sdl_event))
-                while self._destroy_window is not None:
-                    self._window_destroyed.wait()
+                while not self._execute_complete:
+                    self._execute.wait()
+                if self._execute_error:
+                    raise self._execute_error
+                return self._execute_result
 
 
 def sdl_user_event_callback(
@@ -195,18 +177,15 @@ def sdl_user_event_callback(
         gl_context = get_gl_context()
     except RuntimeError:
         return
-    with gl_context._window_created:
-        if gl_context._create_window:
-            assert gl_context._sdl_video_thread == identify_thread()
-            gl_context._create_window = False
-            gl_context._created_window = gl_context.create_window()
-            gl_context._window_created.notify()
-    with gl_context._window_destroyed:
-        if gl_context._destroy_window is not None:
-            assert gl_context._sdl_video_thread == identify_thread()
-            gl_context.destroy_window(gl_context._destroy_window)
-            gl_context._destroy_window = None
-            gl_context._window_destroyed.notify()
+
+    with gl_context._execute:
+        if gl_context._execute_function is not None:
+            try:
+                gl_context._execute_result = gl_context._execute_function()
+            except BaseException as ex:
+                gl_context._execute_error = ex
+            gl_context._execute_complete = True
+            gl_context._execute.notify()
 
 
 assert SDL_USEREVENT not in sdl_event_callback_map
