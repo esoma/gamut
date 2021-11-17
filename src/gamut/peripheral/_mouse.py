@@ -287,7 +287,10 @@ def sdl_window_event_leave(
     keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
 ) -> Optional[MouseMoved]:
-    mouse = mice[SDL_MOUSE_KEY]
+    try:
+        mouse = mice[SDL_MOUSE_KEY]
+    except KeyError:
+        return None
     if mouse._window is None:
         return None
     assert mouse._position is not None
@@ -311,7 +314,10 @@ def sdl_mouse_motion_event_callback(
         window = get_window_from_sdl_id(sdl_event.motion.windowID)
     except KeyError:
         return None
-    mouse = mice[SDL_MOUSE_KEY]
+    try:
+        mouse = mice[SDL_MOUSE_KEY]
+    except KeyError:
+        return None
     mouse._position = (sdl_event.motion.x, sdl_event.motion.y)
     delta = (sdl_event.motion.xrel, sdl_event.motion.yrel)
     mouse._window = window
@@ -329,7 +335,10 @@ def sdl_mouse_button_down_event_callback(
 ) -> Optional[MouseButtonPressed]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
-    mouse = mice[SDL_MOUSE_KEY]
+    try:
+        mouse = mice[SDL_MOUSE_KEY]
+    except KeyError:
+        return None
     button: PressableMouseButton = getattr(
         mouse.Button,
         sdl_button_to_gamut_button_name[sdl_event.button.button]
@@ -352,7 +361,10 @@ def sdl_mouse_button_up_event_callback(
 ) -> Optional[MouseButtonReleased]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
-    mouse = mice[SDL_MOUSE_KEY]
+    try:
+        mouse = mice[SDL_MOUSE_KEY]
+    except KeyError:
+        return None
     button: PressableMouseButton = getattr(
         mouse.Button,
         sdl_button_to_gamut_button_name[sdl_event.button.button]
@@ -375,7 +387,10 @@ def sdl_mouse_wheel_event(
 ) -> Optional[Union[MouseScrolledVertically, MouseScrolledHorizontally]]:
     if sdl_event.button.which == SDL_TOUCH_MOUSEID:
         return None
-    mouse = mice[SDL_MOUSE_KEY]
+    try:
+        mouse = mice[SDL_MOUSE_KEY]
+    except KeyError:
+        return None
     c = -1 if sdl_event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED else 1
     if sdl_event.wheel.y:
         assert sdl_event.wheel.x == 0

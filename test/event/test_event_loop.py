@@ -43,7 +43,6 @@ class TestEventLoop:
         with pytest.raises(NotImplementedError) as excinfo:
             app.run()
 
-
     @pytest.mark.parametrize("return_value", [0, 1, 100])
     def test_return_value(
         self,
@@ -57,7 +56,6 @@ class TestEventLoop:
         app = TestEventLoop()
         assert app.run() == return_value
         assert app.run() == return_value
-
 
     @pytest.mark.parametrize("exception", [
         Exception("test"),
@@ -78,7 +76,6 @@ class TestEventLoop:
             app.run()
         assert excinfo.value is exception
 
-
     def test_await_event(self, cls: type[EventLoop]) -> None:
         class TestEvent(Event):
             text: str
@@ -94,7 +91,6 @@ class TestEventLoop:
         app = TestEventLoop()
         assert app.run() == "test"
 
-
     def test_queue_event(self, cls: type[EventLoop]) -> None:
         class TestEvent(Event):
             text: str
@@ -107,7 +103,6 @@ class TestEventLoop:
 
         app = TestEventLoop()
         assert app.run() == "test"
-
 
     def test_start_end(
         self,

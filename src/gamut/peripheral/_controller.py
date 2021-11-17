@@ -267,6 +267,8 @@ def sdl_joy_device_removed_event_callback(
 
     controller = controllers.pop(sdl_joystick_index)
 
+    if not controller.is_connected:
+        return None
     event = controller.disconnect()
     assert isinstance(event, ControllerDisconnected)
     return event
@@ -282,9 +284,12 @@ def sdl_joy_button_down_event_callback(
     mice: dict[Any, Mouse],
     keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
-) -> ControllerButtonPressed:
+) -> Optional[ControllerButtonPressed]:
     sdl_joystick_index: int = sdl_event.jbutton.which
-    controller = controllers[sdl_joystick_index]
+    try:
+        controller = controllers[sdl_joystick_index]
+    except KeyError:
+        return None
     button = controller.buttons[sdl_event.jbutton.button]
     assert isinstance(button, ControllerButton)
     button._is_pressed = True
@@ -300,9 +305,12 @@ def sdl_joy_button_up_event_callback(
     mice: dict[Any, Mouse],
     keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
-) -> ControllerButtonReleased:
+) -> Optional[ControllerButtonReleased]:
     sdl_joystick_index: int = sdl_event.jbutton.which
-    controller = controllers[sdl_joystick_index]
+    try:
+        controller = controllers[sdl_joystick_index]
+    except KeyError:
+        return None
     button = controller.buttons[sdl_event.jbutton.button]
     assert isinstance(button, ControllerButton)
     button._is_pressed = False
@@ -318,9 +326,12 @@ def sdl_joy_axis_event_callback(
     mice: dict[Any, Mouse],
     keyboards: dict[Any, Keyboard],
     controllers: dict[Any, Controller]
-) -> ControllerAxisMoved:
+) -> Optional[ControllerAxisMoved]:
     sdl_joystick_index: int = sdl_event.jaxis.which
-    controller = controllers[sdl_joystick_index]
+    try:
+        controller = controllers[sdl_joystick_index]
+    except KeyError:
+        return None
     axis = controller.axes[sdl_event.jaxis.axis]
     assert isinstance(axis, ControllerAxis)
     axis._position = sdl_event.jaxis.value / 32767.0

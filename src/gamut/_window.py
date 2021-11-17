@@ -18,6 +18,7 @@ __all__ = [
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
 from gamut._sdl import sdl_window_event_callback_map
+from gamut.event import Bind
 from gamut.event import Event as _Event
 # python
 from ctypes import byref as c_byref
@@ -90,12 +91,14 @@ class Window:
     def __init__(self) -> None:
         self._gl_context = require_gl_context()
 
-        self._sdl = SDL_CreateWindow(
-            b'',
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            100, 100,
-            SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
-        )
+        def create_window() -> Any:
+            return SDL_CreateWindow(
+                b'',
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                100, 100,
+                SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
+            )
+        self._sdl = get_gl_context().execute(create_window)
         if not self._sdl:
             raise RuntimeError(SDL_GetError().decode('utf8'))
 
@@ -123,6 +126,8 @@ class Window:
             raise RuntimeError(SDL_GetError().decode('utf8'))
         Window._id_map[sdl_window_id] = self
 
+        self._resized_bind = Bind.on(self.Resized, self._resized)
+
     def __del__(self) -> None:
         self.close()
 
@@ -136,10 +141,19 @@ class Window:
         if self._sdl is None:
             raise RuntimeError('window is closed')
 
+    async def _resized(self, event: WindowResized) -> None:
+        assert event.window is self
+        glViewport(0, 0, *event.size)
+
     def close(self) -> None:
-        if self._sdl is not None:
-            get_gl_context().unset_sdl_window(self._sdl)
-            SDL_DestroyWindow(self._sdl)
+        if hasattr(self, "_resized_bind"):
+            self._resized_bind.close()
+        if hasattr(self, "_sdl") and self._sdl is not None:
+            gl_context = get_gl_context()
+            gl_context.unset_sdl_window(self._sdl)
+            def destroy_window() -> None:
+                SDL_DestroyWindow(self._sdl)
+            gl_context.execute(destroy_window)
             self._sdl = None
         self._gl_context = release_gl_context(self._gl_context)
 
@@ -173,71 +187,94 @@ class Window:
     @property
     def is_bordered(self) -> bool:
         self._ensure_open()
-        return not SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_BORDERLESS
+        def get_bordered() -> bool:
+            return not bool(
+                SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_BORDERLESS
+            )
+        return get_gl_context().execute(get_bordered)
 
     @is_bordered.setter
     def is_bordered(self, is_bordered: bool) -> None:
         self._ensure_open()
-        SDL_SetWindowBordered(self._sdl, bool(is_bordered))
+        def set_bordered() -> None:
+            SDL_SetWindowBordered(self._sdl, bool(is_bordered))
+        get_gl_context().execute(set_bordered)
 
     @property
     def is_fullscreen(self) -> bool:
         self._ensure_open()
-        return bool(
-            SDL_GetWindowFlags(self._sdl) &
-            SDL_WINDOW_FULLSCREEN_DESKTOP
-        )
+        def get_fullscreen() -> bool:
+            return bool(
+                SDL_GetWindowFlags(self._sdl) &
+                SDL_WINDOW_FULLSCREEN_DESKTOP
+            )
+        return get_gl_context().execute(get_fullscreen)
 
     @is_fullscreen.setter
     def is_fullscreen(self, is_fullscreen: bool) -> None:
         self._ensure_open()
-        SDL_SetWindowFullscreen(
-            self._sdl,
-            SDL_WINDOW_FULLSCREEN_DESKTOP if is_fullscreen else 0
-        )
+        def set_fullscreen() -> None:
+            SDL_SetWindowFullscreen(
+                self._sdl,
+                SDL_WINDOW_FULLSCREEN_DESKTOP if is_fullscreen else 0
+            )
+        get_gl_context().execute(set_fullscreen)
 
     @property
     def is_visible(self) -> bool:
         self._ensure_open()
-        return not SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_HIDDEN
+        def get_is_visible() -> bool:
+            return not SDL_GetWindowFlags(self._sdl) & SDL_WINDOW_HIDDEN
+        return get_gl_context().execute(get_is_visible)
 
     @is_visible.setter
     def is_visible(self, is_visible: bool) -> None:
         self._ensure_open()
-        if is_visible:
-            SDL_ShowWindow(self._sdl)
-        else:
-            SDL_HideWindow(self._sdl)
+        def set_is_visible() -> None:
+            if is_visible:
+                SDL_ShowWindow(self._sdl)
+            else:
+                SDL_HideWindow(self._sdl)
+        get_gl_context().execute(set_is_visible)
 
     def recenter(self) -> None:
         self._ensure_open()
-        SDL_SetWindowPosition(
-            self._sdl,
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
-        )
+        def set_window_position() -> None:
+            SDL_SetWindowPosition(
+                self._sdl,
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
+            )
+        return get_gl_context().execute(set_window_position)
 
     def resize(self, width: int, height: int) -> None:
         self._ensure_open()
-        SDL_SetWindowSize(self._sdl, int(width), int(height))
+        def resize_window() -> None:
+            SDL_SetWindowSize(self._sdl, int(width), int(height))
+        get_gl_context().execute(resize_window)
 
     @property
     def size(self) -> tuple[int, int]:
         self._ensure_open()
-        x = c_int()
-        y = c_int()
-        SDL_GetWindowSize(self._sdl, c_byref(x), c_byref(y))
-        return (x.value, y.value)
+        def get_size() -> tuple[int, int]:
+            x = c_int()
+            y = c_int()
+            SDL_GetWindowSize(self._sdl, c_byref(x), c_byref(y))
+            return (x.value, y.value)
+        return get_gl_context().execute(get_size)
 
     @property
     def title(self) -> str:
         self._ensure_open()
-        title: bytes = SDL_GetWindowTitle(self._sdl)
-        return title.decode('utf8')
+        def get_title() -> str:
+            return SDL_GetWindowTitle(self._sdl).decode('utf8') # type: ignore
+        return get_gl_context().execute(get_title)
 
     @title.setter
     def title(self, title: str) -> None:
         self._ensure_open()
-        SDL_SetWindowTitle(self._sdl, str(title).encode('utf8'))
+        def set_title() -> None:
+            SDL_SetWindowTitle(self._sdl, str(title).encode('utf8'))
+        get_gl_context().execute(set_title)
 
 
 def get_window_from_sdl_id(id: int) -> Window:
@@ -314,7 +351,6 @@ def sdl_window_event_resized_callback(
         window = get_window_from_sdl_id(sdl_event.window.windowID)
     except KeyError:
         return None
-    glViewport(0, 0, sdl_event.window.data1, sdl_event.window.data2)
     return window.Resized((sdl_event.window.data1, sdl_event.window.data2))
 
 assert SDL_WINDOWEVENT_SIZE_CHANGED not in sdl_window_event_callback_map

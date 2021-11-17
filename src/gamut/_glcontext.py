@@ -8,23 +8,39 @@ __all__ = [
     'release_gl_context',
 ]
 
+# gamut
+from ._sdl import sdl_event_callback_map
 # python
+from ctypes import byref as c_byref
+from threading import Condition
+from threading import Lock
+from threading import get_ident as identify_thread
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 # pyopengl
 from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
                        glGetString, glPixelStorei)
 # pysdl2
-from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
+from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
                   SDL_GL_MakeCurrent, SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE,
-                  SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_QuitSubSystem,
-                  SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
+                  SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_PushEvent,
+                  SDL_QuitSubSystem, SDL_USEREVENT, SDL_WINDOW_HIDDEN,
+                  SDL_WINDOW_OPENGL)
 
 singleton: Optional[GlContext] = None
+refs_lock = Lock()
 refs: int = 0
+
+
+R = TypeVar('R')
+
+
+if TYPE_CHECKING:
+    # gamut
+    from gamut.peripheral import Controller, Keyboard, Mouse
 
 
 class GlContext:
@@ -40,6 +56,15 @@ class GlContext:
     _sdl_gl_context: Optional[int]
 
     def __init__(self) -> None:
+        self._sdl_video_thread = identify_thread()
+        self._rendering_thread: Optional[int] = identify_thread()
+
+        self._execute = Condition()
+        self._execute_function: Optional[Callable[[], Any]] = None
+        self._execute_complete = False
+        self._execute_result: Any = None
+        self._execute_error: Optional[BaseException] = None
+
         init_sdl_video()
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1)
 
@@ -79,7 +104,11 @@ class GlContext:
         )
 
     def close(self) -> None:
+        assert self._execute_function is None
+        if identify_thread() != self._sdl_video_thread:
+            raise RuntimeError('shutdown outside main thread')
         if self._sdl_gl_context is not None:
+            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
             SDL_GL_DeleteContext(self._sdl_gl_context)
             self._sdl_gl_context = None
         if self._sdl_window is not None:
@@ -89,14 +118,26 @@ class GlContext:
         deinit_sdl_video()
 
     def set_sdl_window(self, sdl_window: Any) -> None:
+        assert identify_thread() == self._rendering_thread
         if self._sdl_gl_window != sdl_window:
             SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context)
             self._sdl_gl_window = sdl_window
 
     def unset_sdl_window(self, sdl_window: Any) -> None:
-        if self._sdl_gl_window == sdl_window:
-            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
-            self._sdl_gl_window = self._sdl_window
+        if identify_thread() == self._rendering_thread:
+            if self._sdl_gl_window == sdl_window:
+                SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+                self._sdl_gl_window = self._sdl_window
+
+    def release_rendering_thread(self) -> None:
+        self._rendering_thread = None
+        self._sdl_gl_window = None
+        SDL_GL_MakeCurrent(self._sdl_window, 0)
+
+    def obtain_rendering_thread(self) -> None:
+        self._rendering_thread = identify_thread()
+        self._sdl_gl_window = self._sdl_window
+        SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
 
     @property
     def is_open(self) -> bool:
@@ -111,28 +152,79 @@ class GlContext:
     def version(self) -> tuple[int, int]:
         return self._version
 
+    @property
+    def sdl_video_thread(self) -> int:
+        return self._sdl_video_thread
+
+    def execute(self, func: Callable[[], R]) -> R:
+        if self._sdl_video_thread == identify_thread():
+            return func()
+        else:
+            with self._execute:
+                self._execute_function = func
+                self._execute_complete = False
+                self._execute_error = None
+                self._execute_result = None
+                sdl_event = SDL_Event()
+                sdl_event.type = SDL_USEREVENT
+                SDL_PushEvent(c_byref(sdl_event))
+                while not self._execute_complete:
+                    self._execute.wait()
+                self._execute_function = None
+                self._execute_complete = False
+                if self._execute_error is not None:
+                    raise self._execute_error
+                return self._execute_result # type: ignore
+
+
+def sdl_user_event_callback(
+    sdl_event: Any,
+    mice: dict[Any, Mouse],
+    keyboards: dict[Any, Keyboard],
+    controllers: dict[Any, Controller]
+) -> None:
+    try:
+        gl_context = get_gl_context()
+    except RuntimeError:
+        return
+
+    with gl_context._execute:
+        if gl_context._execute_function is not None:
+            try:
+                gl_context._execute_result = gl_context._execute_function()
+            except BaseException as ex:
+                gl_context._execute_error = ex
+            gl_context._execute_complete = True
+            gl_context._execute.notify()
+
+
+assert SDL_USEREVENT not in sdl_event_callback_map
+sdl_event_callback_map[SDL_USEREVENT] = sdl_user_event_callback
+
 
 def release_gl_context(gl_context_marker: Any) -> Any:
     global singleton
     global refs
     if gl_context_marker != 1:
         return False
-    assert singleton is not None
-    assert refs > 0
-    refs -= 1
-    if refs == 0:
-        singleton.close()
-        singleton = None
+    with refs_lock:
+        assert singleton is not None
+        assert refs > 0
+        refs -= 1
+        if refs == 0:
+            singleton.close()
+            singleton = None
     return False
 
 
 def require_gl_context() -> Any:
     global refs
     global singleton
-    if singleton is None:
-        assert refs == 0
-        singleton = GlContext()
-    refs += 1
+    with refs_lock:
+        if singleton is None:
+            assert refs == 0
+            singleton = GlContext()
+        refs += 1
     return True
 
 
