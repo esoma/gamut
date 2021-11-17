@@ -38,6 +38,8 @@ def cleanup() -> Generator[Any, Any, None]:
     # make sure all events are reset so that the event futures don't persist
     # any tasks that are still waiting
     reset_events()
+    # re-enable garbage collection in case it was disabled without re-enabling
+    gc.enable()
     # force a garbage collection to get rid of anything that is still dangling
     # and hasn't had its __del__ resolved
     gc.collect()

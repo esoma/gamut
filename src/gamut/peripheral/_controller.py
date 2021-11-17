@@ -265,7 +265,10 @@ def sdl_joy_device_removed_event_callback(
         raise RuntimeError(SDL_GetError().decode('utf8'))
     SDL_JoystickClose(sdl_joystick)
 
-    controller = controllers.pop(sdl_joystick_index)
+    try:
+        controller = controllers.pop(sdl_joystick_index)
+    except KeyError:
+        return None
 
     if not controller.is_connected:
         return None

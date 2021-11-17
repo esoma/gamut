@@ -24,7 +24,8 @@ from ._rendertarget import (TextureRenderTarget,
                             WindowRenderTarget)
 from ._texture import bind_texture, Texture
 # gamut
-from gamut._glcontext import release_gl_context, require_gl_context
+from gamut._glcontext import (get_gl_context, release_gl_context,
+                              require_gl_context)
 # python
 from ctypes import c_void_p
 from enum import Enum
@@ -42,9 +43,9 @@ from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
                        GL_BLEND, GL_CULL_FACE, GL_CURRENT_PROGRAM,
                        GL_DEPTH_TEST, GL_FALSE, glBlendColor, glBlendEquation,
-                       glBlendFuncSeparate, GLchar, glCullFace,
-                       glDeleteProgram, glDepthFunc, glDepthMask, glDisable,
-                       glDrawArrays, glDrawArraysInstanced, glDrawElements,
+                       glBlendFuncSeparate, GLchar, glCullFace, glDepthFunc,
+                       glDepthMask, glDisable, glDrawArrays,
+                       glDrawArraysInstanced, glDrawElements,
                        glDrawElementsInstanced, glEnable, GLenum,
                        glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
                        GLint, GLsizei)
@@ -363,13 +364,11 @@ class Shader:
     def close(self) -> None:
         global shader_in_use
         if shader_in_use and shader_in_use() is self:
-            glUseProgram(0)
             shader_in_use = None
         if hasattr(self, "_gl") and self._gl is not None:
-            glDeleteProgram(self._gl)
+            get_gl_context().delete_shader(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
-
 
     @property
     def attributes(self) -> tuple[ShaderAttribute, ...]:

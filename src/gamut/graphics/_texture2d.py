@@ -7,7 +7,8 @@ __all__ = ['TextureComponents', 'TextureView', 'Texture2d']
 from ._texture import (Texture, TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE,
                        TEXTURE_DATA_TYPES, TextureDataType)
 # gamut
-from gamut._glcontext import release_gl_context, require_gl_context
+from gamut._glcontext import (get_gl_context, release_gl_context,
+                              require_gl_context)
 # python
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
@@ -15,8 +16,6 @@ from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof
 from enum import Enum
 from typing import Final, Optional
-# numpy
-from numpy import array as np_array
 # pyglm
 from glm import uint32
 # pyopengl
@@ -25,9 +24,9 @@ from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL,
                        GL_RGB, GL_RGBA, GL_STREAM_READ, GL_TEXTURE0,
                        GL_TEXTURE_2D, GL_UNSIGNED_INT_24_8, glActiveTexture,
                        glBindBuffer, glBindTexture, glBufferData,
-                       glDeleteBuffers, glDeleteTextures, glGenBuffers,
-                       glGenerateMipmap, glGenTextures, glGetTexImage,
-                       glMapBuffer, glTexImage2D, glUnmapBuffer)
+                       glDeleteBuffers, glGenBuffers, glGenerateMipmap,
+                       glGenTextures, glGetTexImage, glMapBuffer, glTexImage2D,
+                       glUnmapBuffer)
 
 
 class TextureComponents(Enum):
@@ -123,7 +122,7 @@ class Texture2d(Texture):
 
     def close(self) -> None:
         if hasattr(self, '_gl') and self._gl is not None:
-            glDeleteTextures(np_array([self._gl]))
+            get_gl_context().delete_texture(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
 

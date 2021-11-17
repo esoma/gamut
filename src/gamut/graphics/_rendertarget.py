@@ -37,8 +37,6 @@ from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        glClearDepthf, glClearStencil, glReadPixels, glViewport)
 from OpenGL.GL.framebufferobjects import (glBindFramebuffer,
                                           glBindRenderbuffer,
-                                          glDeleteFramebuffers,
-                                          glDeleteRenderbuffers,
                                           glFramebufferRenderbuffer,
                                           glFramebufferTexture2D,
                                           glGenFramebuffers,
@@ -132,10 +130,10 @@ class TextureRenderTarget:
 
     def close(self) -> None:
         if hasattr(self, "_ds_gl") and self._ds_gl is not None:
-            glDeleteRenderbuffers(1, [self._ds_gl])
+            get_gl_context().delete_render_buffer(self._ds_gl)
             self._ds_gl = None
         if hasattr(self, "_gl") and self._gl is not None:
-            glDeleteFramebuffers(1, [self._gl])
+            get_gl_context().delete_frame_buffer(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
 

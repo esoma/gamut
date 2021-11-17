@@ -12,14 +12,24 @@ __all__ = [
 from ._sdl import sdl_event_callback_map
 # python
 from ctypes import byref as c_byref
+from queue import Empty as QueueEmpty
+from queue import Queue
+import sys
 from threading import Condition
-from threading import Lock
+from threading import RLock
 from threading import get_ident as identify_thread
 from time import sleep
 from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
+# numpy
+from numpy import array as np_array
 # pyopengl
-from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
-                       glGetString, glPixelStorei)
+from OpenGL.GL import (GL_COPY_READ_BUFFER, GL_PACK_ALIGNMENT,
+                       GL_UNPACK_ALIGNMENT, GL_VERSION, glBindBuffer,
+                       glDeleteBuffers, glDeleteProgram, glDeleteTextures,
+                       glDeleteVertexArrays, glGetString, glPixelStorei,
+                       glUnmapBuffer)
+from OpenGL.GL.framebufferobjects import (glDeleteFramebuffers,
+                                          glDeleteRenderbuffers)
 # pysdl2
 from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
@@ -31,7 +41,7 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_WINDOW_OPENGL)
 
 singleton: Optional[GlContext] = None
-refs_lock = Lock()
+refs_lock = RLock()
 refs: int = 0
 
 
@@ -58,6 +68,8 @@ class GlContext:
     def __init__(self) -> None:
         self._sdl_video_thread = identify_thread()
         self._rendering_thread: Optional[int] = identify_thread()
+
+        self._gc: Queue[Callable[[], None]] = Queue()
 
         self._execute = Condition()
         self._execute_function: Optional[Callable[[], Any]] = None
@@ -107,6 +119,7 @@ class GlContext:
         assert self._execute_function is None
         if identify_thread() != self._sdl_video_thread:
             raise RuntimeError('shutdown outside main thread')
+        self.gc_collect()
         if self._sdl_gl_context is not None:
             SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
             SDL_GL_DeleteContext(self._sdl_gl_context)
@@ -132,7 +145,14 @@ class GlContext:
     def release_rendering_thread(self) -> None:
         self._rendering_thread = None
         self._sdl_gl_window = None
-        SDL_GL_MakeCurrent(self._sdl_window, 0)
+        # windows doesn't "carry" the opengl context to child threads
+        # automatically, but macos and linux do
+        # this makes things weird because SDL caches the current context and
+        # so it won't update the context if it thinks it's already set, so in
+        # order to actually set it in obtain_rendering_thread we need to
+        # release it only on windows
+        if sys.platform in ['win32', 'cygwin']:
+            SDL_GL_MakeCurrent(self._sdl_window, 0)
 
     def obtain_rendering_thread(self) -> None:
         self._rendering_thread = identify_thread()
@@ -156,8 +176,59 @@ class GlContext:
     def sdl_video_thread(self) -> int:
         return self._sdl_video_thread
 
+    def gc_collect(self) -> None:
+        assert identify_thread() == self._rendering_thread
+        while True:
+            try:
+                gc = self._gc.get_nowait()
+            except QueueEmpty:
+                return
+            gc()
+
+    def _collect_garbage(self, func: Callable[[], None]) -> None:
+        if identify_thread() == self._rendering_thread:
+            func()
+        else:
+            self._gc.put(func)
+
+    def unmap_gl_buffer(self, gl_buffer_name: Any) -> None:
+        def _unmap_gl_buffer() -> None:
+            glBindBuffer(GL_COPY_READ_BUFFER, gl_buffer_name)
+            glUnmapBuffer(GL_COPY_READ_BUFFER)
+        self._collect_garbage(_unmap_gl_buffer)
+
+    def delete_buffer(self, gl_buffer_name: Any) -> None:
+        def _delete_buffer() -> None:
+            glDeleteBuffers(1, np_array([gl_buffer_name]))
+        self._collect_garbage(_delete_buffer)
+
+    def delete_vertex_array(self, gl_vertex_array_name: Any) -> None:
+        def _delete_vertex_array() -> None:
+            glDeleteVertexArrays(1, np_array([gl_vertex_array_name]))
+        self._collect_garbage(_delete_vertex_array)
+
+    def delete_render_buffer(self, gl_render_buffer_name: Any) -> None:
+        def _delete_render_buffer() -> None:
+            glDeleteRenderbuffers(1, np_array([gl_render_buffer_name]))
+        self._collect_garbage(_delete_render_buffer)
+
+    def delete_frame_buffer(self, gl_frame_buffer_name: Any) -> None:
+        def _delete_frame_buffer() -> None:
+            glDeleteFramebuffers(1, np_array([gl_frame_buffer_name]))
+        self._collect_garbage(_delete_frame_buffer)
+
+    def delete_shader(self, gl_shader_name: Any) -> None:
+        def _delete_shader() -> None:
+            glDeleteProgram(gl_shader_name)
+        self._collect_garbage(_delete_shader)
+
+    def delete_texture(self, gl_texture_name: Any) -> None:
+        def _delete_texture() -> None:
+            glDeleteTextures(np_array([gl_texture_name]))
+        self._collect_garbage(_delete_texture)
+
     def execute(self, func: Callable[[], R]) -> R:
-        if self._sdl_video_thread == identify_thread():
+        if identify_thread() == self._sdl_video_thread:
             return func()
         else:
             with self._execute:
@@ -213,6 +284,7 @@ def release_gl_context(gl_context_marker: Any) -> Any:
         refs -= 1
         if refs == 0:
             singleton.close()
+            assert refs == 0
             singleton = None
     return False
 
@@ -229,9 +301,10 @@ def require_gl_context() -> Any:
 
 
 def get_gl_context() -> GlContext:
-    if singleton is None:
-        raise RuntimeError('no gl context')
-    return singleton
+    with refs_lock:
+        if singleton is None:
+            raise RuntimeError('no gl context')
+        return singleton
 
 
 def init_sdl_video() -> None:
