@@ -167,7 +167,7 @@ class GlContext:
                     self._execute.wait()
                 self._execute_function = None
                 self._execute_complete = False
-                if self._execute_error:
+                if self._execute_error is not None:
                     raise self._execute_error
                 return self._execute_result # type: ignore
 
