@@ -114,10 +114,10 @@ class Application(EventLoop[R]):
         except BaseException as ex:
             self._run_exception = ex
         finally:
+            self._running = False
             sdl_event = SDL_Event()
             sdl_event.type = SDL_USEREVENT
             SDL_PushEvent(c_byref(sdl_event))
-            self._running = False
 
     def run_context(self) -> ContextManager:
         return ApplicationRunContext((
