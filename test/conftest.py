@@ -24,14 +24,15 @@ def cleanup() -> Generator[Any, Any, None]:
     """This fixture helps to clean up any state that would persist between
     tests.
     """
-    # make sure SDL isn't initialized
-    assert SDL_WasInit(SDL_INIT_TIMER) == 0
-    assert SDL_WasInit(SDL_INIT_AUDIO) == 0
-    assert SDL_WasInit(SDL_INIT_VIDEO) == 0
-    assert SDL_WasInit(SDL_INIT_JOYSTICK) == 0
-    assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
-    assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
-    assert SDL_WasInit(SDL_INIT_EVENTS) == 0
+    if SDL_WasInit(
+        SDL_INIT_TIMER |
+        SDL_INIT_AUDIO |
+        SDL_INIT_VIDEO |
+        SDL_INIT_JOYSTICK |
+        SDL_INIT_HAPTIC |
+        SDL_INIT_GAMECONTROLLER |
+        SDL_INIT_EVENTS) != 0:
+        pytest.exit('SDL in unexpected state, cannot continue testing')
     # do the test
     yield
     # make sure all events are reset so that the event futures don't persist

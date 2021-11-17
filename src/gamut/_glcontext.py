@@ -115,14 +115,16 @@ class GlContext:
         deinit_sdl_video()
 
     def set_sdl_window(self, sdl_window: Any) -> None:
+        assert identify_thread() == self._rendering_thread
         if self._sdl_gl_window != sdl_window:
             SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context)
             self._sdl_gl_window = sdl_window
 
     def unset_sdl_window(self, sdl_window: Any) -> None:
-        if self._sdl_gl_window == sdl_window:
-            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
-            self._sdl_gl_window = self._sdl_window
+        if identify_thread() == self._rendering_thread:
+            if self._sdl_gl_window == sdl_window:
+                SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+                self._sdl_gl_window = self._sdl_window
 
     def release_rendering_thread(self) -> None:
         self._rendering_thread = None

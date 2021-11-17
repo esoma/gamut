@@ -150,8 +150,8 @@ class Window:
             self._resized_bind.close()
         if hasattr(self, "_sdl") and self._sdl is not None:
             gl_context = get_gl_context()
+            gl_context.unset_sdl_window(self._sdl)
             def destroy_window() -> None:
-                gl_context.unset_sdl_window(self._sdl)
                 SDL_DestroyWindow(self._sdl)
             gl_context.execute(destroy_window)
             self._sdl = None
