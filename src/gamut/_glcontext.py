@@ -13,6 +13,7 @@ from ._sdl import sdl_event_callback_map
 # python
 from ctypes import byref as c_byref
 from threading import Condition
+from threading import Lock
 from threading import get_ident as identify_thread
 from time import sleep
 from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
@@ -30,6 +31,7 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_WINDOW_OPENGL)
 
 singleton: Optional[GlContext] = None
+refs_lock = Lock()
 refs: int = 0
 
 
@@ -102,6 +104,7 @@ class GlContext:
         )
 
     def close(self) -> None:
+        assert self._execute_function is None
         if identify_thread() != self._sdl_video_thread:
             raise RuntimeError('shutdown outside main thread')
         if self._sdl_gl_context is not None:
@@ -204,22 +207,24 @@ def release_gl_context(gl_context_marker: Any) -> Any:
     global refs
     if gl_context_marker != 1:
         return False
-    assert singleton is not None
-    assert refs > 0
-    refs -= 1
-    if refs == 0:
-        singleton.close()
-        singleton = None
+    with refs_lock:
+        assert singleton is not None
+        assert refs > 0
+        refs -= 1
+        if refs == 0:
+            singleton.close()
+            singleton = None
     return False
 
 
 def require_gl_context() -> Any:
     global refs
     global singleton
-    if singleton is None:
-        assert refs == 0
-        singleton = GlContext()
-    refs += 1
+    with refs_lock:
+        if singleton is None:
+            assert refs == 0
+            singleton = GlContext()
+        refs += 1
     return True
 
 
