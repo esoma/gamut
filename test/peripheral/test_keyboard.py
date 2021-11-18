@@ -4,7 +4,6 @@ from ..application import TestApplication as Application
 from .test_peripheral import TestPeripheral
 # gamut
 from gamut import Window
-from gamut.event import Bind, Event
 from gamut.peripheral import (Keyboard, KeyboardConnected,
                               KeyboardDisconnected, KeyboardFocused,
                               KeyboardKey, KeyboardKeyPressed,
@@ -307,10 +306,6 @@ sdl_scancode_to_gamut_key_name: Final = {
 }
 
 
-class StageDoneEvent(Event):
-    pass
-
-
 class TestKeyboard(TestPeripheral):
 
     @pytest.fixture
@@ -366,16 +361,12 @@ def test_poll_window_focus_gained_event() -> None:
 
     class TestApplication(Application):
         async def main(self) -> None:
+            nonlocal focused_event
             keyboard = (await KeyboardConnected).keyboard
             assert keyboard.window is None
-            async def _(event: KeyboardFocused) -> None:
-                nonlocal focused_event
-                focused_event = event
-                assert keyboard.window is window
-                StageDoneEvent().send()
-            with Bind.on(keyboard.Focused, _):
-                send_sdl_window_focus_gained_event(window)
-                await StageDoneEvent
+            send_sdl_window_focus_gained_event(window)
+            focused_event = await keyboard.Focused
+            assert keyboard.window is window
 
     app = TestApplication()
     app.run()
@@ -392,21 +383,11 @@ def test_poll_window_focus_lost_event() -> None:
             nonlocal lost_focus_event
             keyboard = (await KeyboardConnected).keyboard
             assert keyboard.window is None
-
-            async def _1(event: KeyboardFocused) -> None:
-                StageDoneEvent().send()
-            with Bind.on(keyboard.Focused, _1):
-                send_sdl_window_focus_gained_event(window)
-                await StageDoneEvent
-
-            async def _2(event: KeyboardLostFocus) -> None:
-                nonlocal lost_focus_event
-                lost_focus_event = event
-                assert keyboard.window is not window
-                StageDoneEvent().send()
-            with Bind.on(keyboard.LostFocus, _2):
-                send_sdl_window_focus_lost_event()
-                await StageDoneEvent
+            send_sdl_window_focus_gained_event(window)
+            await keyboard.Focused
+            send_sdl_window_focus_lost_event()
+            lost_focus_event = await keyboard.LostFocus
+            assert keyboard.window is None
 
     app = TestApplication()
     app.run()
@@ -425,37 +406,25 @@ def test_poll_key_down_event(sdl_scancode: int, key_name: str) -> None:
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal key
+            nonlocal pressed_event
+            nonlocal generic_pressed_event
             keyboard = (await KeyboardConnected).keyboard
             key = getattr(keyboard.Key, key_name)
             assert isinstance(key, PressableKeyboardKey)
             generic_key = getattr(KeyboardKey, key_name)
             assert isinstance(generic_key, KeyboardKey)
 
-            async def _1(event: KeyboardKeyPressed) -> None:
-                nonlocal pressed_event
-                pressed_event = event
-                assert pressed_event.key is key
-                assert key.is_pressed
-                StageDoneEvent().send()
-            with Bind.on(key.Pressed, _1):
-                send_sdl_keyboard_key_event(sdl_scancode, True)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, True)
+            pressed_event = await key.Pressed
+            assert pressed_event.key is key
+            assert key.is_pressed
 
-            async def _2(event: KeyboardKeyReleased) -> None:
-                StageDoneEvent().send()
-            with Bind.on(key.Released, _2):
-                send_sdl_keyboard_key_event(sdl_scancode, False)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, False)
 
-            async def _3(event: KeyboardKeyPressed) -> None:
-                nonlocal generic_pressed_event
-                generic_pressed_event = event
-                assert generic_pressed_event.key is key
-                assert key.is_pressed
-                StageDoneEvent().send()
-            with Bind.on(key.Pressed, _3):
-                send_sdl_keyboard_key_event(sdl_scancode, True)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, True)
+            generic_pressed_event = await generic_key.Pressed
+            assert generic_pressed_event.key is key
+            assert key.is_pressed
 
     app = TestApplication()
     app.run()
@@ -480,44 +449,30 @@ def test_poll_key_up_event(sdl_scancode: int, key_name: str) -> None:
     class TestApplication(Application):
         async def main(self) -> None:
             nonlocal key
+            nonlocal released_event
+            nonlocal generic_released_event
             keyboard = (await KeyboardConnected).keyboard
             key = getattr(keyboard.Key, key_name)
             assert isinstance(key, PressableKeyboardKey)
             generic_key = getattr(KeyboardKey, key_name)
             assert isinstance(key, KeyboardKey)
 
-            async def _1(event: KeyboardKeyPressed) -> None:
-                StageDoneEvent().send()
-            with Bind.on(key.Pressed, _1):
-                send_sdl_keyboard_key_event(sdl_scancode, True)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, True)
+            await key.Pressed
 
-            async def _2(event: KeyboardKeyReleased) -> None:
-                nonlocal released_event
-                released_event = event
-                assert released_event.key is key
-                assert not key.is_pressed
-                StageDoneEvent().send()
-            with Bind.on(key.Released, _2):
-                send_sdl_keyboard_key_event(sdl_scancode, False)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, False)
+            released_event = await key.Released
+            assert released_event.key is key
+            assert not key.is_pressed
 
-            async def _3(event: KeyboardKeyPressed) -> None:
-                StageDoneEvent().send()
-            with Bind.on(key.Pressed, _3):
-                send_sdl_keyboard_key_event(sdl_scancode, True)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, True)
+            await key.Pressed
 
-            async def _4(event: KeyboardKeyReleased) -> None:
-                nonlocal generic_released_event
-                generic_released_event = event
-                assert isinstance(generic_released_event, KeyboardKeyReleased)
-                assert generic_released_event.key is key
-                assert not key.is_pressed
-                StageDoneEvent().send()
-            with Bind.on(generic_key.Released, _4):
-                send_sdl_keyboard_key_event(sdl_scancode, False)
-                await StageDoneEvent
+            send_sdl_keyboard_key_event(sdl_scancode, False)
+            generic_released_event = await generic_key.Released
+            assert isinstance(generic_released_event, KeyboardKeyReleased)
+            assert generic_released_event.key is key
+            assert not key.is_pressed
 
     app = TestApplication()
     app.run()
