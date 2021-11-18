@@ -139,7 +139,7 @@ class Application(EventLoop[R]):
             self._keyboard_created = True
             keyboard = Keyboard('primary')
             return keyboard.connect()
-        return await super().poll(block=True)
+        return await super().poll(block=block)
 
     @property
     def controllers(self) -> Sequence[Controller]:
