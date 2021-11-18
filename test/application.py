@@ -25,3 +25,4 @@ class TestApplication(Application[R]):
                 return event
             if time.monotonic() - start > timeout:
                 raise RuntimeError('polling timed out')
+            time.sleep(.01)
