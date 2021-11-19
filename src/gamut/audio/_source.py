@@ -45,6 +45,8 @@ class Sample:
         self._al_context = require_al_context()
 
         self._channels = channels
+        self._sample_width = sample_width
+        self._sample_rate = sample_rate
 
         try:
             al_data_type = CHANNELS_DATA_TYPE_TO_AL_FORMAT[
@@ -69,6 +71,14 @@ class Sample:
     def channels(self) -> int:
         return self._channels
 
+    @property
+    def sample_width(self) -> int:
+        return self._sample_width
+
+    @property
+    def sample_rate(self) -> int:
+        return self._sample_rate
+
 
 class Stream:
 
@@ -85,6 +95,8 @@ class Stream:
         self._al_context = require_al_context()
 
         self._channels = channels
+        self._sample_width = sample_width
+        self._sample_rate = sample_rate
 
         try:
             self._al_data_type = CHANNELS_DATA_TYPE_TO_AL_FORMAT[
@@ -145,6 +157,14 @@ class Stream:
     @property
     def channels(self) -> int:
         return self._channels
+
+    @property
+    def sample_width(self) -> int:
+        return self._sample_width
+
+    @property
+    def sample_rate(self) -> int:
+        return self._sample_rate
 
 
 class Streamable(Protocol):

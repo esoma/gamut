@@ -70,6 +70,10 @@ class Sound:
         assert self._impl is not None
         return self._impl.get_sample_rate()
 
+    @property
+    def is_open(self) -> bool:
+        return self._file is not None
+
     def read(self, frames: int = 0) -> bytes:
         self._ensure_open()
         assert self._impl is not None
