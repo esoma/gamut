@@ -1,6 +1,6 @@
 
 # gamut
-# gamut
+from gamut.audio import Listener
 from gamut.event._event import reset_events
 # python
 import gc
@@ -24,6 +24,12 @@ def cleanup() -> Generator[Any, Any, None]:
     """This fixture helps to clean up any state that would persist between
     tests.
     """
+    # make sure there is no active listener before testing
+    if Listener.get_active():
+        pytest.exit(
+            'Active listener in unexpected state, cannot continue testing'
+        )
+    # make sure SDL is completely de-initialized before testing
     if SDL_WasInit(
         SDL_INIT_TIMER |
         SDL_INIT_AUDIO |
@@ -40,8 +46,8 @@ def cleanup() -> Generator[Any, Any, None]:
     reset_events()
     # re-enable garbage collection in case it was disabled without re-enabling
     gc.enable()
-    # force a garbage collection to get rid of anything that is still dangling
-    # and hasn't had its __del__ resolved
+    # force a garbage collection to try to get rid of anything that is still
+    # dangling and hasn't had its __del__ resolved
     gc.collect()
     # make sure SDL was completley de-initialized
     assert SDL_WasInit(SDL_INIT_TIMER) == 0
@@ -51,3 +57,5 @@ def cleanup() -> Generator[Any, Any, None]:
     assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
     assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
     assert SDL_WasInit(SDL_INIT_EVENTS) == 0
+    # make sure the listener was deactivated
+    assert Listener.get_active() is None

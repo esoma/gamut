@@ -8,6 +8,7 @@ from ._alcontext import release_al_context, require_al_context
 # python
 from ctypes import c_float
 from typing import Optional
+from weakref import ref
 # pyglm
 from glm import value_ptr as glm_value_ptr
 from glm import vec3
@@ -15,7 +16,7 @@ from glm import vec3
 from openal.al import (AL_GAIN, AL_ORIENTATION, AL_POSITION, AL_VELOCITY,
                        alListenerf, alListenerfv)
 
-active_listener: Optional[Listener] = None
+active_listener: Optional[ref[Listener]] = None
 
 
 class Listener:
@@ -26,13 +27,18 @@ class Listener:
         position: vec3 = vec3(0),
         velocity: vec3 = vec3(0),
         gain: float = 1.0,
-        look_at: vec3 = vec3(0, 0, -1),
+        direction: vec3 = vec3(0, 0, -1),
         up: vec3 = vec3(0, 1, 0),
     ):
         self._al_context = require_al_context()
+
+        gain = float(gain)
+        if gain < 0.0 or gain > 1.0:
+            raise ValueError('gain must be between 0.0 and 1.0')
+
         self._position = vec3(position)
         self._velocity = vec3(velocity)
-        self._look_at = vec3(look_at)
+        self._direction = vec3(direction)
         self._up = vec3(up)
         self._gain = gain
 
@@ -41,27 +47,32 @@ class Listener:
         self._al_context = release_al_context(self._al_context)
 
     def _update_position(self) -> None:
-        assert active_listener is self
+        assert active_listener is not None and active_listener() is self
         alListenerfv(AL_POSITION, glm_value_ptr(self._position))
 
     def _update_velocity(self) -> None:
-        assert active_listener is self
+        assert active_listener is not None and active_listener() is self
         alListenerfv(AL_VELOCITY, glm_value_ptr(self._velocity))
 
     def _update_orientation(self) -> None:
-        assert active_listener is self
-        alListenerfv(AL_ORIENTATION, (c_float * 6)(*self._look_at, *self._up))
+        assert active_listener is not None and active_listener() is self
+        alListenerfv(AL_ORIENTATION, (c_float * 6)(
+            *self._direction,
+            *self._up
+        ))
 
     def _update_gain(self) -> None:
-        assert active_listener is self
+        assert active_listener is not None and active_listener() is self
         alListenerf(AL_GAIN, self._gain)
 
     def activate(self) -> None:
         global active_listener
         if active_listener is not None:
-            active_listener.deactivate()
+            current_listener = active_listener()
+            if current_listener is not None:
+                current_listener.deactivate()
         assert active_listener is None
-        active_listener = self
+        active_listener = ref(self)
         self._update_position()
         self._update_velocity()
         self._update_orientation()
@@ -69,7 +80,10 @@ class Listener:
 
     def deactivate(self) -> None:
         global active_listener
-        if active_listener is not self:
+        if active_listener is None:
+            return
+        current_listener = active_listener()
+        if current_listener is not self:
             return None
         active_listener = None
         zero_vec3 = vec3(0)
@@ -80,7 +94,9 @@ class Listener:
 
     @classmethod
     def get_active(cls) -> Optional[Listener]:
-        return active_listener
+        if active_listener is None:
+            return None
+        return active_listener()
 
     @property
     def position(self) -> vec3:
@@ -89,7 +105,7 @@ class Listener:
     @position.setter
     def position(self, value: vec3) -> None:
         self._position = vec3(value)
-        if active_listener is self:
+        if self.get_active() is self:
             self._update_position()
 
     @property
@@ -99,17 +115,17 @@ class Listener:
     @velocity.setter
     def velocity(self, value: vec3) -> None:
         self._velocity = vec3(value)
-        if active_listener is self:
+        if self.get_active() is self:
             self._update_velocity()
 
     @property
-    def look_at(self) -> vec3:
-        return vec3(self._look_at)
+    def direction(self) -> vec3:
+        return vec3(self._direction)
 
-    @look_at.setter
-    def look_at(self, value: vec3) -> None:
-        self._look_at = vec3(value)
-        if active_listener is self:
+    @direction.setter
+    def direction(self, value: vec3) -> None:
+        self._direction = vec3(value)
+        if self.get_active() is self:
             self._update_orientation()
 
     @property
@@ -119,7 +135,7 @@ class Listener:
     @up.setter
     def up(self, value: vec3) -> None:
         self._up = vec3(value)
-        if active_listener is self:
+        if self.get_active() is self:
             self._update_orientation()
 
     @property
@@ -128,6 +144,8 @@ class Listener:
 
     @gain.setter
     def gain(self, value: float) -> None:
+        if value < 0.0 or value > 1.0:
+            raise ValueError('gain must be between 0.0 and 1.0')
         self._gain = value
-        if active_listener is self:
+        if self.get_active() is self:
             self._update_gain()

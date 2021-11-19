@@ -113,9 +113,22 @@ class Stream:
             ]
         except KeyError:
             raise ValueError('invalid channels/sample_width combination')
-        self._sample_rate = sample_rate
+        if not isinstance(sample_rate, int):
+            raise TypeError('sample rate must be an integer')
+        if sample_rate < 1:
+            raise ValueError('sample rate must be greater than 0')
+        if not isinstance(buffer_count, int):
+            raise TypeError('buffer count must be an integer')
+        if buffer_count < 2:
+            raise ValueError('buffer count must be at least 2')
+        if not isinstance(buffer_duration, timedelta):
+            raise TypeError('buffer duration must be a timedelta')
+
         self._buffer_count = buffer_count
         self._buffer_duration = buffer_duration.total_seconds()
+
+        if self._buffer_duration <= 0:
+            raise ValueError('buffer duration must be more than 0 seconds')
 
         al_ids = (c_uint * buffer_count)()
         alGenBuffers(
@@ -137,6 +150,7 @@ class Stream:
             max(1, int(self._buffer_duration * self._sample_rate))
         )
         if not data:
+            self._free_buffers.put(al_buffer)
             return None
         alBufferData(
             al_buffer,

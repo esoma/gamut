@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Speaker']
+__all__ = ['Speaker', 'SpeakerState']
 
 
 # gamut
@@ -15,8 +15,9 @@ from enum import Enum
 from math import degrees, pi
 from queue import Empty as QueueEmpty
 from threading import Lock, Thread
+from threading import get_ident as get_thread_ident
 import time
-from typing import Final, Optional, Union
+from typing import Any, Final, Optional, Union
 from warnings import warn
 from weakref import ref
 # pyglm
@@ -70,6 +71,9 @@ class Speaker:
     ):
         self._al_context = require_al_context()
 
+        if not isinstance(source, (Sample, Stream)):
+            raise TypeError('source must be either a Sample or Stream')
+
         al_id = c_uint()
         alGenSources(1, c_pointer(al_id))
         self._al: Optional[c_uint] = al_id
@@ -82,7 +86,6 @@ class Speaker:
         self._source: Union[Sample, Stream] = source
         if isinstance(source, Sample):
             alSourcei(self._al, AL_BUFFER, get_sample_al_buffer(source))
-            alSourcei(self._al, AL_LOOPING, AL_TRUE if loop else AL_FALSE)
         else:
             self._stream_lock = Lock()
             self._stream_thread = Thread(
@@ -92,19 +95,30 @@ class Speaker:
             )
             self._stream_thread.start()
 
-        self.position = position
-        self.velocity = velocity
-        self.min_gain = min_gain
-        self.gain = gain
-        self.max_gain = max_gain
-        self.is_relative = is_relative
-        self.pitch = pitch
-        self.direction = direction
-        self.inner_cone_angle = inner_cone_angle
-        self.outer_cone_angle = outer_cone_angle
-        self.outer_cone_gain = outer_cone_gain
+        try:
+            self.position = position
+            self.velocity = velocity
+            self.min_gain = min_gain
+            self.gain = gain
+            self.max_gain = max_gain
+            self.is_relative = is_relative
+            self.loop = loop
+            self.pitch = pitch
+            self.direction = direction
+            self.inner_cone_angle = inner_cone_angle
+            self.outer_cone_angle = outer_cone_angle
+            self.outer_cone_gain = outer_cone_gain
+        except BaseException:
+            self.close()
+            raise
 
     def __del__(self) -> None:
+        self.close()
+
+    def __enter__(self) -> Speaker:
+        return self
+
+    def __exit__(self, *_: Any) -> None:
         self.close()
 
     def _stream(self) -> bool:
@@ -126,6 +140,7 @@ class Speaker:
                 if al_buffer is None:
                     if self._loop:
                         self._source.reset()
+                        continue
                     else:
                         self._play = False
                     break
@@ -138,8 +153,9 @@ class Speaker:
 
     def close(self) -> None:
         self._is_closed = True
-        if self._stream_thread:
-            self._stream_thread.join()
+        if hasattr(self, "_stream_thread") and self._stream_thread:
+            if self._stream_thread.ident != get_thread_ident():
+                self._stream_thread.join()
             self._stream_thread = None
         if hasattr(self, "_al") and self._al is not None:
             alDeleteSources(1, c_pointer(self._al))
@@ -212,6 +228,9 @@ class Speaker:
 
     @min_gain.setter
     def min_gain(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0 or value > 1.0:
+            raise ValueError('min gain must be between 0.0 and 1.0')
         self._min_gain = value
         alSourcef(self._al, AL_MIN_GAIN, self._min_gain)
 
@@ -221,6 +240,9 @@ class Speaker:
 
     @gain.setter
     def gain(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0 or value > 1.0:
+            raise ValueError('gain must be between 0.0 and 1.0')
         self._gain = value
         alSourcef(self._al, AL_GAIN, self._gain)
 
@@ -230,6 +252,9 @@ class Speaker:
 
     @max_gain.setter
     def max_gain(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0 or value > 1.0:
+            raise ValueError('max gain must be between 0.0 and 1.0')
         self._max_gain = value
         alSourcef(self._al, AL_MAX_GAIN, self._max_gain)
 
@@ -239,7 +264,7 @@ class Speaker:
 
     @is_relative.setter
     def is_relative(self, value: bool) -> None:
-        self._is_relative = value
+        self._is_relative = bool(value)
         alSourcei(
             self._al,
             AL_SOURCE_RELATIVE,
@@ -247,11 +272,24 @@ class Speaker:
         )
 
     @property
+    def loop(self) -> bool:
+        return self._loop
+
+    @loop.setter
+    def loop(self, value: bool) -> None:
+        self._loop = bool(value)
+        if isinstance(self._source, Sample):
+            alSourcei(self._al, AL_LOOPING, AL_TRUE if value else AL_FALSE)
+
+    @property
     def pitch(self) -> float:
         return self._pitch
 
     @pitch.setter
     def pitch(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0:
+            raise ValueError('pitch must be 0.0 or greater')
         self._pitch = value
         alSourcef(self._al, AL_PITCH, self._pitch)
 
@@ -275,7 +313,20 @@ class Speaker:
 
     @inner_cone_angle.setter
     def inner_cone_angle(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0 or value > (2 * pi):
+            raise ValueError('inner cone angle must be between 0.0 and 2pi')
         self._inner_cone_angle = value
+        if self._source.channels != 1 and self._inner_cone_angle != 2 * pi:
+            warn(
+                f'{self._source} has more than 1 channel, it will be '
+                f'unaffected by changes in inner cone angle'
+            )
+        if self._direction == vec3(0) and self._inner_cone_angle != 2 * pi:
+            warn(
+                f'{self._source} has no direction, it will be unaffected by '
+                f'changes in inner cone angle'
+            )
         alSourcef(
             self._al,
             AL_CONE_INNER_ANGLE,
@@ -288,7 +339,20 @@ class Speaker:
 
     @outer_cone_angle.setter
     def outer_cone_angle(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0 or value > (2 * pi):
+            raise ValueError('outer cone angle must be between 0.0 and 2pi')
         self._outer_cone_angle = value
+        if self._source.channels != 1 and self._outer_cone_angle != 2 * pi:
+            warn(
+                f'{self._source} has more than 1 channel, it will be '
+                f'unaffected by changes in outer cone angle'
+            )
+        if self._direction == vec3(0) and self._outer_cone_angle != 2 * pi:
+            warn(
+                f'{self._source} has no direction, it will be unaffected by '
+                f'changes in outer cone angle'
+            )
         alSourcef(
             self._al,
             AL_CONE_OUTER_ANGLE,
@@ -301,6 +365,9 @@ class Speaker:
 
     @outer_cone_gain.setter
     def outer_cone_gain(self, value: float) -> None:
+        value = float(value)
+        if value < 0.0 or value > 1.0:
+            raise ValueError('outer cone gain must be between 0.0 and 1.0')
         self._outer_cone_gain = value
         alSourcef(self._al, AL_CONE_OUTER_GAIN, self._outer_cone_gain)
 
@@ -327,3 +394,4 @@ def _stream_main(speaker_ref: ref[Speaker]) -> None:
                 speaker._stream()
         del speaker
         time.sleep(.01)
+    print("END")

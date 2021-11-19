@@ -2,8 +2,11 @@
 # gamut
 from gamut.audio import Sample
 from gamut.audio._alcontext import AlContext
+from gamut.audio._source import get_sample_al_buffer
 # python
 from typing import Any
+# pyopenal
+from openal.al import alIsBuffer
 # pytest
 import pytest
 
@@ -97,3 +100,10 @@ def test_initialize(
     assert sample.channels == channels
     assert sample.sample_width == sample_width
     assert sample.sample_rate == sample_rate
+
+
+def test_get_sample_al_buffer(loopback_al_context: AlContext) -> None:
+    sample = Sample(1, 8, 44100, b'')
+    al_buffer = get_sample_al_buffer(sample)
+    assert isinstance(al_buffer, int)
+    assert alIsBuffer(al_buffer)

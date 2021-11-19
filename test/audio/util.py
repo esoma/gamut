@@ -3,7 +3,7 @@ __all__ = ['assert_frequency', 'generate_sin_sample']
 
 # gamut
 from gamut.audio import Sample
-from gamut.audio._alcontext import AlContext
+from gamut.audio._alcontext import AlContext, LOOP_BACK_FREQUENCY
 # numpy
 import numpy as np
 
@@ -27,7 +27,10 @@ def assert_frequency(al_context: AlContext, frequency: int) -> None:
         .astype(np.float32) - 127.5
     ) / 255.0
     magnitudes = np.abs(np.fft.fft(float_data)) # type: ignore
-    freqs = np.fft.fftfreq(len(float_data)) * 22050 # type: ignore
+    freqs = (
+        np.fft.fftfreq(len(float_data)) * # type: ignore
+        LOOP_BACK_FREQUENCY
+    )
     i = np.argmax(magnitudes)
     try:
         low_bound = freqs[i - 1]
@@ -36,6 +39,6 @@ def assert_frequency(al_context: AlContext, frequency: int) -> None:
     try:
         high_bound = freqs[i + 1]
     except IndexError:
-        high_bound = 22050.0
+        high_bound = float(LOOP_BACK_FREQUENCY)
     assert frequency >= low_bound, f'{frequency} >= {low_bound}'
     assert frequency <= high_bound, f'{frequency} <= {high_bound}'

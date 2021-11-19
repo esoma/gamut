@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = [
     'AlContext',
     'LOOP_BACK_AVAILABLE',
+    'LOOP_BACK_FREQUENCY',
     'get_al_context',
     'require_al_context',
     'release_al_context',
@@ -12,6 +13,7 @@ __all__ = [
 # python
 from ctypes import c_char, c_char_p, c_int, c_ubyte, c_void_p
 from threading import Lock
+import time
 from typing import Any, Final, Optional
 # pyopenal
 from openal.al_lib import lib as al_lib
@@ -53,6 +55,7 @@ except AttributeError:
 
 
 LOOP_BACK_AVAILABLE: Final = _loop_back_available
+LOOP_BACK_FREQUENCY: Final = 22050
 
 
 class AlContext:
@@ -66,7 +69,7 @@ class AlContext:
                 raise RuntimeError('unable to open audio device')
             if alcIsRenderFormatSupportedSOFT(
                 self._al_device,
-                22050,
+                LOOP_BACK_FREQUENCY,
                 ALC_MONO_SOFT,
                 0x1401,
             ) == ALC_FALSE:
@@ -74,14 +77,13 @@ class AlContext:
             context_attributes = [
                 ALC_FORMAT_CHANNELS_SOFT, ALC_MONO_SOFT,
                 ALC_FORMAT_TYPE_SOFT, ALC_UNSIGNED_BYTE_SOFT,
-                ALC_FREQUENCY, 22050,
+                ALC_FREQUENCY, LOOP_BACK_FREQUENCY,
             ]
         else:
             self._al_device = alcOpenDevice(None)
             if not self._al_device:
                 raise RuntimeError('unable to open audio device')
             context_attributes = []
-
 
         if not context_attributes:
             c_context_attributes = None
@@ -99,11 +101,24 @@ class AlContext:
         if not alcMakeContextCurrent(self._al_context):
             raise RuntimeError('unable to make OpenAL context current')
 
-    def render(self, samples: int) -> bytes:
+    def render(self, samples: int, *, real_time: bool = False) -> bytes:
         assert self._loopback
-        buffer = (c_ubyte * samples)()
-        alcRenderSamplesSOFT(self._al_device, buffer, samples)
-        return bytes(buffer)
+        if not real_time:
+            buffer = (c_ubyte * samples)()
+            alcRenderSamplesSOFT(self._al_device, buffer, samples)
+            return bytes(buffer)
+        else:
+            step_frames = LOOP_BACK_FREQUENCY // 50
+            result = bytearray()
+            for i in range(samples // step_frames):
+                result += self.render(step_frames)
+                time.sleep(1 / 50.0)
+            leftover_frames = samples % step_frames
+            if leftover_frames:
+                result += self.render(leftover_frames)
+                time.sleep(1 / 50.0)
+            return bytes(result)
+
 
     def close(self) -> None:
         if hasattr(self, "_al_context") and self._al_context:
