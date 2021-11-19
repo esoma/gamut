@@ -53,7 +53,7 @@ jobs:
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo apt-get install xvfb
+        sudo apt-get install xvfb libopenal1
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
