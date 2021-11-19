@@ -152,6 +152,12 @@ class SoundTest:
         cls.test_close = test_close # type: ignore
 
 
+def test_unable_to_load() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        Sound(BytesIO(b''))
+    assert str(excinfo.value) == 'unable to determine sound format'
+
+
 for file_name in os.listdir(DIR / 'sounds'):
     name, extension = file_name.split('.')
     channels, sample_width, sample_rate, length = [
