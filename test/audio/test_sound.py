@@ -1,6 +1,7 @@
 
 # gamut
 from gamut.audio import Sample, Sound, Stream
+from gamut.audio._alcontext import AlContext
 # python
 from io import BytesIO
 import os
@@ -73,6 +74,7 @@ class SoundTest:
         @pytest.mark.parametrize("file", generate_files())
         def test_to_sample(
             self: SoundTest,
+            loopback_al_context: AlContext,
             file: Union[str, Path, BinaryIO]
         ) -> None:
             sound = Sound(file)
@@ -88,6 +90,7 @@ class SoundTest:
         @pytest.mark.parametrize("file", generate_files())
         def test_to_stream(
             self: SoundTest,
+            loopback_al_context: AlContext,
             file: Union[str, Path, BinaryIO]
         ) -> None:
             sound = Sound(file)

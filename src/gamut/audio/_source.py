@@ -54,6 +54,15 @@ class Sample:
             ]
         except KeyError:
             raise ValueError('invalid channels/sample_width combination')
+        if not isinstance(sample_rate, int):
+            raise TypeError('sample rate must be an integer')
+        if sample_rate < 1:
+            raise ValueError('sample rate must be greater than 0')
+        if not isinstance(data, bytes):
+            raise TypeError('data must be bytes')
+        assert sample_width % 8 == 0
+        if len(data) % (channels * (sample_width / 8)) != 0:
+            raise ValueError('data contains partial frames')
 
         al_id = c_uint()
         alGenBuffers(1, c_pointer(al_id))
