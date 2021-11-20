@@ -1,10 +1,11 @@
 
 # gamut
+from ..application import TestApplication as Application
 from .test_peripheral import TestPeripheral
 from .virtual import (skip_if_any_real_controllers,
                       skip_if_virtual_controller_nyi, VirtualController)
 # gamut
-from gamut import Application
+from gamut._glcontext import get_gl_context
 from gamut.peripheral import (Controller, ControllerAxis, ControllerAxisMoved,
                               ControllerButton, ControllerButtonPressed,
                               ControllerButtonReleased, ControllerConnected,
@@ -101,6 +102,7 @@ def test_button_repr(button_index: int) -> None:
         f'{button_index!r} for {controller!r}>'
     )
 
+
 @pytest.mark.parametrize("axis_index", [0, 1, 2])
 def test_axis_repr(axis_index: int) -> None:
     controller = Controller('test', 0, 3)
@@ -153,11 +155,18 @@ def test_poll_joy_device_added_event_after_application_start(
 
     class TestApplication(Application):
         async def main(self) -> None:
-            with VirtualController('test', button_count, axis_count) as vc:
-                nonlocal connected_event
-                assert not self.controllers
-                connected_event = await ControllerConnected
-                assert len(self.controllers) == 1
+            nonlocal connected_event
+            vc: VirtualController
+            assert not self.controllers
+
+            # for some reason, we must connect on the main thread when using
+            # uinput in python 3.10 or it won't be recognized by SDL
+            def _1() -> None:
+                nonlocal vc
+                vc = VirtualController('test', button_count, axis_count)
+            get_gl_context().execute(_1)
+            connected_event = await ControllerConnected
+            assert len(self.controllers) == 1
 
     app = TestApplication()
     app.run()
@@ -220,10 +229,19 @@ def test_poll_joy_device_removed_event_added_after_to_application_start(
         async def main(self) -> None:
             nonlocal controller
             nonlocal disconnected_event
+            vc: VirtualController
             assert not self.controllers
-            with VirtualController('test', button_count, axis_count) as vc:
-                connected_event = await ControllerConnected
-                controller = connected_event.controller
+
+            # for some reason, we must connect on the main thread when using
+            # uinput in python 3.10 or it won't be recognized by SDL
+            def _1() -> None:
+                nonlocal vc
+                vc = VirtualController('test', button_count, axis_count)
+            get_gl_context().execute(_1)
+            connected_event = await ControllerConnected
+            controller = connected_event.controller
+
+            vc.close()
             disconnected_event = await ControllerDisconnected
 
     app = TestApplication()
