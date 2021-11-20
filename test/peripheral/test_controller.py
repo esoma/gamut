@@ -155,11 +155,18 @@ def test_poll_joy_device_added_event_after_application_start(
 
     class TestApplication(Application):
         async def main(self) -> None:
-            with VirtualController('test', button_count, axis_count) as vc:
-                nonlocal connected_event
-                assert not self.controllers
-                connected_event = await ControllerConnected
-                assert len(self.controllers) == 1
+            nonlocal connected_event
+            vc: VirtualController
+            assert not self.controllers
+
+            # for some reason, we must connect on the main thread when using
+            # uinput in python 3.10 or it won't be recognized by SDL
+            def _1() -> None:
+                nonlocal vc
+                vc = VirtualController('test', button_count, axis_count)
+            get_gl_context().execute(_1)
+            connected_event = await ControllerConnected
+            assert len(self.controllers) == 1
 
     app = TestApplication()
     app.run()
