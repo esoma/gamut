@@ -70,6 +70,8 @@ jobs:
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        brew install openal-soft
+        cp /usr/local/opt/openal-soft/lib/libopenal.dylib .
         python -m pytest --cov=gamut --cov-report=xml
 
     - name: Codecov

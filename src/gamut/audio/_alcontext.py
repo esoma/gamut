@@ -47,6 +47,7 @@ try:
     ALC_FORMAT_TYPE_SOFT = 0x1991
 
     ALC_MONO_SOFT = 0x1500
+    ALC_STEREO_SOFT = 0x1501
     ALC_UNSIGNED_BYTE_SOFT = 0x1401
 
     _loop_back_available = True
@@ -55,7 +56,7 @@ except AttributeError:
 
 
 LOOP_BACK_AVAILABLE: Final = _loop_back_available
-LOOP_BACK_FREQUENCY: Final = 22050
+LOOP_BACK_FREQUENCY: Final = 44100
 
 
 class AlContext:
@@ -68,11 +69,11 @@ class AlContext:
             alcIsRenderFormatSupportedSOFT(
                 self._al_device,
                 LOOP_BACK_FREQUENCY,
-                ALC_MONO_SOFT,
+                ALC_STEREO_SOFT,
                 0x1401,
             )
             context_attributes = [
-                ALC_FORMAT_CHANNELS_SOFT, ALC_MONO_SOFT,
+                ALC_FORMAT_CHANNELS_SOFT, ALC_STEREO_SOFT,
                 ALC_FORMAT_TYPE_SOFT, ALC_UNSIGNED_BYTE_SOFT,
                 ALC_FREQUENCY, LOOP_BACK_FREQUENCY,
             ]
@@ -93,23 +94,34 @@ class AlContext:
         )
         alcMakeContextCurrent(self._al_context)
 
-    def render(self, samples: int, *, real_time: bool = False) -> bytes:
+    def render(
+        self,
+        samples: int,
+        *,
+        real_time: bool = False
+    ) -> tuple[bytes, bytes]:
         assert self._loopback
         if not real_time:
-            buffer = (c_ubyte * samples)()
+            buffer = (c_ubyte * samples * 2)()
             alcRenderSamplesSOFT(self._al_device, buffer, samples)
-            return bytes(buffer)
+            stereo = bytes(buffer)
+            return (stereo[::2], stereo[1::2])
         else:
             step_frames = LOOP_BACK_FREQUENCY // 50
-            result = bytearray()
+            left = bytearray()
+            right = bytearray()
             for i in range(samples // step_frames):
-                result += self.render(step_frames)
+                t_left, t_right = self.render(step_frames)
+                left += t_left
+                right += t_right
                 time.sleep(1 / 50.0)
             leftover_frames = samples % step_frames
             if leftover_frames:
-                result += self.render(leftover_frames)
+                t_left, t_right = self.render(leftover_frames)
+                left += t_left
+                right += t_right
                 time.sleep(1 / 50.0)
-            return bytes(result)
+            return (bytes(left), bytes(right))
 
 
     def close(self) -> None:

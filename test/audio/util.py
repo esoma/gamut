@@ -1,11 +1,15 @@
 
-__all__ = ['assert_frequency', 'generate_sin_sample']
+__all__ = ['assert_tone', 'generate_sin_sample']
 
 # gamut
 from gamut.audio import Sample
 from gamut.audio._alcontext import AlContext, LOOP_BACK_FREQUENCY
+# python
+from typing import Any
 # numpy
 import numpy as np
+# pytest
+import pytest
 
 
 def generate_sin_sample(frequency: int) -> Sample:
@@ -20,8 +24,30 @@ def generate_sin_sample(frequency: int) -> Sample:
     )
 
 
-def assert_frequency(al_context: AlContext, frequency: int) -> None:
-    raw = al_context.render(1024)
+def assert_tone(
+    al_context: AlContext,
+    samples: int,
+    frequency: Any,
+    magnitude: Any
+) -> None:
+    if isinstance(frequency, tuple):
+        left_frequency, right_frequency = frequency
+    else:
+        left_frequency = right_frequency = frequency
+    if isinstance(magnitude, tuple):
+        left_magnitude, right_magnitude = magnitude
+    else:
+        left_magnitude = right_magnitude = magnitude
+    left, right = al_context.render(samples)
+    assert_frequency_channel(left, left_frequency, left_magnitude)
+    assert_frequency_channel(right, right_frequency, right_magnitude)
+
+
+def assert_frequency_channel(
+    raw: bytes,
+    expected_frequency: Any,
+    expected_magnitude: Any
+) -> None:
     float_data = (
         np.frombuffer(raw, dtype=np.uint8) # type: ignore
         .astype(np.float32) - 127.5
@@ -32,13 +58,12 @@ def assert_frequency(al_context: AlContext, frequency: int) -> None:
         LOOP_BACK_FREQUENCY
     )
     i = np.argmax(magnitudes)
-    try:
-        low_bound = freqs[i - 1]
-    except IndexError:
-        low_bound = 0.0
-    try:
-        high_bound = freqs[i + 1]
-    except IndexError:
-        high_bound = float(LOOP_BACK_FREQUENCY)
-    assert frequency >= low_bound, f'{frequency} >= {low_bound}'
-    assert frequency <= high_bound, f'{frequency} <= {high_bound}'
+    magnitude = magnitudes[i] / len(float_data)
+    frequency = abs(freqs[i])
+    assert frequency == pytest.approx(expected_frequency, abs=0.1), (
+        f'{frequency} != {expected_frequency}'
+    )
+    if expected_magnitude is not None:
+        assert magnitude == pytest.approx(expected_magnitude, abs=0.05), (
+            f'{magnitude} != {expected_magnitude}'
+        )
