@@ -5,6 +5,7 @@ from .test_peripheral import TestPeripheral
 from .virtual import (skip_if_any_real_controllers,
                       skip_if_virtual_controller_nyi, VirtualController)
 # gamut
+from gamut._glcontext import get_gl_context
 from gamut.peripheral import (Controller, ControllerAxis, ControllerAxisMoved,
                               ControllerButton, ControllerButtonPressed,
                               ControllerButtonReleased, ControllerConnected,
@@ -221,10 +222,17 @@ def test_poll_joy_device_removed_event_added_after_to_application_start(
         async def main(self) -> None:
             nonlocal controller
             nonlocal disconnected_event
+            vc: VirtualController
             assert not self.controllers
-            with VirtualController('test', button_count, axis_count) as vc:
-                connected_event = await ControllerConnected
-                controller = connected_event.controller
+
+            def _1() -> None:
+                nonlocal vc
+                vc = VirtualController('test', button_count, axis_count)
+            get_gl_context().execute(_1)
+            connected_event = await ControllerConnected
+            controller = connected_event.controller
+
+            vc.close()
             disconnected_event = await ControllerDisconnected
 
     app = TestApplication()
