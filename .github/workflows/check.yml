@@ -40,6 +40,7 @@ jobs:
     - name: Install Test Dependencies
       run: |
         python -m pip install .[test]
+        python -m pip install pytest-xdist
 
     - name: Install Mesa
       if: ${{ matrix.os == 'windows-latest' }}
@@ -57,20 +58,21 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller"
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml --cov-append -k "controller"
 
     - name: Test (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         set GALLIUM_DRIVER=llvmpipe
         set PATH=%cd%;%PATH%
-        python -m pytest --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml
       shell: cmd
 
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        python -m pytest --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml
 
     - name: Codecov
       uses: codecov/codecov-action@v1.2.1

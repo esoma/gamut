@@ -4,6 +4,7 @@ __all__ = [
     'Texture',
     'TextureDataType',
     'TEXTURE_DATA_TYPES',
+    'TEXTURE_DATA_TYPES_SORTED',
     'TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE',
 ]
 
@@ -42,7 +43,10 @@ TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE: Final[dict[type[TextureDataType], Any]] = {
 }
 
 
-TEXTURE_DATA_TYPES = set(TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE.keys())
+TEXTURE_DATA_TYPES_SORTED: Final = list(
+    TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE.keys()
+)
+TEXTURE_DATA_TYPES: Final = set(TEXTURE_DATA_TYPES_SORTED)
 
 
 def bind_texture(texture: Texture, index: int) -> None:
