@@ -225,6 +225,8 @@ def test_poll_joy_device_removed_event_added_after_to_application_start(
             vc: VirtualController
             assert not self.controllers
 
+            # for some reason, we must connect on the main thread when using
+            # uinput in python 3.10 or it won't be recognized by SDL
             def _1() -> None:
                 nonlocal vc
                 vc = VirtualController('test', button_count, axis_count)
