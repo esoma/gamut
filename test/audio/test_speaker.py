@@ -16,7 +16,9 @@ def test_initialize_defaults(
     loopback_al_context: AlContext,
     source_type: Union[type[Sample], type[Stream]],
 ) -> None:
-    with Speaker(create_source(source_type)) as speaker:
+    source = create_source(source_type)
+    with Speaker(source) as speaker:
+        assert speaker.source is source
         assert isinstance(speaker.position, glm.vec3)
         assert speaker.position == glm.vec3(0, 0, 0)
         assert isinstance(speaker.velocity, glm.vec3)
@@ -42,6 +44,136 @@ def test_initialize_defaults(
         assert isinstance(speaker.outer_cone_gain, float)
         assert speaker.outer_cone_gain == 0.0
         assert speaker.state == SpeakerState.STOPPED
+        assert speaker.is_open
+
+
+@pytest.mark.parametrize("source_type", [Sample, Stream])
+def test_close(
+    loopback_al_context: AlContext,
+    source_type: Union[type[Sample], type[Stream]],
+) -> None:
+    speaker = Speaker(create_source(source_type))
+    assert speaker.is_open
+    speaker.close()
+    assert not speaker.is_open
+    speaker.close()
+    assert not speaker.is_open
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.play()
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.pause()
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.stop()
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.source
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.state
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.position
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.position = glm.vec3()
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.velocity
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.velocity = glm.vec3()
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.min_gain
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.min_gain = .5
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.gain
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.gain = .5
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.max_gain
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.max_gain = .5
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.is_relative
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.is_relative = True
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.loop
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.loop = True
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.pitch
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.pitch = .5
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.direction
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.direction = glm.vec3()
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.inner_cone_angle
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.inner_cone_angle = .5
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.outer_cone_angle
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.outer_cone_angle = .5
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.outer_cone_gain
+    assert str(excinfo.value) == 'speaker is closed'
+
+    with pytest.raises(RuntimeError) as excinfo:
+        speaker.outer_cone_gain = .5
+    assert str(excinfo.value) == 'speaker is closed'
 
 
 @pytest.mark.parametrize("source", [None, object(), b'\x00\x00'])
@@ -75,6 +207,18 @@ def test_position(
         assert speaker.position != position
 
 
+def test_position_stereo(loopback_al_context: AlContext) -> None:
+    source = Sample(2, 8, 44100, b'')
+    with Speaker(source) as speaker:
+        with pytest.warns(UserWarning) as warnings:
+                speaker.position = glm.vec3(1)
+        assert len(warnings) == 1
+        assert warnings[0].message.args[0] == ( # type: ignore
+            f'{source} has more than 1 channel, it will be '
+            f'unaffected by changes in position'
+        )
+
+
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 @pytest.mark.parametrize("velocity", [
     glm.vec3(1, 2, 3),
@@ -96,6 +240,18 @@ def test_velocity(
         assert speaker.velocity != velocity
 
 
+def test_velocity_stereo(loopback_al_context: AlContext) -> None:
+    source = Sample(2, 8, 44100, b'')
+    with Speaker(source) as speaker:
+        with pytest.warns(UserWarning) as warnings:
+                speaker.velocity = glm.vec3(1)
+        assert len(warnings) == 1
+        assert warnings[0].message.args[0] == ( # type: ignore
+            f'{source} has more than 1 channel, it will be '
+            f'unaffected by changes in velocity'
+        )
+
+
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 @pytest.mark.parametrize("direction", [
     glm.vec3(1, 2, 3),
@@ -115,6 +271,18 @@ def test_direction(
 
         direction += glm.vec3(1)
         assert speaker.direction != direction
+
+
+def test_direction_stereo(loopback_al_context: AlContext) -> None:
+    source = Sample(2, 8, 44100, b'')
+    with Speaker(source) as speaker:
+        with pytest.warns(UserWarning) as warnings:
+                speaker.direction = glm.vec3(1)
+        assert len(warnings) == 1
+        assert warnings[0].message.args[0] == ( # type: ignore
+            f'{source} has more than 1 channel, it will be '
+            f'unaffected by changes in direction'
+        )
 
 
 @pytest.mark.parametrize("source_type", [Sample, Stream])
@@ -285,6 +453,18 @@ def test_inner_cone_angle(
         assert isinstance(speaker.inner_cone_angle, float)
 
 
+def test_inner_cone_angle_stereo(loopback_al_context: AlContext) -> None:
+    source = Sample(2, 8, 44100, b'')
+    with Speaker(source) as speaker:
+        with pytest.warns(UserWarning) as warnings:
+                speaker.inner_cone_angle = pi
+        assert len(warnings) == 2
+        assert warnings[0].message.args[0] == ( # type: ignore
+            f'{source} has more than 1 channel, it will be '
+            f'unaffected by changes in inner cone angle'
+        )
+
+
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 @pytest.mark.parametrize("inner_cone_angle", [-0.000001, (pi * 2) + .000001])
 def test_inner_cone_angle_invalid(
@@ -322,6 +502,18 @@ def test_outer_cone_angle(
                 f'changes in outer cone angle'
             )
         assert isinstance(speaker.outer_cone_angle, float)
+
+
+def test_outer_cone_angle_stereo(loopback_al_context: AlContext) -> None:
+    source = Sample(2, 8, 44100, b'')
+    with Speaker(source) as speaker:
+        with pytest.warns(UserWarning) as warnings:
+                speaker.outer_cone_angle = pi
+        assert len(warnings) == 2
+        assert warnings[0].message.args[0] == ( # type: ignore
+            f'{source} has more than 1 channel, it will be '
+            f'unaffected by changes in outer cone angle'
+        )
 
 
 @pytest.mark.parametrize("source_type", [Sample, Stream])

@@ -78,7 +78,7 @@ class Speaker:
         alGenSources(1, c_pointer(al_id))
         self._al: Optional[c_uint] = al_id
 
-        self._is_closed = False
+        self._is_open = True
         self._play = False
         self._loop = loop
         self._stream_thread: Optional[Thread] = None
@@ -152,7 +152,7 @@ class Speaker:
             raise RuntimeError('speaker is closed')
 
     def close(self) -> None:
-        self._is_closed = True
+        self._is_open = False
         if hasattr(self, "_stream_thread") and self._stream_thread:
             if self._stream_thread.ident != get_thread_ident():
                 self._stream_thread.join()
@@ -196,10 +196,12 @@ class Speaker:
 
     @property
     def position(self) -> vec3:
+        self._ensure_open()
         return vec3(self._position)
 
     @position.setter
     def position(self, value: vec3) -> None:
+        self._ensure_open()
         self._position = vec3(value)
         if self._source.channels != 1 and self._position != vec3(0):
             warn(
@@ -210,10 +212,12 @@ class Speaker:
 
     @property
     def velocity(self) -> vec3:
+        self._ensure_open()
         return vec3(self._velocity)
 
     @velocity.setter
     def velocity(self, value: vec3) -> None:
+        self._ensure_open()
         self._velocity = vec3(value)
         if self._source.channels != 1 and self._velocity != vec3(0):
             warn(
@@ -224,10 +228,12 @@ class Speaker:
 
     @property
     def min_gain(self) -> float:
+        self._ensure_open()
         return self._min_gain
 
     @min_gain.setter
     def min_gain(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0 or value > 1.0:
             raise ValueError('min gain must be between 0.0 and 1.0')
@@ -236,10 +242,12 @@ class Speaker:
 
     @property
     def gain(self) -> float:
+        self._ensure_open()
         return self._gain
 
     @gain.setter
     def gain(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0 or value > 1.0:
             raise ValueError('gain must be between 0.0 and 1.0')
@@ -248,10 +256,12 @@ class Speaker:
 
     @property
     def max_gain(self) -> float:
+        self._ensure_open()
         return self._max_gain
 
     @max_gain.setter
     def max_gain(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0 or value > 1.0:
             raise ValueError('max gain must be between 0.0 and 1.0')
@@ -260,10 +270,12 @@ class Speaker:
 
     @property
     def is_relative(self) -> bool:
+        self._ensure_open()
         return self._is_relative
 
     @is_relative.setter
     def is_relative(self, value: bool) -> None:
+        self._ensure_open()
         self._is_relative = bool(value)
         alSourcei(
             self._al,
@@ -273,20 +285,24 @@ class Speaker:
 
     @property
     def loop(self) -> bool:
+        self._ensure_open()
         return self._loop
 
     @loop.setter
     def loop(self, value: bool) -> None:
+        self._ensure_open()
         self._loop = bool(value)
         if isinstance(self._source, Sample):
             alSourcei(self._al, AL_LOOPING, AL_TRUE if value else AL_FALSE)
 
     @property
     def pitch(self) -> float:
+        self._ensure_open()
         return self._pitch
 
     @pitch.setter
     def pitch(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0:
             raise ValueError('pitch must be 0.0 or greater')
@@ -295,10 +311,12 @@ class Speaker:
 
     @property
     def direction(self) -> vec3:
+        self._ensure_open()
         return vec3(self._direction)
 
     @direction.setter
     def direction(self, value: vec3) -> None:
+        self._ensure_open()
         self._direction = vec3(value)
         if self._source.channels != 1 and self._direction != vec3(0):
             warn(
@@ -309,10 +327,12 @@ class Speaker:
 
     @property
     def inner_cone_angle(self) -> float:
+        self._ensure_open()
         return self._inner_cone_angle
 
     @inner_cone_angle.setter
     def inner_cone_angle(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0 or value > (2 * pi):
             raise ValueError('inner cone angle must be between 0.0 and 2pi')
@@ -335,10 +355,12 @@ class Speaker:
 
     @property
     def outer_cone_angle(self) -> float:
+        self._ensure_open()
         return self._inner_cone_angle
 
     @outer_cone_angle.setter
     def outer_cone_angle(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0 or value > (2 * pi):
             raise ValueError('outer cone angle must be between 0.0 and 2pi')
@@ -361,21 +383,27 @@ class Speaker:
 
     @property
     def outer_cone_gain(self) -> float:
+        self._ensure_open()
         return self._outer_cone_gain
 
     @outer_cone_gain.setter
     def outer_cone_gain(self, value: float) -> None:
+        self._ensure_open()
         value = float(value)
         if value < 0.0 or value > 1.0:
             raise ValueError('outer cone gain must be between 0.0 and 1.0')
         self._outer_cone_gain = value
         alSourcef(self._al, AL_CONE_OUTER_GAIN, self._outer_cone_gain)
 
+    @property
+    def is_open(self) -> bool:
+        return self._is_open
+
 
 def _stream_main(speaker_ref: ref[Speaker]) -> None:
     while True:
         speaker = speaker_ref()
-        if speaker is None or speaker._is_closed:
+        if speaker is None or not speaker._is_open:
             break
         if speaker.state != SpeakerState.STOPPED:
             speaker._stream()
@@ -394,4 +422,3 @@ def _stream_main(speaker_ref: ref[Speaker]) -> None:
                 speaker._stream()
         del speaker
         time.sleep(.01)
-    print("END")

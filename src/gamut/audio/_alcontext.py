@@ -17,8 +17,8 @@ import time
 from typing import Any, Final, Optional
 # pyopenal
 from openal.al_lib import lib as al_lib
-from openal.alc import (alc_check_error, ALC_FALSE, ALC_FREQUENCY,
-                        alcCloseDevice, alcCreateContext, alcDestroyContext,
+from openal.alc import (alc_check_error, ALC_FREQUENCY, alcCloseDevice,
+                        alcCreateContext, alcDestroyContext,
                         alcMakeContextCurrent, alcOpenDevice)
 
 singleton: Optional[AlContext] = None
@@ -65,15 +65,12 @@ class AlContext:
         if loopback:
             assert LOOP_BACK_AVAILABLE
             self._al_device = alcLoopbackOpenDeviceSOFT(None)
-            if not self._al_device:
-                raise RuntimeError('unable to open audio device')
-            if alcIsRenderFormatSupportedSOFT(
+            alcIsRenderFormatSupportedSOFT(
                 self._al_device,
                 LOOP_BACK_FREQUENCY,
                 ALC_MONO_SOFT,
                 0x1401,
-            ) == ALC_FALSE:
-                raise RuntimeError('loopback device format not available')
+            )
             context_attributes = [
                 ALC_FORMAT_CHANNELS_SOFT, ALC_MONO_SOFT,
                 ALC_FORMAT_TYPE_SOFT, ALC_UNSIGNED_BYTE_SOFT,
@@ -81,8 +78,6 @@ class AlContext:
             ]
         else:
             self._al_device = alcOpenDevice(None)
-            if not self._al_device:
-                raise RuntimeError('unable to open audio device')
             context_attributes = []
 
         if not context_attributes:
@@ -96,10 +91,7 @@ class AlContext:
             self._al_device,
             c_context_attributes
         )
-        if not self._al_context:
-            raise RuntimeError('unable to create OpenAL context')
-        if not alcMakeContextCurrent(self._al_context):
-            raise RuntimeError('unable to make OpenAL context current')
+        alcMakeContextCurrent(self._al_context)
 
     def render(self, samples: int, *, real_time: bool = False) -> bytes:
         assert self._loopback
@@ -125,8 +117,7 @@ class AlContext:
             alcDestroyContext(self._al_context)
             self._al_context = None
         if hasattr(self, "_al_device") and self._al_device:
-            if alcCloseDevice(self._al_device) == ALC_FALSE:
-                raise RuntimeError('unable to cleanup OpenAL device')
+            alcCloseDevice(self._al_device)
 
 
 def release_al_context(al_context_marker: Any) -> Any:
