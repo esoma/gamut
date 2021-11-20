@@ -1,10 +1,10 @@
 
 # gamut
+from ..application import TestApplication as Application
 from .test_peripheral import TestPeripheral
 from .virtual import (skip_if_any_real_controllers,
                       skip_if_virtual_controller_nyi, VirtualController)
 # gamut
-from gamut import Application
 from gamut.peripheral import (Controller, ControllerAxis, ControllerAxisMoved,
                               ControllerButton, ControllerButtonPressed,
                               ControllerButtonReleased, ControllerConnected,
@@ -100,6 +100,7 @@ def test_button_repr(button_index: int) -> None:
         f'<gamut.peripheral.ControllerButton '
         f'{button_index!r} for {controller!r}>'
     )
+
 
 @pytest.mark.parametrize("axis_index", [0, 1, 2])
 def test_axis_repr(axis_index: int) -> None:
