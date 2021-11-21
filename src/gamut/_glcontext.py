@@ -14,7 +14,6 @@ from ._sdl import sdl_event_callback_map
 from ctypes import byref as c_byref
 from queue import Empty as QueueEmpty
 from queue import Queue
-import sys
 from threading import Condition
 from threading import RLock
 from threading import get_ident as identify_thread
@@ -119,13 +118,14 @@ class GlContext:
             raise RuntimeError('shutdown outside main thread')
         self.gc_collect()
         if self._sdl_gl_context is not None:
-            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+            assert self._rendering_thread == identify_thread()
+            SDL_GL_MakeCurrent(self._sdl_window, 0)
             SDL_GL_DeleteContext(self._sdl_gl_context)
             self._sdl_gl_context = None
+            self._sdl_gl_window = None
         if self._sdl_window is not None:
             SDL_DestroyWindow(self._sdl_window)
             self._sdl_window = None
-            self._sdl_gl_window = None
         deinit_sdl_video()
 
     def set_sdl_window(self, sdl_window: Any) -> None:
@@ -143,14 +143,7 @@ class GlContext:
     def release_rendering_thread(self) -> None:
         self._rendering_thread = None
         self._sdl_gl_window = None
-        # windows doesn't "carry" the opengl context to child threads
-        # automatically, but macos and linux do
-        # this makes things weird because SDL caches the current context and
-        # so it won't update the context if it thinks it's already set, so in
-        # order to actually set it in obtain_rendering_thread we need to
-        # release it only on windows
-        if sys.platform in ['win32', 'cygwin']:
-            SDL_GL_MakeCurrent(self._sdl_window, 0)
+        SDL_GL_MakeCurrent(self._sdl_window, 0)
 
     def obtain_rendering_thread(self) -> None:
         self._rendering_thread = identify_thread()

@@ -40,7 +40,7 @@ jobs:
     - name: Install Test Dependencies
       run: |
         python -m pip install .[test]
-        python -m pip install pytest-xdist
+        python -m pip install pytest-xdist pytest-timeout pytest-rerunfailures
 
     - name: Install Mesa
       if: ${{ matrix.os == 'windows-latest' }}
@@ -58,21 +58,21 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller"
-        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml --cov-append -k "controller"
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller" --timeout=10 --timeout-method=thread --reruns 2 --only-rerun "node down"
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n 1 --cov=gamut --cov-report=xml --cov-append -k "controller" --timeout=10 --timeout-method=thread --reruns 2 --only-rerun "node down"
 
     - name: Test (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         set GALLIUM_DRIVER=llvmpipe
         set PATH=%cd%;%PATH%
-        python -m pytest -n auto --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml --timeout=10 --timeout-method=thread --reruns 2 --only-rerun "node down"
       shell: cmd
 
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        python -m pytest -n auto --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml --timeout=10 --timeout-method=thread --reruns 2 --only-rerun "node down"
 
     - name: Codecov
       uses: codecov/codecov-action@v1.2.1
