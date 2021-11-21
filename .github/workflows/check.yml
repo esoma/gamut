@@ -63,8 +63,8 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n 1 --max-worker-restart=999999 --cov=gamut --cov-report=xml -k "not test_mypy.py" --timeout=15 --timeout-method=thread -o timeout_func_only=true --reruns 3
-        python -m pytest -n auto --cov=gamut --cov-report=xml -k "test_mypy.py"
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n 1 --cov-append --max-worker-restart=999999 --cov=gamut --cov-report=xml -k "not test_mypy.py" --timeout=15 --timeout-method=thread -o timeout_func_only=true --reruns 3
+        python -m pytest -n auto --cov=gamut --cov-report=xml --cov-append -k "test_mypy.py"
 
     - name: Test (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
