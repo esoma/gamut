@@ -51,9 +51,6 @@ jobs:
         dir
       shell: cmd
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
