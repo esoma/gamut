@@ -3,8 +3,11 @@
 from gamut.event._event import reset_events
 # python
 import gc
+import os
 from pathlib import Path
+import signal
 from typing import Any, Generator
+import warnings
 # pysdl2
 from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
                   SDL_INIT_HAPTIC, SDL_INIT_JOYSTICK, SDL_INIT_TIMER,
@@ -38,7 +41,8 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
         SDL_INIT_HAPTIC |
         SDL_INIT_GAMECONTROLLER |
         SDL_INIT_EVENTS) != 0:
-        pytest.exit('SDL in unexpected state, cannot continue testing')
+        warnings.warn('SDL in unexpected state, cannot continue testing')
+        os.kill(os.getpid(), signal.SIGTERM)
     # do the test
     yield
     # make sure all events are reset so that the event futures don't persist

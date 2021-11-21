@@ -71,13 +71,13 @@ jobs:
       run: |
         set GALLIUM_DRIVER=llvmpipe
         set PATH=%cd%;%PATH%
-        python -m pytest -n auto --max-worker-restart=999999 --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml
       shell: cmd
 
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        python -m pytest -n auto --max-worker-restart=999999 --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml
 
     - name: Codecov
       uses: codecov/codecov-action@v1.2.1
