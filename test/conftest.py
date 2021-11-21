@@ -15,7 +15,8 @@ import pytest
 
 def pytest_configure(config: Any) -> None:
     config.addinivalue_line(
-        "controller", 'mark that a test modifies OS level controller data'
+        "markers",
+        'controller(): mark that a test modifies OS level controller data'
     )
 
 
