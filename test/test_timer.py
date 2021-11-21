@@ -75,7 +75,6 @@ def test_repeat(event_type: type[TimerExpired]) -> None:
     test_loop.run()
 
     assert len(events) > 1
-    assert len(events) <= 10
     for timer_expired in events:
         assert isinstance(timer_expired, event_type)
         assert (
@@ -105,7 +104,6 @@ def test_repeat_fixed(event_type: type[TimerExpired]) -> None:
     test_loop.run()
 
     assert len(events) > 1
-    assert len(events) <= 10
     for timer_expired in events:
         assert isinstance(timer_expired, event_type)
         assert (
