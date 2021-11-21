@@ -1,6 +1,5 @@
 
 # gamut
-# gamut
 from gamut.event._event import reset_events
 # python
 import gc
@@ -14,13 +13,19 @@ from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
 import pytest
 
 
+def pytest_configure(config: Any) -> None:
+    config.addinivalue_line(
+        "controller", 'mark that a test modifies OS level controller data'
+    )
+
+
 @pytest.fixture
 def resources() -> Path:
     return Path(__file__).parent / 'resources'
 
 
 @pytest.fixture(autouse=True)
-def cleanup() -> Generator[Any, Any, None]:
+def cleanup(request: Any) -> Generator[Any, Any, None]:
     """This fixture helps to clean up any state that would persist between
     tests.
     """

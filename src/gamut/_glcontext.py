@@ -14,6 +14,7 @@ from ._sdl import sdl_event_callback_map
 from ctypes import byref as c_byref
 from queue import Empty as QueueEmpty
 from queue import Queue
+import sys
 from threading import Condition
 from threading import RLock
 from threading import get_ident as identify_thread
@@ -131,24 +132,41 @@ class GlContext:
     def set_sdl_window(self, sdl_window: Any) -> None:
         assert identify_thread() == self._rendering_thread
         if self._sdl_gl_window != sdl_window:
-            SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context)
+            if SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
             self._sdl_gl_window = sdl_window
 
     def unset_sdl_window(self, sdl_window: Any) -> None:
         if identify_thread() == self._rendering_thread:
             if self._sdl_gl_window == sdl_window:
-                SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+                if SDL_GL_MakeCurrent(
+                    self._sdl_window,
+                    self._sdl_gl_context
+                ) != 0:
+                    raise RuntimeError(SDL_GetError().decode('utf8'))
                 self._sdl_gl_window = self._sdl_window
 
     def release_rendering_thread(self) -> None:
+        assert identify_thread() == self._rendering_thread
+        assert self._sdl_gl_window is not None
+        # on non-linux platforms the GL context is actually tied to a single
+        # thread, so we must release it from the current one before moving it
+        # to another thread
+        #
+        # however, some linux X servers (xvfb) will hang when trying to do this
+        # so, we'll just only do it on non-linux platforms
+        if sys.platform != 'linux':
+            if SDL_GL_MakeCurrent(self._sdl_gl_window, 0) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
         self._rendering_thread = None
         self._sdl_gl_window = None
-        SDL_GL_MakeCurrent(self._sdl_window, 0)
 
     def obtain_rendering_thread(self) -> None:
+        assert self._rendering_thread is None
+        if SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
         self._rendering_thread = identify_thread()
         self._sdl_gl_window = self._sdl_window
-        SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
 
     @property
     def is_open(self) -> bool:
