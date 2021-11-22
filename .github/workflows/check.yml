@@ -46,6 +46,7 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         wget http://xpra.org/xorg.conf
+        sudo apt-get update
         sudo apt-get install xserver-xorg-video-dummy
         sudo Xorg -noreset +extension GLX +extension RANDR +extension RENDER -logfile /tmp/xdummy.log -config xorg.conf :1 &
         export DISPLAY=:1
