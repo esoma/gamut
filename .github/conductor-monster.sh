@@ -1,4 +1,4 @@
 
 export DISPLAY=:0
-python -m pytest -k "not controller" -nauto
-python -m pytest -k "controller"
+python -m pytest -k "not controller" -nauto -v
+python -m pytest -k "controller" -v
