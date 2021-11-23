@@ -117,11 +117,11 @@ class Application(EventLoop[R]):
         except BaseException as ex:
             self._run_exception = ex
         finally:
-            get_gl_context().release_rendering_thread()
             self._running = False
             sdl_event = SDL_Event()
             sdl_event.type = SDL_USEREVENT
             SDL_PushEvent(c_byref(sdl_event))
+            get_gl_context().release_rendering_thread()
 
     def run_context(self) -> ContextManager:
         return ApplicationRunContext((
@@ -157,7 +157,7 @@ class Application(EventLoop[R]):
         with SdlContext():
             sdl_event = SDL_Event()
             while self._running:
-                if SDL_WaitEvent(c_byref(sdl_event)) != 1:
+                if SDL_WaitEvent(c_byref(sdl_event)) == 0:
                     raise RuntimeError(SDL_GetError().decode('utf8'))
                 try:
                     callback = sdl_event_callback_map[sdl_event.type]
