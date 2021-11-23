@@ -3,9 +3,8 @@
 from gamut.event._event import reset_events
 # python
 import gc
-import os
 from pathlib import Path
-import signal
+import sys
 from typing import Any, Generator
 import warnings
 # pysdl2
@@ -67,4 +66,4 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
         warnings.warn(f'{sdl_gamecontroller_init=}')
         warnings.warn(f'{sdl_events_init=}')
         warnings.warn('SDL in unexpected state, cannot continue testing')
-        os.kill(os.getpid(), signal.SIGSEGV)
+        sys.exit(1)

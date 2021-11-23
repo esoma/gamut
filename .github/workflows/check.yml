@@ -40,7 +40,7 @@ jobs:
     - name: Install Test Dependencies
       run: |
         python -m pip install .[test]
-        python -m pip install pytest-xdist
+        python -m pip install pytest-xdist pytest-rerunfailures
 
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -49,8 +49,8 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller"
-        sudo -u $USER env PATH=${PATH} xfvb-run -a python -m pytest -k "controller" --cov=gamut --cov-report=xml --cov-append
+        xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller" --reruns=3 --only-rerun="SystemExit: 1"
+        sudo -u $USER env PATH=${PATH} xfvb-run -a python -m pytest -n 1 -k "controller" --cov=gamut --cov-report=xml --cov-append --reruns=3 --only-rerun="SystemExit: 1"
 
     - name: Test (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
@@ -60,13 +60,13 @@ jobs:
         "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/libglapi.dll
         set GALLIUM_DRIVER=llvmpipe
         set PATH=%cd%;%PATH%
-        python -m pytest -n auto --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml --reruns=3 --only-rerun="SystemExit: 1"
       shell: cmd
 
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        python -m pytest -n auto --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml --reruns=3 --only-rerun="SystemExit: 1"
 
     - name: Codecov
       uses: codecov/codecov-action@v1.2.1
