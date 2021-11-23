@@ -21,6 +21,7 @@ from gamut.peripheral import (Controller, Keyboard, KeyboardConnected, Mouse,
 from ctypes import byref as c_byref
 from threading import Thread
 from threading import get_ident as identify_thread
+import time
 from typing import Any, ContextManager, Optional, Sequence, TypeVar
 # pysdl2
 from sdl2 import (SDL_Event, SDL_GetError, SDL_Init, SDL_INIT_EVENTS,
@@ -92,7 +93,9 @@ class Application(EventLoop[R]):
                     'Applications may only run on the thread in which gamut '
                     'was initialized'
                 )
+            print("MAIN RELEASE")
             get_gl_context().release_rendering_thread()
+            print("MAIN RELEASED")
             try:
                 thread = Thread(target=self._run)
                 self._running = True
@@ -102,7 +105,9 @@ class Application(EventLoop[R]):
                 self._poll_sdl()
                 thread.join()
             finally:
+                print("MAIN OBTAIN")
                 get_gl_context().obtain_rendering_thread()
+                print("MAIN OBTAINED")
         finally:
             self._running = False
             release_gl_context(gl_context)
@@ -111,7 +116,9 @@ class Application(EventLoop[R]):
         return self._run_result # type: ignore
 
     def _run(self) -> None:
+        print("RENDER OBTAIN")
         get_gl_context().obtain_rendering_thread()
+        print("RENDER OBTAINED")
         try:
             self._run_result = super().run()
         except BaseException as ex:
@@ -121,7 +128,9 @@ class Application(EventLoop[R]):
             sdl_event = SDL_Event()
             sdl_event.type = SDL_USEREVENT
             SDL_PushEvent(c_byref(sdl_event))
+            print("RENDER RELEASE")
             get_gl_context().release_rendering_thread()
+            print("RENDER RELEASED")
 
     def run_context(self) -> ContextManager:
         return ApplicationRunContext((
@@ -155,10 +164,12 @@ class Application(EventLoop[R]):
 
     def _poll_sdl(self) -> None:
         with SdlContext():
+            while self._running and get_gl_context().rendering_thread is None:
+                time.sleep(.01)
             sdl_event = SDL_Event()
             while self._running:
                 if SDL_WaitEvent(c_byref(sdl_event)) == 0:
-                    raise RuntimeError(SDL_GetError().decode('utf8'))
+                    continue
                 try:
                     callback = sdl_event_callback_map[sdl_event.type]
                 except KeyError:

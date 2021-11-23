@@ -148,12 +148,6 @@ class GlContext:
     def release_rendering_thread(self) -> None:
         assert identify_thread() == self._rendering_thread
         assert self._sdl_gl_window is not None
-        # on non-linux platforms the GL context is actually tied to a single
-        # thread, so we must release it from the current one before moving it
-        # to another thread
-        #
-        # however, linux X servers will sometimes hang when trying to do this,
-        # so just don't do it on those
         if SDL_GL_MakeCurrent(self._sdl_gl_window, 0) != 0:
             raise RuntimeError(SDL_GetError().decode('utf8'))
         self._rendering_thread = None
@@ -182,6 +176,10 @@ class GlContext:
     @property
     def sdl_video_thread(self) -> int:
         return self._sdl_video_thread
+
+    @property
+    def rendering_thread(self) -> Optional[int]:
+        return self._rendering_thread
 
     def gc_collect(self) -> None:
         assert identify_thread() == self._rendering_thread
