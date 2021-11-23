@@ -45,15 +45,12 @@ jobs:
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        wget http://xpra.org/xorg.conf
-        sudo apt-get update
-        sudo apt-get install xserver-xorg-video-dummy
-        sudo Xorg -noreset +extension GLX +extension RANDR +extension RENDER -logfile /tmp/xdummy.log -config xorg.conf :1 &
-        export DISPLAY=:1
+        sudo apt-get install xvfb
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        sudo -u $USER env PATH=${PATH} python -m pytest -n auto --cov=gamut --cov-report=xml
+        xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller"
+        sudo -u $USER env PATH=${PATH} xfvb-run -a python -m pytest -k "controller" --cov=gamut --cov-report=xml --cov-append
 
     - name: Test (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
