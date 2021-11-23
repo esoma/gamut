@@ -14,11 +14,10 @@ from ._sdl import sdl_event_callback_map
 from ctypes import byref as c_byref
 from queue import Empty as QueueEmpty
 from queue import Queue
-import sys
 from threading import Condition
 from threading import RLock
 from threading import get_ident as identify_thread
-from time import sleep
+import time
 from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 # numpy
 from numpy import array as np_array
@@ -121,43 +120,47 @@ class GlContext:
             raise RuntimeError('shutdown outside main thread')
         self.gc_collect()
         if self._sdl_gl_context is not None:
-            SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+            assert self._rendering_thread == identify_thread()
+            SDL_GL_MakeCurrent(self._sdl_window, 0)
             SDL_GL_DeleteContext(self._sdl_gl_context)
             self._sdl_gl_context = None
+            self._sdl_gl_window = None
         if self._sdl_window is not None:
             SDL_DestroyWindow(self._sdl_window)
             self._sdl_window = None
-            self._sdl_gl_window = None
         deinit_sdl_video()
 
     def set_sdl_window(self, sdl_window: Any) -> None:
         assert identify_thread() == self._rendering_thread
         if self._sdl_gl_window != sdl_window:
-            SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context)
+            if SDL_GL_MakeCurrent(sdl_window, self._sdl_gl_context) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
             self._sdl_gl_window = sdl_window
 
     def unset_sdl_window(self, sdl_window: Any) -> None:
         if identify_thread() == self._rendering_thread:
             if self._sdl_gl_window == sdl_window:
-                SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
+                if SDL_GL_MakeCurrent(
+                    self._sdl_window,
+                    self._sdl_gl_context
+                ) != 0:
+                    raise RuntimeError(SDL_GetError().decode('utf8'))
                 self._sdl_gl_window = self._sdl_window
 
     def release_rendering_thread(self) -> None:
+        assert identify_thread() == self._rendering_thread
+        assert self._sdl_gl_window is not None
+        if SDL_GL_MakeCurrent(self._sdl_gl_window, 0) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
         self._rendering_thread = None
         self._sdl_gl_window = None
-        # windows doesn't "carry" the opengl context to child threads
-        # automatically, but macos and linux do
-        # this makes things weird because SDL caches the current context and
-        # so it won't update the context if it thinks it's already set, so in
-        # order to actually set it in obtain_rendering_thread we need to
-        # release it only on windows
-        if sys.platform in ['win32', 'cygwin']:
-            SDL_GL_MakeCurrent(self._sdl_window, 0)
 
     def obtain_rendering_thread(self) -> None:
+        assert self._rendering_thread is None
+        if SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context) != 0:
+            raise RuntimeError(SDL_GetError().decode('utf8'))
         self._rendering_thread = identify_thread()
         self._sdl_gl_window = self._sdl_window
-        SDL_GL_MakeCurrent(self._sdl_window, self._sdl_gl_context)
 
     @property
     def is_open(self) -> bool:
@@ -175,6 +178,10 @@ class GlContext:
     @property
     def sdl_video_thread(self) -> int:
         return self._sdl_video_thread
+
+    @property
+    def rendering_thread(self) -> Optional[int]:
+        return self._rendering_thread
 
     def gc_collect(self) -> None:
         assert identify_thread() == self._rendering_thread
@@ -308,26 +315,28 @@ def get_gl_context() -> GlContext:
 
 
 def init_sdl_video() -> None:
-    # when rapidly initializing and quitting the video subsystem (as in
-    # testing it has been observed in linux while using xvfb that sometimes
-    # it will fail to initialize
-    #
-    # so we will try a couple times, waiting in between each try if there
-    # is no available video device
-    for i in range(10):
-        if SDL_Init(SDL_INIT_VIDEO) == 0:
-            break
-        # video initialization implies events initialization, but SDL_Init
-        # doesn't quit the events subsystem if SDL_Init has an error, so
-        # we must manually do so
-        # https://github.com/libsdl-org/SDL/issues/4826
-        SDL_QuitSubSystem(SDL_INIT_EVENTS)
-        if SDL_GetError() != b'No available video device':
-            raise RuntimeError(SDL_GetError().decode('utf8'))
-        sleep(.1)
-    else:
+    # the need for part of this mess should be fixed in
+    # https://github.com/libsdl-org/SDL/issues/4826
+    if SDL_Init(SDL_INIT_EVENTS) != 0:
         raise RuntimeError(SDL_GetError().decode('utf8'))
+    try:
+        for i in range(10):
+            if SDL_Init(SDL_INIT_VIDEO) == 0:
+                break
+            SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            if SDL_GetError() != b'No available video device':
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+            else:
+                # SDL_VideoInit failures (which SDL_Init(SDL_INIT_VIDEO) will
+                # trigger) do not properly cleanup after themselves
+                SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            time.sleep(.1)
+    except BaseException:
+        SDL_QuitSubSystem(SDL_INIT_EVENTS)
+        SDL_QuitSubSystem(SDL_INIT_EVENTS)
+        raise
 
 
 def deinit_sdl_video() -> None:
     SDL_QuitSubSystem(SDL_INIT_VIDEO)
+    SDL_QuitSubSystem(SDL_INIT_EVENTS)

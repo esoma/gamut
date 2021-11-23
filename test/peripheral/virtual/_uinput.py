@@ -42,6 +42,9 @@ class VirtualController:
                     device.fd = -1
         device.close = device_close
 
+    def __del__(self) -> None:
+        self.close()
+
     def __enter__(self) -> VirtualController:
         return self
 

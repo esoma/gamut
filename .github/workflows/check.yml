@@ -40,15 +40,14 @@ jobs:
     - name: Install Test Dependencies
       run: |
         python -m pip install .[test]
+        python -m pip install pytest-xdist pytest-rerunfailures
 
-    - name: Install Mesa
-      if: ${{ matrix.os == 'windows-latest' }}
+    - name: Patch pytest-rerunfailures
+    if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/21.2.4/mesa3d-21.2.4-release-msvc.7z
-        "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/opengl32.dll
-        "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/libglapi.dll
-        dir
-      shell: cmd
+        export PYTEST_RERUNFAILURES=`python -c "import pytest_rerunfailures; print(pytest_rerunfailures.__file__)"`
+        sed 's/item_location = *$/item_location = item.nodeid/g' $PYTEST_RERUNFAILURES > /tmp/pytest_rerunfailures.py
+        cp /tmp/pytest_rerunfailures.py $PYTEST_RERUNFAILURES
 
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -57,20 +56,24 @@ jobs:
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
-        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest --cov=gamut --cov-report=xml
+        xvfb-run -a python -m pytest -n auto --cov=gamut --cov-report=xml -k "not controller" --reruns=3 --only-rerun="Not properly terminated"
+        sudo -u $USER env PATH=${PATH} xvfb-run -a python -m pytest -n 1 -k "controller" --cov=gamut --cov-report=xml --cov-append --reruns=3 --only-rerun="Not properly terminated"
 
     - name: Test (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
+        curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/21.2.4/mesa3d-21.2.4-release-msvc.7z
+        "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/opengl32.dll
+        "C:\Program Files\7-Zip\7z.exe" e mesa.7z x64/libglapi.dll
         set GALLIUM_DRIVER=llvmpipe
         set PATH=%cd%;%PATH%
-        python -m pytest --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml --reruns=3 --only-rerun="Not properly terminated"
       shell: cmd
 
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        python -m pytest --cov=gamut --cov-report=xml
+        python -m pytest -n auto --cov=gamut --cov-report=xml --reruns=3 --only-rerun="Not properly terminated"
 
     - name: Codecov
       uses: codecov/codecov-action@v1.2.1

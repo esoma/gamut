@@ -92,15 +92,24 @@ class Window:
         self._gl_context = require_gl_context()
 
         def create_window() -> Any:
-            return SDL_CreateWindow(
+            sdl_window = SDL_CreateWindow(
                 b'',
                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                 100, 100,
                 SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
             )
-        self._sdl = get_gl_context().execute(create_window)
+            if sdl_window:
+                sdl_window_id = SDL_GetWindowID(sdl_window)
+            else:
+                sdl_window_id = 0
+            return (sdl_window, sdl_window_id)
+
+        self._sdl, self._sdl_window_id = get_gl_context().execute(
+            create_window
+        )
         if not self._sdl:
             raise RuntimeError(SDL_GetError().decode('utf8'))
+        Window._id_map[self._sdl_window_id] = self
 
         class Event(WindowEvent, window=self):
             pass
@@ -120,11 +129,6 @@ class Window:
         class Shown(WindowShown, Event):
             pass
         self.Shown = Shown
-
-        sdl_window_id = SDL_GetWindowID(self._sdl)
-        if sdl_window_id == 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
-        Window._id_map[sdl_window_id] = self
 
         self._resized_bind = Bind.on(self.Resized, self._resized)
 
