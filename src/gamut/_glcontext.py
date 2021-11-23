@@ -17,6 +17,7 @@ from queue import Queue
 from threading import Condition
 from threading import RLock
 from threading import get_ident as identify_thread
+import time
 from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 # numpy
 from numpy import array as np_array
@@ -317,8 +318,15 @@ def init_sdl_video() -> None:
     if SDL_Init(SDL_INIT_EVENTS) != 0:
         raise RuntimeError(SDL_GetError().decode('utf8'))
     try:
-        if SDL_Init(SDL_INIT_VIDEO) != 0:
-            raise RuntimeError(SDL_GetError().decode('utf8'))
+        for i in range(10):
+            if SDL_Init(SDL_INIT_VIDEO) == 0:
+                break
+            SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            if SDL_GetError() != b'No available video device':
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+            else:
+                SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            time.sleep(.1)
     except BaseException:
         SDL_QuitSubSystem(SDL_INIT_EVENTS)
         SDL_QuitSubSystem(SDL_INIT_EVENTS)
