@@ -43,7 +43,7 @@ jobs:
         python -m pip install pytest-xdist pytest-rerunfailures
 
     - name: Patch pytest-rerunfailures
-    if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         export PYTEST_RERUNFAILURES=`python -c "import pytest_rerunfailures; print(pytest_rerunfailures.__file__)"`
         sed 's/item_location = *$/item_location = item.nodeid/g' $PYTEST_RERUNFAILURES > /tmp/pytest_rerunfailures.py
