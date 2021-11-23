@@ -70,7 +70,7 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
         # pytest-xdist has had a chance to send some additional data (or
         # something like that)
         time.sleep(.5)
-        os.kill(os.getpid(), signal.SIGTERM)
+        os.kill(os.getpid(), signal.SIGSEGV)
     # do the test
     yield
     # make sure all events are reset so that the event futures don't persist
