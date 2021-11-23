@@ -99,8 +99,10 @@ class Application(EventLoop[R]):
                 self._run_exception = None
                 self._run_result = None
                 thread.start()
-                self._poll_sdl()
-                thread.join()
+                try:
+                    self._poll_sdl()
+                finally:
+                    thread.join()
             finally:
                 get_gl_context().obtain_rendering_thread()
         finally:
@@ -225,6 +227,9 @@ class SdlContext:
                 raise RuntimeError(SDL_GetError().decode('utf8'))
         except BaseException:
             SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            SDL_QuitSubSystem(SDL_INIT_EVENTS)
+            raise
 
     def __exit__(self, *args: Any) -> None:
-        SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK)
+        SDL_QuitSubSystem(SDL_INIT_JOYSTICK)
+        SDL_QuitSubSystem(SDL_INIT_EVENTS)

@@ -12,7 +12,7 @@ import warnings
 # pysdl2
 from sdl2 import (SDL_INIT_AUDIO, SDL_INIT_EVENTS, SDL_INIT_GAMECONTROLLER,
                   SDL_INIT_HAPTIC, SDL_INIT_JOYSTICK, SDL_INIT_TIMER,
-                  SDL_INIT_VIDEO, SDL_WasInit)
+                  SDL_INIT_VIDEO, SDL_Quit, SDL_WasInit)
 # pytest
 import pytest
 
@@ -42,14 +42,15 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     sdl_haptic_init = SDL_WasInit(SDL_INIT_HAPTIC) != 0
     sdl_gamecontroller_init = SDL_WasInit(SDL_INIT_GAMECONTROLLER) != 0
     sdl_events_init = SDL_WasInit(SDL_INIT_EVENTS) != 0
-    if SDL_WasInit(
-        SDL_INIT_TIMER |
-        SDL_INIT_AUDIO |
-        SDL_INIT_VIDEO |
-        SDL_INIT_JOYSTICK |
-        SDL_INIT_HAPTIC |
-        SDL_INIT_GAMECONTROLLER |
-        SDL_INIT_EVENTS) != 0:
+    if (
+        sdl_timer_init or
+        sdl_audio_init or
+        sdl_video_init or
+        sdl_joystick_init or
+        sdl_haptic_init or
+        sdl_gamecontroller_init or
+        sdl_events_init
+    ) != 0:
         if sdl_timer_init:
             warnings.warn(f'SDL Timer Subsystem Initialized')
         if sdl_audio_init:
@@ -88,3 +89,5 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
     assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
     assert SDL_WasInit(SDL_INIT_EVENTS) == 0
+    # totally shutdown SDL
+    SDL_Quit()
