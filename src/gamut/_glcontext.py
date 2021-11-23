@@ -17,6 +17,7 @@ from queue import Queue
 from threading import Condition
 from threading import RLock
 from threading import get_ident as identify_thread
+from time import sleep
 from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 # numpy
 from numpy import array as np_array
@@ -34,8 +35,9 @@ from sdl2 import (SDL_CreateWindow, SDL_DestroyWindow, SDL_Event, SDL_GetError,
                   SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK,
                   SDL_GL_CreateContext, SDL_GL_DeleteContext,
                   SDL_GL_MakeCurrent, SDL_GL_SetAttribute, SDL_GL_STENCIL_SIZE,
-                  SDL_Init, SDL_INIT_VIDEO, SDL_PushEvent, SDL_QuitSubSystem,
-                  SDL_USEREVENT, SDL_WINDOW_HIDDEN, SDL_WINDOW_OPENGL)
+                  SDL_Init, SDL_INIT_EVENTS, SDL_INIT_VIDEO, SDL_PushEvent,
+                  SDL_QuitSubSystem, SDL_USEREVENT, SDL_WINDOW_HIDDEN,
+                  SDL_WINDOW_OPENGL)
 
 singleton: Optional[GlContext] = None
 refs_lock = RLock()
@@ -313,7 +315,24 @@ def get_gl_context() -> GlContext:
 
 
 def init_sdl_video() -> None:
-    if SDL_Init(SDL_INIT_VIDEO) != 0:
+    # when rapidly initializing and quitting the video subsystem (as in
+    # testing it has been observed in linux while using xvfb that sometimes
+    # it will fail to initialize
+    #
+    # so we will try a couple times, waiting in between each try if there
+    # is no available video device
+    for i in range(10):
+        if SDL_Init(SDL_INIT_VIDEO) == 0:
+            break
+        # video initialization implies events initialization, but SDL_Init
+        # doesn't quit the events subsystem if SDL_Init has an error, so
+        # we must manually do so
+        # https://github.com/libsdl-org/SDL/issues/4826
+        SDL_QuitSubSystem(SDL_INIT_EVENTS)
+        if SDL_GetError() != b'No available video device':
+            raise RuntimeError(SDL_GetError().decode('utf8'))
+        sleep(.1)
+    else:
         raise RuntimeError(SDL_GetError().decode('utf8'))
 
 
