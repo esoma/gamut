@@ -315,6 +315,8 @@ def get_gl_context() -> GlContext:
 
 
 def init_sdl_video() -> None:
+    # the need for part of this mess should be fixed in
+    # https://github.com/libsdl-org/SDL/issues/4826
     if SDL_Init(SDL_INIT_EVENTS) != 0:
         raise RuntimeError(SDL_GetError().decode('utf8'))
     try:
@@ -325,6 +327,8 @@ def init_sdl_video() -> None:
             if SDL_GetError() != b'No available video device':
                 raise RuntimeError(SDL_GetError().decode('utf8'))
             else:
+                # SDL_VideoInit failures (which SDL_Init(SDL_INIT_VIDEO) will
+                # trigger) do not properly cleanup after themselves
                 SDL_QuitSubSystem(SDL_INIT_EVENTS)
             time.sleep(.1)
     except BaseException:

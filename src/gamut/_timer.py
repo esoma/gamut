@@ -33,7 +33,8 @@ class Timer:
         self._fixed = fixed
         self._thread = Thread(
             target=timer_thread_main,
-            args=(ref(self), datetime.now()))
+            args=(ref(self), datetime.now())
+        )
         self._thread.start()
 
     @property

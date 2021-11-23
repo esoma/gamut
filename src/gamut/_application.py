@@ -159,8 +159,8 @@ class Application(EventLoop[R]):
         with SdlContext():
             sdl_event = SDL_Event()
             while self._running:
-                if SDL_WaitEvent(c_byref(sdl_event)) == 0:
-                    continue
+                if SDL_WaitEvent(c_byref(sdl_event)) != 1:
+                    raise RuntimeError(SDL_GetError().decode('utf8'))
                 try:
                     callback = sdl_event_callback_map[sdl_event.type]
                 except KeyError:
@@ -220,6 +220,8 @@ class ApplicationRunContext:
 class SdlContext:
 
     def __enter__(self) -> None:
+        # the need for this mess should be fixed in
+        # https://github.com/libsdl-org/SDL/issues/4826
         if SDL_Init(SDL_INIT_EVENTS) != 0:
             raise RuntimeError(SDL_GetError().decode('utf8'))
         try:
