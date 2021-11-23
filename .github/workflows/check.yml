@@ -45,7 +45,7 @@ jobs:
     - name: Build SDL (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        python -m pip uninstall pysdl2-dll
+        python -m pip uninstall pysdl2-dll -y
         mkdir sdl
         cd sdl
         git init
