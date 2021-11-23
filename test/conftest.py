@@ -33,15 +33,6 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     """This fixture helps to clean up any state that would persist between
     tests.
     """
-    if SDL_WasInit(
-        SDL_INIT_TIMER |
-        SDL_INIT_AUDIO |
-        SDL_INIT_VIDEO |
-        SDL_INIT_JOYSTICK |
-        SDL_INIT_HAPTIC |
-        SDL_INIT_GAMECONTROLLER |
-        SDL_INIT_EVENTS) != 0:
-        pass
     # do the test
     yield
     # make sure all events are reset so that the event futures don't persist
@@ -53,13 +44,27 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     # and hasn't had its __del__ resolved
     gc.collect()
     # make sure SDL was completley de-initialized
-    assert SDL_WasInit(SDL_INIT_TIMER) == 0
-    assert SDL_WasInit(SDL_INIT_AUDIO) == 0
-    assert SDL_WasInit(SDL_INIT_VIDEO) == 0
-    assert SDL_WasInit(SDL_INIT_JOYSTICK) == 0
-    assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
-    assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
-    assert SDL_WasInit(SDL_INIT_EVENTS) == 0
-    if True:
+    sdl_timer_init = SDL_WasInit(SDL_INIT_TIMER) == 0
+    sdl_audio_init = SDL_WasInit(SDL_INIT_AUDIO) == 0
+    sdl_video_init = SDL_WasInit(SDL_INIT_VIDEO) == 0
+    sdl_joystick_init = SDL_WasInit(SDL_INIT_JOYSTICK) == 0
+    sdl_haptic_init = SDL_WasInit(SDL_INIT_HAPTIC) == 0
+    sdl_gamecontroller_init = SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
+    sdl_events_init = SDL_WasInit(SDL_INIT_EVENTS) == 0
+    if SDL_WasInit(
+        SDL_INIT_TIMER |
+        SDL_INIT_AUDIO |
+        SDL_INIT_VIDEO |
+        SDL_INIT_JOYSTICK |
+        SDL_INIT_HAPTIC |
+        SDL_INIT_GAMECONTROLLER |
+        SDL_INIT_EVENTS) != 0:
+        warnings.warn(f'{sdl_timer_init=}')
+        warnings.warn(f'{sdl_audio_init=}')
+        warnings.warn(f'{sdl_video_init=}')
+        warnings.warn(f'{sdl_joystick_init=}')
+        warnings.warn(f'{sdl_haptic_init=}')
+        warnings.warn(f'{sdl_gamecontroller_init=}')
+        warnings.warn(f'{sdl_events_init=}')
         warnings.warn('SDL in unexpected state, cannot continue testing')
         os.kill(os.getpid(), signal.SIGSEGV)
