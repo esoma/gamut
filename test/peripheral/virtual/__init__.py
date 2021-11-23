@@ -40,6 +40,7 @@ else:
     raise RuntimeError(SDL_GetError().decode('utf8'))
 
 def skip_if_any_real_controllers(func: T) -> T:
+    func = pytest.mark.controller()(func) # type: ignore
     if any_real_controllers:
         return pytest.mark.skip( # type: ignore
             reason='Real controllers connected.'

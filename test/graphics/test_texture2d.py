@@ -3,7 +3,8 @@
 from gamut import Application
 from gamut.graphics import (Buffer, Texture2d, TextureComponents,
                             TextureDataType, TextureView)
-from gamut.graphics._texture import TEXTURE_DATA_TYPES
+from gamut.graphics._texture import (TEXTURE_DATA_TYPES,
+                                     TEXTURE_DATA_TYPES_SORTED)
 # python
 from ctypes import sizeof as c_sizeof
 import struct
@@ -109,7 +110,7 @@ def test_too_much_or_not_enough_data(data: bytes) -> None:
     c for c in TextureComponents
     if c != TextureComponents.DS
 ])
-@pytest.mark.parametrize("data_type", TEXTURE_DATA_TYPES)
+@pytest.mark.parametrize("data_type", TEXTURE_DATA_TYPES_SORTED)
 def test_components_data_type_combinations(
     components: TextureComponents,
     data_type: type[TextureDataType]
@@ -139,7 +140,7 @@ def test_depth_stencil() -> None:
 
 
 @pytest.mark.parametrize("data_type", [
-    dt for dt in TEXTURE_DATA_TYPES
+    dt for dt in TEXTURE_DATA_TYPES_SORTED
     if dt != glm.uint32
 ])
 def test_depth_stencil_invalid_data_types(
@@ -176,8 +177,8 @@ def test_close() -> None:
     c for c in TextureComponents
     if c != TextureComponents.DS
 ])
-@pytest.mark.parametrize("input_data_type", TEXTURE_DATA_TYPES)
-@pytest.mark.parametrize("output_data_type", TEXTURE_DATA_TYPES)
+@pytest.mark.parametrize("input_data_type", TEXTURE_DATA_TYPES_SORTED)
+@pytest.mark.parametrize("output_data_type", TEXTURE_DATA_TYPES_SORTED)
 def test_texture_view(
     components: TextureComponents,
     input_data_type: type[TextureDataType],
@@ -276,7 +277,7 @@ def test_texture_view_depth_stencil() -> None:
 
 
 @pytest.mark.parametrize("output_data_type", [
-    dt for dt in TEXTURE_DATA_TYPES
+    dt for dt in TEXTURE_DATA_TYPES_SORTED
     if dt != glm.uint32
 ])
 def test_texture_view_depth_stencil_invalid_output_data_type(

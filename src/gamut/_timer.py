@@ -31,7 +31,10 @@ class Timer:
         self._event = event
         self._repeat = repeat
         self._fixed = fixed
-        self._thread = Thread(target=timer_thread_main, args=(ref(self),))
+        self._thread = Thread(
+            target=timer_thread_main,
+            args=(ref(self), datetime.now())
+        )
         self._thread.start()
 
     @property
@@ -58,7 +61,7 @@ class Timer:
         return True
 
 
-def timer_thread_main(weak_timer: ref[Timer]) -> None:
+def timer_thread_main(weak_timer: ref[Timer], previous: datetime) -> None:
     timer = weak_timer()
     if timer is None:
         return
@@ -67,7 +70,6 @@ def timer_thread_main(weak_timer: ref[Timer]) -> None:
     timer_fixed = timer.fixed
     timer_event = timer.event
     del timer
-    previous = datetime.now()
 
     while True:
         timer = weak_timer()
