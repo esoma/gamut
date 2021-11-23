@@ -6,7 +6,6 @@ import gc
 import os
 from pathlib import Path
 import signal
-import time
 from typing import Any, Generator
 import warnings
 # pysdl2
@@ -42,17 +41,7 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
         SDL_INIT_HAPTIC |
         SDL_INIT_GAMECONTROLLER |
         SDL_INIT_EVENTS) != 0:
-        warnings.warn('SDL in unexpected state, cannot continue testing')
-        os.kill(os.getpid(), signal.SIGTERM)
-    # add a delay for tests that failed and are being retried
-    try:
-        failures_db = request.config.failures_db
-    except AttributeError:
-        failures_db = None
-    if failures_db is not None:
-        failures = failures_db.get_test_failures(request.node.nodeid)
-        if failures != 0:
-            time.sleep(5)
+        pass
     # do the test
     yield
     # make sure all events are reset so that the event futures don't persist
@@ -71,3 +60,6 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
     assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
     assert SDL_WasInit(SDL_INIT_EVENTS) == 0
+    if True:
+        warnings.warn('SDL in unexpected state, cannot continue testing')
+        os.kill(os.getpid(), signal.SIGSEGV)
