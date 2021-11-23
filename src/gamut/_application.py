@@ -218,8 +218,13 @@ class ApplicationRunContext:
 class SdlContext:
 
     def __enter__(self) -> None:
-        if SDL_Init(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK) != 0:
+        if SDL_Init(SDL_INIT_EVENTS) != 0:
             raise RuntimeError(SDL_GetError().decode('utf8'))
+        try:
+            if SDL_Init(SDL_INIT_JOYSTICK) != 0:
+                raise RuntimeError(SDL_GetError().decode('utf8'))
+        except BaseException:
+            SDL_QuitSubSystem(SDL_INIT_EVENTS)
 
     def __exit__(self, *args: Any) -> None:
         SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK)
