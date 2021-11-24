@@ -7,15 +7,19 @@ __all__ = ['Font']
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, Generator, Optional, Sequence, Union
+from typing import BinaryIO, Final, Generator, Optional, Sequence, Union
 # freetype-py
 from freetype import FT_ENCODING_UNICODE
 from freetype import Face as FtFace
+from icu import BreakIterator as IcuBreakIterator
+from icu import Locale as IcuLocale
 # uharfbuzz
 from uharfbuzz import Buffer as HbBuffer
 from uharfbuzz import Face as HbFace
 from uharfbuzz import Font as HbFont
 from uharfbuzz import shape as hb_shape
+
+UBRK_LINE_HARD: Final = 100
 
 
 class Font:
@@ -89,24 +93,65 @@ class Font:
         return RenderedGlyph(
             bytes(ft_glyph.bitmap.buffer),
             (ft_glyph.bitmap.pitch, ft_glyph.bitmap.rows),
-            (ft_glyph.bitmap_left, ft_glyph.bitmap_top),
+            (ft_glyph.bitmap_left, -ft_glyph.bitmap_top),
         )
 
-    def layout_text(self, text: str) -> Generator[LayoutGlyph, None, None]:
-        hb_buffer = HbBuffer()
-        hb_buffer.add_str(text)
-        hb_buffer.guess_segment_properties()
-        hb_shape(self._hb_font, hb_buffer, {})
-
-        infos = hb_buffer.glyph_infos
-        positions = hb_buffer.glyph_positions
-        for info, pos in zip(infos, positions):
-            yield LayoutGlyph(
-                info.codepoint,
-                (pos.x_advance, pos.y_advance),
-                (pos.x_offset, pos.y_offset),
-            )
-
+    def layout_text(
+        self,
+        text: str,
+        size: FontSize,
+        *,
+        max_line_size: Optional[int] = None
+    ) -> Generator[PositionedGlyph, None, None]:
+        self._hb_font.scale = size._scale
+        pen_position_x = 0
+        pen_position_y = size._line_size[1]
+        break_iter = IcuBreakIterator.createLineInstance(
+            IcuLocale.getDefault()
+        )
+        break_iter.setText(text)
+        previous_chunk_index = 0
+        for next_chunk_index in break_iter:
+            chunk_pen_position_x = pen_position_x
+            chunk_pen_position_y = pen_position_y
+            chunk = text[previous_chunk_index:next_chunk_index]
+            rule_status = break_iter.getRuleStatus()
+            hb_buffer = HbBuffer()
+            hb_buffer.direction = 'LTR'
+            hb_buffer.add_str(chunk)
+            hb_shape(self._hb_font, hb_buffer, {
+                "kern": True,
+                "liga": True,
+            })
+            chunk_glyphs: list[PositionedGlyph] = []
+            for info, pos in zip(
+                hb_buffer.glyph_infos,
+                hb_buffer.glyph_positions
+            ):
+                c = chunk[info.cluster]
+                chunk_glyphs.append(PositionedGlyph(
+                    c,
+                    info.codepoint,
+                    (
+                        pen_position_x + (pos.x_offset / 64.0),
+                        pen_position_y + (pos.y_offset / 64.0),
+                    ),
+                ))
+                pen_position_x += pos.x_advance / 64.0
+                pen_position_y += pos.y_advance / 64.0
+            if max_line_size is not None and pen_position_x > max_line_size:
+                for chunk_glyph in chunk_glyphs:
+                    chunk_glyph.position = (
+                        chunk_glyph.position[0] - chunk_pen_position_x,
+                        chunk_glyph.position[1]
+                    )
+                pen_position_x -= chunk_pen_position_x
+                pen_position_y += size._line_size[1]
+            elif rule_status == UBRK_LINE_HARD:
+                pen_position_x = 0
+                pen_position_y += size._line_size[1]
+            yield from chunk_glyphs
+            previous_chunk_index = next_chunk_index
 
     @property
     def fixed_sizes(self) -> Sequence[FontSize]:
@@ -121,20 +166,23 @@ class Font:
         return self._name
 
 
-class LayoutGlyph:
+class PositionedGlyph:
 
     def __init__(
         self,
+        character: str,
         glyph_index: int,
-        advance: tuple[int, int],
-        offset: tuple[int, int],
+        position: tuple[int, int],
     ):
+        self.character = character
         self.glyph_index = glyph_index
-        self.advance = advance
-        self.offset = offset
+        self.position = position
 
     def __repr__(self) -> str:
-        return f'<gamut.text.LayoutGlyph {self.glyph_index}>'
+        return (
+            f'<gamut.text.PositionedGlyph {self.character!r} @ '
+            f'{self.position}>'
+        )
 
 
 class RenderedGlyph:
@@ -170,6 +218,18 @@ class FontSize(ABC):
         self._nominal_size = (
             self._font._ft_face.size.x_ppem,
             self._font._ft_face.size.y_ppem,
+        )
+        self._scale = (
+            self._font._ft_face.size.x_scale *
+            self._font._ft_face.units_per_EM +
+            (1 << 15) >> 16,
+            self._font._ft_face.size.y_scale *
+            self._font._ft_face.units_per_EM +
+            (1 << 15) >> 16,
+        )
+        self._line_size = (
+            0.0, # how
+            self._font._ft_face.size.height / 64.0,
         )
 
     def __repr__(self) -> str:

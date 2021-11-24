@@ -25,6 +25,7 @@ warn_unused_configs = true
 [[tool.mypy.overrides]]
 module = [
     'freetype',
+    'icu',
     'openal',
     'openal.al',
     'openal.al_lib',
@@ -52,14 +53,16 @@ known_glm = 'glm'
 known_openal = 'openal'
 known_uharfbuzz = 'uharfbuzz'
 known_freetypepy = 'freetype'
+known_pyicu = 'icu'
 
 sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
-            'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'GLM', 'OPENAL', 'OPENGL',
-            'SDL2', 'PYTEST', 'SETUPTOOLS', 'UHARFBUZZ', 'THIRDPARTY']
+            'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'GLM', 'OPENAL',
+            'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'UHARFBUZZ',
+            'THIRDPARTY']
 no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
-                   'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'GLM', 'OPENAL',
-                   'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'UHARFBUZZ',
-                   'THIRDPARTY']
+                   'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'GLM',
+                   'OPENAL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
+                   'UHARFBUZZ', 'THIRDPARTY']
 
 import_heading_localfolder = 'gamut'
 import_heading_evdev = 'evdev'
@@ -69,6 +72,7 @@ import_heading_stdlib = 'python'
 import_heading_mypy = 'mypy'
 import_heading_numpy = 'numpy'
 import_heading_pillow = 'pillow'
+import_heading_icu = 'pyicu'
 import_heading_glm = 'pyglm'
 import_heading_openal = 'pyopenal'
 import_heading_opengl = 'pyopengl'
