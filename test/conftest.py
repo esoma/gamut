@@ -1,5 +1,6 @@
 
 # gamut
+from gamut.audio import Listener
 from gamut.event._event import reset_events
 # python
 import gc
@@ -34,7 +35,8 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     """This fixture helps to clean up any state that would persist between
     tests.
     """
-    # exit if SDL isn't completley de-initialized
+    # exit if gamut isn't completley de-initialized
+    listener = Listener.get_active()
     sdl_timer_init = SDL_WasInit(SDL_INIT_TIMER) != 0
     sdl_audio_init = SDL_WasInit(SDL_INIT_AUDIO) != 0
     sdl_video_init = SDL_WasInit(SDL_INIT_VIDEO) != 0
@@ -43,6 +45,7 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     sdl_gamecontroller_init = SDL_WasInit(SDL_INIT_GAMECONTROLLER) != 0
     sdl_events_init = SDL_WasInit(SDL_INIT_EVENTS) != 0
     if (
+        listener or
         sdl_timer_init or
         sdl_audio_init or
         sdl_video_init or
@@ -51,6 +54,8 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
         sdl_gamecontroller_init or
         sdl_events_init
     ) != 0:
+        if listener:
+            warnings.warn(f'Listener Active')
         if sdl_timer_init:
             warnings.warn(f'SDL Timer Subsystem Initialized')
         if sdl_audio_init:
@@ -65,7 +70,7 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
             warnings.warn(f'SDL Game Controller Subsystem Initialized')
         if sdl_events_init:
             warnings.warn(f'SDL Events Subsystem Initialized')
-        warnings.warn('SDL in unexpected state, cannot continue testing')
+        warnings.warn('gamut in unexpected state, cannot continue testing')
         # the sleep is necessary to avoid killing this process before
         # pytest-xdist has had a chance to send some additional data (or
         # something like that)
@@ -78,8 +83,8 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     reset_events()
     # re-enable garbage collection in case it was disabled without re-enabling
     gc.enable()
-    # force a garbage collection to get rid of anything that is still dangling
-    # and hasn't had its __del__ resolved
+    # force a garbage collection to try to get rid of anything that is still
+    # dangling and hasn't had its __del__ resolved
     gc.collect()
     # make sure SDL was completley de-initialized
     assert SDL_WasInit(SDL_INIT_TIMER) == 0
@@ -89,5 +94,7 @@ def cleanup(request: Any) -> Generator[Any, Any, None]:
     assert SDL_WasInit(SDL_INIT_HAPTIC) == 0
     assert SDL_WasInit(SDL_INIT_GAMECONTROLLER) == 0
     assert SDL_WasInit(SDL_INIT_EVENTS) == 0
+    # make sure there is no active listener
+    assert Listener.get_active() is None
     # totally shutdown SDL
     SDL_Quit()

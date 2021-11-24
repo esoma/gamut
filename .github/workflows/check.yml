@@ -43,7 +43,7 @@ jobs:
         python -m pip install pytest-xdist pytest-rerunfailures
 
     - name: Patch pytest-rerunfailures
-    if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         export PYTEST_RERUNFAILURES=`python -c "import pytest_rerunfailures; print(pytest_rerunfailures.__file__)"`
         sed 's/item_location = *$/item_location = item.nodeid/g' $PYTEST_RERUNFAILURES > /tmp/pytest_rerunfailures.py
@@ -52,7 +52,7 @@ jobs:
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo apt-get install xvfb
+        sudo apt-get install xvfb libopenal1
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
@@ -73,6 +73,8 @@ jobs:
     - name: Test (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        brew install openal-soft
+        cp /usr/local/opt/openal-soft/lib/libopenal.dylib .
         python -m pytest -n auto --cov=gamut --cov-report=xml --reruns=3 --only-rerun="Not properly terminated"
 
     - name: Codecov
