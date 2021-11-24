@@ -41,7 +41,7 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         sudo apt-get install pkg-config libicu-dev
-        python -m pip install --nobinary=:pyicu: pyicu
+        python -m pip install --no-binary=:pyicu: pyicu
 
     - name: Install PyICU (Windows 3.9)
       if: ${{ matrix.os == 'windows-latest' && matrix.python-version == '3.9' }}
@@ -56,13 +56,13 @@ jobs:
         python -m pip install PyICU-2.7.4-cp310-cp310-win_amd64.whl
 
     - name: Install PyICU (Mac OS)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.os == 'macos-latest' }}
       run: |
         brew install pkg-config icu4c
         export PATH="/usr/local/opt/icu4c/bin:/usr/local/opt/icu4c/sbin:$PATH"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
         unset CC CXX
-        python -m pip install --nobinary=:pyicu: pyicu
+        python -m pip install --no-binary=:pyicu: pyicu
 
     - name: Install Test Dependencies
       run: |
