@@ -3,6 +3,8 @@ from __future__ import annotations
 
 __all__ = ['Font']
 
+# gamut
+from ._break import break_never, BreakMethod
 # python
 from abc import ABC, abstractmethod
 from io import BytesIO
@@ -11,9 +13,6 @@ from typing import BinaryIO, Final, Generator, Optional, Sequence, Union
 # freetype-py
 from freetype import FT_ENCODING_UNICODE
 from freetype import Face as FtFace
-# pyicu
-from icu import BreakIterator as IcuBreakIterator
-from icu import Locale as IcuLocale
 # uharfbuzz
 from uharfbuzz import Buffer as HbBuffer
 from uharfbuzz import Face as HbFace
@@ -102,24 +101,18 @@ class Font:
         text: str,
         size: FontSize,
         *,
+        break_method: BreakMethod = break_never,
         max_line_size: Optional[int] = None
     ) -> Generator[PositionedGlyph, None, None]:
         self._hb_font.scale = size._scale
         pen_position_x = 0
         pen_position_y = size._line_size[1]
-        break_iter = IcuBreakIterator.createLineInstance(
-            IcuLocale.getDefault()
-        )
-        break_iter.setText(text)
-        previous_chunk_index = 0
-        for next_chunk_index in break_iter:
+        for chunk in break_method(text):
             chunk_pen_position_x = pen_position_x
             chunk_pen_position_y = pen_position_y
-            chunk = text[previous_chunk_index:next_chunk_index]
-            rule_status = break_iter.getRuleStatus()
             hb_buffer = HbBuffer()
             hb_buffer.direction = 'LTR'
-            hb_buffer.add_str(chunk)
+            hb_buffer.add_str(chunk.text)
             hb_shape(self._hb_font, hb_buffer, {
                 "kern": True,
                 "liga": True,
@@ -129,7 +122,7 @@ class Font:
                 hb_buffer.glyph_infos,
                 hb_buffer.glyph_positions
             ):
-                c = chunk[info.cluster]
+                c = chunk.text[info.cluster]
                 chunk_glyphs.append(PositionedGlyph(
                     c,
                     info.codepoint,
@@ -148,11 +141,10 @@ class Font:
                     )
                 pen_position_x -= chunk_pen_position_x
                 pen_position_y += size._line_size[1]
-            elif rule_status == UBRK_LINE_HARD:
+            elif chunk.force_newline:
                 pen_position_x = 0
                 pen_position_y += size._line_size[1]
             yield from chunk_glyphs
-            previous_chunk_index = next_chunk_index
 
     @property
     def fixed_sizes(self) -> Sequence[FontSize]:
