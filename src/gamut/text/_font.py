@@ -11,6 +11,7 @@ from typing import BinaryIO, Final, Generator, Optional, Sequence, Union
 # freetype-py
 from freetype import FT_ENCODING_UNICODE
 from freetype import Face as FtFace
+# pyicu
 from icu import BreakIterator as IcuBreakIterator
 from icu import Locale as IcuLocale
 # uharfbuzz
