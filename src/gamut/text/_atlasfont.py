@@ -9,10 +9,21 @@ __all__ = ['AtlasFont', 'AtlasGlyph']
 from ._face import FontSize, RenderedGlyph, RenderedGlyphFormat
 from ._font import Font
 # gamut
-from gamut.graphics import Texture2d
+from gamut.graphics import Pack2d, Texture2d, TextureComponents
 # python
-from typing import Optional, Union
+from typing import Final, Optional, Union
 from weakref import ref
+from PIL import Image as PilImage
+from PIL.ImageOps import flip as pil_flip
+# pyglm
+from glm import ivec2, uint8
+
+GLYPH_FORMAT_TO_PIL_MODE: Final = {
+    RenderedGlyphFormat.ALPHA: 'L',
+    RenderedGlyphFormat.SDF: 'L',
+    RenderedGlyphFormat.LCD: 'RGB',
+    RenderedGlyphFormat.LCD_V: 'RGB',
+}
 
 
 class AtlasFont(Font):
@@ -29,6 +40,8 @@ class AtlasFont(Font):
         self._texture_size = texture_size
         self._glyph_map: dict[int, AtlasGlyph] = {}
         self._textures: list[Texture2d] = []
+        self._pack = Pack2d(texture_size)
+        self._pack_to_glyph: dict[int, int] = {}
 
     def __getitem__(self, glyph_index: int) -> AtlasGlyph:
         try:
@@ -36,14 +49,45 @@ class AtlasFont(Font):
         except KeyError:
             return self._map_glyph(glyph_index)
 
+    def _update_texture(self, texture_index: int) -> None:
+        canvas = PilImage.new('L', self._texture_size, color=0)
+        for pack_index, packed in self._pack.map.items():
+            if packed.bin != texture_index:
+                continue
+            glyph_index = self._pack_to_glyph[pack_index]
+            rendered_glyph = self.render_glyph(glyph_index)
+            glyph_canvas = PilImage.frombytes(
+                'L',
+                rendered_glyph.size,
+                rendered_glyph.data
+            )
+            canvas.paste(glyph_canvas, packed.position)
+        canvas = pil_flip(canvas)
+        texture = Texture2d(
+            *self._texture_size,
+            TextureComponents.R,
+            uint8,
+            canvas.tobytes()
+        )
+        try:
+            self._textures[texture_index] = texture
+        except IndexError:
+            assert len(self._textures) == texture_index
+            self._textures.append(texture)
+
     def _map_glyph(self, glyph_index: int) -> AtlasGlyph:
         assert glyph_index not in self._glyph_map
         rendered_glyph = self.render_glyph(glyph_index)
+        pack_index = self._pack.add(rendered_glyph.size)
+        self._pack_to_glyph[pack_index] = glyph_index
+        self._pack.pack()
+        packed = self._pack.map[pack_index]
+        self._update_texture(packed.bin)
         atlas_glyph = AtlasGlyph(
             self,
             rendered_glyph.bearing,
-            0,
-            (0, 0),
+            packed.bin,
+            packed.position,
             rendered_glyph.size,
             data=rendered_glyph.data
         )
@@ -64,6 +108,10 @@ class AtlasFont(Font):
     def format(self) -> RenderedGlyphFormat:
         return self._format
 
+    @property
+    def texture_size(self) -> ivec2:
+        return ivec2(self._texture_size)
+
 
 class AtlasGlyph:
 
@@ -82,3 +130,36 @@ class AtlasGlyph:
         self._texture_index = texture_index
         self._position = position
         self._size = size
+
+    def __repr__(self) -> str:
+        font = self._font()
+        if not font:
+            return '<gamut.text.AtlasGlyph (orphaned)>'
+        else:
+            return (
+                f'<gamut.text.AtlasGlyph texture={self.texture} '
+                f'position={self._position}>'
+            )
+
+    @property
+    def font(self) -> AtlasFont:
+        font = self._font()
+        if font is None:
+            raise RuntimeError('font no longer exists')
+        return font
+
+    @property
+    def texture(self) -> Texture2d:
+        return self._font()._textures[self._texture_index]
+
+    @property
+    def bearing(self) -> ivec2:
+        return ivec2(self._bearing)
+
+    @property
+    def position(self) -> ivec2:
+        return ivec2(self._position)
+
+    @property
+    def size(self) -> ivec2:
+        return ivec2(self._size)
