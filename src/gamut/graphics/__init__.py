@@ -15,6 +15,7 @@ __all__ = [
     'Image',
     'ImageInvalidError',
     'Pack2d',
+    'Packed2dItem',
     'PrimitiveMode',
     'read_color_from_render_target',
     'read_depth_from_render_target',
@@ -37,7 +38,7 @@ from ._buffer import (Buffer, BufferFrequency, BufferNature, BufferView,
                       BufferViewMap)
 from ._color import Color
 from ._image import Image, ImageInvalidError
-from ._pack2d import Pack2d
+from ._pack2d import Pack2d, Packed2dItem
 from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             read_depth_from_render_target,
                             read_stencil_from_render_target,
