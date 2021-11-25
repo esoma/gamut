@@ -85,7 +85,7 @@ class App(Application):
         )
         
         face = Face('Roboto-Regular.ttf')
-        size = face.request_pixel_size(height=72)
+        size = face.request_pixel_size(height=64)
         font = AtlasFont(size, RenderedGlyphFormat.ALPHA)
         
         ortho = glm.ortho(0, 800, 800, 0, -1000, 1000)
@@ -99,16 +99,15 @@ class App(Application):
                 print(repr(g.character))
                 continue
             ag = font[g.glyph_index]
-            top_left = glm.vec2(ag.position) / glm.vec2(font.texture_size)
-            bottom_right = glm.vec2(ag.position + ag.size) / glm.vec2(font.texture_size)
+            top_left, bottom_right = ag.uv
             ag_uv = BufferView(
                 Buffer(glm.array(
-                    glm.vec2(top_left[0], 1 - top_left[1]),
-                    glm.vec2(top_left[0], 1 - bottom_right[1]),
-                    glm.vec2(bottom_right[0], 1 - bottom_right[1]),
-                    glm.vec2(bottom_right[0], 1 - bottom_right[1]),
-                    glm.vec2(top_left[0], 1 - top_left[1]),
-                    glm.vec2(bottom_right[0], 1 - top_left[1]),
+                    glm.vec2(top_left[0], top_left[1]),
+                    glm.vec2(top_left[0], bottom_right[1]),
+                    glm.vec2(bottom_right[0], bottom_right[1]),
+                    glm.vec2(bottom_right[0], bottom_right[1]),
+                    glm.vec2(top_left[0], top_left[1]),
+                    glm.vec2(bottom_right[0], top_left[1]),
                 ).to_bytes()),
                 glm.vec2,
             )

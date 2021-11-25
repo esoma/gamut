@@ -16,7 +16,7 @@ from weakref import ref
 from PIL import Image as PilImage
 from PIL.ImageOps import flip as pil_flip
 # pyglm
-from glm import ivec2, uint8
+from glm import ivec2, uint8, vec2
 
 GLYPH_FORMAT_TO_PIL_MODE: Final = {
     RenderedGlyphFormat.ALPHA: 'L',
@@ -34,10 +34,12 @@ class AtlasFont(Font):
         format: RenderedGlyphFormat,
         *,
         texture_size: tuple[int, int] = (256, 256),
+        padding: int = 1,
     ):
         super().__init__(size)
         self._format = format
         self._texture_size = texture_size
+        self._padding = padding
         self._glyph_map: dict[int, AtlasGlyph] = {}
         self._textures: list[Texture2d] = []
         self._pack = Pack2d(texture_size)
@@ -61,8 +63,10 @@ class AtlasFont(Font):
                 rendered_glyph.size,
                 rendered_glyph.data
             )
-            canvas.paste(glyph_canvas, packed.position)
-        canvas = pil_flip(canvas)
+            canvas.paste(
+                glyph_canvas,
+                tuple(packed.position + ivec2(self._padding, self._padding))
+            )
         texture = Texture2d(
             *self._texture_size,
             TextureComponents.R,
@@ -78,7 +82,10 @@ class AtlasFont(Font):
     def _map_glyph(self, glyph_index: int) -> AtlasGlyph:
         assert glyph_index not in self._glyph_map
         rendered_glyph = self.render_glyph(glyph_index)
-        pack_index = self._pack.add(rendered_glyph.size)
+        pack_index = self._pack.add((
+            rendered_glyph.size[0] + (self._padding * 2),
+            rendered_glyph.size[1] + (self._padding * 2)
+        ))
         self._pack_to_glyph[pack_index] = glyph_index
         self._pack.pack()
         packed = self._pack.map[pack_index]
@@ -87,7 +94,7 @@ class AtlasFont(Font):
             self,
             rendered_glyph.bearing,
             packed.bin,
-            packed.position,
+            packed.position + ivec2(self._padding, self._padding),
             rendered_glyph.size,
             data=rendered_glyph.data
         )
@@ -163,3 +170,10 @@ class AtlasGlyph:
     @property
     def size(self) -> ivec2:
         return ivec2(self._size)
+        
+    @property
+    def uv(self) -> tuple[vec2, vec2]:
+        tex_size = vec2(self.font.texture_size)
+        top_left = vec2(self._position) / tex_size
+        bottom_right = vec2(self._position + self._size) / tex_size
+        return top_left, bottom_right

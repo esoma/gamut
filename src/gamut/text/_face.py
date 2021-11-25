@@ -136,10 +136,7 @@ class Face:
             hb_buffer = HbBuffer()
             hb_buffer.direction = 'LTR'
             hb_buffer.add_str(chunk.text)
-            hb_shape(self._hb_font, hb_buffer, {
-                "kern": True,
-                "liga": True,
-            })
+            hb_shape(self._hb_font, hb_buffer, {})
             chunk_glyphs: list[PositionedGlyph] = []
             for info, pos in zip(
                 hb_buffer.glyph_infos,
