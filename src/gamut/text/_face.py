@@ -22,6 +22,8 @@ from freetype import (FT_ENCODING_UNICODE, FT_RENDER_MODE_LCD,
                       FT_RENDER_MODE_LCD_V, FT_RENDER_MODE_LIGHT,
                       FT_RENDER_MODE_SDF)
 from freetype import Face as FtFace
+# pyglm
+from glm import ivec2, vec2
 # uharfbuzz
 from uharfbuzz import Buffer as HbBuffer
 from uharfbuzz import Face as HbFace
@@ -63,7 +65,7 @@ class Face:
 
     def get_glyph_index(self, character: str) -> int:
         if len(character) != 1:
-            raise ValueError('only a single character may be entered')
+            raise TypeError('only a single character may be entered')
         return self._ft_face.get_char_index(character) # type: ignore
 
     def request_point_size(
@@ -102,7 +104,7 @@ class Face:
         format: RenderedGlyphFormat = RenderedGlyphFormat.ALPHA
     ) -> RenderedGlyph:
         if isinstance(character, str) and len(character) != 1:
-            raise ValueError('only a single character may be rendered')
+            raise TypeError('only a single character may be rendered')
         if size.face is not self:
             raise ValueError('size is not compatible with this face')
         size._use()
@@ -112,10 +114,35 @@ class Face:
             self._ft_face.load_glyph(character, 0)
         ft_glyph = self._ft_face.glyph
         ft_glyph.render(format.value)
+        width = ft_glyph.bitmap.width
+        height = ft_glyph.bitmap.rows
+        data = bytes(ft_glyph.bitmap.buffer)
+        if format == RenderedGlyphFormat.LCD:
+            width = width // 3
+            data = b''.join((
+                bytes((
+                    data[x * 3 + (y * ft_glyph.bitmap.pitch)],
+                    data[x * 3 + 1 + (y * ft_glyph.bitmap.pitch)],
+                    data[x * 3 + 2 + (y * ft_glyph.bitmap.pitch)],
+                ))
+                for y in range(height)
+                for x in range(width)
+            ))
+        elif format == RenderedGlyphFormat.LCD_V:
+            height = height // 3
+            data = b''.join((
+                bytes((
+                    data[x + (y * 3 * ft_glyph.bitmap.pitch)],
+                    data[x + ((y * 3 + 1) * ft_glyph.bitmap.pitch)],
+                    data[x + ((y * 3 + 2) * ft_glyph.bitmap.pitch)],
+                ))
+                for y in range(height)
+                for x in range(width)
+            ))
         return RenderedGlyph(
-            bytes(ft_glyph.bitmap.buffer),
-            (ft_glyph.bitmap.pitch, ft_glyph.bitmap.rows),
-            (ft_glyph.bitmap_left, -ft_glyph.bitmap_top),
+            data,
+            ivec2(width, height),
+            ivec2(ft_glyph.bitmap_left, -ft_glyph.bitmap_top),
             format,
         )
 
@@ -128,7 +155,7 @@ class Face:
         max_line_size: Optional[int] = None
     ) -> Generator[PositionedGlyph, None, None]:
         self._hb_font.scale = size._scale
-        pen_position_x = 0
+        pen_position_x = 0.0
         pen_position_y = size._line_size[1]
         for chunk in break_method(text):
             chunk_pen_position_x = pen_position_x
@@ -146,7 +173,7 @@ class Face:
                 chunk_glyphs.append(PositionedGlyph(
                     c,
                     info.codepoint,
-                    (
+                    vec2(
                         pen_position_x + (pos.x_offset / 64.0),
                         pen_position_y + (pos.y_offset / 64.0),
                     ),
@@ -154,12 +181,15 @@ class Face:
                 pen_position_x += pos.x_advance / 64.0
                 pen_position_y += pos.y_advance / 64.0
             if max_line_size is not None and pen_position_x > max_line_size:
-                for chunk_glyph in chunk_glyphs:
-                    chunk_glyph.position = (
-                        chunk_glyph.position[0] - chunk_pen_position_x,
-                        chunk_glyph.position[1]
-                    )
-                pen_position_x -= chunk_pen_position_x
+                if chunk_pen_position_x == 0.0:
+                    pen_position_x = 0.0
+                else:
+                    for chunk_glyph in chunk_glyphs:
+                        chunk_glyph.position = vec2(
+                            chunk_glyph.position[0] - chunk_pen_position_x,
+                            chunk_glyph.position[1] + size._line_size[1]
+                        )
+                    pen_position_x -= chunk_pen_position_x
                 pen_position_y += size._line_size[1]
             elif chunk.force_newline:
                 pen_position_x = 0
@@ -185,7 +215,7 @@ class PositionedGlyph:
         self,
         character: str,
         glyph_index: int,
-        position: tuple[int, int],
+        position: vec2,
     ):
         self.character = character
         self.glyph_index = glyph_index
@@ -194,7 +224,7 @@ class PositionedGlyph:
     def __repr__(self) -> str:
         return (
             f'<gamut.text.PositionedGlyph {self.character!r} @ '
-            f'{self.position}>'
+            f'{tuple(self.position)}>'
         )
 
 
@@ -203,8 +233,8 @@ class RenderedGlyph:
     def __init__(
         self,
         data: bytes,
-        size: tuple[int, int],
-        bearing: tuple[int, int],
+        size: ivec2,
+        bearing: ivec2,
         format: RenderedGlyphFormat
     ):
         self._data = data
@@ -217,12 +247,12 @@ class RenderedGlyph:
         return self._data
 
     @property
-    def size(self) -> tuple[int, int]:
-        return self._size
+    def size(self) -> ivec2:
+        return ivec2(self._size)
 
     @property
-    def bearing(self) -> tuple[int, int]:
-        return self._bearing
+    def bearing(self) -> ivec2:
+        return ivec2(self._bearing)
 
     @property
     def format(self) -> RenderedGlyphFormat:
@@ -266,8 +296,8 @@ class FontSize(ABC):
         return self._face
 
     @property
-    def nominal_size(self) -> tuple[int, int]:
-        return self._nominal_size
+    def nominal_size(self) -> ivec2:
+        return ivec2(self._nominal_size)
 
 
 class PointFontSize(FontSize):
@@ -279,7 +309,7 @@ class PointFontSize(FontSize):
         height: Optional[float],
         dpi: tuple[int, int]
     ):
-        self._args = (width, height, dpi)
+        self._args = (width, height, dpi[0], dpi[1])
         super().__init__(face)
 
     def _use(self) -> None:
