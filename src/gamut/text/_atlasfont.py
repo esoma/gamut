@@ -56,7 +56,11 @@ class AtlasFont(Font):
             return self._map_glyph(glyph_index)
 
     def _update_texture(self, texture_index: int) -> None:
-        canvas = PilImage.new('L', self._texture_size, color=0)
+        canvas = PilImage.new(
+            GLYPH_FORMAT_TO_PIL_MODE[self._format],
+            self._texture_size,
+            color=0
+        )
         for pack_index, packed in self._pack.map.items():
             if packed.bin != texture_index:
                 continue
@@ -65,7 +69,7 @@ class AtlasFont(Font):
             if rendered_glyph.size[0] == 0 or rendered_glyph.size[1] == 0:
                 continue
             glyph_canvas = PilImage.frombytes(
-                'L',
+                GLYPH_FORMAT_TO_PIL_MODE[self._format],
                 rendered_glyph.size,
                 rendered_glyph.data
             )
