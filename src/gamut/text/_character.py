@@ -1,4 +1,6 @@
 
+from __future__ import annotations
+
 __all__ = ['character_normally_rendered']
 
 # python

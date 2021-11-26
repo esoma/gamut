@@ -29,6 +29,8 @@ BreakMethod = Callable[[str], Generator[BreakChunk, None, None]]
 
 
 def break_never(text: str) -> Generator[BreakChunk, None, None]:
+    if not text:
+        return
     yield BreakChunk(text)
 
 
