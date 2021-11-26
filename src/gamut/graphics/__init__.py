@@ -1,5 +1,7 @@
 
 __all__ = [
+    'create_quad_position_array',
+    'create_quad_uv_array',
     'BlendFactor',
     'BlendFunction',
     'Buffer',
@@ -39,6 +41,7 @@ from ._buffer import (Buffer, BufferFrequency, BufferNature, BufferView,
 from ._color import Color
 from ._image import Image, ImageInvalidError
 from ._pack2d import Pack2d, Packed2dItem
+from ._quad import create_quad_position_array, create_quad_uv_array
 from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             read_depth_from_render_target,
                             read_stencil_from_render_target,

@@ -6,17 +6,21 @@ __all__ = ['AtlasFont', 'AtlasGlyph']
 
 
 # gamut
-from ._face import FontSize, RenderedGlyph, RenderedGlyphFormat
+from ._break import break_never, BreakMethod
+from ._face import (FontSize, PositionedGlyph, RenderedGlyph,
+                    RenderedGlyphFormat)
 from ._font import Font
 # gamut
-from gamut.graphics import Pack2d, Texture2d, TextureComponents
+from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
+                            create_quad_uv_array, Pack2d, PrimitiveMode,
+                            Texture2d, TextureComponents)
 # python
-from typing import Final, Optional, Union
+from typing import Final, Iterable, Optional, Union
 from weakref import ref
 from PIL import Image as PilImage
-from PIL.ImageOps import flip as pil_flip
 # pyglm
-from glm import ivec2, uint8, vec2
+from glm import array as glm_array
+from glm import ivec2, mat4, scale, translate, uint8, vec2, vec3, vec4
 
 GLYPH_FORMAT_TO_PIL_MODE: Final = {
     RenderedGlyphFormat.ALPHA: 'L',
@@ -33,7 +37,7 @@ class AtlasFont(Font):
         size: FontSize,
         format: RenderedGlyphFormat,
         *,
-        texture_size: tuple[int, int] = (256, 256),
+        texture_size: tuple[int, int] = (512, 512),
         padding: int = 1,
     ):
         super().__init__(size)
@@ -58,6 +62,8 @@ class AtlasFont(Font):
                 continue
             glyph_index = self._pack_to_glyph[pack_index]
             rendered_glyph = self.render_glyph(glyph_index)
+            if rendered_glyph.size[0] == 0 or rendered_glyph.size[1] == 0:
+                continue
             glyph_canvas = PilImage.frombytes(
                 'L',
                 rendered_glyph.size,
@@ -92,9 +98,12 @@ class AtlasFont(Font):
         self._update_texture(packed.bin)
         atlas_glyph = AtlasGlyph(
             self,
-            rendered_glyph.bearing,
+            (rendered_glyph.bearing[0], -rendered_glyph.bearing[1]),
             packed.bin,
-            packed.position + ivec2(self._padding, self._padding),
+            (
+                packed.position[0] + self._padding,
+                packed.position[1] + self._padding
+            ),
             rendered_glyph.size,
             data=rendered_glyph.data
         )
@@ -111,6 +120,75 @@ class AtlasFont(Font):
             format = self._format
         return super().render_glyph(character, format=self._format)
 
+    def buffer_positioned_glyphs(
+        self,
+        positioned_glyphs: Iterable[PositionedGlyph],
+    ) -> dict[
+        Texture2d,
+        tuple[BufferView[vec4], BufferView[vec2]]
+    ]:
+        # iterate over all the positioned glyphs once so we can make sure all
+        # glyphs have been rendered to the atlas before continuing
+        #
+        # this should be optimized to do a bulk update, so we're not creating
+        # a ton of useless textures
+        glyphs = [
+            (positioned_glyph, self[positioned_glyph.glyph_index])
+            for positioned_glyph in positioned_glyphs
+        ]
+
+        texture_buffers: dict[Texture2d, tuple[bytes, bytes]] = {}
+        for positioned_glyph, atlas_glyph in glyphs:
+            try:
+                pos, uvs = texture_buffers[atlas_glyph.texture]
+            except KeyError:
+                pos = bytearray()
+                uvs = bytearray()
+                texture_buffers[atlas_glyph.texture] = (pos, uvs)
+            # generate the vertex positions
+            transform = atlas_glyph.transform_with_position(positioned_glyph)
+            glyph_position = create_quad_position_array(
+                PrimitiveMode.TRIANGLE,
+                left=0, bottom=0,
+            )
+            glyph_position = glm_array(
+                *(transform * p for p in glyph_position)
+            )
+            pos += glyph_position.to_bytes()
+            # generate the vertex uvs
+            top_left_uv, bottom_right_uv = atlas_glyph.uv
+            uvs += create_quad_uv_array(
+                PrimitiveMode.TRIANGLE,
+                left=top_left_uv.x,
+                right=bottom_right_uv.x,
+                bottom=bottom_right_uv.y,
+                top=top_left_uv.y
+            ).to_bytes()
+
+        return {
+            texture: (
+                BufferView(Buffer(bytes(pos)), vec4),
+                BufferView(Buffer(bytes(uvs)), vec2),
+            )
+            for texture, (pos, uvs) in texture_buffers.items()
+        }
+
+    def buffer_text(
+        self,
+        text: str,
+        *,
+        break_method: BreakMethod = break_never,
+        max_line_size: Optional[int] = None
+    ) -> dict[
+        Texture2d,
+        tuple[BufferView[vec4], BufferView[vec2]]
+    ]:
+        return self.buffer_positioned_glyphs(self.layout_text(
+            text,
+            break_method=break_method,
+            max_line_size=max_line_size,
+        ))
+
     @property
     def format(self) -> RenderedGlyphFormat:
         return self._format
@@ -118,6 +196,10 @@ class AtlasFont(Font):
     @property
     def texture_size(self) -> ivec2:
         return ivec2(self._texture_size)
+
+    @property
+    def textures(self) -> tuple[Texture2d, ...]:
+        return tuple(self._textures)
 
 
 class AtlasGlyph:
@@ -156,8 +238,12 @@ class AtlasGlyph:
         return font
 
     @property
+    def texture_index(self) -> int:
+        return self._texture_index
+
+    @property
     def texture(self) -> Texture2d:
-        return self._font()._textures[self._texture_index]
+        return self.font._textures[self._texture_index]
 
     @property
     def bearing(self) -> ivec2:
@@ -170,10 +256,21 @@ class AtlasGlyph:
     @property
     def size(self) -> ivec2:
         return ivec2(self._size)
-        
+
     @property
     def uv(self) -> tuple[vec2, vec2]:
         tex_size = vec2(self.font.texture_size)
         top_left = vec2(self._position) / tex_size
-        bottom_right = vec2(self._position + self._size) / tex_size
+        bottom_right = (vec2(self._position) + vec2(self._size)) / tex_size
         return top_left, bottom_right
+
+    def transform_with_position(self, positioned: PositionedGlyph) -> mat4:
+        return scale(
+            translate(
+                mat4(1),
+                vec3(positioned.position[0], -positioned.position[1], 0) -
+                vec3(0, self._size[1], 0) +
+                vec3(*self._bearing, 0)
+            ),
+            vec3(*self._size, 1)
+        )
