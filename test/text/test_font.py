@@ -1,7 +1,6 @@
 
-
 # gamut
-from gamut.text import (BreakChunk, Face, FontSize, PositionedGlyph,
+from gamut.text import (BreakChunk, Face, Font, PositionedGlyph,
                         RenderedGlyphFormat)
 # python
 import os
@@ -22,23 +21,27 @@ FONTS: Final = [
 
 
 @pytest.mark.parametrize("file", FONTS)
-@pytest.mark.parametrize("type", [str, Path, lambda f: open(f, 'rb')])
-def test_load(file: str, type: Any) -> None:
-    face = Face(type(file))
-    assert face.name
-
-
-def test_name_open_sans_regular() -> None:
-    face = Face(FONTS_DIR / 'OpenSans-Regular.ttf')
-    assert face.name == 'OpenSans-Regular'
-
-
-def test_repr_open_sans_regular() -> None:
-    face = Face(FONTS_DIR / 'OpenSans-Regular.ttf')
-    assert repr(face) == f'<gamut.text.Face {face.name!r}>'
+def test_init(file: str) -> None:
+    face = Face(file)
+    size = face.request_point_size(height=12)
+    font = Font(size)
+    assert font.size is size
+    assert font.face is face
 
 
 @pytest.mark.parametrize("file", FONTS)
+@pytest.mark.parametrize("height", [10, 20])
+def test_repr(file: str, height: int) -> None:
+    face = Face(file)
+    size = face.request_point_size(height=height)
+    font = Font(size)
+    assert repr(font) == (
+        f'<gamut.text.Font {face.name!r} of {tuple(size.nominal_size)}>'
+    )
+
+
+@pytest.mark.parametrize("file", FONTS)
+@pytest.mark.parametrize("height", [10, 20])
 @pytest.mark.parametrize("character", [
     'a', 'z',
     'A', 'Z',
@@ -46,123 +49,31 @@ def test_repr_open_sans_regular() -> None:
     '食',
     '\u2028'
 ])
-def test_get_glyph_index(file: str, character: str) -> None:
+def test_get_glyph_index(file: str, height: int, character: str) -> None:
     face = Face(file)
-    glyph_index = face.get_glyph_index(character)
+    size = face.request_point_size(height=height)
+    font = Font(size)
+    glyph_index = font.get_glyph_index(character)
     assert isinstance(glyph_index, int)
+    assert glyph_index == face.get_glyph_index(character)
 
 
 @pytest.mark.parametrize("file", FONTS)
+@pytest.mark.parametrize("height", [10, 20])
 @pytest.mark.parametrize("character", [
     '', 'aZ', '食食',
 ])
-def test_get_glyph_index_invalid_length(file: str, character: str) -> None:
+def test_get_glyph_index_invalid_length(
+    file: str,
+    height: int,
+    character: str
+) -> None:
     face = Face(file)
+    size = face.request_point_size(height=height)
+    font = Font(size)
     with pytest.raises(TypeError) as excinfo:
-        face.get_glyph_index(character)
+        font.get_glyph_index(character)
     assert str(excinfo.value) == 'only a single character may be entered'
-
-
-@pytest.mark.parametrize("file", FONTS)
-def test_request_point_size_no_dimensions(file: str) -> None:
-    face = Face(file)
-    with pytest.raises(TypeError) as excinfo:
-        face.request_point_size()
-    assert str(excinfo.value) == 'width or height must be specified'
-
-
-@pytest.mark.parametrize("file", FONTS)
-@pytest.mark.parametrize("width, height", [
-    (10, None), (None, 10), (10, 10),
-    (20, None), (None, 20), (20, 20),
-    (20, 25), (25, 20),
-])
-@pytest.mark.parametrize("dpi", [
-    None,
-    (72, 72),
-    (144, 72),
-    (72, 144),
-    (144, 144),
-])
-def test_request_point_size(
-    file: str,
-    width: Any, height: Any,
-    dpi: Any
-) -> None:
-    face = Face(file)
-    kwargs: dict[str, Any] = {}
-    if width is not None:
-        kwargs["width"] = width
-    if height is not None:
-        kwargs["height"] = height
-    if dpi is not None:
-        kwargs["dpi"] = dpi
-    else:
-        dpi = (72, 72)
-    expected_nominal_size = (
-        int((height if width is None else width) * (dpi[0] / 72.0)),
-        int((width if height is None else height) * (dpi[1] / 72.0)),
-    )
-
-    size = face.request_point_size(**kwargs)
-    assert isinstance(size, FontSize)
-    assert size.face is face
-
-    nominal_size = size.nominal_size
-    assert isinstance(nominal_size, glm.ivec2)
-    assert nominal_size == expected_nominal_size
-    nominal_size += (1, 1)
-    assert size.nominal_size is not nominal_size
-    assert size.nominal_size != nominal_size
-
-
-@pytest.mark.parametrize("file", FONTS)
-def test_request_pixel_size_no_dimensions(file: str) -> None:
-    face = Face(file)
-    with pytest.raises(TypeError) as excinfo:
-        face.request_pixel_size()
-    assert str(excinfo.value) == 'width or height must be specified'
-
-
-@pytest.mark.parametrize("file", FONTS)
-@pytest.mark.parametrize("width, height", [
-    (10, None), (None, 10), (10, 10),
-    (20, None), (None, 20), (20, 20),
-    (20, 25), (25, 20),
-])
-def test_request_pixel_size(
-    file: str,
-    width: Any, height: Any
-) -> None:
-    face = Face(file)
-    kwargs: dict[str, Any] = {}
-    if width is not None:
-        kwargs["width"] = width
-    if height is not None:
-        kwargs["height"] = height
-    expected_nominal_size = (
-        height if width is None else width,
-        width if height is None else height,
-    )
-
-    size = face.request_pixel_size(**kwargs)
-    assert isinstance(size, FontSize)
-    assert size.face is face
-
-    nominal_size = size.nominal_size
-    assert isinstance(nominal_size, glm.ivec2)
-    assert nominal_size == expected_nominal_size
-    nominal_size += (1, 1)
-    assert size.nominal_size is not nominal_size
-    assert size.nominal_size != nominal_size
-
-
-@pytest.mark.parametrize("file", FONTS)
-def test_fixed_sizes(file: str) -> None:
-    face = Face(file)
-    fixed_sizes = face.fixed_sizes
-    assert isinstance(fixed_sizes, tuple)
-    assert len(fixed_sizes) == 0
 
 
 @pytest.mark.parametrize("max_line_size", [
@@ -171,8 +82,9 @@ def test_fixed_sizes(file: str) -> None:
 def test_layout_text_no_wrap(max_line_size: Optional[int]) -> None:
     face = Face(FONTS_DIR / 'OpenSans-Regular.ttf')
     size = face.request_pixel_size(height=16)
-    positioned_glyphs = list(face.layout_text(
-        'hello world', size,
+    font = Font(size)
+    positioned_glyphs = list(font.layout_text(
+        'hello world',
         max_line_size=max_line_size,
     ))
     def check_glyph(
@@ -221,8 +133,9 @@ def test_layout_text_wrap(
 
     face = Face(FONTS_DIR / 'OpenSans-Regular.ttf')
     size = face.request_pixel_size(height=16)
-    positioned_glyphs = list(face.layout_text(
-        'abcd', size,
+    font = Font(size)
+    positioned_glyphs = list(font.layout_text(
+        'abcd',
         break_method=break_character,
         max_line_size=max_line_size,
     ))
@@ -258,8 +171,9 @@ def test_layout_text_wrap_force(
 
     face = Face(FONTS_DIR / 'OpenSans-Regular.ttf')
     size = face.request_pixel_size(height=16)
-    positioned_glyphs = list(face.layout_text(
-        'abcd', size,
+    font = Font(size)
+    positioned_glyphs = list(font.layout_text(
+        'abcd',
         break_method=break_always,
         max_line_size=max_line_size,
     ))
@@ -282,38 +196,15 @@ def test_layout_text_wrap_force(
     check_glyph(positioned_glyphs[3], 'd', 71, 0.0, 88.0)
 
 
-@pytest.mark.parametrize("character", 'aZ')
-@pytest.mark.parametrize("glyph_index", [0, 100])
-@pytest.mark.parametrize("position", [glm.vec2(1, 0), glm.vec2(0, 1)])
-def test_positioned_glyph_repr(
-    character: str,
-    glyph_index: int,
-    position: glm.vec2,
-) -> None:
-    pg = PositionedGlyph(character, glyph_index, position)
-    assert repr(pg) == (
-        f'<gamut.text.PositionedGlyph {character!r} @ {tuple(position)}>'
-    )
-
-
 @pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("character", ['', 'ab'])
 def test_render_glyph_invalid_character(file: str, character: str) -> None:
     face = Face(file)
     size = face.request_pixel_size(height=10)
+    font = Font(size)
     with pytest.raises(TypeError) as excinfo:
-        face.render_glyph(character, size)
+        font.render_glyph(character)
     assert str(excinfo.value) == 'only a single character may be rendered'
-
-
-@pytest.mark.parametrize("file", FONTS)
-def test_render_glyph_invalid_size(file: str) -> None:
-    face = Face(file)
-    other_face = Face(file)
-    size = other_face.request_pixel_size(height=10)
-    with pytest.raises(ValueError) as excinfo:
-        face.render_glyph('a', size)
-    assert str(excinfo.value) == 'size is not compatible with this face'
 
 
 @pytest.mark.parametrize("file", FONTS)
@@ -328,9 +219,10 @@ def test_render_glyph(
 ) -> None:
     face = Face(file)
     size = face.request_pixel_size(height=10)
+    font = Font(size)
     input: Union[str, int]
     if use_glyph_index:
-        input = face.get_glyph_index(character)
+        input = font.get_glyph_index(character)
     else:
         input = character
     kwargs: dict[str, Any] = {}
@@ -338,7 +230,7 @@ def test_render_glyph(
         kwargs["format"] = format
     else:
         format = RenderedGlyphFormat.ALPHA
-    rendered_glyph = face.render_glyph(input, size, **kwargs)
+    rendered_glyph = font.render_glyph(input, **kwargs)
 
     assert isinstance(rendered_glyph.data, bytes)
     assert rendered_glyph.data

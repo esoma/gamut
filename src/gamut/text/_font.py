@@ -20,7 +20,7 @@ class Font:
     def __repr__(self) -> str:
         return (
             f'<gamut.text.Font {self._size.face.name!r} of '
-            f'{self._size.nominal_size}>'
+            f'{tuple(self._size.nominal_size)}>'
         )
 
     def get_glyph_index(self, character: str) -> int:
