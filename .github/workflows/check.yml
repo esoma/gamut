@@ -37,6 +37,15 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools
 
+    - name: Install Freetype-Py
+      env:
+        FREETYPEPY_BUNDLE_FT: 1
+      run: |
+        git clone https://github.com/esoma/freetype-py.git
+        cd freetype-py
+        git checkout 2.11
+        python setup.py install
+
     - name: Install PyICU (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
