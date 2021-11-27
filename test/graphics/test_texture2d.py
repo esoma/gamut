@@ -1,8 +1,9 @@
 
 # gamut
 from gamut import Application
-from gamut.graphics import (Buffer, Texture2d, TextureComponents,
-                            TextureDataType, TextureView)
+from gamut.graphics import (Buffer, MipmapSelection, Texture2d,
+                            TextureComponents, TextureDataType, TextureFilter,
+                            TextureView)
 from gamut.graphics._texture import (TEXTURE_DATA_TYPES,
                                      TEXTURE_DATA_TYPES_SORTED)
 # python
@@ -122,6 +123,29 @@ def test_components_data_type_combinations(
     )
     texture = Texture2d(1, 1, components, data_type, data)
     assert texture.components == components
+    assert texture.size == (1, 1)
+    assert texture.is_open
+
+
+@pytest.mark.parametrize("mipmap_selection", list(MipmapSelection))
+@pytest.mark.parametrize("minify_filter", list(TextureFilter))
+@pytest.mark.parametrize("magnify_filter", list(TextureFilter))
+def test_min_mag_mip(
+    mipmap_selection: MipmapSelection,
+    minify_filter: TextureFilter,
+    magnify_filter: TextureFilter,
+) -> None:
+    data = b'\x00'
+    texture = Texture2d(
+        1, 1,
+        TextureComponents.R,
+        glm.uint8,
+        data,
+        mipmap_selection=mipmap_selection,
+        minify_filter=minify_filter,
+        magnify_filter=magnify_filter
+    )
+    assert texture.components == TextureComponents.R
     assert texture.size == (1, 1)
     assert texture.is_open
 

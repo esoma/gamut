@@ -1,20 +1,56 @@
 
 __all__ = [
     'bind_texture',
+    'MipmapSelection',
     'Texture',
     'TextureDataType',
+    'TextureFilter',
     'TEXTURE_DATA_TYPES',
     'TEXTURE_DATA_TYPES_SORTED',
     'TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE',
+    'TEXTURE_FILTER_TO_GL_MAG_FILTER',
+    'TEXTURE_FILTER_TO_GL_MIN_FILTER',
 ]
 
 # python
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, Final, Union
 # pyglm
 import glm
 # pyopengl
 import OpenGL.GL
+
+
+class TextureFilter(Enum):
+    NEAREST = 0
+    LINEAR = 1
+
+
+class MipmapSelection(Enum):
+    NONE = 0
+    NEAREST = 1
+    LINEAR = 2
+
+
+TEXTURE_FILTER_TO_GL_MIN_FILTER: Final = {
+    (MipmapSelection.NONE, TextureFilter.NEAREST): OpenGL.GL.GL_NEAREST,
+    (MipmapSelection.NONE, TextureFilter.LINEAR): OpenGL.GL.GL_LINEAR,
+    (MipmapSelection.NEAREST, TextureFilter.NEAREST):
+        OpenGL.GL.GL_NEAREST_MIPMAP_NEAREST,
+    (MipmapSelection.NEAREST, TextureFilter.LINEAR):
+        OpenGL.GL.GL_NEAREST_MIPMAP_LINEAR,
+    (MipmapSelection.LINEAR, TextureFilter.NEAREST):
+        OpenGL.GL.GL_LINEAR_MIPMAP_NEAREST,
+    (MipmapSelection.LINEAR, TextureFilter.LINEAR):
+        OpenGL.GL.GL_LINEAR_MIPMAP_LINEAR,
+}
+
+
+TEXTURE_FILTER_TO_GL_MAG_FILTER: Final = {
+    TextureFilter.NEAREST: OpenGL.GL.GL_NEAREST,
+    TextureFilter.LINEAR: OpenGL.GL.GL_LINEAR,
+}
 
 
 class Texture(ABC):

@@ -4,8 +4,11 @@ from __future__ import annotations
 __all__ = ['TextureComponents', 'TextureView', 'Texture2d']
 
 # gamut
-from ._texture import (Texture, TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE,
-                       TEXTURE_DATA_TYPES, TextureDataType)
+from ._texture import (MipmapSelection, Texture,
+                       TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE, TEXTURE_DATA_TYPES,
+                       TEXTURE_FILTER_TO_GL_MAG_FILTER,
+                       TEXTURE_FILTER_TO_GL_MIN_FILTER, TextureDataType,
+                       TextureFilter)
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
@@ -19,15 +22,16 @@ from typing import Final, Optional
 # pyglm
 from glm import uint32
 # pyopengl
-from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL, GL_LINEAR,
+from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL,
                        GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED, GL_RG,
                        GL_RGB, GL_RGBA, GL_STREAM_READ, GL_TEXTURE0,
-                       GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                       GL_UNSIGNED_INT_24_8, glActiveTexture, glBindBuffer,
-                       glBindTexture, glBufferData, glDeleteBuffers,
-                       glGenBuffers, glGenerateMipmap, glGenTextures,
-                       glGetTexImage, glMapBuffer, glTexImage2D,
-                       glTexParameteri, glUnmapBuffer)
+                       GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                       GL_TEXTURE_MIN_FILTER, GL_UNSIGNED_INT_24_8,
+                       glActiveTexture, glBindBuffer, glBindTexture,
+                       glBufferData, glDeleteBuffers, glGenBuffers,
+                       glGenerateMipmap, glGenTextures, glGetTexImage,
+                       glMapBuffer, glTexImage2D, glTexParameteri,
+                       glUnmapBuffer)
 
 
 class TextureComponents(Enum):
@@ -58,7 +62,9 @@ class Texture2d(Texture):
         data_type: type[TextureDataType],
         data: bytes,
         *,
-        mipmaps: bool = False,
+        mipmap_selection: MipmapSelection = MipmapSelection.NONE,
+        minify_filter: TextureFilter = TextureFilter.NEAREST,
+        magnify_filter: TextureFilter = TextureFilter.NEAREST,
     ):
         self._gl_context = require_gl_context()
 
@@ -83,7 +89,8 @@ class Texture2d(Texture):
 
         # depth/stencil textures cannot have mipmaps, raises an invalid
         # operation error on some platforms, probably a noop on others
-        if mipmaps and components == TextureComponents.DS:
+        if (mipmap_selection != MipmapSelection.NONE and
+            components == TextureComponents.DS):
             raise ValueError('depth/stencil texture cannot have mipmaps')
 
         expected_data_length = (
@@ -117,10 +124,18 @@ class Texture2d(Texture):
             components.value, gl_data_type, data
         )
 
-        if mipmaps:
+        if mipmap_selection != MipmapSelection.NONE:
             glGenerateMipmap(GL_TEXTURE_2D)
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MIN_FILTER,
+            TEXTURE_FILTER_TO_GL_MIN_FILTER[(mipmap_selection, minify_filter)]
+        )
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MAG_FILTER,
+            TEXTURE_FILTER_TO_GL_MAG_FILTER[magnify_filter]
+        )
 
     def __del__(self) -> None:
         self.close()

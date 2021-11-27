@@ -16,6 +16,7 @@ __all__ = [
     'FaceCull',
     'Image',
     'ImageInvalidError',
+    'MipmapSelection',
     'Pack2d',
     'Packed2dItem',
     'PrimitiveMode',
@@ -26,9 +27,10 @@ __all__ = [
     'ShaderAttribute',
     'ShaderUniform',
     'Texture',
+    'Texture2d',
     'TextureComponents',
     'TextureDataType',
-    'Texture2d',
+    'TextureFilter',
     'TextureRenderTarget',
     'TextureRenderTargetDepthStencil',
     'TextureView',
@@ -52,4 +54,4 @@ from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
                       FaceCull, PrimitiveMode, Shader, ShaderAttribute,
                       ShaderUniform)
 from ._texture2d import Texture2d, TextureComponents, TextureView
-from ._texture import Texture, TextureDataType
+from ._texture import MipmapSelection, Texture, TextureDataType, TextureFilter
