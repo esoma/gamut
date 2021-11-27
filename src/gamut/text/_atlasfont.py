@@ -137,7 +137,7 @@ class AtlasFont(Font):
     ) -> RenderedGlyph:
         if format is None:
             format = self._format
-        return super().render_glyph(character, format=self._format)
+        return super().render_glyph(character, format=format)
 
     def buffer_positioned_glyphs(
         self,
