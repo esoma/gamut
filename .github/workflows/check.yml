@@ -41,7 +41,7 @@ jobs:
       env:
         FREETYPEPY_BUNDLE_FT: 1
       run: |
-        python -m pip install wheel
+        python -m pip install certifi wheel
         git clone https://github.com/esoma/freetype-py.git
         cd freetype-py
         git checkout 2.11
