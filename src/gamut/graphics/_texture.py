@@ -5,6 +5,7 @@ __all__ = [
     'Texture',
     'TextureDataType',
     'TextureFilter',
+    'TextureWrap',
     'TEXTURE_DATA_TYPES',
     'TEXTURE_DATA_TYPES_SORTED',
     'TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE',
@@ -20,6 +21,14 @@ from typing import Any, Final, Union
 import glm
 # pyopengl
 import OpenGL.GL
+
+
+class TextureWrap(Enum):
+    CLAMP_TO_EDGE = OpenGL.GL.GL_CLAMP_TO_EDGE
+    CLAMP_TO_COLOR = OpenGL.GL.GL_CLAMP_TO_BORDER
+    REPEAT = OpenGL.GL.GL_REPEAT
+    REPEAT_MIRRORED = OpenGL.GL.GL_MIRRORED_REPEAT
+    REPEAT_MIRRORED_THEN_CLAMP_TO_EDGE = OpenGL.GL.GL_MIRROR_CLAMP_TO_EDGE
 
 
 class TextureFilter(Enum):

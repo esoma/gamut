@@ -3,7 +3,7 @@
 from gamut import Application
 from gamut.graphics import (Buffer, MipmapSelection, Texture2d,
                             TextureComponents, TextureDataType, TextureFilter,
-                            TextureView)
+                            TextureView, TextureWrap)
 from gamut.graphics._texture import (TEXTURE_DATA_TYPES,
                                      TEXTURE_DATA_TYPES_SORTED)
 # python
@@ -144,6 +144,35 @@ def test_min_mag_mip(
         mipmap_selection=mipmap_selection,
         minify_filter=minify_filter,
         magnify_filter=magnify_filter
+    )
+    assert texture.components == TextureComponents.R
+    assert texture.size == (1, 1)
+    assert texture.is_open
+
+
+@pytest.mark.parametrize("wrap", [None, 0, 1] + list(TextureWrap))
+def test_wrap_invalid(wrap: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        texture = Texture2d(
+            1, 1,
+            TextureComponents.R,
+            glm.uint8,
+            b'\x00',
+            wrap=wrap,
+        )
+    assert str(excinfo.value) == 'wrap must be a pair of texture wrap objects'
+
+
+@pytest.mark.parametrize("wrap_s", list(TextureWrap))
+@pytest.mark.parametrize("wrap_t", list(TextureWrap))
+def test_wrap(wrap_s: TextureWrap, wrap_t: TextureWrap) -> None:
+    data = b'\x00'
+    texture = Texture2d(
+        1, 1,
+        TextureComponents.R,
+        glm.uint8,
+        data,
+        wrap=(wrap_s, wrap_t),
     )
     assert texture.components == TextureComponents.R
     assert texture.size == (1, 1)

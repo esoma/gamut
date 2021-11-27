@@ -34,6 +34,7 @@ __all__ = [
     'TextureRenderTarget',
     'TextureRenderTargetDepthStencil',
     'TextureView',
+    'TextureWrap',
     'WindowRenderTarget',
 ]
 
@@ -54,4 +55,5 @@ from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
                       FaceCull, PrimitiveMode, Shader, ShaderAttribute,
                       ShaderUniform)
 from ._texture2d import Texture2d, TextureComponents, TextureView
-from ._texture import MipmapSelection, Texture, TextureDataType, TextureFilter
+from ._texture import (MipmapSelection, Texture, TextureDataType,
+                       TextureFilter, TextureWrap)
