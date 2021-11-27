@@ -207,6 +207,18 @@ def test_render_glyph_invalid_character(file: str, character: str) -> None:
     assert str(excinfo.value) == 'only a single character may be rendered'
 
 
+
+@pytest.mark.parametrize("file", FONTS)
+@pytest.mark.parametrize("glyph_index", [-1000, -1, 999999])
+def test_render_glyph_invalid_index(file: str, glyph_index: int) -> None:
+    face = Face(file)
+    size = face.request_pixel_size(height=10)
+    font = Font(size)
+    with pytest.raises(ValueError) as excinfo:
+        font.render_glyph(glyph_index)
+    assert str(excinfo.value) == 'face does not contain the specified glyph'
+
+
 @pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("character", ['a', 'Z', '1'])
 @pytest.mark.parametrize("use_glyph_index", [False, True])

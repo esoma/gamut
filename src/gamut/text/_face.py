@@ -18,7 +18,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO, Generator, Optional, Sequence, Union
 # freetype-py
-from freetype import (FT_ENCODING_UNICODE, FT_RENDER_MODE_LCD,
+from freetype import (FT_ENCODING_UNICODE, FT_Exception, FT_RENDER_MODE_LCD,
                       FT_RENDER_MODE_LCD_V, FT_RENDER_MODE_LIGHT,
                       FT_RENDER_MODE_SDF)
 from freetype import Face as FtFace
@@ -111,7 +111,10 @@ class Face:
         if isinstance(character, str):
             self._ft_face.load_char(character, 0)
         else:
-            self._ft_face.load_glyph(character, 0)
+            try:
+                self._ft_face.load_glyph(character, 0)
+            except FT_Exception as ex:
+                raise ValueError('face does not contain the specified glyph')
         ft_glyph = self._ft_face.glyph
         ft_glyph.render(format.value)
         width = ft_glyph.bitmap.width

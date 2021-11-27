@@ -30,6 +30,14 @@ GLYPH_FORMAT_TO_PIL_MODE: Final = {
 }
 
 
+GLYPH_FORMAT_TO_TEXTURE_MODE: Final = {
+    RenderedGlyphFormat.ALPHA: TextureComponents.R,
+    RenderedGlyphFormat.SDF: TextureComponents.R,
+    RenderedGlyphFormat.LCD: TextureComponents.RGB,
+    RenderedGlyphFormat.LCD_V: TextureComponents.RGB,
+}
+
+
 class AtlasFont(Font):
 
     def __init__(
@@ -37,28 +45,34 @@ class AtlasFont(Font):
         size: FontSize,
         format: RenderedGlyphFormat,
         *,
-        texture_size: tuple[int, int] = (512, 512),
+        texture_size: ivec2 = ivec2(512, 512),
         padding: int = 1,
     ):
         super().__init__(size)
         self._format = format
-        self._texture_size = texture_size
+        self._texture_size = ivec2(texture_size)
         self._padding = padding
         self._glyph_map: dict[int, AtlasGlyph] = {}
         self._textures: list[Texture2d] = []
-        self._pack = Pack2d(texture_size)
+        self._pack = Pack2d((texture_size.x, texture_size.y))
         self._pack_to_glyph: dict[int, int] = {}
 
     def __getitem__(self, glyph_index: int) -> AtlasGlyph:
         try:
             return self._glyph_map[glyph_index]
         except KeyError:
-            return self._map_glyph(glyph_index)
+            try:
+                return self._map_glyph(glyph_index)
+            except ValueError as ex:
+                if (len(ex.args) == 1 and
+                    ex.args[0] == 'face does not contain the specified glyph'):
+                    raise IndexError(glyph_index)
+                raise
 
     def _update_texture(self, texture_index: int) -> None:
         canvas = PilImage.new(
             GLYPH_FORMAT_TO_PIL_MODE[self._format],
-            self._texture_size,
+            tuple(self._texture_size),
             color=0
         )
         for pack_index, packed in self._pack.map.items():
@@ -70,7 +84,7 @@ class AtlasFont(Font):
                 continue
             glyph_canvas = PilImage.frombytes(
                 GLYPH_FORMAT_TO_PIL_MODE[self._format],
-                rendered_glyph.size,
+                tuple(rendered_glyph.size),
                 rendered_glyph.data
             )
             canvas.paste(
@@ -78,8 +92,9 @@ class AtlasFont(Font):
                 tuple(packed.position + ivec2(self._padding, self._padding))
             )
         texture = Texture2d(
-            *self._texture_size,
-            TextureComponents.R,
+            self._texture_size.x,
+            self._texture_size.y,
+            GLYPH_FORMAT_TO_TEXTURE_MODE[self._format],
             uint8,
             canvas.tobytes()
         )
@@ -102,9 +117,9 @@ class AtlasFont(Font):
         self._update_texture(packed.bin)
         atlas_glyph = AtlasGlyph(
             self,
-            (rendered_glyph.bearing[0], -rendered_glyph.bearing[1]),
+            ivec2(rendered_glyph.bearing[0], -rendered_glyph.bearing[1]),
             packed.bin,
-            (
+            ivec2(
                 packed.position[0] + self._padding,
                 packed.position[1] + self._padding
             ),
@@ -211,18 +226,18 @@ class AtlasGlyph:
     def __init__(
         self,
         font: AtlasFont,
-        bearing: tuple[int, int],
+        bearing: ivec2,
         texture_index: int,
-        position: tuple[int, int],
-        size: tuple[int, int],
+        position: ivec2,
+        size: ivec2,
         *,
         data: Optional[bytes] = None,
     ):
         self._font = ref(font)
-        self._bearing = bearing
+        self._bearing = ivec2(bearing)
         self._texture_index = texture_index
-        self._position = position
-        self._size = size
+        self._position = ivec2(position)
+        self._size = ivec2(size)
 
     def __repr__(self) -> str:
         font = self._font()
@@ -231,7 +246,7 @@ class AtlasGlyph:
         else:
             return (
                 f'<gamut.text.AtlasGlyph texture={self.texture} '
-                f'position={self._position}>'
+                f'position={tuple(self._position)}>'
             )
 
     @property
@@ -274,7 +289,7 @@ class AtlasGlyph:
                 mat4(1),
                 vec3(positioned.position[0], -positioned.position[1], 0) -
                 vec3(0, self._size[1], 0) +
-                vec3(*self._bearing, 0)
+                vec3(self._bearing.x, self._bearing.y, 0)
             ),
-            vec3(*self._size, 1)
+            vec3(self._size.x, self._size.y, 1)
         )

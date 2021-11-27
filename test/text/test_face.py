@@ -317,6 +317,16 @@ def test_render_glyph_invalid_size(file: str) -> None:
 
 
 @pytest.mark.parametrize("file", FONTS)
+@pytest.mark.parametrize("glyph_index", [-1000, -1, 999999])
+def test_render_glyph_invalid_index(file: str, glyph_index: int) -> None:
+    face = Face(file)
+    size = face.request_pixel_size(height=10)
+    with pytest.raises(ValueError) as excinfo:
+        face.render_glyph(glyph_index, size)
+    assert str(excinfo.value) == 'face does not contain the specified glyph'
+
+
+@pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("character", ['a', 'Z', '1'])
 @pytest.mark.parametrize("use_glyph_index", [False, True])
 @pytest.mark.parametrize("format", [None] + list(RenderedGlyphFormat))
