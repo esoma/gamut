@@ -19,14 +19,15 @@ from typing import Final, Optional
 # pyglm
 from glm import uint32
 # pyopengl
-from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL,
+from OpenGL.GL import (GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL, GL_LINEAR,
                        GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_RED, GL_RG,
                        GL_RGB, GL_RGBA, GL_STREAM_READ, GL_TEXTURE0,
-                       GL_TEXTURE_2D, GL_UNSIGNED_INT_24_8, glActiveTexture,
-                       glBindBuffer, glBindTexture, glBufferData,
-                       glDeleteBuffers, glGenBuffers, glGenerateMipmap,
-                       glGenTextures, glGetTexImage, glMapBuffer, glTexImage2D,
-                       glUnmapBuffer)
+                       GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                       GL_UNSIGNED_INT_24_8, glActiveTexture, glBindBuffer,
+                       glBindTexture, glBufferData, glDeleteBuffers,
+                       glGenBuffers, glGenerateMipmap, glGenTextures,
+                       glGetTexImage, glMapBuffer, glTexImage2D,
+                       glTexParameteri, glUnmapBuffer)
 
 
 class TextureComponents(Enum):
@@ -55,7 +56,9 @@ class Texture2d(Texture):
         width: int, height: int,
         components: TextureComponents,
         data_type: type[TextureDataType],
-        data: bytes
+        data: bytes,
+        *,
+        mipmaps: bool = False,
     ):
         self._gl_context = require_gl_context()
 
@@ -77,6 +80,11 @@ class Texture2d(Texture):
             raise ValueError('width must be > 0')
         if height < 1:
             raise ValueError('height must be > 0')
+
+        # depth/stencil textures cannot have mipmaps, raises an invalid
+        # operation error on some platforms, probably a noop on others
+        if mipmaps and components == TextureComponents.DS:
+            raise ValueError('depth/stencil texture cannot have mipmaps')
 
         expected_data_length = (
             width * height *
@@ -108,10 +116,11 @@ class Texture2d(Texture):
             0,
             components.value, gl_data_type, data
         )
-        # depth/stencil textures cannot have mipmaps, raises an invalid
-        # operation error on some platforms, probably a noop on others
-        if components != TextureComponents.DS:
+
+        if mipmaps:
             glGenerateMipmap(GL_TEXTURE_2D)
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
     def __del__(self) -> None:
         self.close()

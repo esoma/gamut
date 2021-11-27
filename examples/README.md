@@ -21,3 +21,8 @@ Demonstrates rendering a million textured cubes using instanced rendering.
 Demonstrates rendering a transparent object.
 
 ![](screenshots/transparency.py.png)
+
+## text.py
+Demonstrates rendering text with both orthographic and perspective projections.
+
+![](screenshots/text.py.png)
