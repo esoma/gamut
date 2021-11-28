@@ -54,15 +54,16 @@ known_openal = 'openal'
 known_uharfbuzz = 'uharfbuzz'
 known_freetypepy = 'freetype'
 known_pyicu = 'icu'
+known_pyglm_typing = 'glm_typing'
 
 sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
-            'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'GLM', 'OPENAL',
-            'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'UHARFBUZZ',
-            'THIRDPARTY']
+            'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'GLM',
+            'PYGLM_TYPING', 'OPENAL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
+            'UHARFBUZZ', 'THIRDPARTY']
 no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
                    'FREETYPEPY', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'GLM',
-                   'OPENAL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
-                   'UHARFBUZZ', 'THIRDPARTY']
+                   'PYGLM_TYPING', 'OPENAL', 'OPENGL', 'SDL2', 'PYTEST',
+                   'SETUPTOOLS', 'UHARFBUZZ', 'THIRDPARTY']
 
 import_heading_localfolder = 'gamut'
 import_heading_evdev = 'evdev'
@@ -71,9 +72,10 @@ import_heading_firstparty = 'gamut'
 import_heading_stdlib = 'python'
 import_heading_mypy = 'mypy'
 import_heading_numpy = 'numpy'
-import_heading_pillow = 'pillow'
+import_heading_pil = 'pillow'
 import_heading_pyicu = 'pyicu'
 import_heading_glm = 'pyglm'
+import_heading_pyglm_typing = 'pyglm-typing'
 import_heading_openal = 'pyopenal'
 import_heading_opengl = 'pyopengl'
 import_heading_sdl2 = 'pysdl2'

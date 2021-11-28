@@ -367,8 +367,8 @@ def test_sampler_uniforms(
             f'(got sequence of length 1)'
         )
         shader._set_uniform(uni, [
-            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00'),
-            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00'),
+            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
         ])
     else:
         with pytest.raises(ValueError) as excinfo:
@@ -378,7 +378,7 @@ def test_sampler_uniforms(
         )
         shader._set_uniform(
             uni,
-            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
         )
 
 
@@ -461,8 +461,8 @@ def test_shadow_sampler_uniforms(
             f'(got sequence of length 1)'
         )
         shader._set_uniform(uni, [
-            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00'),
-            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00'),
+            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
         ])
     else:
         with pytest.raises(ValueError) as excinfo:
@@ -472,7 +472,7 @@ def test_shadow_sampler_uniforms(
         )
         shader._set_uniform(
             uni,
-            Texture2d(1, 1, TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
         )
 
 

@@ -54,6 +54,6 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
 from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
                       FaceCull, PrimitiveMode, Shader, ShaderAttribute,
                       ShaderUniform)
-from ._texture2d import Texture2d, TextureComponents, TextureView
-from ._texture import (MipmapSelection, Texture, TextureDataType,
-                       TextureFilter, TextureWrap)
+from ._texture2d import Texture2d, TextureView
+from ._texture import (MipmapSelection, Texture, TextureComponents,
+                       TextureDataType, TextureFilter, TextureWrap)

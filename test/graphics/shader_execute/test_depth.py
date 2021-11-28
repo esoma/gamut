@@ -85,7 +85,7 @@ def test_no_depth_buffer_fail(
     depth_write: bool
 ) -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -120,7 +120,7 @@ def test_no_depth_buffer_okay(
     expected_color: Color
 ) -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -174,7 +174,7 @@ def test_basic(
     expected_depth: float
 ) -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )

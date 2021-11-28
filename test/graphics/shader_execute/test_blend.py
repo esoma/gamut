@@ -116,7 +116,7 @@ def test_source_destination_factors(
     blend_color = Color(.8, .7, .6, .5)
 
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -180,7 +180,7 @@ def test_source_destination_alpha_factors(
     blend_color = Color(.8, .7, .6, .5)
 
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -245,7 +245,7 @@ def test_function(blend_function: BlendFunction,) -> None:
     clear_color = Color(.2, .5, .2)
 
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -297,7 +297,7 @@ def test_function(blend_function: BlendFunction,) -> None:
 
 def test_default_blend_color() -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
