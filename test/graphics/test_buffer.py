@@ -109,6 +109,9 @@ def test_bytes(data: bytes) -> None:
     buffer.bytes = b''
     assert buffer.bytes == b''
     assert len(buffer) == 0
+    with pytest.raises(TypeError) as excinfo:
+        buffer.bytes = object() # type: ignore
+    assert str(excinfo.value) == 'data must by bytes'
 
 
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
