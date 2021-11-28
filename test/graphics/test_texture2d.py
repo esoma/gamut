@@ -48,38 +48,31 @@ TEXTURE_DATA_TYPE_STRUCT: Final = {
 }
 
 
+@pytest.mark.parametrize("size", [None, 0, (1,), (1, 2, 3)])
+def test_size_invalid(size: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Texture2d(size, TextureComponents.R, glm.int8, b'')
+    assert str(excinfo.value) == 'size must be a sequence of two integers'
+
+
 @pytest.mark.parametrize("width", [-100, -1, 0])
 def test_width_out_of_range(width: int) -> None:
     with pytest.raises(ValueError) as excinfo:
-        Texture2d(width, 1, TextureComponents.R, glm.int8, b'')
+        Texture2d((width, 1), TextureComponents.R, glm.int8, b'')
     assert str(excinfo.value) == 'width must be > 0'
-
-
-@pytest.mark.parametrize("width", [None, object(), 'test', 1.0])
-def test_width_invalid(width: Any) -> None:
-    with pytest.raises(TypeError) as excinfo:
-        Texture2d(width, 1, TextureComponents.R, glm.int8, b'')
-    assert str(excinfo.value) == 'width must be an int'
 
 
 @pytest.mark.parametrize("height", [-100, -1, 0])
 def test_height_out_of_range(height: int) -> None:
     with pytest.raises(ValueError) as excinfo:
-        Texture2d(1, height, TextureComponents.R, glm.int8, b'')
+        Texture2d((1, height), TextureComponents.R, glm.int8, b'')
     assert str(excinfo.value) == 'height must be > 0'
-
-
-@pytest.mark.parametrize("height", [None, object(), 'test', 1.0])
-def test_height_invalid(height: Any) -> None:
-    with pytest.raises(TypeError) as excinfo:
-        Texture2d(1, height, TextureComponents.R, glm.int8, b'')
-    assert str(excinfo.value) == 'height must be an int'
 
 
 @pytest.mark.parametrize("components", [None, object(), 'test', 1.0, 1])
 def test_invalid_components(components: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Texture2d(1, 1, components, glm.int8, b'')
+        Texture2d((1, 1), components, glm.int8, b'')
     assert str(excinfo.value) == (
         'components must be <enum \'TextureComponents\'>'
     )
@@ -88,22 +81,24 @@ def test_invalid_components(components: Any) -> None:
 @pytest.mark.parametrize("data_type", [None, object(), 'test', 1.0, 1])
 def test_invalid_data_type(data_type: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Texture2d(1, 1, TextureComponents.R, data_type, b'')
-    data_types = ", ".join(sorted((str(t) for t in TEXTURE_DATA_TYPES)))
+        Texture2d((1, 1), TextureComponents.R, data_type, b'')
+    data_types = ', '.join(sorted((str(t) for t in TEXTURE_DATA_TYPES)))
     assert str(excinfo.value) == f'data_type must be {data_types}'
 
 
-@pytest.mark.parametrize("data", [None, object(), 'test', 1.0, 1])
+@pytest.mark.parametrize("data", [None, object(), 1.0])
 def test_invalid_data(data: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Texture2d(1, 1, TextureComponents.R, glm.int8, data)
-    assert str(excinfo.value) == 'data must be bytes'
+        Texture2d((1, 1), TextureComponents.R, glm.int8, data)
+    assert str(excinfo.value) == (
+        f'cannot convert {type(data).__name__!r} object to bytes'
+    )
 
 
 @pytest.mark.parametrize("data", [b'', b'\x00\x00'])
 def test_too_much_or_not_enough_data(data: bytes) -> None:
     with pytest.raises(ValueError) as excinfo:
-        Texture2d(1, 1, TextureComponents.R, glm.int8, data)
+        Texture2d((1, 1), TextureComponents.R, glm.int8, data)
     assert str(excinfo.value) == 'too much or not enough data'
 
 
@@ -121,10 +116,46 @@ def test_components_data_type_combinations(
         TEXTURE_COMPONENTS_COUNT[components] *
         c_sizeof(data_type)
     )
-    texture = Texture2d(1, 1, components, data_type, data)
+    texture = Texture2d((1, 1), components, data_type, data)
     assert texture.components == components
     assert texture.size == (1, 1)
     assert texture.is_open
+
+
+@pytest.mark.parametrize("mipmap_selection", [None, 1, 'hello', object()])
+def test_mipmap_selection_invalid(mipmap_selection: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Texture2d(
+            (1, 1), TextureComponents.R, glm.int8, b'\x00',
+            mipmap_selection=mipmap_selection
+        )
+    assert str(excinfo.value) == (
+        'mipmap_selection must be <enum \'MipmapSelection\'>'
+    )
+
+
+@pytest.mark.parametrize("minify_filter", [None, 1, 'hello', object()])
+def test_minify_filter_invalid(minify_filter: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Texture2d(
+            (1, 1), TextureComponents.R, glm.int8, b'\x00',
+            minify_filter=minify_filter
+        )
+    assert str(excinfo.value) == (
+        'minify_filter must be <enum \'TextureFilter\'>'
+    )
+
+
+@pytest.mark.parametrize("magnify_filter", [None, 1, 'hello', object()])
+def test_magnify_filter_invalid(magnify_filter: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Texture2d(
+            (1, 1), TextureComponents.R, glm.int8, b'\x00',
+            magnify_filter=magnify_filter
+        )
+    assert str(excinfo.value) == (
+        'magnify_filter must be <enum \'TextureFilter\'>'
+    )
 
 
 @pytest.mark.parametrize("mipmap_selection", list(MipmapSelection))
@@ -137,7 +168,7 @@ def test_min_mag_mip(
 ) -> None:
     data = b'\x00'
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.uint8,
         data,
@@ -150,11 +181,14 @@ def test_min_mag_mip(
     assert texture.is_open
 
 
-@pytest.mark.parametrize("wrap", [None, 0, 1] + list(TextureWrap))
+@pytest.mark.parametrize("wrap", [
+    None, 0, 1,
+    (0, 1),
+] + list(TextureWrap))
 def test_wrap_invalid(wrap: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         texture = Texture2d(
-            1, 1,
+            (1, 1),
             TextureComponents.R,
             glm.uint8,
             b'\x00',
@@ -163,12 +197,29 @@ def test_wrap_invalid(wrap: Any) -> None:
     assert str(excinfo.value) == 'wrap must be a pair of texture wrap objects'
 
 
+@pytest.mark.parametrize("wrap_color", [
+    None, 0, 1,
+    'ab',
+    (1,), (1, 2, 3),
+])
+def test_wrap_color_invalid(wrap_color: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        texture = Texture2d(
+            (1, 1),
+            TextureComponents.R,
+            glm.uint8,
+            b'\x00',
+            wrap_color=wrap_color,
+        )
+    assert str(excinfo.value) == 'wrap_color must be a sequence of four floats'
+
+
 @pytest.mark.parametrize("wrap_s", list(TextureWrap))
 @pytest.mark.parametrize("wrap_t", list(TextureWrap))
 def test_wrap(wrap_s: TextureWrap, wrap_t: TextureWrap) -> None:
     data = b'\x00'
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.uint8,
         data,
@@ -182,7 +233,7 @@ def test_wrap(wrap_s: TextureWrap, wrap_t: TextureWrap) -> None:
 def test_depth_stencil() -> None:
     data = b'\x00' * c_sizeof(glm.uint32)
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.DS,
         glm.uint32,
         data
@@ -202,7 +253,7 @@ def test_depth_stencil_invalid_data_types(
     data = b'\x00' * c_sizeof(data_type)
     with pytest.raises(ValueError) as excinfo:
         texture = Texture2d(
-            1, 1,
+            (1, 1),
             TextureComponents.DS,
             data_type,
             data
@@ -215,7 +266,7 @@ def test_depth_stencil_invalid_data_types(
 
 def test_close() -> None:
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.int8,
         b'\x00'
@@ -257,7 +308,12 @@ def test_texture_view(
         for i in range(TEXTURE_COMPONENTS_COUNT[components])
     ]
 
-    texture = Texture2d(width, height, components, input_data_type, input_data)
+    texture = Texture2d(
+        (width, height),
+        components,
+        input_data_type,
+        input_data
+    )
     view = TextureView(texture, output_data_type)
     assert view.texture is texture
     assert len(view) == (
@@ -305,7 +361,12 @@ def test_texture_view_depth_stencil() -> None:
         for i in range(TEXTURE_COMPONENTS_COUNT[components])
     ]
 
-    texture = Texture2d(width, height, components, input_data_type, input_data)
+    texture = Texture2d((
+        width, height),
+        components,
+        input_data_type,
+        input_data
+    )
     view = TextureView(texture, output_data_type)
     assert view.texture is texture
     assert len(view) == (
@@ -352,7 +413,12 @@ def test_texture_view_depth_stencil_invalid_output_data_type(
         )
     )
 
-    texture = Texture2d(width, height, components, input_data_type, input_data)
+    texture = Texture2d(
+        (width, height),
+        components,
+        input_data_type,
+        input_data
+    )
 
     with pytest.raises(ValueError) as excinfo:
         TextureView(texture, output_data_type)
@@ -364,7 +430,7 @@ def test_texture_view_depth_stencil_invalid_output_data_type(
 
 def test_create_texture_view_texture_closed() -> None:
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.int8,
         b'\x00'
@@ -377,7 +443,7 @@ def test_create_texture_view_texture_closed() -> None:
 
 def test_texture_view_texture_closed() -> None:
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.int8,
         b'\x00'
@@ -409,7 +475,7 @@ def test_texture_view_non_texture(texture: Any) -> None:
 @pytest.mark.parametrize("data_type", [None, object(), 'test', 1.0])
 def test_texture_view_non_data_type(data_type: Any) -> None:
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.int8,
         b'\x00'
@@ -422,7 +488,7 @@ def test_texture_view_non_data_type(data_type: Any) -> None:
 
 def test_texture_view_close() -> None:
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.R,
         glm.int8,
         b'\x00'
@@ -448,7 +514,7 @@ def test_texture_view_close() -> None:
 
 def test_texture2d_thread_transfer_to_app() -> None:
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.DS,
         glm.uint32,
         b'\x00' * c_sizeof(glm.uint32)
@@ -470,7 +536,7 @@ def test_texture2d_thread_transfer_to_main() -> None:
         async def main(self) -> None:
             nonlocal texture
             texture = Texture2d(
-                1, 1,
+                (1, 1),
                 TextureComponents.DS,
                 glm.uint32,
                 b'\x00' * c_sizeof(glm.uint32)
@@ -487,7 +553,7 @@ def test_texture2d_thread_transfer_to_main() -> None:
 def test_texture2d_thread_closed_outside_render_thread() -> None:
     keep_alive_buffer = Buffer()
     texture = Texture2d(
-        1, 1,
+        (1, 1),
         TextureComponents.DS,
         glm.uint32,
         b'\x00' * c_sizeof(glm.uint32)

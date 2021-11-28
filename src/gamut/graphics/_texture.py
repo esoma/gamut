@@ -3,9 +3,11 @@ __all__ = [
     'bind_texture',
     'MipmapSelection',
     'Texture',
+    'TextureComponents',
     'TextureDataType',
     'TextureFilter',
     'TextureWrap',
+    'TEXTURE_COMPONENTS_COUNT',
     'TEXTURE_DATA_TYPES',
     'TEXTURE_DATA_TYPES_SORTED',
     'TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE',
@@ -23,23 +25,34 @@ import glm
 import OpenGL.GL
 
 
-class TextureWrap(Enum):
-    CLAMP_TO_EDGE = OpenGL.GL.GL_CLAMP_TO_EDGE
-    CLAMP_TO_COLOR = OpenGL.GL.GL_CLAMP_TO_BORDER
-    REPEAT = OpenGL.GL.GL_REPEAT
-    REPEAT_MIRRORED = OpenGL.GL.GL_MIRRORED_REPEAT
-    REPEAT_MIRRORED_THEN_CLAMP_TO_EDGE = OpenGL.GL.GL_MIRROR_CLAMP_TO_EDGE
+class TextureComponents(Enum):
+    R = OpenGL.GL.GL_RED
+    RG = OpenGL.GL.GL_RG
+    RGB = OpenGL.GL.GL_RGB
+    RGBA = OpenGL.GL.GL_RGBA
+    D = OpenGL.GL.GL_DEPTH_COMPONENT
+    DS = OpenGL.GL.GL_DEPTH_STENCIL
 
 
-class TextureFilter(Enum):
-    NEAREST = 0
-    LINEAR = 1
+TEXTURE_COMPONENTS_COUNT: Final = {
+    TextureComponents.R: 1,
+    TextureComponents.RG: 2,
+    TextureComponents.RGB: 3,
+    TextureComponents.RGBA: 4,
+    TextureComponents.D: 1,
+    TextureComponents.DS: 1
+}
 
 
 class MipmapSelection(Enum):
     NONE = 0
     NEAREST = 1
     LINEAR = 2
+
+
+class TextureFilter(Enum):
+    NEAREST = 0
+    LINEAR = 1
 
 
 TEXTURE_FILTER_TO_GL_MIN_FILTER: Final = {
@@ -60,6 +73,14 @@ TEXTURE_FILTER_TO_GL_MAG_FILTER: Final = {
     TextureFilter.NEAREST: OpenGL.GL.GL_NEAREST,
     TextureFilter.LINEAR: OpenGL.GL.GL_LINEAR,
 }
+
+
+class TextureWrap(Enum):
+    CLAMP_TO_EDGE = OpenGL.GL.GL_CLAMP_TO_EDGE
+    CLAMP_TO_COLOR = OpenGL.GL.GL_CLAMP_TO_BORDER
+    REPEAT = OpenGL.GL.GL_REPEAT
+    REPEAT_MIRRORED = OpenGL.GL.GL_MIRRORED_REPEAT
+    REPEAT_MIRRORED_THEN_CLAMP_TO_EDGE = OpenGL.GL.GL_MIRROR_CLAMP_TO_EDGE
 
 
 class Texture(ABC):
