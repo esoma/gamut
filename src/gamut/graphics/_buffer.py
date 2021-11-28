@@ -37,7 +37,7 @@ from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_RED, GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
                        GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
                        GL_UNSIGNED_BYTE, glBindBuffer, glBindVertexArray,
-                       glBufferData, glClearBufferSubData,
+                       glBufferData, glBufferSubData, glClearBufferSubData,
                        glEnableVertexAttribArray, glGenBuffers,
                        glGenVertexArrays, glMapBuffer, glUnmapBuffer,
                        glVertexAttribDivisor, glVertexAttribIPointer,
@@ -184,15 +184,7 @@ class Buffer:
         if len(data) == 0:
             return
         glBindBuffer(GL_ARRAY_BUFFER, self._gl)
-        glClearBufferSubData(
-            GL_ARRAY_BUFFER,
-            GL_R8,
-            offset,
-            len(data),
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            data
-        )
+        glBufferSubData(GL_ARRAY_BUFFER, offset, len(data), data)
 
     def clear(
         self,
@@ -225,16 +217,24 @@ class Buffer:
             start = 0
             end = self._length
         # clear the range part of the buffer
-        glBindBuffer(GL_ARRAY_BUFFER, self._gl)
-        glClearBufferSubData(
-            GL_ARRAY_BUFFER,
-            GL_R8,
-            start,
-            end - start,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            data
-        )
+        self._clear_impl(data, start, end - start)
+
+    if glClearBufferSubData:
+        def _clear_impl(self, data: _bytes, offset: int, size: int) -> None:
+            glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+            glClearBufferSubData(
+                GL_ARRAY_BUFFER,
+                GL_R8,
+                offset,
+                size,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                data
+            )
+    else:
+        def _clear_impl(self, data: _bytes, offset: int, size: int) -> None:
+            glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+            glBufferSubData(GL_ARRAY_BUFFER, offset, size, data * size)
 
     @property
     def frequency(self) -> BufferFrequency:
