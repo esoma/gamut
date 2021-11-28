@@ -115,6 +115,69 @@ def test_bytes(data: bytes) -> None:
 
 
 @pytest.mark.parametrize("data", [None, object(), 1.0])
+def test_replace_invalid_data_type(data: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.replace(0, data)
+    assert str(excinfo.value) == 'data must be bytes'
+
+
+@pytest.mark.parametrize("offset", ['abcd', (1,), (1, 2, 3)])
+def test_replace_invalid_offset_type(offset: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.replace(offset, b'\x00')
+    assert str(excinfo.value) == 'offset must be int'
+
+
+@pytest.mark.parametrize("offset", [-100, -1])
+def test_replace_invalid_offset_value(offset: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(ValueError) as excinfo:
+        buffer.replace(offset, b'\x00')
+    assert str(excinfo.value) == 'offset must be 0 or more'
+
+
+@pytest.mark.parametrize("offset, data", [
+    (0, b'\x00' * 5),
+    (1, b'\x00' * 4),
+    (2, b'\x00' * 3),
+    (3, b'\x00' * 2),
+    (4, b'\x00'),
+    (5, b''),
+])
+def test_replace_invalid_offset_data_combo(offset: int, data: bytes) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(ValueError) as excinfo:
+        buffer.replace(offset, data)
+    assert str(excinfo.value) == (
+        'requested offset and data would write beyond the end of the buffer'
+    )
+
+
+@pytest.mark.parametrize("offset, data", [
+    (0, b'\x05'),
+    (0, b'\x05' * 2),
+    (0, b'\x05' * 3),
+    (0, b'\x05' * 4),
+    (1, b'\x05' * 3),
+    (2, b'\x05' * 2),
+    (3, b'\x05' * 1),
+    (4, b''),
+])
+def test_replace(offset: int, data: bytes) -> None:
+    original_data = b'\x00\x01\x02\x03'
+    expected_data = (
+        original_data[:offset] +
+        data +
+        original_data[offset + len(data):]
+    )
+    buffer = Buffer(original_data)
+    buffer.replace(offset, data)
+    assert buffer.bytes == expected_data
+
+
+@pytest.mark.parametrize("data", [None, object(), 1.0])
 def test_clear_invalid_data_type(data: Any) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(TypeError) as excinfo:
@@ -141,7 +204,7 @@ def test_clear_invalid_range_type(range: Any) -> None:
 @pytest.mark.parametrize("range", [(0, 5), (5, 6)])
 def test_clear_invalid_range_beyond_length(range: tuple[int, int]) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(ValueError) as excinfo:
         buffer.clear(b'\x00', range=range)
     assert str(excinfo.value) == (
         'range must be between 0 and the length of the buffer'
@@ -151,7 +214,7 @@ def test_clear_invalid_range_beyond_length(range: tuple[int, int]) -> None:
 @pytest.mark.parametrize("range", [(0, 0), (1, 0), (4, 0)])
 def test_clear_invalid_range_start_after_end(range: tuple[int, int]) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(ValueError) as excinfo:
         buffer.clear(b'\x00', range=range)
     assert str(excinfo.value) == 'range end must come after start'
 

@@ -160,6 +160,40 @@ class Buffer:
         glBufferData(GL_ARRAY_BUFFER, data, self._gl_access)
         self._length = len(data) if data is not None else 0
 
+    def replace(self, offset: int, data: _bytes) -> None:
+        # check offset
+        try:
+            offset = int(offset)
+        except (ValueError, TypeError):
+            raise TypeError('offset must be int')
+        if offset < 0:
+            raise ValueError('offset must be 0 or more')
+        # check data
+        try:
+            data = bytes(data)
+        except TypeError:
+            raise TypeError('data must be bytes')
+        # ensure the requested write doesn't go beyond the end of the existing
+        # buffer
+        if offset + len(data) > self._length:
+            raise ValueError(
+                'requested offset and data would write beyond the end of the '
+                'buffer'
+            )
+        # replace the data
+        if len(data) == 0:
+            return
+        glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+        glClearBufferSubData(
+            GL_ARRAY_BUFFER,
+            GL_R8,
+            offset,
+            len(data),
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            data
+        )
+
     def clear(
         self,
         data: _bytes = b'\x00',
@@ -182,11 +216,11 @@ class Buffer:
             assert start >= 0
             assert end >= 0
             if start > self._length or end > self._length:
-                raise TypeError(
+                raise ValueError(
                     'range must be between 0 and the length of the buffer'
                 )
             if start >= end:
-                raise TypeError('range end must come after start')
+                raise ValueError('range end must come after start')
         else:
             start = 0
             end = self._length
