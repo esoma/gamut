@@ -111,7 +111,72 @@ def test_bytes(data: bytes) -> None:
     assert len(buffer) == 0
     with pytest.raises(TypeError) as excinfo:
         buffer.bytes = object() # type: ignore
-    assert str(excinfo.value) == 'data must by bytes'
+    assert str(excinfo.value) == 'data must be bytes'
+
+
+@pytest.mark.parametrize("data", [None, object(), 1.0])
+def test_clear_invalid_data_type(data: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.clear(data)
+    assert str(excinfo.value) == 'data must be bytes'
+
+
+@pytest.mark.parametrize("data", [b'', b'\x00\x01'])
+def test_clear_invalid_data_length(data: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.clear(data)
+    assert str(excinfo.value) == 'data must be a single byte'
+
+
+@pytest.mark.parametrize("range", ['abcd', (1,), (1, 2, 3)])
+def test_clear_invalid_range_type(range: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.clear(b'\x00', range=range)
+    assert str(excinfo.value) == 'range must be a uvec2'
+
+
+@pytest.mark.parametrize("range", [(0, 5), (5, 6)])
+def test_clear_invalid_range_beyond_length(range: tuple[int, int]) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.clear(b'\x00', range=range)
+    assert str(excinfo.value) == (
+        'range must be between 0 and the length of the buffer'
+    )
+
+
+@pytest.mark.parametrize("range", [(0, 0), (1, 0), (4, 0)])
+def test_clear_invalid_range_start_after_end(range: tuple[int, int]) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.clear(b'\x00', range=range)
+    assert str(excinfo.value) == 'range end must come after start'
+
+
+
+@pytest.mark.parametrize("data", [b'\x00', b'\x01'])
+@pytest.mark.parametrize("range", [None, (0, 4)])
+def test_clear_full(data: bytes, range: tuple[int, int]) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    buffer.clear(data, range=range)
+    assert buffer.bytes == data * 4
+
+
+@pytest.mark.parametrize("data", [b'\x00', b'\x01'])
+@pytest.mark.parametrize("range", [(0, 1), (1, 2), (2, 4), (1, 3)])
+def test_clear_range(data: bytes, range: tuple[int, int]) -> None:
+    original_data = b'\x00\x01\x02\x03'
+    expected_data = (
+        original_data[:range[0]] +
+        (data * (range[1] - range[0])) +
+        original_data[range[1]:]
+    )
+    buffer = Buffer(original_data)
+    buffer.clear(data, range=range)
+    assert buffer.bytes == expected_data
 
 
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
