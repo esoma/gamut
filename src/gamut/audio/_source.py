@@ -43,6 +43,7 @@ class Sample:
         sample_rate: int,
         data: bytes,
     ):
+        self._al: Optional[c_uint] = None
         self._al_context = require_al_context()
 
         self._channels = channels
@@ -67,7 +68,7 @@ class Sample:
 
         al_id = c_uint()
         alGenBuffers(1, c_pointer(al_id))
-        self._al: Optional[c_uint] = al_id
+        self._al = al_id
         self._al_refs: int = 1
 
         alBufferData(self._al, al_data_type, data, len(data), sample_rate)
