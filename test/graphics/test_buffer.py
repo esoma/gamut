@@ -64,6 +64,13 @@ def test_default_access() -> None:
     assert buffer.nature == BufferNature.DRAW
 
 
+@pytest.mark.parametrize("data", [object(), 1.0])
+def test_data_invalid(data: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Buffer(data)
+    assert str(excinfo.value) == 'data must be bytes'
+
+
 @pytest.mark.parametrize("frequency", list(BufferFrequency))
 @pytest.mark.parametrize("nature", list(BufferNature))
 def test_frequency_nature_combinations(
@@ -73,6 +80,20 @@ def test_frequency_nature_combinations(
     buffer = Buffer(b'', frequency=frequency, nature=nature)
     assert buffer.frequency is frequency
     assert buffer.nature is nature
+
+
+@pytest.mark.parametrize("frequency", [None, 0, 'abc'])
+def test_frequency_invalid(frequency: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Buffer(None, frequency=frequency)
+    assert str(excinfo.value) == 'frequency must be <enum \'BufferFrequency\'>'
+
+
+@pytest.mark.parametrize("nature", [None, 0, 'abc'])
+def test_nature_invalid(nature: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Buffer(None, nature=nature)
+    assert str(excinfo.value) == 'nature must be <enum \'BufferNature\'>'
 
 
 @pytest.mark.parametrize("data", [
@@ -103,6 +124,13 @@ def test_view_empty_buffer(data_type: Any) -> None:
     assert list(view) == []
 
 
+@pytest.mark.parametrize("stride", [(1, 2), 'abc'])
+def test_view_stride_invalid(stride: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        BufferView(Buffer(), glm.int8, stride=stride)
+    assert str(excinfo.value) == 'stride must be an int'
+
+
 @pytest.mark.parametrize("stride", [-100, -1, 0])
 def test_view_non_positive_stride(stride: int) -> None:
     with pytest.raises(ValueError) as excinfo:
@@ -110,11 +138,25 @@ def test_view_non_positive_stride(stride: int) -> None:
     assert str(excinfo.value) == 'stride must be greater than 0'
 
 
+@pytest.mark.parametrize("offset", [(1, 2), 'abc'])
+def test_view_offset_invalid(offset: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        BufferView(Buffer(), glm.int8, offset=offset)
+    assert str(excinfo.value) == 'offset must be an int'
+
+
 @pytest.mark.parametrize("offset", [-100, -1])
 def test_view_negative_offset(offset: int) -> None:
     with pytest.raises(ValueError) as excinfo:
         BufferView(Buffer(), glm.float32, offset=offset)
     assert str(excinfo.value) == 'offset must be 0 or greater'
+
+
+@pytest.mark.parametrize("instancing_divisor", [(1, 2), 'abc'])
+def test_view_instancing_divisor_invalid(instancing_divisor: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        BufferView(Buffer(), glm.int8, instancing_divisor=instancing_divisor)
+    assert str(excinfo.value) == 'instancing divisor must be an int'
 
 
 @pytest.mark.parametrize("instancing_divisor", [-100, -1, 0])
@@ -186,6 +228,56 @@ def test_view_map_read_only_mapping() -> None:
     assert len(bvm) == 2
     assert bvm["vbo_1"] is bv_1
     assert bvm["vbo_2"] is bv_2
+
+
+@pytest.mark.parametrize("mapping", [None, 1, [1, 2, 3]])
+def test_buffer_view_map_mapping_invalid(mapping: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        BufferViewMap(mapping)
+    assert str(excinfo.value) == 'mapping must be a dict'
+
+
+@pytest.mark.parametrize("key", [None, 1, (1, 2, 3)])
+def test_buffer_view_map_key_invalid(key: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        BufferViewMap({key: BufferView(Buffer(), glm.uint8)})
+    assert str(excinfo.value) == f'invalid key {key!r}, expected str'
+
+
+@pytest.mark.parametrize("value", [None, 1, (1, 2, 3)])
+def test_buffer_view_map_value_invalid(value: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        BufferViewMap({"a": value})
+    assert str(excinfo.value) == (
+        f'invalid value for key {"a"!r}, expected gamut.graphics.BufferView'
+    )
+
+
+@pytest.mark.parametrize("view_map", [None, object(), 'abc'])
+def test_use_buffer_view_map_with_shader_view_map_invalid(
+    view_map: Any
+) -> None:
+    shader = Shader(vertex=b'''
+    #version 140
+    void main()
+    {
+        gl_Position = vec4(0, 0, 0, 1);
+    }
+    ''')
+    with pytest.raises(TypeError) as excinfo:
+        use_buffer_view_map_with_shader(view_map, shader)
+    assert str(excinfo.value) == (
+        'view_map must be gamut.graphics.BufferViewMap'
+    )
+
+
+@pytest.mark.parametrize("shader", [None, object(), 'abc'])
+def test_use_buffer_view_map_with_shader_shader_invalid(
+    shader: Any
+) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        use_buffer_view_map_with_shader(BufferViewMap({}), shader)
+    assert str(excinfo.value) == 'shader must be a gamut.graphics.Shader'
 
 
 @pytest.mark.parametrize("view_data_type", VIEW_DATA_TYPES)

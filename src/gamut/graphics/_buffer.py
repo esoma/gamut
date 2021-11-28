@@ -90,24 +90,36 @@ class Buffer:
         frequency: BufferFrequency = BufferFrequency.STATIC,
         nature: BufferNature = BufferNature.DRAW,
     ):
+        self._gl: Any = None
+        self._map: Optional[c_void_p] = None
         self._gl_context = require_gl_context()
-
+        # check data
+        if data is not None:
+            try:
+                data = bytes(data)
+            except TypeError:
+                raise TypeError('data must be bytes')
+        self._length = len(data) if data is not None else 0
+        # check frequency/nature
+        try:
+            gl_access = FREQUENCY_NATURE_TO_GL_ACCESS[(frequency, nature)]
+        except KeyError:
+            if not isinstance(frequency, BufferFrequency):
+                raise TypeError(f'frequency must be {BufferFrequency}')
+            assert not isinstance(nature, BufferNature)
+            raise TypeError(f'nature must be {BufferNature}')
+        self._frequency = frequency
+        self._nature = nature
+        # create the gl buffer
         self._gl = glGenBuffers(1)
-        gl_access = FREQUENCY_NATURE_TO_GL_ACCESS[(frequency, nature)]
         glBindBuffer(GL_ARRAY_BUFFER, self._gl)
         glBufferData(GL_ARRAY_BUFFER, data, gl_access)
 
-        self._map: Optional[c_void_p] = None
-
-        self._length = len(data) if data is not None else 0
-        self._frequency = frequency
-        self._nature = nature
-
     def __del__(self) -> None:
-        if hasattr(self, '_map') and self._map is not None:
+        if self._map is not None:
             get_gl_context().unmap_gl_buffer(self._gl)
             self._map = None
-        if hasattr(self, '_gl') and self._gl is not None:
+        if self._gl is not None:
             get_gl_context().delete_buffer(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
@@ -178,16 +190,33 @@ class BufferView(Generic[BVT]):
     ) -> None:
         self._buffer = buffer
         self._data_type: type[BVT] = data_type
+        # check stride
         if stride is None:
             stride = glm_sizeof(data_type)
+        else:
+            try:
+                stride = int(stride)
+            except (ValueError, TypeError):
+                raise TypeError('stride must be an int')
         if stride < 1:
             raise ValueError('stride must be greater than 0')
         self._stride = stride
+        # check offset
+        try:
+            offset = int(offset)
+        except (ValueError, TypeError):
+            raise TypeError('offset must be an int')
         if offset < 0:
             raise ValueError('offset must be 0 or greater')
         self._offset = offset
-        if instancing_divisor is not None and instancing_divisor < 1:
-            raise ValueError('instancing divisor must be greater than 0')
+        # check instancing divisor
+        if instancing_divisor is not None:
+            try:
+                instancing_divisor = int(instancing_divisor)
+            except (ValueError, TypeError):
+                raise TypeError('instancing divisor must be an int')
+            if instancing_divisor < 1:
+                raise ValueError('instancing divisor must be greater than 0')
         self._instancing_divisor = instancing_divisor
 
     def __len__(self) -> int:
@@ -236,7 +265,18 @@ class BufferView(Generic[BVT]):
 class BufferViewMap:
 
     def __init__(self, mapping: dict[str, BufferView], /) -> None:
-        self._mapping = mapping.copy()
+        try:
+            self._mapping = dict(mapping)
+        except TypeError:
+            raise TypeError('mapping must be a dict')
+        for key, value in self._mapping.items():
+            if not isinstance(key, str):
+                raise TypeError(f'invalid key {key!r}, expected str')
+            if not isinstance(value, BufferView):
+                raise TypeError(
+                    f'invalid value for key {key!r}, '
+                    f'expected gamut.graphics.BufferView'
+                )
         self._shader_mapping: WeakKeyDictionary[Shader, GlVertexArray] = (
             WeakKeyDictionary()
         )
@@ -250,7 +290,7 @@ class BufferViewMap:
     def _get_gl_vertex_array_for_shader(self, shader: Shader) -> GlVertexArray:
         try:
             return self._shader_mapping[shader]
-        except KeyError:
+        except (TypeError, KeyError):
             pass
         gl_vertex_array = self._shader_mapping[shader] = GlVertexArray(
             shader,
@@ -275,66 +315,72 @@ class GlVertexArray:
         self._gl_context = require_gl_context()
         self._gl = glGenVertexArrays(1)
         self.use()
+        try:
+            attributes = shader.attributes
+        except AttributeError:
+            raise TypeError('shader must be a gamut.graphics.Shader')
+        attribute_names = {a.name for a in shader.attributes}
+        for name in mapping:
+            if name not in attribute_names:
+                raise ValueError(
+                    f'shader does not accept an attribute called "{name}"'
+                )
         for attribute in shader.attributes:
-            buffer_view: Optional[BufferView] = None
             try:
                 buffer_view = mapping[attribute.name]
             except KeyError:
-                locations = 1
-            else:
-                glBindBuffer(GL_ARRAY_BUFFER, buffer_view.buffer._gl)
-                attr_gl_type = (
-                    BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[attribute.type]
-                )[0]
-                view_gl_type, count, locations = (
-                    BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[buffer_view.type]
-                )
+                raise ValueError(f'missing attribute: {attribute.name}')
+            glBindBuffer(GL_ARRAY_BUFFER, buffer_view.buffer._gl)
+            attr_gl_type = (
+                BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[attribute.type]
+            )[0]
+            view_gl_type, count, locations = (
+                BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[buffer_view.type]
+            )
             for location_offset in range(locations):
                 location = attribute.location + location_offset
-                if buffer_view is not None:
-                    offset = (
-                        buffer_view.offset +
-                        ((buffer_view.stride // locations) * location_offset)
+                offset = (
+                    buffer_view.offset +
+                    ((buffer_view.stride // locations) * location_offset)
+                )
+                if (
+                    attr_gl_type == GL_DOUBLE and
+                    view_gl_type == GL_DOUBLE
+                ):
+                    glVertexAttribLPointer(
+                        location,
+                        count,
+                        view_gl_type,
+                        buffer_view.stride,
+                        c_void_p(offset)
                     )
-                    if (
-                        attr_gl_type == GL_DOUBLE and
-                        view_gl_type == GL_DOUBLE
-                    ):
-                        glVertexAttribLPointer(
-                            location,
-                            count,
-                            view_gl_type,
-                            buffer_view.stride,
-                            c_void_p(offset)
-                        )
-                    elif (
-                        attr_gl_type in GL_INT_TYPES and
-                        view_gl_type in GL_INT_TYPES
-                    ):
-                        glVertexAttribIPointer(
-                            location,
-                            count,
-                            view_gl_type,
-                            buffer_view.stride,
-                            c_void_p(offset)
-                        )
-                    else:
-                        glVertexAttribPointer(
-                            location,
-                            count,
-                            view_gl_type,
-                            GL_FALSE,
-                            buffer_view.stride,
-                            c_void_p(offset)
-                        )
-                    glEnableVertexAttribArray(location)
-                    if buffer_view.instancing_divisor is not None:
-                        glVertexAttribDivisor(
-                            location,
-                            buffer_view.instancing_divisor
-                        )
+                elif (
+                    attr_gl_type in GL_INT_TYPES and
+                    view_gl_type in GL_INT_TYPES
+                ):
+                    glVertexAttribIPointer(
+                        location,
+                        count,
+                        view_gl_type,
+                        buffer_view.stride,
+                        c_void_p(offset)
+                    )
                 else:
-                    raise ValueError(f'missing attribute: {attribute.name}')
+                    glVertexAttribPointer(
+                        location,
+                        count,
+                        view_gl_type,
+                        GL_FALSE,
+                        buffer_view.stride,
+                        c_void_p(offset)
+                    )
+                glEnableVertexAttribArray(location)
+                if buffer_view.instancing_divisor is not None:
+                    glVertexAttribDivisor(
+                        location,
+                        buffer_view.instancing_divisor
+                    )
+
 
     def use(self) -> None:
         global gl_vertex_array_in_use
@@ -417,7 +463,11 @@ def use_buffer_view_map_with_shader(
     view_map: BufferViewMap,
     shader: Shader
 ) -> None:
-    gl_vertex_array = view_map._get_gl_vertex_array_for_shader(shader)
+    try:
+        get_gl_vertex_array = view_map._get_gl_vertex_array_for_shader
+    except AttributeError:
+        raise TypeError('view_map must be gamut.graphics.BufferViewMap')
+    gl_vertex_array = get_gl_vertex_array(shader)
     gl_vertex_array.use()
 
 
