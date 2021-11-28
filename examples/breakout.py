@@ -183,10 +183,6 @@ class App(Application):
             )
             await self.window.Close
 
-        self.boop_speakers = []
-        self.bwop_speakers = []
-        del self.lose_speaker
-
     def reset(self) -> None:
         self.lives = 3
         self.update_lives_text()

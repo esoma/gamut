@@ -7,7 +7,8 @@ __all__ = ['Speaker', 'SpeakerState']
 # gamut
 from ._alcontext import release_al_context, require_al_context
 from ._source import (consume_stream_buffer, get_sample_al_buffer,
-                      return_stream_buffer, Sample, Stream)
+                      release_sample_al_buffer, return_stream_buffer, Sample,
+                      Stream)
 # python
 from ctypes import c_int, c_uint
 from ctypes import pointer as c_pointer
@@ -83,9 +84,13 @@ class Speaker:
         self._loop = loop
         self._stream_thread: Optional[Thread] = None
         self._stream_lock: Optional[Lock] = None
-        self._source: Union[Sample, Stream] = source
+        self._source: Optional[Union[Sample, Stream]] = source
         if isinstance(source, Sample):
-            alSourcei(self._al, AL_BUFFER, get_sample_al_buffer(source))
+            try:
+                alSourcei(self._al, AL_BUFFER, get_sample_al_buffer(source))
+            except Exception:
+                self._source = None
+                raise
         else:
             self._stream_lock = Lock()
             self._stream_thread = Thread(
@@ -160,6 +165,10 @@ class Speaker:
         if hasattr(self, "_al") and self._al is not None:
             alDeleteSources(1, c_pointer(self._al))
             self._al = None
+        if hasattr(self, "_source") and self._source is not None:
+            if isinstance(self._source, Sample):
+                release_sample_al_buffer(self._source)
+            self._source = None
         self._al_context = release_al_context(self._al_context)
 
     def play(self) -> None:
@@ -203,6 +212,7 @@ class Speaker:
     def position(self, value: vec3) -> None:
         self._ensure_open()
         self._position = vec3(value)
+        assert self._source is not None
         if self._source.channels != 1 and self._position != vec3(0):
             warn(
                 f'{self._source} has more than 1 channel, it will be '
@@ -219,6 +229,7 @@ class Speaker:
     def velocity(self, value: vec3) -> None:
         self._ensure_open()
         self._velocity = vec3(value)
+        assert self._source is not None
         if self._source.channels != 1 and self._velocity != vec3(0):
             warn(
                 f'{self._source} has more than 1 channel, it will be '
@@ -292,6 +303,7 @@ class Speaker:
     def loop(self, value: bool) -> None:
         self._ensure_open()
         self._loop = bool(value)
+        assert self._source is not None
         if isinstance(self._source, Sample):
             alSourcei(self._al, AL_LOOPING, AL_TRUE if value else AL_FALSE)
 
@@ -318,6 +330,7 @@ class Speaker:
     def direction(self, value: vec3) -> None:
         self._ensure_open()
         self._direction = vec3(value)
+        assert self._source is not None
         if self._source.channels != 1 and self._direction != vec3(0):
             warn(
                 f'{self._source} has more than 1 channel, it will be '
@@ -337,6 +350,7 @@ class Speaker:
         if value < 0.0 or value > (2 * pi):
             raise ValueError('inner cone angle must be between 0.0 and 2pi')
         self._inner_cone_angle = value
+        assert self._source is not None
         if self._source.channels != 1 and self._inner_cone_angle != 2 * pi:
             warn(
                 f'{self._source} has more than 1 channel, it will be '
@@ -365,6 +379,7 @@ class Speaker:
         if value < 0.0 or value > (2 * pi):
             raise ValueError('outer cone angle must be between 0.0 and 2pi')
         self._outer_cone_angle = value
+        assert self._source is not None
         if self._source.channels != 1 and self._outer_cone_angle != 2 * pi:
             warn(
                 f'{self._source} has more than 1 channel, it will be '
@@ -413,6 +428,7 @@ def _stream_main(speaker_ref: ref[Speaker]) -> None:
             buffers_processed = c_int()
             alGetSourcei(speaker._al, AL_BUFFERS_PROCESSED, buffers_processed)
             if buffers_queued.value == buffers_processed.value:
+                assert speaker._source is not None
                 warn(
                     f'buffer underrun for {speaker._source}, '
                     f'audio may be choppy or incorrectly rendered: '
