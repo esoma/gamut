@@ -26,3 +26,8 @@ Demonstrates rendering a transparent object.
 Demonstrates rendering text with both orthographic and perspective projections.
 
 ![](screenshots/text.py.png)
+
+## breakout.py
+A Breakout style game.
+
+![](screenshots/breakout.py.png)
