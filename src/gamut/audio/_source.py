@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = [
     'consume_stream_buffer',
     'get_sample_al_buffer',
+    'release_sample_al_buffer',
     'return_stream_buffer',
     'Sample',
     'Stream',
@@ -67,13 +68,13 @@ class Sample:
         al_id = c_uint()
         alGenBuffers(1, c_pointer(al_id))
         self._al: Optional[c_uint] = al_id
+        self._al_refs: int = 1
 
         alBufferData(self._al, al_data_type, data, len(data), sample_rate)
 
     def __del__(self) -> None:
-        if hasattr(self, "_al") and self._al is not None:
-            alDeleteBuffers(1, c_pointer(self._al))
-            self._al = None
+        if self._al is not None:
+            release_sample_al_buffer(self)
         self._al_context = release_al_context(self._al_context)
 
     @property
@@ -201,10 +202,22 @@ class Streamable(Protocol):
 
 def get_sample_al_buffer(sample: Sample) -> int:
     assert sample._al is not None
+    sample._al_refs += 1
     return sample._al.value
+
+
+def release_sample_al_buffer(sample: Sample) -> None:
+    assert sample._al_refs > 0
+    sample._al_refs -= 1
+    if sample._al_refs == 0:
+        assert sample._al is not None
+        alDeleteBuffers(1, c_pointer(sample._al))
+        sample._al = None
+
 
 def consume_stream_buffer(stream: Stream) -> Optional[int]:
     return stream._consume_buffer()
+
 
 def return_stream_buffer(stream: Stream, al_buffer: int) -> None:
     return stream._return_buffer(al_buffer)
