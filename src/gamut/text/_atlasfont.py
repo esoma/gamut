@@ -17,6 +17,7 @@ from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
 # python
 from typing import Final, Iterable, Optional, Union
 from weakref import ref
+# pillow
 from PIL import Image as PilImage
 # pyglm
 from glm import array as glm_array
@@ -92,8 +93,7 @@ class AtlasFont(Font):
                 tuple(packed.position + ivec2(self._padding, self._padding))
             )
         texture = Texture2d(
-            self._texture_size.x,
-            self._texture_size.y,
+            self._texture_size,
             GLYPH_FORMAT_TO_TEXTURE_MODE[self._format],
             uint8,
             canvas.tobytes()

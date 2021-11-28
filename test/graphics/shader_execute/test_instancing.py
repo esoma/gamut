@@ -65,7 +65,7 @@ def draw_fullscreen_quads(
 
 def test_negative_instances() -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -89,7 +89,7 @@ def test_negative_instances() -> None:
 
 def test_zero_instances() -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -118,7 +118,7 @@ def test_zero_instances() -> None:
 ]))
 def test_basic(colors: Sequence[Color]) -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )

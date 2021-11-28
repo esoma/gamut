@@ -69,7 +69,7 @@ def draw_fullscreen_quad(
 ])
 def test_basic(face_cull: FaceCull, expected_color: Color) -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )

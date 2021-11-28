@@ -14,7 +14,8 @@ __all__ = [
 
 # gamut
 from ._color import Color
-from ._texture2d import Texture2d, TextureComponents
+from ._texture2d import Texture2d
+from ._texture import TextureComponents
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
@@ -24,6 +25,8 @@ from ctypes import byref as c_byref
 from ctypes import c_int
 from enum import Enum
 from typing import Optional, Sequence, Union
+# pyglm
+from glm import ivec2
 # pyopengl
 from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        GL_DEPTH24_STENCIL8, GL_DEPTH_ATTACHMENT,
@@ -71,7 +74,7 @@ class TextureRenderTarget:
         sizes = {t.size for t in colors}
         if len(sizes) != 1:
             raise ValueError('all textures must have the same size')
-        self._size = list(sizes)[0]
+        self._size = ivec2(list(sizes)[0])
 
         self._gl = glGenFramebuffers(1)
         glBindFramebuffer(GL_FRAMEBUFFER, self._gl)
@@ -149,7 +152,7 @@ class TextureRenderTarget:
         return self._depth_stencil
 
     @property
-    def size(self) -> tuple[int, int]:
+    def size(self) -> ivec2:
         return self._size
 
     @property

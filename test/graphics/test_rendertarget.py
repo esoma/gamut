@@ -47,13 +47,13 @@ def test_texture_render_target(
     depth_stencil: Optional[TextureRenderTargetDepthStencil]
 ) -> None:
     texture = Texture2d(
-        100, 100,
+        (100, 100),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 100 * 100 * 4
     )
     actual_depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] = (
         Texture2d(
-            100, 100,
+            (100, 100),
             TextureComponents.DS, glm.uint32,
             b'\x00' * 100 * 100 * c_sizeof(c_uint)
         )
@@ -92,12 +92,12 @@ def test_texture_render_target_different_color_sizes(
     height: int
 ) -> None:
     texture1 = Texture2d(
-        100, 100,
+        (100, 100),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 100 * 100 * 4
     )
     texture2 = Texture2d(
-        width, height,
+        (width, height),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * width * height * 4
     )
@@ -111,7 +111,7 @@ def create_render_target(
 ) -> Union[TextureRenderTarget, WindowRenderTarget]:
     if cls is TextureRenderTarget:
         texture = Texture2d(
-            100, 100,
+            (100, 100),
             TextureComponents.RGBA, glm.uint8,
             b'\x00' * 100 * 100 * 4
         )
@@ -187,7 +187,7 @@ def test_clear_closed(
 
 def test_read_depth_from_render_target_no_depth_buffer() -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )
@@ -207,7 +207,7 @@ def test_read_depth_from_render_target_no_depth_buffer() -> None:
 
 def test_clear_render_target_no_depth_buffer() -> None:
     texture = Texture2d(
-        10, 10,
+        (10, 10),
         TextureComponents.RGBA, glm.uint8,
         b'\x00' * 10 * 10 * 4
     )

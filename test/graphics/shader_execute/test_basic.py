@@ -24,7 +24,7 @@ def create_render_target(
 ) -> Union[TextureRenderTarget, WindowRenderTarget]:
     if cls is TextureRenderTarget:
         texture = Texture2d(
-            10, 10,
+            (10, 10),
             TextureComponents.RGBA, glm.uint8,
             b'\x00' * 10 * 10 * 4
         )
