@@ -103,6 +103,12 @@ def test_nature_invalid(nature: Any) -> None:
 def test_bytes(data: bytes) -> None:
     buffer = Buffer(data)
     assert buffer.bytes == data
+    buffer.bytes = b'\x00\x00'
+    assert buffer.bytes == b'\x00\x00'
+    assert len(buffer) == 2
+    buffer.bytes = b''
+    assert buffer.bytes == b''
+    assert len(buffer) == 0
 
 
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
