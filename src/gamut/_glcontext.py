@@ -22,11 +22,9 @@ from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 # numpy
 from numpy import array as np_array
 # pyopengl
-from OpenGL.GL import (GL_COPY_READ_BUFFER, GL_PACK_ALIGNMENT,
-                       GL_UNPACK_ALIGNMENT, GL_VERSION, glBindBuffer,
+from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
                        glDeleteBuffers, glDeleteProgram, glDeleteTextures,
-                       glDeleteVertexArrays, glGetString, glPixelStorei,
-                       glUnmapBuffer)
+                       glDeleteVertexArrays, glGetString, glPixelStorei)
 from OpenGL.GL.framebufferobjects import (glDeleteFramebuffers,
                                           glDeleteRenderbuffers)
 # pysdl2
@@ -197,12 +195,6 @@ class GlContext:
             func()
         else:
             self._gc.put(func)
-
-    def unmap_gl_buffer(self, gl_buffer_name: Any) -> None:
-        def _unmap_gl_buffer() -> None:
-            glBindBuffer(GL_COPY_READ_BUFFER, gl_buffer_name)
-            glUnmapBuffer(GL_COPY_READ_BUFFER)
-        self._collect_garbage(_unmap_gl_buffer)
 
     def delete_buffer(self, gl_buffer_name: Any) -> None:
         def _delete_buffer() -> None:

@@ -14,6 +14,7 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
+from gamut._glmhelp import uvec2_exact
 # python
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
@@ -26,22 +27,28 @@ from weakref import ref, WeakKeyDictionary
 # pyglm
 import glm
 from glm import sizeof as glm_sizeof
+# pyglm-typing
+from glm_typing import U32Vector2
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
                        GL_DYNAMIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
-                       GL_ELEMENT_ARRAY_BUFFER, GL_FALSE, GL_READ_ONLY,
-                       GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
+                       GL_ELEMENT_ARRAY_BUFFER, GL_FALSE, GL_R8, GL_READ_ONLY,
+                       GL_RED, GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
                        GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
-                       glBindBuffer, glBindVertexArray, glBufferData,
+                       GL_UNSIGNED_BYTE, glBindBuffer, glBindVertexArray,
+                       glBufferData, glBufferSubData, glClearBufferSubData,
                        glEnableVertexAttribArray, glGenBuffers,
-                       glGenVertexArrays, glMapBuffer, glVertexAttribDivisor,
-                       glVertexAttribIPointer, glVertexAttribLPointer,
-                       glVertexAttribPointer)
+                       glGenVertexArrays, glMapBuffer, glUnmapBuffer,
+                       glVertexAttribDivisor, glVertexAttribIPointer,
+                       glVertexAttribLPointer, glVertexAttribPointer)
 
 if TYPE_CHECKING:
     # gamut
     from ._shader import Shader
+
+
+_bytes = bytes
 
 
 class BufferFrequency(Enum):
@@ -91,7 +98,6 @@ class Buffer:
         nature: BufferNature = BufferNature.DRAW,
     ):
         self._gl: Any = None
-        self._map: Optional[c_void_p] = None
         self._gl_context = require_gl_context()
         # check data
         if data is not None:
@@ -102,7 +108,9 @@ class Buffer:
         self._length = len(data) if data is not None else 0
         # check frequency/nature
         try:
-            gl_access = FREQUENCY_NATURE_TO_GL_ACCESS[(frequency, nature)]
+            self._gl_access = FREQUENCY_NATURE_TO_GL_ACCESS[
+                (frequency, nature)
+            ]
         except KeyError:
             if not isinstance(frequency, BufferFrequency):
                 raise TypeError(f'frequency must be {BufferFrequency}')
@@ -113,12 +121,9 @@ class Buffer:
         # create the gl buffer
         self._gl = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self._gl)
-        glBufferData(GL_ARRAY_BUFFER, data, gl_access)
+        glBufferData(GL_ARRAY_BUFFER, data, self._gl_access)
 
     def __del__(self) -> None:
-        if self._map is not None:
-            get_gl_context().unmap_gl_buffer(self._gl)
-            self._map = None
         if self._gl is not None:
             get_gl_context().delete_buffer(self._gl)
             self._gl = None
@@ -127,26 +132,109 @@ class Buffer:
     def __len__(self) -> int:
         return self._length
 
-    def _ensure_mapped(self) -> None:
-        assert self._length > 0
-        if self._map is not None:
-            return
-        glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
-        self._map = c_void_p(glMapBuffer(
-            GL_COPY_READ_BUFFER,
-            GL_READ_ONLY
-        ))
-
     @property
     def bytes(self) -> bytes:
         if self._length == 0:
             return b''
-        self._ensure_mapped()
-        assert self._map is not None
-        return bytes(c_cast(
-            self._map,
-            c_pointer(c_byte * self._length),
-        ).contents)
+        glBindBuffer(GL_COPY_READ_BUFFER, self._gl)
+        map = c_void_p(glMapBuffer(
+            GL_COPY_READ_BUFFER,
+            GL_READ_ONLY
+        ))
+        try:
+            result = bytes(c_cast(
+                map,
+                c_pointer(c_byte * self._length),
+            ).contents)
+        finally:
+            glUnmapBuffer(GL_COPY_READ_BUFFER)
+        return result
+
+    @bytes.setter
+    def bytes(self, data: bytes) -> None:
+        try:
+            data = bytes(data)
+        except TypeError:
+            raise TypeError('data must be bytes')
+        glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+        glBufferData(GL_ARRAY_BUFFER, data, self._gl_access)
+        self._length = len(data) if data is not None else 0
+
+    def replace(self, offset: int, data: _bytes) -> None:
+        # check offset
+        try:
+            offset = int(offset)
+        except (ValueError, TypeError):
+            raise TypeError('offset must be int')
+        if offset < 0:
+            raise ValueError('offset must be 0 or more')
+        # check data
+        try:
+            data = bytes(data)
+        except TypeError:
+            raise TypeError('data must be bytes')
+        # ensure the requested write doesn't go beyond the end of the existing
+        # buffer
+        if offset + len(data) > self._length:
+            raise ValueError(
+                'requested offset and data would write beyond the end of the '
+                'buffer'
+            )
+        # replace the data
+        if len(data) == 0:
+            return
+        glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+        glBufferSubData(GL_ARRAY_BUFFER, offset, len(data), data)
+
+    def clear(
+        self,
+        data: _bytes = b'\x00',
+        *,
+        range: Optional[U32Vector2] = None
+    ) -> None:
+        # check data
+        try:
+            data = bytes(data)
+        except TypeError:
+            raise TypeError('data must be bytes')
+        if len(data) != 1:
+            raise TypeError('data must be a single byte')
+        # check range
+        if range is not None:
+            try:
+                start, end = uvec2_exact(range)
+            except TypeError:
+                raise TypeError('range must be a uvec2')
+            assert start >= 0
+            assert end >= 0
+            if start > self._length or end > self._length:
+                raise ValueError(
+                    'range must be between 0 and the length of the buffer'
+                )
+            if start >= end:
+                raise ValueError('range end must come after start')
+        else:
+            start = 0
+            end = self._length
+        # clear the range part of the buffer
+        self._clear_impl(data, start, end - start)
+
+    if glClearBufferSubData:
+        def _clear_impl(self, data: _bytes, offset: int, size: int) -> None:
+            glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+            glClearBufferSubData(
+                GL_ARRAY_BUFFER,
+                GL_R8,
+                offset,
+                size,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                data
+            )
+    else:
+        def _clear_impl(self, data: _bytes, offset: int, size: int) -> None:
+            glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+            glBufferSubData(GL_ARRAY_BUFFER, offset, size, data * size)
 
     @property
     def frequency(self) -> BufferFrequency:
@@ -225,20 +313,16 @@ class BufferView(Generic[BVT]):
     def __iter__(self) -> Generator[BVT, None, None]:
         if len(self._buffer) == 0:
             return
-        self._buffer._ensure_mapped()
-        assert self._buffer._map is not None
-
+        buffer_bytes = self._buffer.bytes
         for i in range(len(self)):
-            assert self._buffer._map.value is not None
-            data_bytes = bytes(c_cast(
-                self._buffer._map.value + self._offset + (self._stride * i),
-                c_pointer(c_byte * glm_sizeof(self._data_type)),
-            ).contents)
+            start_index = self._offset + (self._stride * i)
+            end_index = start_index + glm_sizeof(self._data_type)
+            chunk = buffer_bytes[start_index:end_index]
             try:
                 struct_name = GLM_POD_TO_STRUCT_NAME[self._data_type]
-                data = c_unpack(struct_name, data_bytes)
+                data = c_unpack(struct_name, chunk)
             except KeyError:
-                data = self._data_type.from_bytes(data_bytes) # type: ignore
+                data = self._data_type.from_bytes(chunk) # type: ignore
             yield data # type: ignore
 
     @property
