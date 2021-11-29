@@ -90,9 +90,8 @@ class App(Application):
         self.listener = Listener(gain=.25)
         self.listener.activate()
         self.boop_sample = Sound(DIR / 'resources/boop.wav').to_sample()
-        self.boop_speakers: list[Speaker] = []
         self.bwop_sample = Sound(DIR / 'resources/bwop.wav').to_sample()
-        self.bwop_speakers: list[Speaker] = []
+        self.speakers: list[Speaker] = []
         self.lose_sample = Sound(DIR / 'resources/lose.wav').to_sample()
         self.lose_speaker = Speaker(self.lose_sample)
 
@@ -268,21 +267,23 @@ class App(Application):
 
 
     def play_boop(self) -> None:
-        for speaker in self.boop_speakers:
+        for speaker in self.speakers:
             if speaker.state == SpeakerState.STOPPED:
                 break
         else:
             speaker = Speaker(self.boop_sample)
-            self.boop_speakers.append(speaker)
+            self.speakers.append(speaker)
+        speaker.source = self.boop_sample
         speaker.play()
 
     def play_bwop(self) -> None:
-        for speaker in self.bwop_speakers:
+        for speaker in self.speakers:
             if speaker.state == SpeakerState.STOPPED:
                 break
         else:
             speaker = Speaker(self.bwop_sample)
-            self.bwop_speakers.append(speaker)
+            self.speakers.append(speaker)
+        speaker.source = self.bwop_sample
         speaker.play()
 
     def step_physics(self, duration: timedelta) -> None:

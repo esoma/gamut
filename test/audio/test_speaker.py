@@ -47,6 +47,37 @@ def test_initialize_defaults(
         assert speaker.is_open
 
 
+def test_set_source_sample(loopback_al_context: AlContext) -> None:
+    source = create_source(Sample)
+    sample = create_source(Sample)
+    stream = create_source(Stream)
+    with Speaker(source) as speaker:
+        assert speaker.source is source
+        speaker.source = sample
+        assert speaker.source is sample
+        with pytest.raises(TypeError) as excinfo:
+            speaker.source = stream
+        assert str(excinfo.value) == 'may only change the source to a sample'
+
+
+def test_set_source_stream(loopback_al_context: AlContext) -> None:
+    source = create_source(Stream)
+    sample = create_source(Sample)
+    stream = create_source(Stream)
+    with Speaker(source) as speaker:
+        assert speaker.source is source
+        with pytest.raises(TypeError) as excinfo:
+            speaker.source = sample
+        assert str(excinfo.value) == (
+            'may only change the source if it is a sample'
+        )
+        with pytest.raises(TypeError) as excinfo:
+            speaker.source = stream
+        assert str(excinfo.value) == (
+            'may only change the source if it is a sample'
+        )
+
+
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 def test_close(
     loopback_al_context: AlContext,

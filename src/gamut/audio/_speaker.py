@@ -87,10 +87,11 @@ class Speaker:
         self._source: Optional[Union[Sample, Stream]] = source
         if isinstance(source, Sample):
             try:
-                alSourcei(self._al, AL_BUFFER, get_sample_al_buffer(source))
+                al_buffer = get_sample_al_buffer(source)
             except Exception:
                 self._source = None
                 raise
+            alSourcei(self._al, AL_BUFFER, al_buffer)
         else:
             self._stream_lock = Lock()
             self._stream_thread = Thread(
@@ -195,6 +196,19 @@ class Speaker:
         self._ensure_open()
         assert self._source is not None
         return self._source
+
+    @source.setter
+    def source(self, value: Union[Sample, Stream]) -> None:
+        self._ensure_open()
+        if not isinstance(self._source, Sample):
+            raise TypeError('may only change the source if it is a sample')
+        if not isinstance(value, Sample):
+            raise TypeError('may only change the source to a sample')
+        self.stop()
+        al_buffer = get_sample_al_buffer(value)
+        release_sample_al_buffer(self._source)
+        alSourcei(self._al, AL_BUFFER, al_buffer)
+        self._source = value
 
     @property
     def state(self) -> SpeakerState:
