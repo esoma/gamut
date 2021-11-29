@@ -47,7 +47,7 @@ def test_initialize_defaults(
         assert speaker.is_open
 
 
-def test_set_source_sample() -> None:
+def test_set_source_sample(loopback_al_context: AlContext) -> None:
     source = create_source(Sample)
     sample = create_source(Sample)
     stream = create_source(Stream)
@@ -60,7 +60,7 @@ def test_set_source_sample() -> None:
         assert str(excinfo.value) == 'may only change the source to a sample'
 
 
-def test_set_source_stream() -> None:
+def test_set_source_stream(loopback_al_context: AlContext) -> None:
     source = create_source(Stream)
     sample = create_source(Sample)
     stream = create_source(Stream)
