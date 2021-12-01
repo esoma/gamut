@@ -178,6 +178,10 @@ class Speaker:
             self._stream()
         self._play = True
         alSourcePlay(self._al)
+        
+    def resume(self) -> None:
+        if self.state is SpeakerState.PAUSED:
+            self.play()
 
     def pause(self) -> None:
         self._ensure_open()
