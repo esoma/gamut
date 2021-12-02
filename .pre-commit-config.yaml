@@ -4,14 +4,15 @@ repos:
     rev: v4.0.1
     hooks:
     -   id: trailing-whitespace
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v0.910'
-    hooks:
-    -   id: mypy
-        entry: python .pre-commit-mypy.py
-        args: [--config-file=pyproject.toml]
-        exclude: setup.py
-        additional_dependencies: ['pytest']
+# mypy will not work until #11643 and #11650 are merged and released
+#-   repo: https://github.com/pre-commit/mirrors-mypy
+#    rev: 'v0.910'
+#    hooks:
+#    -   id: mypy
+#        entry: python .pre-commit-mypy.py
+#        args: [--config-file=pyproject.toml]
+#        exclude: setup.py
+#        additional_dependencies: ['pytest']
 -   repo: https://github.com/pycqa/isort
     rev: '5.9.3'
     hooks:

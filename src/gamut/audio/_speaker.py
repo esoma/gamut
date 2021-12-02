@@ -178,7 +178,7 @@ class Speaker:
             self._stream()
         self._play = True
         alSourcePlay(self._al)
-        
+
     def resume(self) -> None:
         if self.state is SpeakerState.PAUSED:
             self.play()
@@ -388,7 +388,7 @@ class Speaker:
     @property
     def outer_cone_angle(self) -> float:
         self._ensure_open()
-        return self._inner_cone_angle
+        return self._outer_cone_angle
 
     @outer_cone_angle.setter
     def outer_cone_angle(self, value: float) -> None:
