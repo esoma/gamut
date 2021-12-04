@@ -3,6 +3,8 @@ from __future__ import annotations
 
 __all__ = ['TransformNode']
 
+# gamut
+from ._glmhelp import F32Matrix4x4, mat4_exact
 # python
 from typing import Optional
 # pyglm
@@ -14,13 +16,13 @@ class TransformNode:
     def __init__(
         self,
         *,
-        local_transform: Optional[mat4] = None,
+        local_transform: Optional[F32Matrix4x4] = None,
         parent: Optional[TransformNode] = None
     ) -> None:
         self._parent = parent
         if local_transform is None:
             local_transform = mat4(1)
-        self._local_transform = mat4(local_transform)
+        self._local_transform = mat4_exact(local_transform)
         self._parent_transform: Optional[mat4] = None
         self._transform: Optional[mat4] = None
 
@@ -40,10 +42,11 @@ class TransformNode:
         return mat4(self._local_transform)
 
     @local_transform.setter
-    def local_transform(self, value: mat4) -> None:
+    def local_transform(self, value: F32Matrix4x4) -> None:
+        value = mat4_exact(value)
         if value != self._local_transform:
             self._transform = None
-            self._local_transform = mat4(value)
+            self._local_transform = value
 
     @property
     def transform(self) -> mat4:
