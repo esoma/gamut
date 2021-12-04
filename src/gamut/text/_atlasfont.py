@@ -1,9 +1,6 @@
-
-
 from __future__ import annotations
 
 __all__ = ['AtlasFont', 'AtlasGlyph']
-
 
 # gamut
 from ._break import break_never, BreakMethod
@@ -11,6 +8,7 @@ from ._face import (FontSize, PositionedGlyph, RenderedGlyph,
                     RenderedGlyphFormat)
 from ._font import Font
 # gamut
+from gamut._glmhelp import I32Vector2, ivec2_exact
 from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
                             create_quad_uv_array, Pack2d, PrimitiveMode,
                             Texture2d, TextureComponents)
@@ -46,12 +44,12 @@ class AtlasFont(Font):
         size: FontSize,
         format: RenderedGlyphFormat,
         *,
-        texture_size: ivec2 = ivec2(512, 512),
+        texture_size: I32Vector2 = ivec2(512, 512),
         padding: int = 1,
     ):
         super().__init__(size)
         self._format = format
-        self._texture_size = ivec2(texture_size)
+        self._texture_size = ivec2_exact(texture_size)
         self._padding = padding
         self._glyph_map: dict[int, AtlasGlyph] = {}
         self._textures: list[Texture2d] = []
@@ -107,7 +105,7 @@ class AtlasFont(Font):
     def _map_glyph(self, glyph_index: int) -> AtlasGlyph:
         assert glyph_index not in self._glyph_map
         rendered_glyph = self.render_glyph(glyph_index)
-        pack_index = self._pack.add((
+        pack_index = self._pack.add(ivec2(
             rendered_glyph.size[0] + (self._padding * 2),
             rendered_glyph.size[1] + (self._padding * 2)
         ))
