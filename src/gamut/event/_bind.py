@@ -12,6 +12,7 @@ from ._taskmanager import TaskManager, TaskManagerIgnoredException
 from enum import Enum
 from typing import (Any, Callable, Coroutine, final, Generic, Optional, Type,
                     TypeVar)
+from warnings import warn
 from weakref import WeakSet
 
 
@@ -86,7 +87,10 @@ class Bind(Generic[E]):
         return self
 
     def __exit__(self, *args: Any) -> None:
-        self.close()
+        try:
+            self.close()
+        except RuntimeError as ex:
+            warn(str(ex))
 
     def _on_send(
         self,

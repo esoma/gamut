@@ -14,7 +14,9 @@ from datetime import timedelta
 import gc
 from pathlib import Path
 from random import randrange
+import traceback
 from typing import Final
+import warnings
 # pyglm
 from glm import array as glm_array
 from glm import mat4, ortho
@@ -463,6 +465,7 @@ class App(Application):
         if mouse_moved.position is None:
             return
         self.update_paddle_transform(mouse_moved.position[0])
+        raise Exception()
 
     async def draw(self, draw: Draw) -> None:
         self.step_physics(draw.when - draw.previous)
@@ -531,6 +534,10 @@ class App(Application):
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    try:
+        app.run()
+    except Exception as ex:
+        traceback.print_exception(ex)
+        warnings.simplefilter('ignore')
     del app
     gc.collect()
