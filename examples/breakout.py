@@ -1,7 +1,7 @@
 
 # gamut
 from gamut import Application, Timer, TimerExpired, Window
-from gamut.audio import Listener, Sound, Speaker, SpeakerState
+from gamut.audio import Listener, MultiSpeaker, Sound
 from gamut.event import Bind
 from gamut.graphics import (BlendFactor, Buffer, BufferFrequency, BufferView,
                             BufferViewMap, clear_render_target, Color,
@@ -89,11 +89,10 @@ class App(Application):
 
         self.listener = Listener(gain=.25)
         self.listener.activate()
+        self.speaker = MultiSpeaker()
         self.boop_sample = Sound(DIR / 'resources/boop.wav').to_sample()
         self.bwop_sample = Sound(DIR / 'resources/bwop.wav').to_sample()
-        self.speakers: list[Speaker] = []
         self.lose_sample = Sound(DIR / 'resources/lose.wav').to_sample()
-        self.lose_speaker = Speaker(self.lose_sample)
 
         self.face = Face(DIR / 'resources/ArcadeClassic.ttf')
         self.small_font = AtlasFont(
@@ -267,24 +266,7 @@ class App(Application):
 
 
     def play_boop(self) -> None:
-        for speaker in self.speakers:
-            if speaker.state == SpeakerState.STOPPED:
-                break
-        else:
-            speaker = Speaker(self.boop_sample)
-            self.speakers.append(speaker)
-        speaker.source = self.boop_sample
-        speaker.play()
-
-    def play_bwop(self) -> None:
-        for speaker in self.speakers:
-            if speaker.state == SpeakerState.STOPPED:
-                break
-        else:
-            speaker = Speaker(self.bwop_sample)
-            self.speakers.append(speaker)
-        speaker.source = self.bwop_sample
-        speaker.play()
+        self.speaker.play(self.boop_sample)
 
     def step_physics(self, duration: timedelta) -> None:
         paddle_current_x = (self.paddle_transform * vec3(0)).x
@@ -431,7 +413,7 @@ class App(Application):
         )
         self.lives -= 1
         self.update_lives_text()
-        self.lose_speaker.play()
+        self.speaker.play(self.lose_sample)
         if self.lives == 0:
             self.reset()
 
@@ -446,7 +428,7 @@ class App(Application):
             brick.index * glm_sizeof(vec4) * 6,
             colors.to_bytes(),
         )
-        self.play_bwop()
+        self.speaker.play(self.bwop_sample)
         if all(not brick.is_active for brick in self.bricks):
             self.reset()
 

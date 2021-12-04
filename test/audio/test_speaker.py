@@ -605,9 +605,15 @@ def test_controls(
         assert speaker.state == SpeakerState.PLAYING
         speaker.pause()
         assert speaker.state == SpeakerState.PAUSED
+        speaker.resume()
+        assert speaker.state == SpeakerState.PLAYING
+        speaker.pause()
+        assert speaker.state == SpeakerState.PAUSED
         speaker.play()
         assert speaker.state == SpeakerState.PLAYING
         speaker.stop()
+        assert speaker.state == SpeakerState.STOPPED
+        speaker.resume()
         assert speaker.state == SpeakerState.STOPPED
 
 

@@ -1,6 +1,7 @@
 
 __all__ = [
     'Listener',
+    'MultiSpeaker',
     'Sample',
     'Sound',
     'Speaker',
@@ -11,6 +12,7 @@ __all__ = [
 
 # gamut
 from ._listener import Listener
+from ._multispeaker import MultiSpeaker
 from ._sound import Sound
 from ._source import Sample, Stream, Streamable
 from ._speaker import Speaker, SpeakerState
