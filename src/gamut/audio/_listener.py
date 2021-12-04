@@ -5,6 +5,8 @@ __all__ = ['Listener']
 
 # gamut
 from ._alcontext import release_al_context, require_al_context
+# gamut
+from gamut._glmhelp import F32Vector3, vec3_exact
 # python
 from ctypes import c_float
 from typing import Optional
@@ -24,11 +26,11 @@ class Listener:
     def __init__(
         self,
         *,
-        position: vec3 = vec3(0),
-        velocity: vec3 = vec3(0),
+        position: F32Vector3 = vec3(0),
+        velocity: F32Vector3 = vec3(0),
         gain: float = 1.0,
-        direction: vec3 = vec3(0, 0, -1),
-        up: vec3 = vec3(0, 1, 0),
+        direction: F32Vector3 = vec3(0, 0, -1),
+        up: F32Vector3 = vec3(0, 1, 0),
     ):
         self._al_context = require_al_context()
 
@@ -36,10 +38,10 @@ class Listener:
         if gain < 0.0 or gain > 1.0:
             raise ValueError('gain must be between 0.0 and 1.0')
 
-        self._position = vec3(position)
-        self._velocity = vec3(velocity)
-        self._direction = vec3(direction)
-        self._up = vec3(up)
+        self._position = vec3_exact(position)
+        self._velocity = vec3_exact(velocity)
+        self._direction = vec3_exact(direction)
+        self._up = vec3_exact(up)
         self._gain = gain
 
     def __del__(self) -> None:
@@ -103,8 +105,8 @@ class Listener:
         return vec3(self._position)
 
     @position.setter
-    def position(self, value: vec3) -> None:
-        self._position = vec3(value)
+    def position(self, value: F32Vector3) -> None:
+        self._position = vec3_exact(value)
         if self.get_active() is self:
             self._update_position()
 
@@ -113,8 +115,8 @@ class Listener:
         return vec3(self._velocity)
 
     @velocity.setter
-    def velocity(self, value: vec3) -> None:
-        self._velocity = vec3(value)
+    def velocity(self, value: F32Vector3) -> None:
+        self._velocity = vec3_exact(value)
         if self.get_active() is self:
             self._update_velocity()
 
@@ -123,8 +125,8 @@ class Listener:
         return vec3(self._direction)
 
     @direction.setter
-    def direction(self, value: vec3) -> None:
-        self._direction = vec3(value)
+    def direction(self, value: F32Vector3) -> None:
+        self._direction = vec3_exact(value)
         if self.get_active() is self:
             self._update_orientation()
 
@@ -133,8 +135,8 @@ class Listener:
         return vec3(self._up)
 
     @up.setter
-    def up(self, value: vec3) -> None:
-        self._up = vec3(value)
+    def up(self, value: F32Vector3) -> None:
+        self._up = vec3_exact(value)
         if self.get_active() is self:
             self._update_orientation()
 
