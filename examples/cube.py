@@ -28,7 +28,7 @@ class App(Application):
     async def main(self) -> None:
         self.window = Window()
         self.window.title = 'Gamut Cube Example'
-        self.window.resize(800, 800)
+        self.window.resize((800, 800))
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)

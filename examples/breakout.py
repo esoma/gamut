@@ -79,7 +79,7 @@ class App(Application):
 
         self.window = Window()
         self.window.title = 'Gamut Breakout Example'
-        self.window.resize(*self.SCREEN_SIZE)
+        self.window.resize(self.SCREEN_SIZE)
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)
