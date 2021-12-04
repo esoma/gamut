@@ -465,7 +465,6 @@ class App(Application):
         if mouse_moved.position is None:
             return
         self.update_paddle_transform(mouse_moved.position[0])
-        raise Exception()
 
     async def draw(self, draw: Draw) -> None:
         self.step_physics(draw.when - draw.previous)
