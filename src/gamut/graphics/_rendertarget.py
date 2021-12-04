@@ -173,12 +173,12 @@ class WindowRenderTarget:
         self._gl_context = release_gl_context(self._gl_context)
 
     @property
-    def size(self) -> tuple[int, int]:
+    def size(self) -> ivec2:
         sdl_window = get_sdl_window_from_window(self._window)
         x = c_int()
         y = c_int()
         SDL_GL_GetDrawableSize(sdl_window, c_byref(x), c_byref(y))
-        return (x.value, y.value)
+        return ivec2(x.value, y.value)
 
     @property
     def window(self) -> Window:
