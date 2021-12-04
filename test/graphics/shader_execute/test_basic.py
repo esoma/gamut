@@ -35,7 +35,7 @@ def create_render_target(
     elif cls is WindowRenderTarget:
         window = Window()
         window.is_bordered = False
-        window.resize(10, 10)
+        window.resize((10, 10))
         return WindowRenderTarget(window)
     raise NotImplementedError()
 

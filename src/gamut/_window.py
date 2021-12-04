@@ -17,6 +17,7 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
+from gamut._glmhelp import I32Vector2, ivec2_exact
 from gamut._sdl import sdl_window_event_callback_map
 from gamut.event import Bind
 from gamut.event import Event as _Event
@@ -27,6 +28,8 @@ from enum import Enum
 import sys
 from typing import Any, ClassVar, Optional, TYPE_CHECKING
 from weakref import WeakValueDictionary
+# pyglm
+from glm import ivec2
 # pyopengl
 from OpenGL.GL import GL_DRAW_FRAMEBUFFER, glBindFramebuffer, glViewport
 # pysdl2
@@ -60,11 +63,11 @@ class WindowHidden(WindowEvent, window=...):
 
 
 class WindowMoved(WindowEvent, window=...):
-    position: tuple[int, int]
+    position: ivec2
 
 
 class WindowResized(WindowEvent, window=...):
-    size: tuple[int, int]
+    size: ivec2
 
 
 class WindowShown(WindowEvent, window=...):
@@ -147,7 +150,7 @@ class Window:
 
     async def _resized(self, event: WindowResized) -> None:
         assert event.window is self
-        glViewport(0, 0, *event.size)
+        glViewport(0, 0, event.size.x, event.size.y)
 
     def close(self) -> None:
         if hasattr(self, "_resized_bind"):
@@ -250,20 +253,22 @@ class Window:
             )
         return get_gl_context().execute(set_window_position)
 
-    def resize(self, width: int, height: int) -> None:
+    def resize(self, size: I32Vector2) -> None:
         self._ensure_open()
+        size = ivec2_exact(size)
         def resize_window() -> None:
-            SDL_SetWindowSize(self._sdl, int(width), int(height))
+            assert isinstance(size, ivec2)
+            SDL_SetWindowSize(self._sdl, size.x, size.y)
         get_gl_context().execute(resize_window)
 
     @property
-    def size(self) -> tuple[int, int]:
+    def size(self) -> ivec2:
         self._ensure_open()
-        def get_size() -> tuple[int, int]:
+        def get_size() -> ivec2:
             x = c_int()
             y = c_int()
             SDL_GetWindowSize(self._sdl, c_byref(x), c_byref(y))
-            return (x.value, y.value)
+            return ivec2(x.value, y.value)
         return get_gl_context().execute(get_size)
 
     @property
@@ -336,7 +341,7 @@ def sdl_window_event_moved_callback(
         window = get_window_from_sdl_id(sdl_event.window.windowID)
     except KeyError:
         return None
-    return window.Moved((sdl_event.window.data1, sdl_event.window.data2))
+    return window.Moved(ivec2(sdl_event.window.data1, sdl_event.window.data2))
 
 assert SDL_WINDOWEVENT_MOVED not in sdl_window_event_callback_map
 sdl_window_event_callback_map[SDL_WINDOWEVENT_MOVED] = (
@@ -355,7 +360,10 @@ def sdl_window_event_resized_callback(
         window = get_window_from_sdl_id(sdl_event.window.windowID)
     except KeyError:
         return None
-    return window.Resized((sdl_event.window.data1, sdl_event.window.data2))
+    return window.Resized(ivec2(
+        sdl_event.window.data1,
+        sdl_event.window.data2
+    ))
 
 assert SDL_WINDOWEVENT_SIZE_CHANGED not in sdl_window_event_callback_map
 sdl_window_event_callback_map[SDL_WINDOWEVENT_SIZE_CHANGED] = (

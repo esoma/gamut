@@ -97,8 +97,8 @@ def test_layout_text_no_wrap(max_line_size: Optional[int]) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
         assert isinstance(glyph.position, glm.vec2)
-        assert glyph.position.x == pytest.approx(x, abs=1e-4)
-        assert glyph.position.y == pytest.approx(y, abs=1e-4)
+        assert glyph.position.x == pytest.approx(x, abs=1e-1)
+        assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 11
     check_glyph(positioned_glyphs[0], 'h', 75, 0.0, 22.0)
     check_glyph(positioned_glyphs[1], 'e', 72, 9.8125, 22.0)
@@ -149,8 +149,8 @@ def test_layout_text_wrap(
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
         assert isinstance(glyph.position, glm.vec2)
-        assert glyph.position.x == pytest.approx(x, abs=1e-4)
-        assert glyph.position.y == pytest.approx(y, abs=1e-4)
+        assert glyph.position.x == pytest.approx(x, abs=1e-1)
+        assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
     check_glyph(positioned_glyphs[0], 'a', 68, *positions[0])
     check_glyph(positioned_glyphs[1], 'b', 69, *positions[1])
@@ -187,8 +187,8 @@ def test_layout_text_wrap_force(
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
         assert isinstance(glyph.position, glm.vec2)
-        assert glyph.position.x == pytest.approx(x, abs=1e-4)
-        assert glyph.position.y == pytest.approx(y, abs=1e-4)
+        assert glyph.position.x == pytest.approx(x, abs=1e-1)
+        assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
     check_glyph(positioned_glyphs[0], 'a', 68, 0.0, 22.0)
     check_glyph(positioned_glyphs[1], 'b', 69, 0.0, 44.0)
