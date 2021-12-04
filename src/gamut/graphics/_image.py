@@ -12,7 +12,7 @@ from PIL import Image as PilImage
 from PIL import ImageMath as PilImageMath
 from PIL import UnidentifiedImageError as PilUnidentifiedImageError
 # pyglm
-from glm import uint8
+from glm import ivec2, uint8
 
 PIL_MODE_TO_TEXTURE_COMPONENTS: Final = {
     'L': TextureComponents.R,
@@ -109,9 +109,9 @@ class Image:
         return self._pil is not None
 
     @property
-    def size(self) -> tuple[int, int]:
+    def size(self) -> ivec2:
         self._ensure_open()
         size: tuple[int, int] = self._pil.size
         assert isinstance(size, tuple)
         assert len(size) == 2
-        return size
+        return ivec2(*size)
