@@ -3,6 +3,8 @@
 from gamut.graphics import Pack2d, Packed2dItem
 # python
 from itertools import permutations
+# pyglm
+import glm
 # pytest
 import pytest
 
@@ -53,7 +55,7 @@ def test_pack_exact_size(width: int, height: int) -> None:
     pack.add((width, height))
     pack.pack()
     assert pack.map == {
-        0: Packed2dItem(0, (0, 0))
+        0: Packed2dItem(0, glm.ivec2(0, 0))
     }
 
 
@@ -85,7 +87,7 @@ def test_pack_tight(width: int, height: int) -> None:
         pack.add((1, 1))
     pack.pack()
     assert pack.map == {
-        i: Packed2dItem(0, (w, h))
+        i: Packed2dItem(0, glm.ivec2(w, h))
         for i, (w, h) in enumerate((
             (w, h)
             for h in range(height)
@@ -105,9 +107,9 @@ def test_backfill(items: list[tuple[int, int]]) -> None:
         pack.add(item)
     pack.pack()
     assert pack.map == {
-        items.index((51, 51)): Packed2dItem(0, (0, 0)),
-        items.index((50, 51)): Packed2dItem(1, (0, 0)),
-        items.index((49, 51)): Packed2dItem(0, (51, 0)),
+        items.index((51, 51)): Packed2dItem(0, glm.ivec2(0, 0)),
+        items.index((50, 51)): Packed2dItem(1, glm.ivec2(0, 0)),
+        items.index((49, 51)): Packed2dItem(0, glm.ivec2(51, 0)),
     }
 
 
@@ -122,9 +124,9 @@ def test_newline(items: list[tuple[int, int]]) -> None:
         pack.add(item)
     pack.pack()
     assert pack.map == {
-        items.index((51, 50)): Packed2dItem(0, (0, 0)),
-        items.index((50, 50)): Packed2dItem(0, (0, 50)),
-        items.index((49, 50)): Packed2dItem(0, (51, 0)),
+        items.index((51, 50)): Packed2dItem(0, glm.ivec2(0, 0)),
+        items.index((50, 50)): Packed2dItem(0, glm.ivec2(0, 50)),
+        items.index((49, 50)): Packed2dItem(0, glm.ivec2(51, 0)),
     }
 
 
@@ -142,11 +144,11 @@ def test_last_line_expansion(items: list[tuple[int, int]]) -> None:
     pack.add((50, 1))
     pack.pack()
     assert pack.map == {
-        items.index((52, 30)): Packed2dItem(0, (0, 0)),
-        items.index((51, 20)): Packed2dItem(0, (0, 30)),
-        items.index((50, 10)): Packed2dItem(0, (0, 50)),
-        3: Packed2dItem(0, (50, 50)),
-        4: Packed2dItem(0, (0, 90)),
+        items.index((52, 30)): Packed2dItem(0, glm.ivec2(0, 0)),
+        items.index((51, 20)): Packed2dItem(0, glm.ivec2(0, 30)),
+        items.index((50, 10)): Packed2dItem(0, glm.ivec2(0, 50)),
+        3: Packed2dItem(0, glm.ivec2(50, 50)),
+        4: Packed2dItem(0, glm.ivec2(0, 90)),
     }
 
 @pytest.mark.parametrize("items", permutations([
@@ -163,9 +165,9 @@ def test_repack(items: list[tuple[int, int]]) -> None:
         pack.pack()
     pack.repack()
     assert pack.map == {
-        items.index((10, 40)): Packed2dItem(0, (0, 0)),
-        items.index((52, 30)): Packed2dItem(0, (10, 0)),
-        items.index((51, 20)): Packed2dItem(0, (0, 40)),
-        items.index((50, 10)): Packed2dItem(0, (0, 60)),
-        items.index((50, 1)): Packed2dItem(0, (50, 60)),
+        items.index((10, 40)): Packed2dItem(0, glm.ivec2(0, 0)),
+        items.index((52, 30)): Packed2dItem(0, glm.ivec2(10, 0)),
+        items.index((51, 20)): Packed2dItem(0, glm.ivec2(0, 40)),
+        items.index((50, 10)): Packed2dItem(0, glm.ivec2(0, 60)),
+        items.index((50, 1)): Packed2dItem(0, glm.ivec2(50, 60)),
     }
