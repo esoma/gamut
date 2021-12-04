@@ -8,6 +8,7 @@ __all__ = [
     'uvec2_exact',
     'F32Matrix4x4',
     'F32Vector3',
+    'F32Vector4',
     'vec3_exact',
     'vec4_exact',
 ]
