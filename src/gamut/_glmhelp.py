@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 __all__ = [
+    'mat4_exact',
     'ivec2_exact',
     'I32Vector2',
     'uvec2_exact',
+    'F32Matrix4x4',
     'F32Vector3',
     'vec3_exact',
     'vec4_exact',
@@ -13,9 +15,9 @@ __all__ = [
 # python
 from typing import Union
 # pyglm
-from glm import imvec2, imvec3, ivec2, uvec2, vec3, vec4
+from glm import imvec2, imvec3, ivec2, mat4, uvec2, vec3, vec4
 # pyglm-typing
-from glm_typing import F32Vector4, Number, U32Vector2
+from glm_typing import F32Matrix4x4, F32Vector4, Number, U32Vector2
 
 I32Vector2 = Union[imvec2, ivec2, tuple[Number, Number]]
 
@@ -43,3 +45,7 @@ def vec4_exact(input: F32Vector4) -> vec4:
     if len(input) != 4:
         raise TypeError('input length must be 4')
     return vec4(input)
+
+
+def mat4_exact(input: F32Matrix4x4) -> mat4:
+    return mat4(input)
