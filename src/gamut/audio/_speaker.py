@@ -9,6 +9,8 @@ from ._alcontext import release_al_context, require_al_context
 from ._source import (consume_stream_buffer, get_sample_al_buffer,
                       release_sample_al_buffer, return_stream_buffer, Sample,
                       Stream)
+# gamut
+from gamut._glmhelp import F32Vector3, vec3_exact
 # python
 from ctypes import c_int, c_uint
 from ctypes import pointer as c_pointer
@@ -57,15 +59,15 @@ class Speaker:
         self,
         source: Union[Sample, Stream],
         *,
-        position: vec3 = vec3(0),
-        velocity: vec3 = vec3(0),
+        position: F32Vector3 = vec3(0),
+        velocity: F32Vector3 = vec3(0),
         min_gain: float = 0.0,
         gain: float = 1.0,
         max_gain: float = 1.0,
         is_relative: bool = False,
         loop: bool = False,
         pitch: float = 1.0,
-        direction: vec3 = vec3(0),
+        direction: F32Vector3 = vec3(0),
         inner_cone_angle: float = 2 * pi,
         outer_cone_angle: float = 2 * pi,
         outer_cone_gain: float = 0.0,
@@ -227,9 +229,9 @@ class Speaker:
         return vec3(self._position)
 
     @position.setter
-    def position(self, value: vec3) -> None:
+    def position(self, value: F32Vector3) -> None:
         self._ensure_open()
-        self._position = vec3(value)
+        self._position = vec3_exact(value)
         assert self._source is not None
         if self._source.channels != 1 and self._position != vec3(0):
             warn(
@@ -244,9 +246,9 @@ class Speaker:
         return vec3(self._velocity)
 
     @velocity.setter
-    def velocity(self, value: vec3) -> None:
+    def velocity(self, value: F32Vector3) -> None:
         self._ensure_open()
-        self._velocity = vec3(value)
+        self._velocity = vec3_exact(value)
         assert self._source is not None
         if self._source.channels != 1 and self._velocity != vec3(0):
             warn(
@@ -345,9 +347,9 @@ class Speaker:
         return vec3(self._direction)
 
     @direction.setter
-    def direction(self, value: vec3) -> None:
+    def direction(self, value: F32Vector3) -> None:
         self._ensure_open()
-        self._direction = vec3(value)
+        self._direction = vec3_exact(value)
         assert self._source is not None
         if self._source.channels != 1 and self._direction != vec3(0):
             warn(
