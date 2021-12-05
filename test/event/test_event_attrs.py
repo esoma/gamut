@@ -287,7 +287,7 @@ def test_instantiate_specify_static(
         pass
 
     with pytest.raises(TypeError):
-        event = StaticAttrEvent(1, *args, **kwargs) # type: ignore
+        event = StaticAttrEvent(1, *args, **kwargs)
 
 
 def test_event_repr() -> None:

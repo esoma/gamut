@@ -74,9 +74,10 @@ class TransformNode:
         return self._parent
 
     @parent.setter
-    def parent(self, value: TransformNode) -> None:
+    def parent(self, value: Optional[TransformNode]) -> None:
         if value is not self._parent:
-            self._check_for_cycle(value)
+            if value is not None:
+                self._check_for_cycle(value)
             self._transform = None
             self._parent_transform = None
             self._parent = value

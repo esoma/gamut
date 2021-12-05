@@ -16,7 +16,8 @@ from mypy.plugin import Plugin as _Plugin
 from mypy.plugin import ReportConfigContext
 from mypy.plugins.common import add_method
 from mypy.semanal import SemanticAnalyzer
-from mypy.types import AnyType, CallableType, get_proper_type, NoneType
+from mypy.types import (AnyType, CallableType, FunctionLike, get_proper_type,
+                        NoneType)
 from mypy.types import Type as MypyType
 from mypy.types import TypeOfAny
 
@@ -82,7 +83,7 @@ class Plugin(_Plugin):
     def get_method_signature_hook(
         self,
         fullname: str
-    ) -> Optional[Callable[[MethodSigContext], CallableType]]:
+    ) -> Optional[Callable[[MethodSigContext], FunctionLike]]:
         result = super().get_method_signature_hook(fullname)
         if result is not None:
             return result
