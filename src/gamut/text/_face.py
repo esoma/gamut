@@ -11,6 +11,8 @@ __all__ = [
 
 # gamut
 from ._break import break_never, BreakMethod
+# gamut
+from gamut._glmhelp import I32Vector2, ivec2_exact
 # python
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -72,10 +74,11 @@ class Face:
         self,
         width: Optional[float] = None,
         height: Optional[float] = None,
-        dpi: tuple[int, int] = (72, 72),
+        dpi: I32Vector2 = (72, 72),
     ) -> FontSize:
         if width is None and height is None:
             raise TypeError('width or height must be specified')
+        dpi = ivec2_exact(dpi)
         return PointFontSize(
             self,
             0 if width is None else (width * 64),
@@ -310,9 +313,9 @@ class PointFontSize(FontSize):
         face: Face,
         width: Optional[float],
         height: Optional[float],
-        dpi: tuple[int, int]
+        dpi: ivec2
     ):
-        self._args = (width, height, dpi[0], dpi[1])
+        self._args = (width, height, dpi.x, dpi.y)
         super().__init__(face)
 
     def _use(self) -> None:
