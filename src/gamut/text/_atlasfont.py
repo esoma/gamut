@@ -53,7 +53,7 @@ class AtlasFont(Font):
         self._padding = padding
         self._glyph_map: dict[int, AtlasGlyph] = {}
         self._textures: list[Texture2d] = []
-        self._pack = Pack2d((texture_size.x, texture_size.y))
+        self._pack = Pack2d(self._texture_size)
         self._pack_to_glyph: dict[int, int] = {}
 
     def __getitem__(self, glyph_index: int) -> AtlasGlyph:
