@@ -336,7 +336,7 @@ class Event(metaclass=EventType):
 
         cls._fields = fields
         cls._prototype_fields = prototype_fields
-        super().__init_subclass__(**kwargs) # type: ignore
+        super().__init_subclass__(**kwargs)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None: # type: ignore
         if self._prototype_fields:
@@ -360,7 +360,7 @@ class Event(metaclass=EventType):
                                 f'missing argument {field!r}'
                             ) from None
             setattr(self, field, arg)
-        super().__init__(*args, **kwargs) # type: ignore
+        super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
         name = f'{type(self).__module__}.{type(self).__qualname__}'
