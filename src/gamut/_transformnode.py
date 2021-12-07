@@ -6,31 +6,47 @@ __all__ = ['TransformNode']
 # gamut
 from ._glmhelp import F32Matrix4x4, mat4_exact
 # python
-from typing import Optional
+from collections import deque
+from typing import Any, Callable, Generic, Optional, TypeVar
+from weakref import ref
 # pyglm
 from glm import mat4
 
+T = TypeVar('T', bound='TransformNode')
+C = TypeVar('C', bound='TransformNode')
 
-class TransformNode:
+
+class TransformNode(Generic[C]):
 
     def __init__(
-        self,
+        self: T,
         *,
-        local_transform: Optional[F32Matrix4x4] = None,
-        parent: Optional[TransformNode] = None
+        local_transform: F32Matrix4x4 | None = None,
+        parent: TransformNode[T] | None = None,
     ) -> None:
-        self._parent = parent
+        if parent is not None:
+            parent._children.add(self)
+        self._parent: ref[TransformNode[T]] | None = (
+            ref(parent)
+            if parent is not None else
+            None
+        )
+        self._children: set[C] = set()
         if local_transform is None:
             local_transform = mat4(1)
         self._local_transform = mat4_exact(local_transform)
         self._parent_transform: Optional[mat4] = None
         self._transform: Optional[mat4] = None
 
-    def _check_for_cycle(self, parent: TransformNode) -> None:
+    def __del__(self) -> None:
+        for child in tuple(self._children):
+            child.parent = None
+
+    def _check_for_cycle(self, parent: TransformNode[T]) -> None:
         if parent == self:
             raise ValueError('transform parent/child relationship cycle')
-        chain = {self}
-        node: Optional[TransformNode] = parent
+        chain: set[TransformNode[Any]] = {self}
+        node: TransformNode[Any] | None = parent
         while node is not None:
             chain.add(node)
             node = node.parent
@@ -50,34 +66,55 @@ class TransformNode:
 
     @property
     def transform(self) -> mat4:
-        if (self._parent is not None and
-            self._parent_transform != self._parent.transform):
+        parent = self.parent
+        if (parent is not None and
+            self._parent_transform != parent.transform):
             self._parent_transform = None
 
         if (
             self._transform is None or
             (
-                self._parent is not None and
+                parent is not None and
                 self._parent_transform is None
             )
         ):
             self._transform = mat4(self._local_transform)
-            if self._parent is not None:
+            if parent is not None:
                 if self._parent_transform is None:
-                    self._parent_transform = self._parent.transform
+                    self._parent_transform = parent.transform
                 self._transform @= self._parent_transform
 
         return mat4(self._transform)
 
     @property
-    def parent(self) -> Optional[TransformNode]:
-        return self._parent
+    def parent(self: T) -> TransformNode[T] | None:
+        if self._parent is not None:
+            return self._parent()
+        return None
 
     @parent.setter
-    def parent(self, value: Optional[TransformNode]) -> None:
-        if value is not self._parent:
+    def parent(self: T, value: TransformNode[T] | None) -> None:
+        parent = self.parent
+        if value is not parent:
             if value is not None:
                 self._check_for_cycle(value)
+            if parent is not None:
+                parent._children.remove(self)
             self._transform = None
             self._parent_transform = None
-            self._parent = value
+            if value is None:
+                self._parent = None
+            else:
+                self._parent = ref(value)
+                value._children.add(self)
+
+    @property
+    def children(self) -> set[C]:
+        return set(self._children)
+
+    def descend(self, f: Callable[[TransformNode], None]) -> None:
+        queue: deque[TransformNode] = deque([self])
+        while queue:
+            node = queue.popleft()
+            f(node)
+            queue.extend(node.children)
