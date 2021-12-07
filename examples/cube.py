@@ -11,7 +11,7 @@ from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
 # python
 from datetime import timedelta
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 # pyglm
 from glm import (array, cos, cross, lookAt, mat4, normalize, perspective, pi,
                  rotate, sin, uint8, vec2, vec3)
@@ -46,7 +46,7 @@ class App(Application):
         self.player_position = vec3(0, 0, 5)
         self.player_yaw = -pi() / 2
         self.player_pitch = 0.0
-        self.player_node = TransformNode()
+        self.player_node: TransformNode[Any] = TransformNode()
         self.camera_node = TransformNode(
             local_transform=perspective(45, 1, 1.0, -1.0),
             parent=self.player_node
