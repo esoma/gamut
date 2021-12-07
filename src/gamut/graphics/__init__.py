@@ -14,6 +14,7 @@ __all__ = [
     'DepthTest',
     'execute_shader',
     'FaceCull',
+    'IndexBuffer',
     'Image',
     'ImageInvalidError',
     'MipmapSelection',
@@ -35,6 +36,7 @@ __all__ = [
     'TextureRenderTargetDepthStencil',
     'TextureView',
     'TextureWrap',
+    'UniformMap',
     'WindowRenderTarget',
 ]
 
