@@ -8,7 +8,7 @@ from ._face import (FontSize, PositionedGlyph, RenderedGlyph,
                     RenderedGlyphFormat)
 from ._font import Font
 # gamut
-from gamut._glmhelp import I32Vector2, ivec2_exact
+from gamut.glmhelp import I32Vector2, ivec2_exact
 from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
                             create_quad_uv_array, Pack2d, PrimitiveMode,
                             Texture2d, TextureComponents)

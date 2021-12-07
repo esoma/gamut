@@ -17,10 +17,10 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut._glmhelp import I32Vector2, ivec2_exact
 from gamut._sdl import sdl_window_event_callback_map
 from gamut.event import Bind
 from gamut.event import Event as _Event
+from gamut.glmhelp import I32Vector2, ivec2_exact
 # python
 from ctypes import byref as c_byref
 from ctypes import c_int

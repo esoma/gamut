@@ -8,7 +8,7 @@ __all__ = ['MultiSpeaker']
 from ._source import Sample
 from ._speaker import Speaker, SpeakerState
 # gamut
-from gamut._glmhelp import F32Vector3, vec3_exact
+from gamut.glmhelp import F32Vector3, vec3_exact
 # python
 from math import pi
 # pyglm

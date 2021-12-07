@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['TransformNode']
 
 # gamut
-from ._glmhelp import F32Matrix4x4, mat4_exact
+from .glmhelp import F32Matrix4x4, mat4_exact
 # python
 from collections import deque
 from typing import Any, Callable, Generic, Optional, TypeVar
