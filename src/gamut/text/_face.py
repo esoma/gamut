@@ -12,7 +12,7 @@ __all__ = [
 # gamut
 from ._break import break_never, BreakMethod
 # gamut
-from gamut._glmhelp import I32Vector2, ivec2_exact
+from gamut.glmhelp import I32Vector2, ivec2_exact
 # python
 from abc import ABC, abstractmethod
 from enum import Enum

@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['Pack2d', 'Packed2dItem']
 
 # gamut
-from gamut._glmhelp import I32Vector2, ivec2_exact
+from gamut.glmhelp import I32Vector2, ivec2_exact
 # python
 from typing import Optional
 # pyglm

@@ -10,7 +10,7 @@ from ._source import (consume_stream_buffer, get_sample_al_buffer,
                       release_sample_al_buffer, return_stream_buffer, Sample,
                       Stream)
 # gamut
-from gamut._glmhelp import F32Vector3, vec3_exact
+from gamut.glmhelp import F32Vector3, vec3_exact
 # python
 from ctypes import c_int, c_uint
 from ctypes import pointer as c_pointer

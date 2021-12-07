@@ -12,7 +12,7 @@ from ._texture import (MipmapSelection, Texture, TEXTURE_COMPONENTS_COUNT,
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut._glmhelp import F32Vector4, I32Vector2, ivec2_exact, vec4_exact
+from gamut.glmhelp import F32Vector4, I32Vector2, ivec2_exact, vec4_exact
 # python
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p

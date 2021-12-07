@@ -6,7 +6,7 @@ __all__ = ['Listener']
 # gamut
 from ._alcontext import release_al_context, require_al_context
 # gamut
-from gamut._glmhelp import F32Vector3, vec3_exact
+from gamut.glmhelp import F32Vector3, vec3_exact
 # python
 from ctypes import c_float
 from typing import Optional
