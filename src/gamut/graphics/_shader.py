@@ -195,7 +195,7 @@ class Shader:
             name = name.value[:length.value]
             location = glGetAttribLocation(self._gl, name)
             attributes.append(ShaderAttribute(
-                name.decode('utf8').rstrip('[0]'),
+                name.decode('utf8').removesuffix('[0]'),
                 GL_TYPE_TO_PY[type.value],
                 size.value,
                 location
@@ -220,7 +220,7 @@ class Shader:
             name = name.value[:length.value]
             location = glGetUniformLocation(self._gl, name)
             uniforms.append(ShaderUniform(
-                name.decode('utf8').rstrip('[0]'),
+                name.decode('utf8').removesuffix('[0]'),
                 GL_TYPE_TO_PY[type.value],
                 size.value,
                 location
