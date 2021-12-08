@@ -3,7 +3,10 @@ __all__ = ['Image', 'ImageInvalidError']
 
 # gamut
 from ._texture2d import Texture2d
-from ._texture import TextureComponents
+from ._texture import (MipmapSelection, TextureComponents, TextureFilter,
+                       TextureWrap)
+# gamut
+from gamut.glmhelp import F32Vector4
 # python
 from pathlib import Path
 from typing import BinaryIO, Final, Union
@@ -12,7 +15,7 @@ from PIL import Image as PilImage
 from PIL import ImageMath as PilImageMath
 from PIL import UnidentifiedImageError as PilUnidentifiedImageError
 # pyglm
-from glm import ivec2, uint8
+from glm import ivec2, uint8, vec4
 
 PIL_MODE_TO_TEXTURE_COMPONENTS: Final = {
     'L': TextureComponents.R,
@@ -85,13 +88,28 @@ class Image:
         assert isinstance(result, bytes)
         return result
 
-    def to_texture(self) -> Texture2d:
+    def to_texture(
+        self,
+        mipmap_selection: MipmapSelection = MipmapSelection.NONE,
+        minify_filter: TextureFilter = TextureFilter.NEAREST,
+        magnify_filter: TextureFilter = TextureFilter.NEAREST,
+        wrap: tuple[TextureWrap, TextureWrap] = (
+            TextureWrap.REPEAT,
+            TextureWrap.REPEAT
+        ),
+        wrap_color: F32Vector4 = vec4(0, 0, 0, 0)
+    ) -> Texture2d:
         self._ensure_open()
         return Texture2d(
             self.size,
             PIL_MODE_TO_TEXTURE_COMPONENTS[self._pil.mode],
             uint8,
-            self.to_bytes()
+            self.to_bytes(),
+            mipmap_selection=mipmap_selection,
+            minify_filter=minify_filter,
+            magnify_filter=magnify_filter,
+            wrap=wrap,
+            wrap_color=wrap_color,
         )
 
     def close(self) -> None:
