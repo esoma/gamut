@@ -14,6 +14,7 @@ __all__ = [
     'DepthTest',
     'execute_shader',
     'FaceCull',
+    'IndexBuffer',
     'Image',
     'ImageInvalidError',
     'MipmapSelection',
@@ -35,6 +36,7 @@ __all__ = [
     'TextureRenderTargetDepthStencil',
     'TextureView',
     'TextureWrap',
+    'UniformMap',
     'WindowRenderTarget',
 ]
 
@@ -52,8 +54,8 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
 from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
-                      FaceCull, PrimitiveMode, Shader, ShaderAttribute,
-                      ShaderUniform)
+                      FaceCull, IndexBuffer, PrimitiveMode, Shader,
+                      ShaderAttribute, ShaderUniform, UniformMap)
 from ._texture2d import Texture2d, TextureView
 from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureWrap)
