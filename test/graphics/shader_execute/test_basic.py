@@ -126,6 +126,12 @@ def test_missing_uniform(
             gl_Position = vec4(xy, z, 1.0);
         }
         """,
+        fragment=b"""
+        #version 140
+        void main()
+        {
+        }
+        """
     )
     with pytest.raises(ValueError) as excinfo:
         execute_shader(
@@ -194,6 +200,12 @@ def test_ignored_attribute(
             gl_Position = vec4(0, 0, 0, 1.0);
         }
         """,
+        fragment=b"""
+        #version 140
+        void main()
+        {
+        }
+        """
         ignored_attributes={"xy"},
     )
     execute_shader(
