@@ -78,6 +78,40 @@ def test_not_a_uniform(
 
 
 @pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_ignored_uniform(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
+) -> None:
+    render_target = create_render_target(cls)
+    shader = Shader(
+        vertex=b"""
+        #version 140
+        in vec2 xy;
+        void main()
+        {
+            gl_Position = vec4(xy, 0, 1.0);
+        }
+        """,
+        ignored_uniforms={"color"},
+    )
+    execute_shader(
+        render_target,
+        shader,
+        PrimitiveMode.POINT,
+        BufferViewMap({
+            "xy": BufferView(Buffer(glm.array(
+                glm.vec2(-.9, -.9),
+                glm.vec2(-.9, .9),
+                glm.vec2(.9, .9),
+                glm.vec2(.9, -.9),
+            ).to_bytes()), glm.vec2)
+        }), {
+            "color": glm.vec4()
+        },
+        index_range=(0, 4),
+    )
+
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
 def test_missing_uniform(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
 ) -> None:
@@ -144,6 +178,38 @@ def test_not_an_attribute(
         )
     assert str(excinfo.value) == (
         'shader does not accept an attribute called "xy"'
+    )
+
+
+@pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
+def test_ignored_attribute(
+    cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
+) -> None:
+    render_target = create_render_target(cls)
+    shader = Shader(
+        vertex=b"""
+        #version 140
+        void main()
+        {
+            gl_Position = vec4(0, 0, 0, 1.0);
+        }
+        """,
+        ignored_attributes={"xy"},
+    )
+    execute_shader(
+        render_target,
+        shader,
+        PrimitiveMode.POINT,
+        BufferViewMap({
+            "xy": BufferView(Buffer(glm.array(
+                glm.vec2(-.9, -.9),
+                glm.vec2(-.9, .9),
+                glm.vec2(.9, .9),
+                glm.vec2(.9, -.9),
+            ).to_bytes()), glm.vec2)
+        }), {
+        },
+        index_range=(0, 4),
     )
 
 
