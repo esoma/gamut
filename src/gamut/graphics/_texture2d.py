@@ -32,7 +32,7 @@ from OpenGL.GL import (GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_STREAM_READ,
                        glBindTexture, glBufferData, glDeleteBuffers,
                        glGenBuffers, glGenerateMipmap, glGenTextures,
                        glGetTexImage, glMapBuffer, glTexImage2D,
-                       glTexParameteri, glTexParameteriv, glUnmapBuffer)
+                       glTexParameterfv, glTexParameteri, glUnmapBuffer)
 
 
 class Texture2d(Texture):
@@ -147,7 +147,7 @@ class Texture2d(Texture):
         # set the wrapping parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s.value)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t.value)
-        glTexParameteriv(
+        glTexParameterfv(
             GL_TEXTURE_2D,
             GL_TEXTURE_BORDER_COLOR,
             glm_value_ptr(wrap_color)
