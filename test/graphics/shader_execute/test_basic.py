@@ -91,6 +91,12 @@ def test_ignored_uniform(
             gl_Position = vec4(xy, 0, 1.0);
         }
         """,
+        fragment=b"""
+        #version 140
+        void main()
+        {
+        }
+        """,
         ignored_uniforms={"color"},
     )
     execute_shader(
@@ -124,12 +130,6 @@ def test_missing_uniform(
         void main()
         {
             gl_Position = vec4(xy, z, 1.0);
-        }
-        """,
-        fragment=b"""
-        #version 140
-        void main()
-        {
         }
         """
     )
@@ -205,7 +205,7 @@ def test_ignored_attribute(
         void main()
         {
         }
-        """
+        """,
         ignored_attributes={"xy"},
     )
     execute_shader(
