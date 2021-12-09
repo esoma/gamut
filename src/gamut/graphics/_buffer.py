@@ -405,7 +405,10 @@ class GlVertexArray:
             raise TypeError('shader must be a gamut.graphics.Shader')
         attribute_names = {a.name for a in shader.attributes}
         for name in mapping:
-            if name not in attribute_names:
+            if (
+                name not in attribute_names and
+                name not in shader.ignored_attributes
+            ):
                 raise ValueError(
                     f'shader does not accept an attribute called "{name}"'
                 )

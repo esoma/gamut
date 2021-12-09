@@ -823,3 +823,68 @@ def test_shader_thread_closed_outside_render_thread() -> None:
     thread.join()
 
     assert not shader.is_open
+
+
+@pytest.mark.parametrize("ignored_attributes", [
+    None,
+    [],
+    ['hello', 'world'],
+])
+@pytest.mark.parametrize("ignored_uniforms", [
+    None,
+    [],
+    ['hello', 'world'],
+])
+def test_shader_ignore(ignored_attributes: Any, ignored_uniforms: Any) -> None:
+    shader = Shader(vertex=f'''
+        #version 140
+        void main()
+        {{
+            gl_Position = vec4(0, 0, 0, 1);
+        }}
+        '''.encode('utf-8'),
+        ignored_attributes=ignored_attributes,
+        ignored_uniforms=ignored_uniforms,
+    )
+    assert isinstance(shader.ignored_attributes, set)
+    assert isinstance(shader.ignored_uniforms, set)
+    assert shader.ignored_attributes == set(
+        ignored_attributes if ignored_attributes else []
+    )
+    assert shader.ignored_uniforms == set(
+        ignored_uniforms if ignored_uniforms else []
+    )
+    assert shader.ignored_attributes is not ignored_attributes
+    assert shader.ignored_uniforms is not ignored_uniforms
+
+
+@pytest.mark.parametrize("name", ['abc', '_123'])
+def test_shader_attribute_repr(name: str) -> None:
+    shader = Shader(vertex=f'''
+        #version 140
+        in vec4 {name};
+        void main()
+        {{
+            gl_Position = {name};
+        }}
+        '''.encode('utf-8'),
+    )
+    assert repr(shader.attributes[0]) == (
+        f'<gamut.graphics.ShaderAttribute {name!r}>'
+    )
+
+
+@pytest.mark.parametrize("name", ['abc', '_123'])
+def test_shader_uniform_repr(name: str) -> None:
+    shader = Shader(vertex=f'''
+        #version 140
+        uniform vec4 {name};
+        void main()
+        {{
+            gl_Position = {name};
+        }}
+        '''.encode('utf-8'),
+    )
+    assert repr(shader.uniforms[0]) == (
+        f'<gamut.graphics.ShaderUniform {name!r}>'
+    )

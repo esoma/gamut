@@ -134,6 +134,8 @@ class Shader:
         self, *,
         vertex: Optional[bytes] = None,
         fragment: Optional[bytes] = None,
+        ignored_attributes: set[str] | None = None,
+        ignored_uniforms: set[str] | None = None,
     ):
         self._gl_context = require_gl_context()
 
@@ -231,6 +233,15 @@ class Shader:
             **{attribute.name: attribute for attribute in attributes},
             **{uniform.name: uniform for uniform in uniforms},
         }
+
+        self._ignored_attributes = (
+            set(ignored_attributes)
+            if ignored_attributes else set()
+        )
+        self._ignored_uniforms = (
+            set(ignored_uniforms)
+            if ignored_uniforms else set()
+        )
 
         self._next_texture_index = 0
 
@@ -383,6 +394,14 @@ class Shader:
         return self._uniforms
 
     @property
+    def ignored_attributes(self) -> set[str]:
+        return set(self._ignored_attributes)
+
+    @property
+    def ignored_uniforms(self) -> set[str]:
+        return set(self._ignored_uniforms)
+
+    @property
     def is_open(self) -> bool:
         return self._gl is not None
 
@@ -400,6 +419,9 @@ class ShaderAttribute(Generic[T]):
         self._type: Type[T] = type
         self._size = size
         self._location = location
+
+    def __repr__(self) -> str:
+        return f'<gamut.graphics.ShaderAttribute {self.name!r}>'
 
     @property
     def name(self) -> str:
@@ -433,6 +455,9 @@ class ShaderUniform(Generic[T]):
         self._location = location
         self._setter = TYPE_TO_UNIFORM_SETTER[self._type]
         self._set_type: Any = int32 if type is Texture else type
+
+    def __repr__(self) -> str:
+        return f'<gamut.graphics.ShaderUniform {self.name!r}>'
 
     @property
     def name(self) -> str:
@@ -545,7 +570,8 @@ def execute_shader(
         try:
             input = shader[uniform_name]
         except KeyError:
-            pass
+            if uniform_name in shader.ignored_uniforms:
+                continue
         if not isinstance(input, ShaderUniform):
             raise ValueError(
                 f'shader does not accept a uniform called "{uniform_name}"'
