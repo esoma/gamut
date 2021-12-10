@@ -44,69 +44,6 @@ from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY,
                        glTexImage3D, glTexParameterfv, glTexParameteri)
 
 
-class TextureComponents(Enum):
-    R = OpenGL.GL.GL_RED
-    RG = OpenGL.GL.GL_RG
-    RGB = OpenGL.GL.GL_RGB
-    RGBA = OpenGL.GL.GL_RGBA
-    D = OpenGL.GL.GL_DEPTH_COMPONENT
-    DS = OpenGL.GL.GL_DEPTH_STENCIL
-
-
-TEXTURE_COMPONENTS_COUNT: Final = {
-    TextureComponents.R: 1,
-    TextureComponents.RG: 2,
-    TextureComponents.RGB: 3,
-    TextureComponents.RGBA: 4,
-    TextureComponents.D: 1,
-    TextureComponents.DS: 1
-}
-
-
-class MipmapSelection(Enum):
-    NONE = 0
-    NEAREST = 1
-    LINEAR = 2
-
-
-class TextureFilter(Enum):
-    NEAREST = 0
-    LINEAR = 1
-
-
-TEXTURE_FILTER_TO_GL_MIN_FILTER: Final = {
-    (MipmapSelection.NONE, TextureFilter.NEAREST): OpenGL.GL.GL_NEAREST,
-    (MipmapSelection.NONE, TextureFilter.LINEAR): OpenGL.GL.GL_LINEAR,
-    (MipmapSelection.NEAREST, TextureFilter.NEAREST):
-        OpenGL.GL.GL_NEAREST_MIPMAP_NEAREST,
-    (MipmapSelection.NEAREST, TextureFilter.LINEAR):
-        OpenGL.GL.GL_NEAREST_MIPMAP_LINEAR,
-    (MipmapSelection.LINEAR, TextureFilter.NEAREST):
-        OpenGL.GL.GL_LINEAR_MIPMAP_NEAREST,
-    (MipmapSelection.LINEAR, TextureFilter.LINEAR):
-        OpenGL.GL.GL_LINEAR_MIPMAP_LINEAR,
-}
-
-
-TEXTURE_FILTER_TO_GL_MAG_FILTER: Final = {
-    TextureFilter.NEAREST: OpenGL.GL.GL_NEAREST,
-    TextureFilter.LINEAR: OpenGL.GL.GL_LINEAR,
-}
-
-
-class TextureWrap(Enum):
-    CLAMP_TO_EDGE = OpenGL.GL.GL_CLAMP_TO_EDGE
-    CLAMP_TO_COLOR = OpenGL.GL.GL_CLAMP_TO_BORDER
-    REPEAT = OpenGL.GL.GL_REPEAT
-    REPEAT_MIRRORED = OpenGL.GL.GL_MIRRORED_REPEAT
-    REPEAT_MIRRORED_THEN_CLAMP_TO_EDGE = OpenGL.GL.GL_MIRROR_CLAMP_TO_EDGE
-
-
-class TextureType(Enum):
-    NORMAL_2D = 0
-    ARRAY_2D = 1
-
-
 class Texture:
 
     def __init__(
@@ -276,8 +213,12 @@ class Texture:
         self.close()
 
     def __repr__(self) -> str:
+        cls = type(self)
         size_str = 'x'.join(str(c) for c in self._size)
-        return f'<gamut.graphics.Texture2d {size_str} {self.components}>'
+        return (
+            f'<{cls.__module__}.{cls.__qualname__} '
+            f'{size_str} {self.components}>'
+        )
 
     def close(self) -> None:
         if self._gl is not None:
@@ -298,6 +239,45 @@ class Texture:
         return self._gl is not None
 
 
+def bind_texture(texture: Texture, index: int) -> None:
+    assert index >= 0
+    glActiveTexture(GL_TEXTURE0 + index)
+    glBindTexture(texture._gl_target, texture._gl)
+
+
+class MipmapSelection(Enum):
+    NONE = 0
+    NEAREST = 1
+    LINEAR = 2
+
+
+class TextureFilter(Enum):
+    NEAREST = 0
+    LINEAR = 1
+
+
+class TextureComponents(Enum):
+    R = OpenGL.GL.GL_RED
+    RG = OpenGL.GL.GL_RG
+    RGB = OpenGL.GL.GL_RGB
+    RGBA = OpenGL.GL.GL_RGBA
+    D = OpenGL.GL.GL_DEPTH_COMPONENT
+    DS = OpenGL.GL.GL_DEPTH_STENCIL
+
+
+class TextureWrap(Enum):
+    CLAMP_TO_EDGE = OpenGL.GL.GL_CLAMP_TO_EDGE
+    CLAMP_TO_COLOR = OpenGL.GL.GL_CLAMP_TO_BORDER
+    REPEAT = OpenGL.GL.GL_REPEAT
+    REPEAT_MIRRORED = OpenGL.GL.GL_MIRRORED_REPEAT
+    REPEAT_MIRRORED_THEN_CLAMP_TO_EDGE = OpenGL.GL.GL_MIRROR_CLAMP_TO_EDGE
+
+
+class TextureType(Enum):
+    NORMAL_2D = 0
+    ARRAY_2D = 1
+
+
 GL_TEXTURE_WRAP_NAMES: Final = (
     GL_TEXTURE_WRAP_S,
     GL_TEXTURE_WRAP_T,
@@ -305,12 +285,14 @@ GL_TEXTURE_WRAP_NAMES: Final = (
 )
 
 
-TextureDataType = Union[
-    glm.uint8, glm.int8,
-    glm.uint16, glm.int16,
-    glm.uint32, glm.int32,
-    glm.float32
-]
+TEXTURE_COMPONENTS_COUNT: Final = {
+    TextureComponents.R: 1,
+    TextureComponents.RG: 2,
+    TextureComponents.RGB: 3,
+    TextureComponents.RGBA: 4,
+    TextureComponents.D: 1,
+    TextureComponents.DS: 1
+}
 
 
 TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE: Final[dict[type[TextureDataType], Any]] = {
@@ -324,13 +306,35 @@ TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE: Final[dict[type[TextureDataType], Any]] = {
 }
 
 
+TEXTURE_FILTER_TO_GL_MIN_FILTER: Final = {
+    (MipmapSelection.NONE, TextureFilter.NEAREST): OpenGL.GL.GL_NEAREST,
+    (MipmapSelection.NONE, TextureFilter.LINEAR): OpenGL.GL.GL_LINEAR,
+    (MipmapSelection.NEAREST, TextureFilter.NEAREST):
+        OpenGL.GL.GL_NEAREST_MIPMAP_NEAREST,
+    (MipmapSelection.NEAREST, TextureFilter.LINEAR):
+        OpenGL.GL.GL_NEAREST_MIPMAP_LINEAR,
+    (MipmapSelection.LINEAR, TextureFilter.NEAREST):
+        OpenGL.GL.GL_LINEAR_MIPMAP_NEAREST,
+    (MipmapSelection.LINEAR, TextureFilter.LINEAR):
+        OpenGL.GL.GL_LINEAR_MIPMAP_LINEAR,
+}
+
+
+TEXTURE_FILTER_TO_GL_MAG_FILTER: Final = {
+    TextureFilter.NEAREST: OpenGL.GL.GL_NEAREST,
+    TextureFilter.LINEAR: OpenGL.GL.GL_LINEAR,
+}
+
+
+TextureDataType = Union[
+    glm.uint8, glm.int8,
+    glm.uint16, glm.int16,
+    glm.uint32, glm.int32,
+    glm.float32
+]
+
+
 TEXTURE_DATA_TYPES_SORTED: Final = list(
     TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE.keys()
 )
 TEXTURE_DATA_TYPES: Final = set(TEXTURE_DATA_TYPES_SORTED)
-
-
-def bind_texture(texture: Texture, index: int) -> None:
-    assert index >= 0
-    glActiveTexture(GL_TEXTURE0 + index)
-    glBindTexture(texture._gl_target, texture._gl)
