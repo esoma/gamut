@@ -4,8 +4,8 @@ from __future__ import annotations
 __all__ = ['TextureView']
 
 # gamut
-from ._texture2d import Texture2d
-from ._texture import (TEXTURE_COMPONENTS_COUNT,
+from ._texture import (get_texture_gl_target, Texture,
+                       TEXTURE_COMPONENTS_COUNT,
                        TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE, TEXTURE_DATA_TYPES,
                        TextureComponents, TextureDataType)
 # gamut
@@ -15,28 +15,29 @@ from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
 from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof
+from math import prod
 from typing import Any
 # pyglm
 from glm import uint32
 # pyopengl
 from OpenGL.GL import (GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_STREAM_READ,
-                       GL_TEXTURE_2D, GL_UNSIGNED_INT_24_8, glBindBuffer,
-                       glBindTexture, glBufferData, glDeleteBuffers,
-                       glGenBuffers, glGetTexImage, glMapBuffer, glUnmapBuffer)
+                       GL_UNSIGNED_INT_24_8, glBindBuffer, glBindTexture,
+                       glBufferData, glDeleteBuffers, glGenBuffers,
+                       glGetTexImage, glMapBuffer, glUnmapBuffer)
 
 
 class TextureView:
 
-    def __init__(self, texture: Texture2d, data_type: type[TextureDataType]):
+    def __init__(self, texture: Texture, data_type: type[TextureDataType]):
         self._gl: Any = None
         self._map: c_void_p | None = None
         self._gl_context = require_gl_context()
         # check texture
-        if not isinstance(texture, Texture2d):
-            raise TypeError(f'texture must be {Texture2d}')
+        if not isinstance(texture, Texture):
+            raise TypeError(f'texture must be {Texture}')
         if not texture.is_open:
             raise RuntimeError('texture is closed')
-        self._texture: Texture2d | None = texture
+        self._texture: Texture | None = texture
         # check data type
         try:
             gl_data_type = TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE[data_type]
@@ -55,7 +56,7 @@ class TextureView:
         # calculate the length
         texture_size = texture.size
         self._length = (
-            texture_size.x * texture_size.y *
+            prod(texture_size) *
             TEXTURE_COMPONENTS_COUNT[texture.components] *
             c_sizeof(data_type)
         )
@@ -68,9 +69,10 @@ class TextureView:
             c_void_p(0),
             GL_STREAM_READ,
         )
-        glBindTexture(GL_TEXTURE_2D, self._texture._gl)
+        texture_gl_target = get_texture_gl_target(texture)
+        glBindTexture(texture_gl_target, self._texture._gl)
         glGetTexImage(
-            GL_TEXTURE_2D,
+            texture_gl_target,
             0,
             texture.components.value,
             gl_data_type,
@@ -114,7 +116,7 @@ class TextureView:
         ).contents)
 
     @property
-    def texture(self) -> Texture2d:
+    def texture(self) -> Texture:
         self._ensure_open(include_texture=False)
         assert self._texture is not None
         return self._texture

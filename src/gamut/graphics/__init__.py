@@ -29,11 +29,13 @@ __all__ = [
     'ShaderUniform',
     'Texture',
     'Texture2d',
+    'Texture2dArray',
     'TextureComponents',
     'TextureDataType',
     'TextureFilter',
     'TextureRenderTarget',
     'TextureRenderTargetDepthStencil',
+    'TextureType',
     'TextureView',
     'TextureWrap',
     'UniformMap',
@@ -56,7 +58,8 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
 from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
                       FaceCull, IndexBuffer, PrimitiveMode, Shader,
                       ShaderAttribute, ShaderUniform, UniformMap)
-from ._texture2d import Texture2d
+from ._texture2d import Texture2d, Texture2dArray
 from ._texture import (MipmapSelection, Texture, TextureComponents,
-                       TextureDataType, TextureFilter, TextureWrap)
+                       TextureDataType, TextureFilter, TextureType,
+                       TextureWrap)
 from ._textureview import TextureView
