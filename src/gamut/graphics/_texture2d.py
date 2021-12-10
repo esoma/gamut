@@ -14,6 +14,7 @@ from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
 from gamut.glmhelp import F32Vector4, I32Vector2, ivec2_exact, vec4_exact
 # python
+from ctypes import sizeof as c_sizeof
 from typing import Any, Optional
 # pyglm
 from glm import ivec2, uint32
