@@ -34,6 +34,7 @@ __all__ = [
     'TextureFilter',
     'TextureRenderTarget',
     'TextureRenderTargetDepthStencil',
+    'TextureType',
     'TextureView',
     'TextureWrap',
     'UniformMap',
@@ -58,5 +59,6 @@ from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
                       ShaderAttribute, ShaderUniform, UniformMap)
 from ._texture2d import Texture2d
 from ._texture import (MipmapSelection, Texture, TextureComponents,
-                       TextureDataType, TextureFilter, TextureWrap)
+                       TextureDataType, TextureFilter, TextureType,
+                       TextureWrap)
 from ._textureview import TextureView

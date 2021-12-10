@@ -52,7 +52,7 @@ TEXTURE_DATA_TYPE_STRUCT: Final = {
 def test_size_invalid(size: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Texture2d(size, TextureComponents.R, glm.int8, b'')
-    assert str(excinfo.value) == 'size must be a sequence of two integers'
+    assert str(excinfo.value) == 'size must be a sequence of 2 integers'
 
 
 @pytest.mark.parametrize("width", [-100, -1, 0])
@@ -122,7 +122,7 @@ def test_components_data_type_combinations(
     assert texture.is_open
 
 
-@pytest.mark.parametrize("mipmap_selection", [None, 1, 'hello', object()])
+@pytest.mark.parametrize("mipmap_selection", [1, 'hello', object()])
 def test_mipmap_selection_invalid(mipmap_selection: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Texture2d(
@@ -134,7 +134,7 @@ def test_mipmap_selection_invalid(mipmap_selection: Any) -> None:
     )
 
 
-@pytest.mark.parametrize("minify_filter", [None, 1, 'hello', object()])
+@pytest.mark.parametrize("minify_filter", [1, 'hello', object()])
 def test_minify_filter_invalid(minify_filter: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Texture2d(
@@ -146,7 +146,7 @@ def test_minify_filter_invalid(minify_filter: Any) -> None:
     )
 
 
-@pytest.mark.parametrize("magnify_filter", [None, 1, 'hello', object()])
+@pytest.mark.parametrize("magnify_filter", [1, 'hello', object()])
 def test_magnify_filter_invalid(magnify_filter: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Texture2d(
@@ -182,10 +182,11 @@ def test_min_mag_mip(
 
 
 @pytest.mark.parametrize("wrap", [
-    None, 0, 1,
-    (0, 1),
+    0, 1,
+    (0, 1, 2),
+    (0,)
 ] + list(TextureWrap))
-def test_wrap_invalid(wrap: Any) -> None:
+def test_wrap_invalid_length(wrap: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         texture = Texture2d(
             (1, 1),
@@ -194,11 +195,27 @@ def test_wrap_invalid(wrap: Any) -> None:
             b'\x00',
             wrap=wrap,
         )
-    assert str(excinfo.value) == 'wrap must be a pair of texture wrap objects'
+    assert str(excinfo.value) == f'wrap must be 2 {TextureWrap}'
+
+
+@pytest.mark.parametrize("wrap", [
+    (0, 1),
+    ('asd', 'bsdfsd')
+])
+def test_wrap_invalid_type(wrap: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        texture = Texture2d(
+            (1, 1),
+            TextureComponents.R,
+            glm.uint8,
+            b'\x00',
+            wrap=wrap,
+        )
+    assert str(excinfo.value) == f'wrap items must be {TextureWrap}'
 
 
 @pytest.mark.parametrize("wrap_color", [
-    None, 0, 1,
+    0, 1,
     'ab',
     (1,), (1, 2, 3),
 ])
