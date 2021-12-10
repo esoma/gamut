@@ -35,12 +35,13 @@ from glm import value_ptr as glm_value_ptr
 from glm import vec4
 # pyopengl
 import OpenGL.GL
-from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR,
-                       GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER,
-                       GL_TEXTURE_WRAP_R, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
+from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY,
+                       GL_TEXTURE_BORDER_COLOR, GL_TEXTURE_MAG_FILTER,
+                       GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_R,
+                       GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
                        GL_UNSIGNED_INT_24_8, glActiveTexture, glBindTexture,
                        glGenerateMipmap, glGenTextures, glTexImage2D,
-                       glTexParameterfv, glTexParameteri)
+                       glTexImage3D, glTexParameterfv, glTexParameteri)
 
 
 class TextureComponents(Enum):
@@ -125,7 +126,7 @@ class Texture:
               None = None,
         wrap_color: F32Vector4 | None = None
     ):
-        self._gl: Optional[Any] = None
+        self._gl: Any = None
         self._gl_context = require_gl_context()
         # check the type
         if type == TextureType.NORMAL_2D:
@@ -144,7 +145,10 @@ class Texture:
         if magnify_filter is None:
             magnify_filter = TextureFilter.NEAREST
         if wrap is None:
-            wrap = tuple(TextureWrap.REPEAT for _ in range(wrap_length))
+            wrap = tuple( # type: ignore
+                TextureWrap.REPEAT for _ in range(wrap_length)
+            )
+            assert wrap is not None
         if wrap_color is None:
             wrap_color = vec4(0, 0, 0, 0)
         # check the size
@@ -272,7 +276,7 @@ class Texture:
         self.close()
 
     def __repr__(self) -> str:
-        size_str = 'x'.join(self._size)
+        size_str = 'x'.join(str(c) for c in self._size)
         return f'<gamut.graphics.Texture2d {size_str} {self.components}>'
 
     def close(self) -> None:
@@ -287,7 +291,7 @@ class Texture:
 
     @property
     def size(self) -> ivec1 | ivec2 | ivec3:
-        return type(self._size)(self._size)
+        return type(self._size)(self._size) # type: ignore
 
     @property
     def is_open(self) -> bool:
