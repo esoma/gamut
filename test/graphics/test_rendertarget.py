@@ -80,7 +80,7 @@ def test_texture_render_target(
 def test_texture_render_target_no_colors() -> None:
     with pytest.raises(ValueError) as excinfo:
         TextureRenderTarget([])
-    assert str(excinfo.value) == 'at least 1 color texture must be supplied'
+    assert str(excinfo.value) == 'at least 1 texture must be supplied'
 
 
 @pytest.mark.parametrize("width, height", [
