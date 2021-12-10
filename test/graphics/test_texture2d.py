@@ -485,7 +485,7 @@ def test_texture_view_non_texture(texture: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         TextureView(texture, glm.int8)
     assert str(excinfo.value) == (
-        'texture must be <class \'gamut.graphics.Texture2d\'>'
+        'texture must be <class \'gamut.graphics._texture.Texture\'>'
     )
 
 

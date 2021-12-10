@@ -3,6 +3,7 @@ from __future__ import annotations
 
 __all__ = [
     'bind_texture',
+    'get_texture_gl_target',
     'MipmapSelection',
     'Texture',
     'TextureComponents',
@@ -237,6 +238,10 @@ class Texture:
     @property
     def is_open(self) -> bool:
         return self._gl is not None
+
+
+def get_texture_gl_target(texture: Texture) -> Any:
+    return texture._gl_target
 
 
 def bind_texture(texture: Texture, index: int) -> None:
