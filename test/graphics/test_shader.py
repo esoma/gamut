@@ -38,7 +38,7 @@ def test_invalid_fragment_type(fragment: Any) -> None:
 @pytest.mark.parametrize("stage", ['vertex', 'fragment'])
 def test_compile_error(stage: str) -> None:
     with pytest.raises(RuntimeError) as excinfo:
-        Shader(**{
+        Shader(**{ # type: ignore
             stage: b'''#version 140
             void main()
             {
