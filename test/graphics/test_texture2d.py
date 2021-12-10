@@ -1,4 +1,5 @@
 
+from __future__ import annotations
 # gamut
 from .test_texture import TextureTest
 # gamut
