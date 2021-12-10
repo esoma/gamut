@@ -69,9 +69,11 @@ class TextureRenderTarget:
         self._depth_stencil = depth_stencil
         self._ds_gl: Optional[int] = None
 
-        if not colors:
-            raise ValueError('at least 1 color texture must be supplied')
+        if not colors and not isinstance(depth_stencil, Texture2d):
+            raise ValueError('at least 1 texture must be supplied')
         sizes = {t.size for t in colors}
+        if isinstance(depth_stencil, Texture2d):
+            sizes.add(depth_stencil.size)
         if len(sizes) != 1:
             raise ValueError('all textures must have the same size')
         self._size = ivec2(list(sizes)[0])
