@@ -18,7 +18,9 @@ import pytest
 def test_empty_shader() -> None:
     with pytest.raises(TypeError) as excinfo:
         Shader()
-    assert str(excinfo.value) == 'vertex or fragment must be provided'
+    assert str(excinfo.value) == (
+        'vertex, geometry and fragment must be provided'
+    )
 
 
 @pytest.mark.parametrize("vertex", [1, 'string', object(), bytearray()])
@@ -26,6 +28,13 @@ def test_invalid_vertex_type(vertex: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Shader(vertex=vertex)
     assert str(excinfo.value) == 'vertex must be bytes'
+
+
+@pytest.mark.parametrize("geometry", [1, 'string', object(), bytearray()])
+def test_invalid_geometry_type(geometry: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Shader(geometry=geometry)
+    assert str(excinfo.value) == 'geometry must be bytes'
 
 
 @pytest.mark.parametrize("fragment", [1, 'string', object(), bytearray()])
@@ -72,6 +81,20 @@ def test_vertex_only() -> None:
     }
     ''')
     assert shader.is_open
+
+
+def test_geometry_only() -> None:
+    with pytest.raises(TypeError) as excinfo:
+        shader = Shader(geometry=b'''#version 150
+        layout(triangles) in;
+        layout(triangle_strip) out;
+
+        void main()
+        {
+            gl_Position = vec4(0, 0, 0, 1);
+        }
+        ''')
+    assert str(excinfo.value) == 'geometry shader requires vertex shader'
 
 
 def test_fragment_only() -> None:
