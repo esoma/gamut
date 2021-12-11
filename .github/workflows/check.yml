@@ -50,6 +50,7 @@ jobs:
     - name: Install PyICU (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
+        sudo apt-get update
         sudo apt-get install pkg-config libicu-dev
         python -m pip install --no-binary=:pyicu: pyicu
 

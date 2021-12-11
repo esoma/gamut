@@ -52,9 +52,10 @@ from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
                        GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
-                               GL_LINK_STATUS, GL_VERTEX_SHADER,
-                               glAttachShader, glCompileShader,
-                               glCreateProgram, glCreateShader, glDeleteShader,
+                               GL_GEOMETRY_SHADER, GL_LINK_STATUS,
+                               GL_VERTEX_SHADER, glAttachShader,
+                               glCompileShader, glCreateProgram,
+                               glCreateShader, glDeleteShader,
                                glGetActiveAttrib, glGetAttribLocation,
                                glGetProgramInfoLog, glGetProgramiv,
                                glGetShaderInfoLog, glGetShaderiv,
@@ -133,18 +134,24 @@ class Shader:
     def __init__(
         self, *,
         vertex: Optional[bytes] = None,
+        geometry: Optional[bytes] = None,
         fragment: Optional[bytes] = None,
         ignored_attributes: set[str] | None = None,
         ignored_uniforms: set[str] | None = None,
     ):
         self._gl_context = require_gl_context()
 
-        if vertex is None and fragment is None:
-            raise TypeError('vertex or fragment must be provided')
+        if vertex is None and geometry is None and fragment is None:
+            raise TypeError('vertex, geometry and fragment must be provided')
         if vertex is not None and not isinstance(vertex, bytes):
             raise TypeError('vertex must be bytes')
+        if geometry is not None and not isinstance(geometry, bytes):
+            raise TypeError('geometry must be bytes')
         if fragment is not None and not isinstance(fragment, bytes):
             raise TypeError('fragment must be bytes')
+
+        if geometry is not None and vertex is None:
+            raise TypeError('geometry shader requires vertex shader')
 
         stages: list[int] = []
 
@@ -162,6 +169,8 @@ class Shader:
         try:
             if vertex is not None:
                 add_stage('vertex', vertex, GL_VERTEX_SHADER)
+            if geometry is not None:
+                add_stage('geometry', geometry, GL_GEOMETRY_SHADER)
             if fragment is not None:
                 add_stage('fragment', fragment, GL_FRAGMENT_SHADER)
 
