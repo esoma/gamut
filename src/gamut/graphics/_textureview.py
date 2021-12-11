@@ -7,8 +7,7 @@ __all__ = ['TextureView']
 from ._texture import (get_texture_gl_target, GL_TEXTURE_CUBE_MAP_TARGETS,
                        Texture, TEXTURE_COMPONENTS_COUNT,
                        TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE, TEXTURE_DATA_TYPES,
-                       TextureComponents, TextureDataType)
-from ._texturecube import TextureCube
+                       TextureComponents, TextureDataType, TextureType)
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
@@ -65,7 +64,7 @@ class TextureView:
         texture_gl_target = get_texture_gl_target(texture)
         glBindTexture(texture_gl_target, self._texture._gl)
         buffer_targets: tuple[Any, ...]
-        if isinstance(texture, TextureCube):
+        if texture.type == TextureType.NORMAL_CUBE:
             self._length *= 6
             buffer_targets = GL_TEXTURE_CUBE_MAP_TARGETS
         else:
