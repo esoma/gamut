@@ -14,8 +14,7 @@ __all__ = [
 
 # gamut
 from ._color import Color
-from ._texture2d import Texture2d
-from ._texture import TextureComponents
+from ._texture import Texture, TextureComponents
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
@@ -35,13 +34,12 @@ from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        GL_DRAW_FRAMEBUFFER, GL_FLOAT, GL_FRAMEBUFFER,
                        GL_FRAMEBUFFER_COMPLETE, GL_INT, GL_READ_FRAMEBUFFER,
                        GL_RENDERBUFFER, GL_RGBA, GL_STENCIL_BUFFER_BIT,
-                       GL_STENCIL_INDEX, GL_TEXTURE_2D,
-                       glCheckFramebufferStatus, glClear, glClearColor,
-                       glClearDepthf, glClearStencil, glReadPixels, glViewport)
+                       GL_STENCIL_INDEX, glCheckFramebufferStatus, glClear,
+                       glClearColor, glClearDepthf, glClearStencil,
+                       glFramebufferTexture, glReadPixels, glViewport)
 from OpenGL.GL.framebufferobjects import (glBindFramebuffer,
                                           glBindRenderbuffer,
                                           glFramebufferRenderbuffer,
-                                          glFramebufferTexture2D,
                                           glGenFramebuffers,
                                           glGenRenderbuffers,
                                           glRenderbufferStorage)
@@ -59,8 +57,8 @@ class TextureRenderTarget:
 
     def __init__(
         self,
-        colors: Sequence[Texture2d],
-        depth_stencil: Union[TextureRenderTargetDepthStencil, Texture2d] =
+        colors: Sequence[Texture],
+        depth_stencil: Union[TextureRenderTargetDepthStencil, Texture] =
             TextureRenderTargetDepthStencil.NONE
     ):
         self._gl_context = require_gl_context()
@@ -69,10 +67,10 @@ class TextureRenderTarget:
         self._depth_stencil = depth_stencil
         self._ds_gl: Optional[int] = None
 
-        if not colors and not isinstance(depth_stencil, Texture2d):
+        if not colors and not isinstance(depth_stencil, Texture):
             raise ValueError('at least 1 texture must be supplied')
         sizes = {t.size for t in colors}
-        if isinstance(depth_stencil, Texture2d):
+        if isinstance(depth_stencil, Texture):
             sizes.add(depth_stencil.size)
         if len(sizes) != 1:
             raise ValueError('all textures must have the same size')
@@ -81,15 +79,14 @@ class TextureRenderTarget:
         self._gl = glGenFramebuffers(1)
         glBindFramebuffer(GL_FRAMEBUFFER, self._gl)
         for i, color_texture in enumerate(colors):
-            glFramebufferTexture2D(
+            glFramebufferTexture(
                 GL_FRAMEBUFFER,
                 GL_COLOR_ATTACHMENT0 + i,
-                GL_TEXTURE_2D,
                 color_texture._gl,
                 0
             )
 
-        if isinstance(depth_stencil, Texture2d):
+        if isinstance(depth_stencil, Texture):
             if depth_stencil.components == TextureComponents.D:
                 attachment = GL_DEPTH_ATTACHMENT
             elif depth_stencil.components == TextureComponents.DS:
@@ -99,10 +96,9 @@ class TextureRenderTarget:
                     f'depth_stencil texture must either be '
                     f'{TextureComponents.D} or {TextureComponents.DS}'
                 )
-            glFramebufferTexture2D(
+            glFramebufferTexture(
                 GL_FRAMEBUFFER,
                 attachment,
-                GL_TEXTURE_2D,
                 depth_stencil._gl,
                 0
             )
@@ -143,13 +139,13 @@ class TextureRenderTarget:
         self._gl_context = release_gl_context(self._gl_context)
 
     @property
-    def colors(self) -> Sequence[Texture2d]:
+    def colors(self) -> Sequence[Texture]:
         return self._colors
 
     @property
     def depth_stencil(self) -> Union[
         TextureRenderTargetDepthStencil,
-        Texture2d
+        Texture
     ]:
         return self._depth_stencil
 
