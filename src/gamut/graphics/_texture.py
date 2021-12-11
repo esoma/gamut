@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = [
     'bind_texture',
     'get_texture_gl_target',
+    'GL_TEXTURE_CUBE_MAP_TARGETS',
     'MipmapSelection',
     'Texture',
     'TextureComponents',
@@ -37,7 +38,13 @@ from glm import vec4
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY,
-                       GL_TEXTURE_BORDER_COLOR, GL_TEXTURE_MAG_FILTER,
+                       GL_TEXTURE_BORDER_COLOR, GL_TEXTURE_CUBE_MAP,
+                       GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                       GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                       GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+                       GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                       GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                       GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_MAG_FILTER,
                        GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_R,
                        GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
                        GL_UNSIGNED_INT_24_8, glActiveTexture, glBindTexture,
@@ -67,6 +74,7 @@ class Texture:
         self._gl: Any = None
         self._gl_context = require_gl_context()
         # check the type
+        self._type = type
         if type == TextureType.NORMAL_2D:
             size_length = 2
             wrap_length = 2
@@ -75,6 +83,12 @@ class Texture:
             size_length = 3
             wrap_length = 2
             self._gl_target = GL_TEXTURE_2D_ARRAY
+        elif type == TextureType.NORMAL_CUBE:
+            size_length = 2
+            wrap_length = 3
+            self._gl_target = GL_TEXTURE_CUBE_MAP
+        else:
+            assert False
         # set defaults
         if mipmap_selection is None:
             mipmap_selection = MipmapSelection.NONE
@@ -162,11 +176,13 @@ class Texture:
             raise TypeError(f'magnify_filter must be {TextureFilter}')
         # ensure the length of the data buffer is what we expect give the size,
         # component count and data type
-        expected_data_length = (
+        expected_data_length = cube_face_data_length = (
             prod(size) *
             component_count *
             c_sizeof(data_type)
         )
+        if type == TextureType.NORMAL_CUBE:
+            expected_data_length *= 6
         data = bytes(data)
         if len(data) != expected_data_length:
             raise ValueError('too much or not enough data')
@@ -183,8 +199,7 @@ class Texture:
                 0,
                 components.value, gl_data_type, data
             )
-        else:
-            assert type == TextureType.ARRAY_2D
+        elif type == TextureType.ARRAY_2D:
             assert isinstance(size, ivec3)
             glTexImage3D(
                 self._gl_target,
@@ -194,6 +209,23 @@ class Texture:
                 0,
                 components.value, gl_data_type, data
             )
+        elif type == TextureType.NORMAL_CUBE:
+            assert isinstance(size, ivec2)
+            for i, gl_cube_target in enumerate(GL_TEXTURE_CUBE_MAP_TARGETS):
+                glTexImage2D(
+                    gl_cube_target,
+                    0,
+                    components.value,
+                    size.x, size.y,
+                    0,
+                    components.value, gl_data_type,
+                    data[
+                        i * cube_face_data_length:
+                        (i + 1) * cube_face_data_length
+                    ]
+                )
+        else:
+            assert False
         # we only need to generate mipmaps if we're using a mipmap selection
         # that would actually check the mipmaps
         if mipmap_selection != MipmapSelection.NONE:
@@ -239,6 +271,10 @@ class Texture:
     def is_open(self) -> bool:
         return self._gl is not None
 
+    @property
+    def type(self) -> TextureType:
+        return self._type
+
 
 def get_texture_gl_target(texture: Texture) -> Any:
     return texture._gl_target
@@ -281,12 +317,23 @@ class TextureWrap(Enum):
 class TextureType(Enum):
     NORMAL_2D = 0
     ARRAY_2D = 1
+    NORMAL_CUBE = 2
 
 
 GL_TEXTURE_WRAP_NAMES: Final = (
     GL_TEXTURE_WRAP_S,
     GL_TEXTURE_WRAP_T,
     GL_TEXTURE_WRAP_R
+)
+
+
+GL_TEXTURE_CUBE_MAP_TARGETS: Final = (
+    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
 )
 
 
