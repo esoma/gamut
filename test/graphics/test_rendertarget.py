@@ -77,7 +77,7 @@ def test_texture_render_target(
     assert not render_target.is_open
 
 
-def test_texture_render_target_no_colors() -> None:
+def test_texture_render_target_no_textures() -> None:
     with pytest.raises(ValueError) as excinfo:
         TextureRenderTarget([])
     assert str(excinfo.value) == 'at least 1 texture must be supplied'
