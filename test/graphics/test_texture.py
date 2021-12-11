@@ -58,6 +58,7 @@ class TextureTest:
 
     size_length: int
     wrap_length: int
+    data_multiplier: int = 1
 
     @classmethod
     def create_texture(
@@ -132,14 +133,14 @@ class TextureTest:
 
     def test_not_enough_data(self, size: Any) -> None:
         expected_data_length = prod(size)
-        data = b'\x00' * (expected_data_length - 1)
+        data = b'\x00' * (expected_data_length - 1) * self.data_multiplier
         with pytest.raises(ValueError) as excinfo:
             self.create_texture(size, TextureComponents.R, glm.int8, data)
         assert str(excinfo.value) == 'too much or not enough data'
 
     def test_too_much_data(self, size: Any) -> None:
         expected_data_length = prod(size)
-        data = b'\x00' * (expected_data_length + 1)
+        data = b'\x00' * (expected_data_length + 1) * self.data_multiplier
         with pytest.raises(ValueError) as excinfo:
             self.create_texture(size, TextureComponents.R, glm.int8, data)
         assert str(excinfo.value) == 'too much or not enough data'
@@ -158,7 +159,8 @@ class TextureTest:
         data = (
             b'\x00' *
             TEXTURE_COMPONENTS_COUNT[components] *
-            c_sizeof(data_type)
+            c_sizeof(data_type) *
+            self.data_multiplier
         )
         texture = self.create_texture(size, components, data_type, data)
         assert texture.components == components
@@ -173,7 +175,8 @@ class TextureTest:
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             self.create_texture(
-                size, TextureComponents.R, glm.int8, b'\x00',
+                size, TextureComponents.R, glm.int8,
+                b'\x00' * self.data_multiplier,
                 mipmap_selection=mipmap_selection
             )
         assert str(excinfo.value) == (
@@ -188,7 +191,8 @@ class TextureTest:
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             self.create_texture(
-                size, TextureComponents.R, glm.int8, b'\x00',
+                size, TextureComponents.R, glm.int8,
+                b'\x00' * self.data_multiplier,
                 minify_filter=minify_filter
             )
         assert str(excinfo.value) == (
@@ -203,7 +207,8 @@ class TextureTest:
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             self.create_texture(
-                size, TextureComponents.R, glm.int8, b'\x00',
+                size, TextureComponents.R, glm.int8,
+                b'\x00' * self.data_multiplier,
                 magnify_filter=magnify_filter
             )
         assert str(excinfo.value) == (
@@ -221,7 +226,7 @@ class TextureTest:
         minify_filter: TextureFilter,
         magnify_filter: TextureFilter,
     ) -> None:
-        data = b'\x00'
+        data = b'\x00' * self.data_multiplier
         texture = self.create_texture(
             size,
             TextureComponents.R,
@@ -246,7 +251,7 @@ class TextureTest:
                 size,
                 TextureComponents.R,
                 glm.uint8,
-                b'\x00',
+                b'\x00' * self.data_multiplier,
                 wrap=wrap,
             )
         assert str(excinfo.value) == (
@@ -263,7 +268,7 @@ class TextureTest:
                 size,
                 TextureComponents.R,
                 glm.uint8,
-                b'\x00',
+                b'\x00' * self.data_multiplier,
                 wrap=wrap,
             )
         assert str(excinfo.value) == f'wrap items must be {TextureWrap}'
@@ -279,7 +284,7 @@ class TextureTest:
                 size,
                 TextureComponents.R,
                 glm.uint8,
-                b'\x00',
+                b'\x00' * self.data_multiplier,
                 wrap_color=wrap_color,
             )
         assert str(excinfo.value) == (
@@ -296,7 +301,7 @@ class TextureTest:
         wrap_t: TextureWrap,
         wrap_r: TextureWrap,
     ) -> None:
-        data = b'\x00'
+        data = b'\x00' * self.data_multiplier
         wrap: Any = (wrap_s, wrap_t, wrap_r)[:self.wrap_length]
         texture = self.create_texture(
             size,
@@ -310,7 +315,7 @@ class TextureTest:
         assert texture.is_open
 
     def test_depth_stencil(self, size: Any) -> None:
-        data = b'\x00' * c_sizeof(glm.uint32)
+        data = b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
         texture = self.create_texture(
             size,
             TextureComponents.DS,
@@ -330,7 +335,7 @@ class TextureTest:
         size: Any,
         data_type: type[TextureDataType]
     ) -> None:
-        data = b'\x00' * c_sizeof(data_type)
+        data = b'\x00' * c_sizeof(data_type) * self.data_multiplier
         with pytest.raises(ValueError) as excinfo:
             self.create_texture(
                 size,
@@ -348,7 +353,7 @@ class TextureTest:
             size,
             TextureComponents.R,
             glm.int8,
-            b'\x00'
+            b'\x00' * self.data_multiplier
         )
         assert texture.is_open
 
@@ -369,7 +374,7 @@ class TextureTest:
         output_data_type: type[TextureDataType],
     ) -> None:
         size = [c * 2 for c in size]
-        pixel_count = prod(size)
+        pixel_count = prod(size) * self.data_multiplier
         pixels = [i / pixel_count for i in range(pixel_count)]
 
         component_count = TEXTURE_COMPONENTS_COUNT[components] * pixel_count
@@ -428,7 +433,7 @@ class TextureTest:
         components = TextureComponents.DS
         input_data_type = glm.uint32
         size = [c * 2 for c in size]
-        pixel_count = prod(size)
+        pixel_count = prod(size) * self.data_multiplier
         pixels = [i / pixel_count for i in range(pixel_count)]
 
         component_count = TEXTURE_COMPONENTS_COUNT[components] * pixel_count
@@ -460,7 +465,7 @@ class TextureTest:
             size,
             TextureComponents.R,
             glm.int8,
-            b'\x00'
+            b'\x00' * self.data_multiplier
         )
         texture.close()
         with pytest.raises(RuntimeError) as excinfo:
@@ -473,7 +478,7 @@ class TextureTest:
             size,
             TextureComponents.R,
             glm.int8,
-            b'\x00'
+            b'\x00' * self.data_multiplier
         )
         view = TextureView(texture, glm.int8)
 
@@ -507,7 +512,7 @@ class TextureTest:
             size,
             TextureComponents.R,
             glm.int8,
-            b'\x00'
+            b'\x00' * self.data_multiplier
         )
         with pytest.raises(TypeError) as excinfo:
             TextureView(texture, data_type)
@@ -519,7 +524,7 @@ class TextureTest:
             size,
             TextureComponents.R,
             glm.int8,
-            b'\x00'
+            b'\x00' * self.data_multiplier
         )
         view = TextureView(texture, glm.int8)
         assert view.is_open
@@ -544,7 +549,7 @@ class TextureTest:
             size,
             TextureComponents.DS,
             glm.uint32,
-            b'\x00' * c_sizeof(glm.uint32)
+            b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
         )
 
         class App(Application):
@@ -565,7 +570,7 @@ class TextureTest:
                     size,
                     TextureComponents.DS,
                     glm.uint32,
-                    b'\x00' * c_sizeof(glm.uint32)
+                    b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
                 )
 
         app = App()
@@ -581,7 +586,7 @@ class TextureTest:
             size,
             TextureComponents.DS,
             glm.uint32,
-            b'\x00' * c_sizeof(glm.uint32)
+            b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
         )
 
         def thread_main() -> None:
@@ -639,3 +644,10 @@ class TestTextureTypeArray2d(TextureTestType):
     texture_type = TextureType.ARRAY_2D
     size_length = 3
     wrap_length = 2
+
+
+class TestTextureTypeNormalCube(TextureTestType):
+    texture_type = TextureType.NORMAL_CUBE
+    size_length = 2
+    wrap_length = 3
+    data_multiplier = 6

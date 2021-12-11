@@ -4,10 +4,10 @@ from __future__ import annotations
 __all__ = ['TextureView']
 
 # gamut
-from ._texture import (get_texture_gl_target, Texture,
-                       TEXTURE_COMPONENTS_COUNT,
+from ._texture import (get_texture_gl_target, GL_TEXTURE_CUBE_MAP_TARGETS,
+                       Texture, TEXTURE_COMPONENTS_COUNT,
                        TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE, TEXTURE_DATA_TYPES,
-                       TextureComponents, TextureDataType)
+                       TextureComponents, TextureDataType, TextureType)
 # gamut
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
@@ -29,8 +29,8 @@ from OpenGL.GL import (GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_STREAM_READ,
 class TextureView:
 
     def __init__(self, texture: Texture, data_type: type[TextureDataType]):
-        self._gl: Any = None
-        self._map: c_void_p | None = None
+        self._gls: Any = None
+        self._maps: list[c_void_p] | None = None
         self._gl_context = require_gl_context()
         # check texture
         if not isinstance(texture, Texture):
@@ -55,50 +55,65 @@ class TextureView:
             gl_data_type = GL_UNSIGNED_INT_24_8
         # calculate the length
         texture_size = texture.size
-        self._length = (
+        self._length = self._buffer_size = (
             prod(texture_size) *
             TEXTURE_COMPONENTS_COUNT[texture.components] *
             c_sizeof(data_type)
         )
-        # generate the buffer to load data into
-        self._gl = glGenBuffers(1)
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, self._gl)
-        glBufferData(
-            GL_PIXEL_PACK_BUFFER,
-            self._length,
-            c_void_p(0),
-            GL_STREAM_READ,
-        )
+        # special calculations for cube maps
         texture_gl_target = get_texture_gl_target(texture)
         glBindTexture(texture_gl_target, self._texture._gl)
-        glGetTexImage(
-            texture_gl_target,
-            0,
-            texture.components.value,
-            gl_data_type,
-            0
-        )
-        self._map = c_void_p(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY))
+        buffer_targets: tuple[Any, ...]
+        if texture.type == TextureType.NORMAL_CUBE:
+            self._length *= 6
+            buffer_targets = GL_TEXTURE_CUBE_MAP_TARGETS
+        else:
+            buffer_targets = (texture_gl_target,)
+        # generate the buffers to load data into
+        if len(buffer_targets) == 1:
+            self._gls = [glGenBuffers(1)]
+        else:
+            self._gls = glGenBuffers(len(buffer_targets))
+        self._maps = []
+        for gl, buffer_target in zip(self._gls, buffer_targets):
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, gl)
+            glBufferData(
+                GL_PIXEL_PACK_BUFFER,
+                self._buffer_size,
+                c_void_p(0),
+                GL_STREAM_READ,
+            )
+            glGetTexImage(
+                buffer_target,
+                0,
+                texture.components.value,
+                gl_data_type,
+                0
+            )
+            self._maps.append(
+                c_void_p(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY))
+            )
 
     def __del__(self) -> None:
         self.close()
 
     def _ensure_open(self, *, include_texture: bool = True) -> None:
-        if self._gl is None:
+        if self._gls is None:
             raise RuntimeError('texture view is closed')
         assert self._texture is not None
         if include_texture and not self._texture.is_open:
             raise RuntimeError('texture is closed')
 
     def close(self) -> None:
-        if self._map is not None:
-            assert self._gl
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, self._gl)
-            glUnmapBuffer(GL_PIXEL_PACK_BUFFER)
-            self._map = None
-        if self._gl is not None:
-            glDeleteBuffers(1, [self._gl])
-            self._gl = None
+        if self._maps is not None:
+            assert self._gls is not None
+            for gl in self._gls[:len(self._maps)]:
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, gl)
+                glUnmapBuffer(GL_PIXEL_PACK_BUFFER)
+            self._maps = None
+        if self._gls is not None:
+            glDeleteBuffers(len(self._gls), self._gls)
+            self._gls = None
         self._texture = None
         self._gl_context = release_gl_context(self._gl_context)
 
@@ -109,11 +124,11 @@ class TextureView:
     @property
     def bytes(self) -> bytes:
         self._ensure_open()
-        assert self._map is not None
-        return bytes(c_cast(
-            self._map,
-            c_pointer(c_byte * self._length),
-        ).contents)
+        assert self._maps is not None
+        return b''.join(
+            bytes(c_cast(map, c_pointer(c_byte * self._buffer_size)).contents)
+            for map in self._maps
+        )
 
     @property
     def texture(self) -> Texture:
@@ -123,4 +138,4 @@ class TextureView:
 
     @property
     def is_open(self) -> bool:
-        return self._gl is not None
+        return self._gls is not None

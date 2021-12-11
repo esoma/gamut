@@ -25,7 +25,7 @@ from ctypes import c_int
 from enum import Enum
 from typing import Optional, Sequence, Union
 # pyglm
-from glm import ivec2
+from glm import ivec1, ivec2
 # pyopengl
 from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        GL_DEPTH24_STENCIL8, GL_DEPTH_ATTACHMENT,
@@ -74,7 +74,11 @@ class TextureRenderTarget:
             sizes.add(depth_stencil.size)
         if len(sizes) != 1:
             raise ValueError('all textures must have the same size')
-        self._size = ivec2(list(sizes)[0])
+        target_size = list(sizes)[0]
+        if isinstance(target_size, ivec1):
+            self._size = ivec2(target_size.x, 1)
+        else:
+            self._size = ivec2(target_size.x, target_size.y)
 
         self._gl = glGenFramebuffers(1)
         glBindFramebuffer(GL_FRAMEBUFFER, self._gl)

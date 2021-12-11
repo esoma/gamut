@@ -31,6 +31,7 @@ __all__ = [
     'Texture2d',
     'Texture2dArray',
     'TextureComponents',
+    'TextureCube',
     'TextureDataType',
     'TextureFilter',
     'TextureRenderTarget',
@@ -62,4 +63,5 @@ from ._texture2d import Texture2d, Texture2dArray
 from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureType,
                        TextureWrap)
+from ._texturecube import TextureCube
 from ._textureview import TextureView
