@@ -110,3 +110,32 @@ def test_repeat_fixed(event_type: type[TimerExpired]) -> None:
             (timer_expired.when - timer_expired.previous) ==
             timedelta(seconds=.1)
         )
+
+
+@pytest.mark.parametrize("event_type", [TimerExpired, CustomTimerExpired])
+def test_pause(event_type: type[TimerExpired]) -> None:
+    events: list[Event] = []
+
+    class TestLoop(EventLoop):
+        async def main(self) -> None:
+            timer = Timer(self, timedelta(seconds=.5), event_type)
+            time.sleep(.1)
+            timer.pause()
+            assert not events
+            time.sleep(1)
+            assert not events
+            timer.resume()
+            time.sleep(1)
+
+        def queue_event(self, event: Event) -> None:
+            events.append(event)
+
+    test_loop = TestLoop()
+    test_loop.run()
+
+    assert len(events) == 1
+    timer_expired = events[0]
+    assert isinstance(timer_expired, event_type)
+    assert (
+        (timer_expired.when - timer_expired.previous) >= timedelta(seconds=.5)
+    )

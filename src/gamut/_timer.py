@@ -31,6 +31,7 @@ class Timer:
         self._event = event
         self._repeat = repeat
         self._fixed = fixed
+        self._is_paused = False
         self._thread = Thread(
             target=timer_thread_main,
             args=(ref(self), datetime.now())
@@ -52,6 +53,12 @@ class Timer:
     @property
     def fixed(self) -> bool:
         return self._fixed
+
+    def pause(self) -> None:
+        self._is_paused = True
+
+    def resume(self) -> None:
+        self._is_paused = False
 
     def _send_event(self, event: TimerExpired) -> bool:
         event_loop = self._event_loop()
@@ -76,6 +83,8 @@ def timer_thread_main(weak_timer: ref[Timer], previous: datetime) -> None:
         if timer is None:
             return
         now = datetime.now()
+        if timer._is_paused:
+            previous = now
         difference = now - previous
         while difference >= timer_duration:
             when = now
