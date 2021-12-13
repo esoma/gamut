@@ -76,7 +76,7 @@ def test_transform_parent(
     parent: TransformNode[Any] = TransformNode(local_transform=local_transform)
     node = TransformNode(local_transform=local_transform, parent=parent)
     assert node.local_transform == local_transform
-    assert node.transform == local_transform @ local_transform
+    assert node.transform == local_transform * local_transform
 
 
 def test_add_parent() -> None:
@@ -99,7 +99,7 @@ def test_add_parent() -> None:
     )
     node.parent = parent
     assert node.local_transform == node_local_transform
-    assert node.transform == node_local_transform @ parent_local_transform
+    assert node.transform == parent_local_transform * node_local_transform
     assert parent.children == {node}
 
 
@@ -112,7 +112,7 @@ def test_remove_parent() -> None:
     node_local_transform = translate(mat4(1), vec3(1, 1, 1))
     node = TransformNode(local_transform=node_local_transform, parent=parent)
     assert node.local_transform == node_local_transform
-    assert node.transform == node_local_transform @ parent_local_transform
+    assert node.transform == parent_local_transform * node_local_transform
 
     node.parent = None
     assert node.local_transform == node_local_transform

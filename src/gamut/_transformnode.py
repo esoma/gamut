@@ -82,7 +82,7 @@ class TransformNode(Generic[C]):
             if parent is not None:
                 if self._parent_transform is None:
                     self._parent_transform = parent.transform
-                self._transform @= self._parent_transform
+                self._transform = self._parent_transform * self._transform
 
         return mat4(self._transform)
 
