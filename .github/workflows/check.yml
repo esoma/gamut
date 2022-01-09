@@ -57,14 +57,14 @@ jobs:
     - name: Install PyICU (Windows 3.9)
       if: ${{ matrix.os == 'windows-latest' && matrix.python-version == '3.9' }}
       run: |
-        curl.exe -L --output PyICU-2.7.4-cp39-cp39-win_amd64.whl --url https://download.lfd.uci.edu/pythonlibs/w6tyco5e/PyICU-2.7.4-cp39-cp39-win_amd64.whl
-        python -m pip install PyICU-2.7.4-cp39-cp39-win_amd64.whl
+        curl.exe -L --output PyICU-2.8-cp39-cp39-win_amd64.whl --url https://download.lfd.uci.edu/pythonlibs/x6hvwk7i/PyICU-2.8-cp39-cp39-win_amd64.whl
+        python -m pip install PyICU-2.8-cp39-cp39-win_amd64.whl
 
     - name: Install PyICU (Windows 3.10)
       if: ${{ matrix.os == 'windows-latest' && matrix.python-version == '3.10' }}
       run: |
-        curl.exe -L --output PyICU-2.7.4-cp310-cp310-win_amd64.whl --url https://download.lfd.uci.edu/pythonlibs/w6tyco5e/PyICU-2.7.4-cp310-cp310-win_amd64.whl
-        python -m pip install PyICU-2.7.4-cp310-cp310-win_amd64.whl
+        curl.exe -L --output PyICU-2.8-cp310-cp310-win_amd64.whl --url https://download.lfd.uci.edu/pythonlibs/x6hvwk7i/PyICU-2.8-cp310-cp310-win_amd64.whl
+        python -m pip install PyICU-2.8-cp310-cp310-win_amd64.whl
 
     - name: Install PyICU (Mac OS)
       if: ${{ matrix.os == 'macos-latest' }}
