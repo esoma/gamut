@@ -84,7 +84,7 @@ def test_defaults(button_count: int, axis_count: int) -> None:
     assert len(controller.axes) == axis_count
     for index, axis in enumerate(controller.axes):
         assert axis.index == index
-        assert axis.position == 0.0
+        assert axis.position is None
 
 
 @pytest.mark.parametrize("name", ['', 'test', 'Primary'])
