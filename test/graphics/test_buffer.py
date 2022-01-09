@@ -1,4 +1,5 @@
 
+from __future__ import annotations
 # gamut
 from gamut import Application, Window
 from gamut._glcontext import get_gl_context
@@ -58,6 +59,19 @@ def test_empty_buffer() -> None:
     assert len(buffer) == 0
 
 
+@pytest.mark.parametrize("length", [-100, -1])
+def test_initialize_length_invalid_value(length: int) -> None:
+    with pytest.raises(ValueError) as excinfo:
+        Buffer(length)
+    assert str(excinfo.value) == 'data must be 0 or more'
+
+
+@pytest.mark.parametrize("length", [0, 1, 2, 10, 1000])
+def test_initialize_length(length: int) -> None:
+    buffer = Buffer(length)
+    assert len(buffer) == length
+
+
 @pytest.mark.parametrize("length", [0, 1, 2, 10, 1000])
 def test_length(length: int) -> None:
     buffer = Buffer(b'\x00' * length)
@@ -74,7 +88,7 @@ def test_default_access() -> None:
 def test_data_invalid(data: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Buffer(data)
-    assert str(excinfo.value) == 'data must be bytes'
+    assert str(excinfo.value) == 'data must be bytes or an integer'
 
 
 @pytest.mark.parametrize("frequency", list(BufferFrequency))
@@ -91,14 +105,14 @@ def test_frequency_nature_combinations(
 @pytest.mark.parametrize("frequency", [None, 0, 'abc'])
 def test_frequency_invalid(frequency: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Buffer(None, frequency=frequency)
+        Buffer(0, frequency=frequency)
     assert str(excinfo.value) == 'frequency must be <enum \'BufferFrequency\'>'
 
 
 @pytest.mark.parametrize("nature", [None, 0, 'abc'])
 def test_nature_invalid(nature: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Buffer(None, nature=nature)
+        Buffer(0, nature=nature)
     assert str(excinfo.value) == 'nature must be <enum \'BufferNature\'>'
 
 
@@ -125,7 +139,7 @@ def test_replace_invalid_data_type(data: Any) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(TypeError) as excinfo:
         buffer.replace(0, data)
-    assert str(excinfo.value) == 'data must be bytes'
+    assert str(excinfo.value) == 'data must be bytes or a Buffer'
 
 
 @pytest.mark.parametrize("offset", ['abcd', (1,), (1, 2, 3)])
@@ -144,6 +158,56 @@ def test_replace_invalid_offset_value(offset: Any) -> None:
     assert str(excinfo.value) == 'offset must be 0 or more'
 
 
+@pytest.mark.parametrize("data_offset", ['abcd', (1,), (1, 2, 3)])
+def test_replace_invalid_data_offset_type(data_offset: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.replace(0, b'\x00', data_offset=data_offset)
+    assert str(excinfo.value) == 'data offset must be int'
+
+
+@pytest.mark.parametrize("data_offset", [-100, -1])
+def test_replace_invalid_data_offset_value(data_offset: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(ValueError) as excinfo:
+        buffer.replace(0, b'\x00', data_offset=data_offset)
+    assert str(excinfo.value) == 'data offset must be 0 or more'
+
+
+@pytest.mark.parametrize("length", ['abcd', (1,), (1, 2, 3)])
+def test_replace_invalid_length_type(length: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(TypeError) as excinfo:
+        buffer.replace(0, b'\x00', length=length)
+    assert str(excinfo.value) == 'length must be int'
+
+
+@pytest.mark.parametrize("length", [-100, -1])
+def test_replace_invalid_data_offset_value(length: Any) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(ValueError) as excinfo:
+        buffer.replace(0, b'\x00', length=length)
+    assert str(excinfo.value) == 'length must be 0 or more'
+
+
+@pytest.mark.parametrize("data_offset, length, data", [
+    (0, 3, b'\x00' * 2),
+    (3, 1, b'\x00' * 2),
+])
+def test_replace_read_overflow(
+    data_offset: int,
+    length: int,
+    data: bytes
+) -> None:
+    buffer = Buffer(b'\x00\x01\x02\x03')
+    with pytest.raises(ValueError) as excinfo:
+        buffer.replace(0, data, data_offset=data_offset, length=length)
+    assert str(excinfo.value) == (
+        'requested offset, length and data would read beyond the end of the '
+        'buffer'
+    )
+
+
 @pytest.mark.parametrize("offset, data", [
     (0, b'\x00' * 5),
     (1, b'\x00' * 4),
@@ -152,7 +216,7 @@ def test_replace_invalid_offset_value(offset: Any) -> None:
     (4, b'\x00'),
     (5, b''),
 ])
-def test_replace_invalid_offset_data_combo(offset: int, data: bytes) -> None:
+def test_replace_write_overflow(offset: int, data: bytes) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(ValueError) as excinfo:
         buffer.replace(offset, data)
@@ -161,25 +225,49 @@ def test_replace_invalid_offset_data_combo(offset: int, data: bytes) -> None:
     )
 
 
-@pytest.mark.parametrize("offset, data", [
-    (0, b'\x05'),
-    (0, b'\x05' * 2),
-    (0, b'\x05' * 3),
-    (0, b'\x05' * 4),
-    (1, b'\x05' * 3),
-    (2, b'\x05' * 2),
-    (3, b'\x05' * 1),
-    (4, b''),
+@pytest.mark.parametrize("offset, data, data_offset, length", [
+    (0, b'\x05', None, None),
+    (0, b'\x05' * 2, None, None),
+    (0, b'\x05' * 3, None, None),
+    (0, b'\x05' * 4, None, None),
+    (1, b'\x05' * 3, None, None),
+    (2, b'\x05' * 2, None, None),
+    (3, b'\x05' * 1, None, None),
+    (4, b'', None, None),
+    (0, b'\x05' * 4, 0, None),
+    (0, b'\x05' * 4, 1, None),
+    (0, b'\x05' * 4, 2, None),
+    (0, b'\x05' * 4, None, 1),
+    (0, b'\x05' * 4, None, 2),
 ])
-def test_replace(offset: int, data: bytes) -> None:
+@pytest.mark.parametrize("data_type", [bytes, Buffer])
+def test_replace(
+    offset: int,
+    data: bytes,
+    data_offset: int | None,
+    length: int | None,
+    data_type: type[bytes] | type[Buffer]
+) -> None:
+
+    typed_data = data_type(data)
+
+    if data_offset is None:
+        effective_data_offset = 0
+    else:
+        effective_data_offset = data_offset
+    if length is None:
+        effective_length = len(data) - effective_data_offset
+    else:
+        effective_length = length
+
     original_data = b'\x00\x01\x02\x03'
     expected_data = (
         original_data[:offset] +
-        data +
-        original_data[offset + len(data):]
+        data[effective_data_offset:effective_data_offset + effective_length] +
+        original_data[offset + effective_length:]
     )
     buffer = Buffer(original_data)
-    buffer.replace(offset, data)
+    buffer.replace(offset, typed_data, data_offset=data_offset, length=length)
     assert buffer.bytes == expected_data
 
 

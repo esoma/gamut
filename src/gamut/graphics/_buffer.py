@@ -31,17 +31,19 @@ from glm import sizeof as glm_sizeof
 from glm_typing import U32Vector2
 # pyopengl
 import OpenGL.GL
-from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER, GL_DOUBLE,
-                       GL_DYNAMIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
+from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER,
+                       GL_COPY_WRITE_BUFFER, GL_DOUBLE, GL_DYNAMIC_COPY,
+                       GL_DYNAMIC_DRAW, GL_DYNAMIC_READ,
                        GL_ELEMENT_ARRAY_BUFFER, GL_FALSE, GL_R8, GL_READ_ONLY,
                        GL_RED, GL_STATIC_COPY, GL_STATIC_DRAW, GL_STATIC_READ,
                        GL_STREAM_COPY, GL_STREAM_DRAW, GL_STREAM_READ,
                        GL_UNSIGNED_BYTE, glBindBuffer, glBindVertexArray,
                        glBufferData, glBufferSubData, glClearBufferSubData,
-                       glEnableVertexAttribArray, glGenBuffers,
-                       glGenVertexArrays, glMapBuffer, glUnmapBuffer,
-                       glVertexAttribDivisor, glVertexAttribIPointer,
-                       glVertexAttribLPointer, glVertexAttribPointer)
+                       glCopyBufferSubData, glEnableVertexAttribArray,
+                       glGenBuffers, glGenVertexArrays, glMapBuffer,
+                       glUnmapBuffer, glVertexAttribDivisor,
+                       glVertexAttribIPointer, glVertexAttribLPointer,
+                       glVertexAttribPointer)
 
 if TYPE_CHECKING:
     # gamut
@@ -92,7 +94,7 @@ class Buffer:
 
     def __init__(
         self,
-        data: Optional[bytes] = None,
+        data: bytes | int = 0,
         *,
         frequency: BufferFrequency = BufferFrequency.STATIC,
         nature: BufferNature = BufferNature.DRAW,
@@ -100,12 +102,18 @@ class Buffer:
         self._gl: Any = None
         self._gl_context = require_gl_context()
         # check data
-        if data is not None:
+        if isinstance(data, int):
+            if data < 0:
+                raise ValueError('data must be 0 or more')
+            self._length = data
+            buffer_bytes = None
+        else:
             try:
                 data = bytes(data)
             except TypeError:
-                raise TypeError('data must be bytes')
-        self._length = len(data) if data is not None else 0
+                raise TypeError('data must be bytes or an integer')
+            self._length = len(data)
+            buffer_bytes = data
         # check frequency/nature
         try:
             self._gl_access = FREQUENCY_NATURE_TO_GL_ACCESS[
@@ -121,7 +129,12 @@ class Buffer:
         # create the gl buffer
         self._gl = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self._gl)
-        glBufferData(GL_ARRAY_BUFFER, data, self._gl_access)
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            self._length,
+            buffer_bytes,
+            self._gl_access
+        )
 
     def __del__(self) -> None:
         if self._gl is not None:
@@ -160,7 +173,14 @@ class Buffer:
         glBufferData(GL_ARRAY_BUFFER, data, self._gl_access)
         self._length = len(data) if data is not None else 0
 
-    def replace(self, offset: int, data: _bytes) -> None:
+    def replace(
+        self,
+        offset: int,
+        data: _bytes | Buffer,
+        *,
+        data_offset: int | None = None,
+        length: int | None = None
+    ) -> None:
         # check offset
         try:
             offset = int(offset)
@@ -169,22 +189,64 @@ class Buffer:
         if offset < 0:
             raise ValueError('offset must be 0 or more')
         # check data
-        try:
-            data = bytes(data)
-        except TypeError:
-            raise TypeError('data must be bytes')
-        # ensure the requested write doesn't go beyond the end of the existing
-        # buffer
-        if offset + len(data) > self._length:
+        if not isinstance(data, Buffer):
+            try:
+                data = bytes(data)
+            except TypeError:
+                raise TypeError('data must be bytes or a Buffer')
+        # check the data offset
+        if data_offset is None:
+            data_offset = 0
+        else:
+            try:
+                data_offset = int(data_offset)
+            except (ValueError, TypeError):
+                raise TypeError('data offset must be int')
+            if data_offset < 0:
+                raise ValueError('data offset must be 0 or more')
+        # check the length
+        if length is None:
+            length = len(data) - data_offset
+        else:
+            try:
+                length = int(length)
+            except (ValueError, TypeError):
+                raise TypeError('length must be int')
+            if length < 0:
+                raise ValueError('length must be 0 or more')
+        # ensure we're not overflowing the buffers
+        if data_offset + length > len(data):
+            raise ValueError(
+                'requested offset, length and data would read beyond the end '
+                'of the buffer'
+            )
+        if offset + length > self._length:
             raise ValueError(
                 'requested offset and data would write beyond the end of the '
                 'buffer'
             )
         # replace the data
-        if len(data) == 0:
+        if length == 0:
             return
-        glBindBuffer(GL_ARRAY_BUFFER, self._gl)
-        glBufferSubData(GL_ARRAY_BUFFER, offset, len(data), data)
+        if isinstance(data, bytes):
+            glBindBuffer(GL_ARRAY_BUFFER, self._gl)
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                offset,
+                length,
+                data[data_offset:data_offset + length]
+            )
+        else:
+            assert isinstance(data, Buffer)
+            glBindBuffer(GL_COPY_READ_BUFFER, data._gl)
+            glBindBuffer(GL_COPY_WRITE_BUFFER, self._gl)
+            glCopyBufferSubData(
+                GL_COPY_READ_BUFFER,
+                GL_COPY_WRITE_BUFFER,
+                data_offset,
+                offset,
+                length
+            )
 
     def clear(
         self,
