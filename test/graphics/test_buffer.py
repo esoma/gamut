@@ -88,7 +88,7 @@ def test_default_access() -> None:
 def test_data_invalid(data: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Buffer(data)
-    assert str(excinfo.value) == 'data must be bytes'
+    assert str(excinfo.value) == 'data must be bytes or an integer'
 
 
 @pytest.mark.parametrize("frequency", list(BufferFrequency))
@@ -105,14 +105,14 @@ def test_frequency_nature_combinations(
 @pytest.mark.parametrize("frequency", [None, 0, 'abc'])
 def test_frequency_invalid(frequency: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Buffer(None, frequency=frequency)
+        Buffer(0, frequency=frequency)
     assert str(excinfo.value) == 'frequency must be <enum \'BufferFrequency\'>'
 
 
 @pytest.mark.parametrize("nature", [None, 0, 'abc'])
 def test_nature_invalid(nature: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Buffer(None, nature=nature)
+        Buffer(0, nature=nature)
     assert str(excinfo.value) == 'nature must be <enum \'BufferNature\'>'
 
 
@@ -139,7 +139,7 @@ def test_replace_invalid_data_type(data: Any) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(TypeError) as excinfo:
         buffer.replace(0, data)
-    assert str(excinfo.value) == 'data must be bytes'
+    assert str(excinfo.value) == 'data must be bytes or a Buffer'
 
 
 @pytest.mark.parametrize("offset", ['abcd', (1,), (1, 2, 3)])
