@@ -84,7 +84,7 @@ class ControllerAxis:
 
     def __init__(self, controller: Controller, index: int):
         self._index = index
-        self._position = 0.0
+        self._position = None
         self._controller: ref[Controller] = ref(controller)
 
         class Moved( # type: ignore
@@ -108,7 +108,7 @@ class ControllerAxis:
         return self._index
 
     @property
-    def position(self) -> float:
+    def position(self) -> float | None:
         return self._position
 
 
