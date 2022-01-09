@@ -1,4 +1,5 @@
 
+from __future__ import annotations
 # gamut
 from gamut import Application, Window
 from gamut._glcontext import get_gl_context
