@@ -320,7 +320,7 @@ class BufferView(Generic[BVT]):
             chunk = buffer_bytes[start_index:end_index]
             try:
                 struct_name = GLM_POD_TO_STRUCT_NAME[self._data_type]
-                data = c_unpack(struct_name, chunk)
+                data = c_unpack(struct_name, chunk)[0]
             except KeyError:
                 data = self._data_type.from_bytes(chunk) # type: ignore
             yield data # type: ignore

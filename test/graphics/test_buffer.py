@@ -334,7 +334,7 @@ def test_view_read(
         data_bytes = data[data_start:data_start + glm.sizeof(data_type)]
         try:
             struct_name = GLM_POD_TO_STRUCT_NAME[data_type]
-            expected_python_data.append(c_unpack(struct_name, data_bytes))
+            expected_python_data.append(c_unpack(struct_name, data_bytes)[0])
         except KeyError:
             expected_python_data.append(data_type.from_bytes(data_bytes))
 
