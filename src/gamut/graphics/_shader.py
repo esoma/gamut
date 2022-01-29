@@ -43,14 +43,13 @@ from glm import value_ptr as glm_value_ptr
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
-                       GL_BLEND, GL_CULL_FACE, GL_CURRENT_PROGRAM,
-                       GL_DEPTH_TEST, GL_FALSE, glBlendColor, glBlendEquation,
-                       glBlendFuncSeparate, GLchar, glCullFace, glDepthFunc,
-                       glDepthMask, glDisable, glDrawArrays,
-                       glDrawArraysInstanced, glDrawElements,
+                       GL_BLEND, GL_CULL_FACE, GL_DEPTH_TEST, GL_FALSE,
+                       glBlendColor, glBlendEquation, glBlendFuncSeparate,
+                       GLchar, glCullFace, glDepthFunc, glDepthMask, glDisable,
+                       glDrawArrays, glDrawArraysInstanced, glDrawElements,
                        glDrawElementsInstanced, glEnable, GLenum,
-                       glGetActiveUniform, glGetIntegerv, glGetUniformLocation,
-                       GLint, GLsizei)
+                       glGetActiveUniform, glGetUniformLocation, GLint,
+                       GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_GEOMETRY_SHADER, GL_LINK_STATUS,
                                GL_VERTEX_SHADER, glAttachShader,
@@ -306,10 +305,9 @@ class Shader:
             Texture, Sequence[Texture],
         ],
     ) -> None:
-        assert glGetIntegerv(GL_CURRENT_PROGRAM) == self._gl
         assert uniform in self._uniforms
         input_value: Any = None
-
+        cache_key: Any = value
         if uniform.type is Texture:
             if uniform.size > 1:
                 try:
@@ -378,10 +376,10 @@ class Shader:
                     )
                 if uniform._set_type in POD_UNIFORM_TYPES:
                     input_value = value.value
+                    cache_key = value.value
                 else:
                     input_value = glm_value_ptr(value)
-
-        uniform._setter(uniform.location, uniform.size, input_value)
+        uniform._set(uniform.location, uniform.size, input_value, cache_key)
 
     def close(self) -> None:
         global shader_in_use
@@ -464,9 +462,22 @@ class ShaderUniform(Generic[T]):
         self._location = location
         self._setter = TYPE_TO_UNIFORM_SETTER[self._type]
         self._set_type: Any = int32 if type is Texture else type
+        self._cache: Any = None
 
     def __repr__(self) -> str:
         return f'<gamut.graphics.ShaderUniform {self.name!r}>'
+
+    def _set(
+        self,
+        location: int,
+        size: int,
+        gl_value: Any,
+        cache_key: Any
+    ) -> None:
+        if self._cache == cache_key:
+            return
+        self._setter(location, size, gl_value)
+        self._cache = cache_key
 
     @property
     def name(self) -> str:
