@@ -60,33 +60,33 @@ class ViewFrustum3d:
         return ViewFrustum3d(
             # near
             Plane(
-                row(transform, 3).w + row(transform, 2).w,
-                row(transform, 3).xyz + row(transform, 2).xyz,
+                row(m, 3).w + row(m, 2).w,
+                row(m, 3).xyz + row(m, 2).xyz,
             ),
             # far
             Plane(
-                row(transform, 3).w - row(transform, 2).w,
-                row(transform, 3).xyz - row(transform, 2).xyz,
+                row(m, 3).w - row(m, 2).w,
+                row(m, 3).xyz - row(m, 2).xyz,
             ),
             # left
             Plane(
-                row(transform, 3).w + row(transform, 0).w,
-                row(transform, 3).xyz + row(transform, 0).xyz,
+                row(m, 3).w + row(m, 0).w,
+                row(m, 3).xyz + row(m, 0).xyz,
             ),
             # right
             Plane(
-                row(transform, 3).w - row(transform, 0).w,
-                row(transform, 3).xyz - row(transform, 0).xyz,
+                row(m, 3).w - row(m, 0).w,
+                row(m, 3).xyz - row(m, 0).xyz,
             ),
             # bottom
             Plane(
-                row(transform, 3).w + row(transform, 1).w,
-                row(transform, 3).xyz + row(transform, 1).xyz,
+                row(m, 3).w + row(m, 1).w,
+                row(m, 3).xyz + row(m, 1).xyz,
             ),
             # top
             Plane(
-                row(transform, 3).w - row(transform, 1).w,
-                row(transform, 3).xyz - row(transform, 1).xyz,
+                row(m, 3).w - row(m, 1).w,
+                row(m, 3).xyz - row(m, 1).xyz,
             ),
         )
 
