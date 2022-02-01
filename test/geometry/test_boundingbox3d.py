@@ -159,7 +159,7 @@ def test_equal() -> None:
         BoundingBox3d(vec3(1, 2, 3), vec3(-1, -2, -3)) !=
         BoundingBox3d(vec3(1, 2, 3), vec3(-1, -2, 0))
     )
-    assert BoundingBox3d(vec3(0)) == object()
+    assert BoundingBox3d(vec3(0)) != object()
 
 
 def test_seen_by() -> None:
