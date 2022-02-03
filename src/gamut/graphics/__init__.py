@@ -26,6 +26,7 @@ __all__ = [
     'read_stencil_from_render_target',
     'Shader',
     'ShaderAttribute',
+    'ShaderExecutionResult',
     'ShaderUniform',
     'Texture',
     'Texture2d',
@@ -58,7 +59,8 @@ from ._rendertarget import (clear_render_target, read_color_from_render_target,
                             WindowRenderTarget)
 from ._shader import (BlendFactor, BlendFunction, DepthTest, execute_shader,
                       FaceCull, IndexBuffer, PrimitiveMode, Shader,
-                      ShaderAttribute, ShaderUniform, UniformMap)
+                      ShaderAttribute, ShaderExecutionResult, ShaderUniform,
+                      UniformMap)
 from ._texture2d import Texture2d, Texture2dArray
 from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureType,

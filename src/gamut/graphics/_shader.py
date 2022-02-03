@@ -11,6 +11,7 @@ __all__ = [
     'PrimitiveMode',
     'Shader',
     'ShaderAttribute',
+    'ShaderExecutionResult',
     'ShaderUniform',
     'UniformMap',
     'use_shader',
@@ -647,8 +648,6 @@ def execute_shader(
     elif instances == 0:
         return
 
-    if depth_test == DepthTest.NEVER:
-        return
     if not depth_write and depth_test == DepthTest.ALWAYS:
         glDisable(GL_DEPTH_TEST)
     else:
