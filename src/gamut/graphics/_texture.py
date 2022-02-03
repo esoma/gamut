@@ -253,7 +253,7 @@ class Texture:
             glm_value_ptr(wrap_color)
         )
         # set anisotropy
-        if anisotropy > 1.0:
+        if anisotropy > 1.0 and GL_TEXTURE_MAX_ANISOTROPY_EXT is not None:
             glTexParameterf(
                 self._gl_target,
                 GL_TEXTURE_MAX_ANISOTROPY_EXT,
