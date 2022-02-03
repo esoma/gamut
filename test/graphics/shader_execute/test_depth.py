@@ -79,6 +79,8 @@ def draw_fullscreen_quad(
     (DepthTest.EQUAL, True),
     (DepthTest.NOT_EQUAL, False),
     (DepthTest.NOT_EQUAL, True),
+    (DepthTest.NEVER, False),
+    (DepthTest.NEVER, True),
 ])
 def test_no_depth_buffer_fail(
     depth_test: DepthTest,
@@ -111,8 +113,6 @@ def test_no_depth_buffer_fail(
 
 @pytest.mark.parametrize("depth_test, depth_write, expected_color", [
     (DepthTest.ALWAYS, False, Color(1, 1, 1)),
-    (DepthTest.NEVER, True, Color(0, 0, 0)),
-    (DepthTest.NEVER, True, Color(0, 0, 0)),
 ])
 def test_no_depth_buffer_okay(
     depth_test: DepthTest,
