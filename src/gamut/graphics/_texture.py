@@ -49,7 +49,10 @@ from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY,
                        GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
                        GL_UNSIGNED_INT_24_8, glActiveTexture, glBindTexture,
                        glGenerateMipmap, glGenTextures, glTexImage2D,
-                       glTexImage3D, glTexParameterfv, glTexParameteri)
+                       glTexImage3D, glTexParameterf, glTexParameterfv,
+                       glTexParameteri)
+from OpenGL.GL.EXT.texture_filter_anisotropic import (
+    GL_TEXTURE_MAX_ANISOTROPY_EXT, glInitTextureFilterAnisotropicEXT)
 
 
 class Texture:
@@ -58,6 +61,7 @@ class Texture:
         self,
         type: TextureType,
         *,
+        anisotropy: float = 1.0,
         size: I32Vector1 | I32Vector2 | I32Vector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
@@ -103,6 +107,13 @@ class Texture:
             assert wrap is not None
         if wrap_color is None:
             wrap_color = vec4(0, 0, 0, 0)
+        # check anisotropy
+        if anisotropy is None:
+            anisotropy = 1.0
+        try:
+            anisotropy = float(anisotropy)
+        except (TypeError, ValueError):
+            raise TypeError('anisotropy must be float')
         # check the size
         try:
             if size_length == 1:
@@ -241,6 +252,13 @@ class Texture:
             GL_TEXTURE_BORDER_COLOR,
             glm_value_ptr(wrap_color)
         )
+        # set anisotropy
+        if anisotropy > 1.0 and glInitTextureFilterAnisotropicEXT():
+            glTexParameterf(
+                self._gl_target,
+                GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                anisotropy
+            )
 
     def __del__(self) -> None:
         self.close()

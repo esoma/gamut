@@ -68,6 +68,7 @@ class TextureTest:
         data_type: type[TextureDataType],
         data: bytes,
         *,
+        anisotropy: float | None = None,
         mipmap_selection: MipmapSelection | None = None,
         minify_filter: TextureFilter | None = None,
         magnify_filter: TextureFilter | None = None,
@@ -313,6 +314,29 @@ class TextureTest:
         assert texture.components == TextureComponents.R
         assert texture.size == size
         assert texture.is_open
+
+    @pytest.mark.parametrize("anisotropy", ['abc', object()])
+    def test_anisotropy_invalid(self, size: Any, anisotropy: Any) -> None:
+        with pytest.raises(TypeError) as excinfo:
+            self.create_texture(
+                size,
+                TextureComponents.R,
+                glm.int8,
+                b'',
+                anisotropy=anisotropy
+            )
+        assert str(excinfo.value) == f'anisotropy must be float'
+
+    @pytest.mark.parametrize("anisotropy", [-1000, 0, 1.0, 1.5, 16, 999999])
+    def test_anisotropy_values(self, size: Any, anisotropy: Any) -> None:
+        data = b'\x00' * self.data_multiplier
+        self.create_texture(
+            size,
+            TextureComponents.R,
+            glm.int8,
+            data,
+            anisotropy=anisotropy
+        )
 
     def test_depth_stencil(self, size: Any) -> None:
         data = b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
@@ -611,6 +635,7 @@ class TextureTestType(TextureTest):
         data_type: type[TextureDataType],
         data: bytes,
         *,
+        anisotropy: float | None = None,
         mipmap_selection: MipmapSelection | None = None,
         minify_filter: TextureFilter | None = None,
         magnify_filter: TextureFilter | None = None,
@@ -626,6 +651,7 @@ class TextureTestType(TextureTest):
             components=components,
             data_type=data_type,
             data=data,
+            anisotropy=anisotropy,
             mipmap_selection=mipmap_selection,
             minify_filter=minify_filter,
             magnify_filter=magnify_filter,
