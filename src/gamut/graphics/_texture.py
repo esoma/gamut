@@ -51,8 +51,8 @@ from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY,
                        glGenerateMipmap, glGenTextures, glTexImage2D,
                        glTexImage3D, glTexParameterf, glTexParameterfv,
                        glTexParameteri)
-from OpenGL.GL.EXT.texture_filter_anisotropic import \
-    GL_TEXTURE_MAX_ANISOTROPY_EXT
+from OpenGL.GL.EXT.texture_filter_anisotropic import (
+    GL_TEXTURE_MAX_ANISOTROPY_EXT, glInitTextureFilterAnisotropicEXT)
 
 
 class Texture:
@@ -253,7 +253,7 @@ class Texture:
             glm_value_ptr(wrap_color)
         )
         # set anisotropy
-        if anisotropy > 1.0 and GL_TEXTURE_MAX_ANISOTROPY_EXT is not None:
+        if anisotropy > 1.0 and glInitTextureFilterAnisotropicEXT():
             glTexParameterf(
                 self._gl_target,
                 GL_TEXTURE_MAX_ANISOTROPY_EXT,
