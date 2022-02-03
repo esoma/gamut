@@ -23,8 +23,9 @@ from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 from numpy import array as np_array
 # pyopengl
 from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
-                       glDeleteBuffers, glDeleteProgram, glDeleteTextures,
-                       glDeleteVertexArrays, glGetString, glPixelStorei)
+                       glDeleteBuffers, glDeleteProgram, glDeleteQueries,
+                       glDeleteTextures, glDeleteVertexArrays, glGetString,
+                       glPixelStorei)
 from OpenGL.GL.framebufferobjects import (glDeleteFramebuffers,
                                           glDeleteRenderbuffers)
 # pysdl2
@@ -200,6 +201,11 @@ class GlContext:
         def _delete_buffer() -> None:
             glDeleteBuffers(1, np_array([gl_buffer_name]))
         self._collect_garbage(_delete_buffer)
+
+    def delete_query(self, gl_query_name: Any) -> None:
+        def _delete_query() -> None:
+            glDeleteQueries(1, np_array([gl_query_name]))
+        self._collect_garbage(_delete_query)
 
     def delete_vertex_array(self, gl_vertex_array_name: Any) -> None:
         def _delete_vertex_array() -> None:
