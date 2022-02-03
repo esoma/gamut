@@ -11,6 +11,7 @@ __all__ = [
     'PrimitiveMode',
     'Shader',
     'ShaderAttribute',
+    'ShaderExecutionResult',
     'ShaderUniform',
     'UniformMap',
     'use_shader',
@@ -43,13 +44,14 @@ from glm import value_ptr as glm_value_ptr
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
-                       GL_BLEND, GL_CULL_FACE, GL_DEPTH_TEST, GL_FALSE,
+                       GL_ANY_SAMPLES_PASSED, GL_BLEND, GL_CULL_FACE,
+                       GL_DEPTH_TEST, GL_FALSE, GL_QUERY_RESULT, glBeginQuery,
                        glBlendColor, glBlendEquation, glBlendFuncSeparate,
                        GLchar, glCullFace, glDepthFunc, glDepthMask, glDisable,
                        glDrawArrays, glDrawArraysInstanced, glDrawElements,
-                       glDrawElementsInstanced, glEnable, GLenum,
-                       glGetActiveUniform, glGetUniformLocation, GLint,
-                       GLsizei)
+                       glDrawElementsInstanced, glEnable, glEndQuery, GLenum,
+                       glGenQueries, glGetActiveUniform, glGetQueryObjectuiv,
+                       glGetUniformLocation, GLint, GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_GEOMETRY_SHADER, GL_LINK_STATUS,
                                GL_VERTEX_SHADER, glAttachShader,
@@ -126,6 +128,41 @@ class FaceCull(Enum):
     NONE = 0
     FRONT = int(OpenGL.GL.GL_FRONT)
     BACK = int(OpenGL.GL.GL_BACK)
+
+
+class ShaderExecutionResult:
+
+    def __init__(self):
+        self._gl_context: Any = None
+        self._gl: Any = None
+        self._query_targets: set[Any] = set()
+
+    def __del__(self):
+        if self._gl is not None:
+            get_gl_context().delete_query(self._gl)
+            self._gl = None
+        if self._gl_context is not None:
+            self._gl_context = release_gl_context(self._gl_context)
+
+    def _begin_query(self, *, occluded: bool = False) -> None:
+        if occluded:
+            self._gl_context = require_gl_context()
+            self._gl = glGenQueries(1)[0]
+            if occluded:
+                glBeginQuery(GL_ANY_SAMPLES_PASSED, self._gl)
+                self._query_targets.add(GL_ANY_SAMPLES_PASSED)
+
+    def _end_query(self) -> None:
+        for query_target in self._query_targets:
+            glEndQuery(query_target)
+
+    @property
+    def occluded(self) -> bool:
+        if GL_ANY_SAMPLES_PASSED not in self._query_targets:
+            raise RuntimeError('occlusion information not queried')
+        occluded = GLint()
+        glGetQueryObjectuiv(self._gl, GL_QUERY_RESULT, occluded)
+        return occluded.value == 0
 
 
 class Shader:
@@ -528,7 +565,8 @@ def execute_shader(
     face_cull: FaceCull = FaceCull.NONE,
     instances: int = 1,
     index_range: Optional[tuple[int, int]] = None,
-) -> None:
+    query_occluded: bool = False,
+) -> ShaderExecutionResult:
     ...
 
 
@@ -551,7 +589,8 @@ def execute_shader(
     face_cull: FaceCull = FaceCull.NONE,
     instances: int = 1,
     index_buffer_view: Optional[IndexBuffer] = None,
-) -> None:
+    query_occluded: bool = False,
+) -> ShaderExecutionResult:
     ...
 
 
@@ -578,7 +617,8 @@ def execute_shader(
         BufferView[glm.uint16],
         BufferView[glm.uint32],
     ]] = None,
-) -> None:
+    query_occluded: bool = False,
+) -> ShaderExecutionResult:
     if index_buffer_view is None and index_range is None:
         raise TypeError('index_buffer_view or index_range must be supplied')
     if index_buffer_view is not None and index_range is not None:
@@ -608,8 +648,6 @@ def execute_shader(
     elif instances == 0:
         return
 
-    if depth_test == DepthTest.NEVER:
-        return
     if not depth_write and depth_test == DepthTest.ALWAYS:
         glDisable(GL_DEPTH_TEST)
     else:
@@ -661,38 +699,46 @@ def execute_shader(
         shader._set_uniform(uniform, value)
     use_buffer_view_map_with_shader(buffer_view_map, shader)
 
-    if index_buffer_view is None:
-        assert index_range is not None
-        if instances > 1:
-            glDrawArraysInstanced(
-                primitive_mode.value,
-                index_range[0],
-                index_range[1],
-                instances
-            )
+    result = ShaderExecutionResult()
+    try:
+        result._begin_query(occluded=query_occluded)
+        if index_buffer_view is None:
+            assert index_range is not None
+            if instances > 1:
+                glDrawArraysInstanced(
+                    primitive_mode.value,
+                    index_range[0],
+                    index_range[1],
+                    instances
+                )
+            else:
+                glDrawArrays(
+                    primitive_mode.value,
+                    index_range[0],
+                    index_range[1]
+                )
         else:
-            glDrawArrays(
-                primitive_mode.value,
-                index_range[0],
-                index_range[1]
+            index_gl_type = use_buffer_view_as_element_indexes(
+                index_buffer_view
             )
-    else:
-        index_gl_type = use_buffer_view_as_element_indexes(index_buffer_view)
-        if instances > 1:
-            glDrawElementsInstanced(
-                primitive_mode.value,
-                len(index_buffer_view),
-                index_gl_type,
-                c_void_p(0),
-                instances,
-            )
-        else:
-            glDrawElements(
-                primitive_mode.value,
-                len(index_buffer_view),
-                index_gl_type,
-                c_void_p(0),
-            )
+            if instances > 1:
+                glDrawElementsInstanced(
+                    primitive_mode.value,
+                    len(index_buffer_view),
+                    index_gl_type,
+                    c_void_p(0),
+                    instances,
+                )
+            else:
+                glDrawElements(
+                    primitive_mode.value,
+                    len(index_buffer_view),
+                    index_gl_type,
+                    c_void_p(0),
+                )
+    finally:
+        result._end_query()
+    return result
 
 
 POD_UNIFORM_TYPES: Final = {
