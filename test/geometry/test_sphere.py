@@ -1,13 +1,23 @@
 
 # gamut
-from gamut.geometry import Plane, Sphere, ViewFrustum3d
+from gamut.geometry import (Plane, Shape3dCullable, Shape3dPointContainer,
+                            Sphere, ViewFrustum3d)
 # python
+from math import pi
 from typing import Any
 # pyglm
 from glm import (length, mat4, radians, rotate, scale, translate, vec2, vec3,
                  vec4)
 # pytest
 import pytest
+
+
+def test_cullable() -> None:
+    assert isinstance(Sphere(vec3(0), 0), Shape3dCullable)
+
+
+def test_point_container() -> None:
+    assert isinstance(Sphere(vec3(0), 0), Shape3dPointContainer)
 
 
 def test_repr() -> None:
@@ -91,6 +101,31 @@ def test_equal() -> None:
     assert Sphere(vec3(0), 0) != Sphere(vec3(0, 0, 1), 0)
     assert Sphere(vec3(0), 0) != Sphere(vec3(0), 1)
     assert Sphere(vec3(0), 0) != object()
+
+
+@pytest.mark.parametrize("sphere", [
+    Sphere(vec3(0), 0),
+    Sphere(vec3(0), 10),
+    Sphere(vec3(1, 2, 3), 5),
+])
+def test_contains_point(sphere: Sphere) -> None:
+    assert sphere.contains_point(sphere.center)
+
+    for rc in (0.1, 0.5, 0.9, 1.0):
+        r = sphere.radius * rc
+        base_point = vec3(r, 0, 0)
+        for angle in (0.0, pi * .5, pi, pi * .75):
+            for axis in (vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1)):
+                check_point = sphere.center + rotate(base_point, angle, axis)
+                assert sphere.contains_point(check_point)
+
+    for r_plus in (.1, 2.0, 100.0):
+        r = sphere.radius + r_plus
+        base_point = vec3(r, 0, 0)
+        for angle in (0.0, pi * .5, pi, pi * .75):
+            for axis in (vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1)):
+                check_point = sphere.center + rotate(base_point, angle, axis)
+                assert not sphere.contains_point(check_point)
 
 
 def test_seen_by() -> None:
