@@ -47,7 +47,7 @@ from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ANY_SAMPLES_PASSED, GL_BLEND, GL_CULL_FACE,
                        GL_DEPTH_TEST, GL_FALSE, GL_QUERY_RESULT, glBeginQuery,
                        glBlendColor, glBlendEquation, glBlendFuncSeparate,
-                       GLchar, glCullFace, glDepthFunc, glDepthMask, glDisable,
+                       GLchar, glCullFace, glDepthFunc, glDisable,
                        glDrawArrays, glDrawArraysInstanced, glDrawElements,
                        glDrawElementsInstanced, glEnable, glEndQuery, GLenum,
                        glGenQueries, glGetActiveUniform, glGetQueryObjectuiv,
@@ -560,6 +560,7 @@ def execute_shader(
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
     blend_color: Optional[Color] = None,
+    color_write: tuple[bool, bool, bool, bool] = (True, True, True, True),
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -584,6 +585,7 @@ def execute_shader(
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
     blend_color: Optional[Color] = None,
+    color_write: tuple[bool, bool, bool, bool] = (True, True, True, True),
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -607,6 +609,7 @@ def execute_shader(
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
     blend_color: Optional[Color] = None,
+    color_write: tuple[bool, bool, bool, bool] = (True, True, True, True),
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
     face_cull: FaceCull = FaceCull.NONE,
@@ -619,6 +622,8 @@ def execute_shader(
     ]] = None,
     query_occluded: bool = False,
 ) -> ShaderExecutionResult:
+    gl_context = get_gl_context()
+
     if index_buffer_view is None and index_range is None:
         raise TypeError('index_buffer_view or index_range must be supplied')
     if index_buffer_view is not None and index_range is not None:
@@ -660,8 +665,12 @@ def execute_shader(
                     f'buffer'
                 )
         glEnable(GL_DEPTH_TEST)
-        glDepthMask(bool(depth_write))
+        gl_context.set_depth_mask(bool(depth_write))
         glDepthFunc(depth_test.value)
+
+    if len(color_write) != 4:
+        raise ValueError('color write must be a sequence of 4')
+    gl_context.set_color_mask(*(bool(c) for c in color_write))
 
     if blend_source_alpha is None:
         blend_source_alpha = blend_source

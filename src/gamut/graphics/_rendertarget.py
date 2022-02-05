@@ -286,10 +286,13 @@ def clear_render_target(
     use_render_target(render_target, True, False)
 
     mask = 0
+    gl_context = get_gl_context()
     if color is not None:
+        gl_context.set_color_mask(True, True, True, True)
         glClearColor(color.red, color.green, color.blue, 1.0)
         mask |= GL_COLOR_BUFFER_BIT
     if depth is not None:
+        gl_context.set_depth_mask(True)
         glClearDepthf((depth + 1) / 2.0)
         mask |= GL_DEPTH_BUFFER_BIT
     if stencil is not None:
