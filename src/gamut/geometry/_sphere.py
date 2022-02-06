@@ -67,7 +67,7 @@ class Sphere:
         except TypeError:
             raise TypeError('point must be vec3')
 
-        return length(self._center - point) <= self._radius
+        return length(self._center - p) <= self._radius
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:

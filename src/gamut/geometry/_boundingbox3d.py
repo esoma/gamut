@@ -79,7 +79,7 @@ class BoundingBox3d:
             p = vec3_exact(point)
         except TypeError:
             raise TypeError('point must be vec3')
-        return all(point >= self._min) and all(point <= self._max)
+        return all(p >= self._min) and all(p <= self._max)
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:

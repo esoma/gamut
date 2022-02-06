@@ -405,7 +405,7 @@ class TextureTest:
         input_max = TEXTURE_DATA_TYPE_MAX[input_data_type]
         input_data = struct.pack(
             TEXTURE_DATA_TYPE_STRUCT[input_data_type] * component_count,
-            *(int(p * input_max)
+            *(input_max.__class__(p * input_max)
               for p in pixels
               for i in range(TEXTURE_COMPONENTS_COUNT[components])
             )
@@ -441,7 +441,7 @@ class TextureTest:
         ]
         assert len(output) == len(expected_output)
         assert all(
-            pytest.approx(o, e)
+            o == pytest.approx(e, abs=.025)
             for o, e in zip(output, expected_output)
         )
 
