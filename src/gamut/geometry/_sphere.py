@@ -61,6 +61,14 @@ class Sphere:
     def radius(self) -> float:
         return self._radius
 
+    def contains_point(self, point: F32Vector3) -> bool:
+        try:
+            p = vec3_exact(point)
+        except TypeError:
+            raise TypeError('point must be vec3')
+
+        return length(self._center - p) <= self._radius
+
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:
             distance = plane.distance_to_point(self.center)

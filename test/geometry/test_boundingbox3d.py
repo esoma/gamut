@@ -1,12 +1,21 @@
 
 # gamut
-from gamut.geometry import BoundingBox3d, Plane, ViewFrustum3d
+from gamut.geometry import (BoundingBox3d, Plane, Shape3dCullable,
+                            Shape3dPointContainer, ViewFrustum3d)
 # python
 from typing import Any
 # pyglm
 from glm import mat4, radians, rotate, scale, translate, vec2, vec3, vec4
 # pytest
 import pytest
+
+
+def test_cullable() -> None:
+    assert isinstance(BoundingBox3d(vec3(0)), Shape3dCullable)
+
+
+def test_point_container() -> None:
+    assert isinstance(BoundingBox3d(vec3(0)), Shape3dPointContainer)
 
 
 def test_repr() -> None:
@@ -51,7 +60,7 @@ def test_points_invalid_type(good_points: Any, points: Any) -> None:
     [vec3(-1, 2, -3), vec3(-4, 0, 0), vec3(2, -3, -2), vec3(0, 1, 4)],
 ])
 @pytest.mark.parametrize("point_type", [vec3, tuple, list])
-def test_min_max(points: list[vec3], point_type: Any) -> None:
+def test_min_max_center(points: list[vec3], point_type: Any) -> None:
     bb = BoundingBox3d(*(point_type(p) for p in points))
 
     if len(points) > 1:
@@ -71,6 +80,7 @@ def test_min_max(points: list[vec3], point_type: Any) -> None:
 
     assert bb.min == expected_min
     assert bb.max == expected_max
+    assert bb.center == (expected_min + expected_max) * .5
 
 
 @pytest.mark.parametrize("points", [
@@ -160,6 +170,29 @@ def test_equal() -> None:
         BoundingBox3d(vec3(1, 2, 3), vec3(-1, -2, 0))
     )
     assert BoundingBox3d(vec3(0)) != object()
+
+
+@pytest.mark.parametrize("bounding_box", [
+    BoundingBox3d(vec3(0)),
+    BoundingBox3d(vec3(-1, -1, -1), vec3(1, 1, 1)),
+    BoundingBox3d(vec3(-1000, 0, 67), vec3(20, -56, 87)),
+])
+def test_contains_point(bounding_box: BoundingBox3d) -> None:
+    assert bounding_box.contains_point(bounding_box.center)
+    for corner in bounding_box.corners:
+        assert bounding_box.contains_point(corner)
+
+    for offset in (
+        vec3(1, -1, -1),
+        vec3(-1, 1, -1),
+        vec3(-1, -1, 1),
+        vec3(1, 1, -1),
+        vec3(1, -1, 1),
+        vec3(-1, 1, 1),
+        vec3(1, 1, 1),
+    ):
+        assert not bounding_box.contains_point(bounding_box.min - offset)
+        assert not bounding_box.contains_point(bounding_box.max + offset)
 
 
 def test_seen_by() -> None:

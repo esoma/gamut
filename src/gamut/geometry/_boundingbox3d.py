@@ -40,7 +40,6 @@ class BoundingBox3d:
             return False
         return self._min == other._min and self._max == other._max
 
-
     def __repr__(self) -> str:
         return (
             f'<gamut.geometry.BoundingBox3d '
@@ -53,6 +52,10 @@ class BoundingBox3d:
             return NotImplemented
 
         return BoundingBox3d(*(transform * c for c in self.corners))
+
+    @property
+    def center(self) -> vec3:
+        return (self._min + self._max) * .5
 
     @property
     def min(self) -> vec3:
@@ -70,6 +73,13 @@ class BoundingBox3d:
             for y in (self._min.y, self._max.y)
             for z in (self._min.z, self._max.z)
         )
+
+    def contains_point(self, point: F32Vector3) -> bool:
+        try:
+            p = vec3_exact(point)
+        except TypeError:
+            raise TypeError('point must be vec3')
+        return all(p >= self._min) and all(p <= self._max)
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:

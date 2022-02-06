@@ -131,7 +131,7 @@ def create_render_target(
     Color(1, 1, 1, 1),
 ])
 @pytest.mark.parametrize("depth", [-1.0, 0.0, 1.0])
-@pytest.mark.parametrize("stencil", [-1, 0, 1])
+@pytest.mark.parametrize("stencil", [0, 1])
 def test_clear(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
     color: Color,
@@ -152,9 +152,9 @@ def test_clear(
         *render_target.size
     )
     assert all(
-        pytest.approx(c.red, color[0]) and
-        pytest.approx(c.green, color[1]) and
-        pytest.approx(c.blue, color[2]) and
+        c.red == pytest.approx(color[0], abs=.01) and
+        c.green == pytest.approx(color[1], abs=.01) and
+        c.blue == pytest.approx(color[2], abs=.01) and
         c.alpha == 1.0
         for row in colors for c in row
     )
@@ -164,14 +164,17 @@ def test_clear(
         0, 0,
         *render_target.size
     )
-    assert all(pytest.approx(d, depth) for row in depths for d in row)
+    assert all(
+        d == pytest.approx(depth, abs=.01)
+        for row in depths for d in row
+    )
 
     stencils = read_stencil_from_render_target(
         render_target,
         0, 0,
         *render_target.size
     )
-    assert all(pytest.approx(s, stencil) for row in stencils for s in row)
+    assert all(s == pytest.approx(stencil) for row in stencils for s in row)
 
 
 @pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
