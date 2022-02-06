@@ -338,7 +338,7 @@ def test_poll_joy_axis_moved_event(
             axis = controller.axes[axis_index]
             assert axis.position is None
             moved_event = await axis.Moved
-            assert axis.position == pytest.approx(axis_position)
+            assert axis.position == pytest.approx(axis_position, abs=.01)
 
     with VirtualController('test', 4, 4) as vc:
         app = TestApplication()
@@ -347,4 +347,4 @@ def test_poll_joy_axis_moved_event(
     assert isinstance(moved_event, ControllerAxisMoved)
     assert isinstance(axis, ControllerAxis)
     assert axis.index == axis_index
-    assert axis.position == pytest.approx(axis_position)
+    assert axis.position == pytest.approx(axis_position, abs=.01)
