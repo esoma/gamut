@@ -441,7 +441,7 @@ class TextureTest:
         ]
         assert len(output) == len(expected_output)
         assert all(
-            o == pytest.approx(e, abs=.01)
+            o == pytest.approx(e, abs=.025)
             for o, e in zip(output, expected_output)
         )
 
