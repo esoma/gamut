@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['BoundingBox3d']
 
 # gamut
+from ._sphere import Sphere
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
 from gamut.glmhelp import F32Vector3, vec3_exact
@@ -53,6 +54,16 @@ class BoundingBox3d:
 
         return BoundingBox3d(*(transform * c for c in self.corners))
 
+    def _squared_distance_to_point(self, point: vec3) -> float:
+        result = 0.0
+        for i in range(3):
+            c = point[i]
+            if c < self._min[i]:
+                result += (self._min[i] - c) ** 2
+            if c > self._max[i]:
+                result += (self._max[i] - c) ** 2
+        return result
+
     @property
     def center(self) -> vec3:
         return (self._min + self._max) * .5
@@ -80,6 +91,12 @@ class BoundingBox3d:
         except TypeError:
             raise TypeError('point must be vec3')
         return all(p >= self._min) and all(p <= self._max)
+
+    def intersects_sphere(self, sphere: Sphere) -> bool:
+        return (
+            self._squared_distance_to_point(sphere.center) <=
+            (sphere.radius ** 2)
+        )
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:

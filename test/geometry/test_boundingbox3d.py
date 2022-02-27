@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import (BoundingBox3d, Plane, Shape3dCullable,
-                            Shape3dPointContainer, ViewFrustum3d)
+                            Shape3dPointContainer, Sphere, ViewFrustum3d)
 # python
 from typing import Any
 # pyglm
@@ -229,3 +229,22 @@ def test_seen_by() -> None:
     assert not BoundingBox3d(vec3(0, 6, 5)).seen_by(frustum)
     assert BoundingBox3d(vec3(0, 6, 5), vec3(0, 5, 5)).seen_by(frustum)
     assert BoundingBox3d(vec3(0, 5, 5)).seen_by(frustum)
+
+
+def test_intersects_sphere() -> None:
+    sphere = Sphere(vec3(0, 0, 0), 1)
+
+    assert BoundingBox3d(vec3(0)).intersects_sphere(sphere)
+    assert BoundingBox3d(vec3(-1, 0, 0)).intersects_sphere(sphere)
+    assert BoundingBox3d(vec3(1, 0, 0)).intersects_sphere(sphere)
+    assert BoundingBox3d(vec3(0, -1, 0)).intersects_sphere(sphere)
+    assert BoundingBox3d(vec3(0, 1, 0)).intersects_sphere(sphere)
+    assert BoundingBox3d(vec3(0, 0, -1)).intersects_sphere(sphere)
+    assert BoundingBox3d(vec3(0, 0, 1)).intersects_sphere(sphere)
+
+    assert not BoundingBox3d(vec3(-1.1, 0, 0)).intersects_sphere(sphere)
+    assert not BoundingBox3d(vec3(1.1, 0, 0)).intersects_sphere(sphere)
+    assert not BoundingBox3d(vec3(0, -1.1, 0)).intersects_sphere(sphere)
+    assert not BoundingBox3d(vec3(0, 1.1, 0)).intersects_sphere(sphere)
+    assert not BoundingBox3d(vec3(0, 0, -1.1)).intersects_sphere(sphere)
+    assert not BoundingBox3d(vec3(0, 0, 1.1)).intersects_sphere(sphere)

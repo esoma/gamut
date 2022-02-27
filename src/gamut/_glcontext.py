@@ -182,6 +182,30 @@ class GlContext:
     def rendering_thread(self) -> Optional[int]:
         return self._rendering_thread
 
+    def set_depth_mask(self, mask: bool) -> None:
+        assert isinstance(mask, bool)
+        assert identify_thread() == self._rendering_thread
+        if self._depth_mask != mask:
+            glDepthMask(mask)
+            self._depth_mask = mask
+
+    def set_color_mask(
+        self,
+        red: bool,
+        green: bool,
+        blue: bool,
+        alpha: bool
+    ) -> None:
+        assert isinstance(red, bool)
+        assert isinstance(green, bool)
+        assert isinstance(blue, bool)
+        assert isinstance(alpha, bool)
+        assert identify_thread() == self._rendering_thread
+        mask = (red, green, blue, alpha)
+        if self._color_mask != mask:
+            glColorMask(red, green, blue, alpha)
+            self._color_mask = mask
+
     def gc_collect(self) -> None:
         assert identify_thread() == self._rendering_thread
         while True:
