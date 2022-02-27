@@ -23,9 +23,9 @@ from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 from numpy import array as np_array
 # pyopengl
 from OpenGL.GL import (GL_PACK_ALIGNMENT, GL_UNPACK_ALIGNMENT, GL_VERSION,
-                       glDeleteBuffers, glDeleteProgram, glDeleteQueries,
-                       glDeleteTextures, glDeleteVertexArrays, glGetString,
-                       glPixelStorei)
+                       glColorMask, glDeleteBuffers, glDeleteProgram,
+                       glDeleteQueries, glDeleteTextures, glDeleteVertexArrays,
+                       glDepthMask, glGetString, glPixelStorei)
 from OpenGL.GL.framebufferobjects import (glDeleteFramebuffers,
                                           glDeleteRenderbuffers)
 # pysdl2
@@ -74,6 +74,9 @@ class GlContext:
         self._execute_complete = False
         self._execute_result: Any = None
         self._execute_error: Optional[BaseException] = None
+
+        self._depth_mask = True
+        self._color_mask = (True, True, True, True)
 
         init_sdl_video()
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1)
