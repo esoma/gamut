@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 __all__ = [
+    'dmat4_exact',
     'dvec3_exact',
     'mat4_exact',
     'ivec1_exact',
@@ -15,6 +16,7 @@ __all__ = [
     'F32Vector3',
     'F32Vector4',
     'F64Vector3',
+    'F64Matrix4x4',
     'vec3_exact',
     'vec4_exact',
 ]
@@ -22,8 +24,8 @@ __all__ = [
 # python
 from typing import Any, Union
 # pyglm
-from glm import (dvec3, imvec2, imvec3, ivec1, ivec2, ivec3, mat4, mvec3,
-                 uvec2, vec3, vec4)
+from glm import (dmat4, dvec3, imvec2, imvec3, ivec1, ivec2, ivec3, mat4,
+                 mvec3, uvec2, vec3, vec4)
 # pyglm-typing
 from glm_typing import F32Matrix4x4, F32Vector4, Number
 
@@ -76,3 +78,16 @@ def vec4_exact(input: Any) -> vec4:
 
 def mat4_exact(input: Any) -> mat4:
     return mat4(input)
+
+
+F64Matrix4x4 = Union[
+    dmat4,
+    tuple[
+        Number, Number, Number, Number,
+        Number, Number, Number, Number,
+        Number, Number, Number, Number,
+        Number, Number, Number, Number,
+    ]
+]
+def dmat4_exact(input: Any) -> dmat4:
+    return dmat4(input)

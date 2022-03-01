@@ -22,12 +22,19 @@ struct World
 };
 
 
+struct Shape
+{
+    PyObject_HEAD
+    btCompoundShape *shape;
+};
+
+
 struct Body
 {
     PyObject_HEAD
-    btCollisionShape *collision_shape;
     btDefaultMotionState *motion_state;
     btRigidBody *body;
+    Shape *shape;
 };
 
 
@@ -84,9 +91,12 @@ static PyMemberDef World_PyMemberDef[] = {
 
 
 static PyObject *
-World_add_body(World *self, Body *body)
+World_add_body(World *self, PyObject *args)
 {
-    self->world->addRigidBody(body->body);
+    Body *body = 0;
+    int groups, mask;
+    if (!PyArg_ParseTuple(args, "Oii", &body, &groups, &mask)){ return 0; }
+    self->world->addRigidBody(body->body, groups, mask);
     Py_RETURN_NONE;
 }
 
@@ -105,7 +115,7 @@ World_simulate(World *self, PyObject *args)
     ASSERT(self->world);
     double time = PyFloat_AsDouble(args);
     if (PyErr_Occurred()){ return 0; }
-    self->world->stepSimulation(time);
+    self->world->stepSimulation(time, 0);
     Py_RETURN_NONE;
 }
 
@@ -122,7 +132,7 @@ static PyObject *
 World_Getter_gravity(World *self, void *)
 {
     btVector3 gravity = self->world->getGravity();
-    return Py_BuildValue("fff", gravity.x(), gravity.y(), gravity.z());
+    return Py_BuildValue("ddd", gravity.x(), gravity.y(), gravity.z());
 }
 
 
@@ -196,21 +206,35 @@ define_world_type(PyObject *module)
 static PyObject *
 Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {NULL};
+    double mass = 0;
+    Shape *shape = 0;
+
+    static char *kwlist[] = {
+        "mass",
+        "shape",
+        NULL
+    };
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwds, "", kwlist
+        args, kwds, "dO", kwlist,
+        &mass,
+        &shape
     )){ return 0; }
 
     Body *self = (Body*)cls->tp_alloc(cls, 0);
 
-    self->collision_shape = new btBoxShape(btVector3(1, 1, 1));
     self->motion_state = new btDefaultMotionState(btTransform::getIdentity());
+    btVector3 local_inertia;
+    shape->shape->calculateLocalInertia(mass, local_inertia);
     btRigidBody::btRigidBodyConstructionInfo info(
-        1,
+        mass,
         self->motion_state,
-        self->collision_shape
+        shape->shape,
+        local_inertia
     );
+    info.m_friction = 0;
+
     self->body = new btRigidBody(info);
+    self->shape = shape;
 
     return (PyObject *)self;
 }
@@ -221,7 +245,6 @@ Body___dealloc__(Body *self)
 {
     delete self->body;
     delete self->motion_state;
-    delete self->collision_shape;
 
     PyTypeObject *type = Py_TYPE(self);
     type->tp_free(self);
@@ -234,12 +257,460 @@ static PyMemberDef Body_PyMemberDef[] = {
 };
 
 
+static PyObject *
+Body_set_mass(Body *self, PyObject *args)
+{
+    double mass = PyFloat_AsDouble(args);
+    if (PyErr_Occurred()){ return 0; }
+
+    btVector3 local_inertia;
+    self->shape->shape->calculateLocalInertia(mass, local_inertia);
+    self->body->setMassProps(mass, local_inertia);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_set_enabled(Body *self, PyObject *)
+{
+    self->body->setActivationState(ACTIVE_TAG);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_set_cannot_sleep(Body *self, PyObject *)
+{
+    self->body->setActivationState(DISABLE_DEACTIVATION);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_set_disabled(Body *self, PyObject *)
+{
+    self->body->setActivationState(DISABLE_SIMULATION);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_set_dynamic(Body *self, PyObject *)
+{
+    self->body->setCollisionFlags(0);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_set_kinematic(Body *self, PyObject *)
+{
+    self->body->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_set_static(Body *self, PyObject *)
+{
+    self->body->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+Body_wake(Body *self, PyObject *)
+{
+    self->body->activate();
+    Py_RETURN_NONE;
+}
+
+
 static PyMethodDef Body_PyMethodDef[] = {
+    {
+        "set_mass",
+        (PyCFunction)Body_set_mass,
+        METH_O,
+        0
+    },
+    {
+        "set_enabled",
+        (PyCFunction)Body_set_enabled,
+        METH_NOARGS,
+        0
+    },
+    {
+        "set_cannot_sleep",
+        (PyCFunction)Body_set_cannot_sleep,
+        METH_NOARGS,
+        0
+    },
+    {
+        "set_disabled",
+        (PyCFunction)Body_set_disabled,
+        METH_NOARGS,
+        0
+    },
+    {
+        "set_to_dynamic",
+        (PyCFunction)Body_set_dynamic,
+        METH_NOARGS,
+        0
+    },
+    {
+        "set_to_kinematic",
+        (PyCFunction)Body_set_kinematic,
+        METH_NOARGS,
+        0
+    },
+    {
+        "set_to_static",
+        (PyCFunction)Body_set_static,
+        METH_NOARGS,
+        0
+    },
+    {
+        "wake",
+        (PyCFunction)Body_wake,
+        METH_NOARGS,
+        0
+    },
     {0, 0, 0, 0}
 };
 
 
+static PyObject *
+Body_Getter_angular_damping(Body *self, void *)
+{
+    btScalar damping = self->body->getAngularDamping();
+    return PyFloat_FromDouble(damping);
+}
+
+
+int
+Body_Setter_angular_damping(Body *self, PyObject *value, void *)
+{
+    double damping = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setDamping(self->body->getLinearDamping(), damping);
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_angular_sleep_threshold(Body *self, void *)
+{
+    btScalar threshold = self->body->getAngularSleepingThreshold();
+    return PyFloat_FromDouble(threshold);
+}
+
+
+int
+Body_Setter_angular_sleep_threshold(Body *self, PyObject *value, void *)
+{
+    double threshold = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setSleepingThresholds(
+        self->body->getLinearSleepingThreshold(),
+        threshold
+    );
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_angular_velocity(Body *self, void *)
+{
+    btVector3 v = self->body->getAngularVelocity();
+    return Py_BuildValue("ddd", v.x(), v.y(), v.z());
+}
+
+
+int
+Body_Setter_angular_velocity(Body *self, PyObject *value, void *)
+{
+    double x, y, z;
+    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
+    self->body->setAngularVelocity(btVector3(x, y, z));
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_friction(Body *self, void *)
+{
+    btScalar friction = self->body->getFriction();
+    return PyFloat_FromDouble(friction);
+}
+
+
+int
+Body_Setter_friction(Body *self, PyObject *value, void *)
+{
+    double friction = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setFriction(friction);
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_is_sleeping(Body *self, void *)
+{
+    return PyBool_FromLong(!self->body->isActive());
+}
+
+
+static PyObject *
+Body_Getter_gravity(Body *self, void *)
+{
+    btVector3 g = self->body->getGravity();
+    return Py_BuildValue("ddd", g.x(), g.y(), g.z());
+}
+
+
+int
+Body_Setter_gravity(Body *self, PyObject *value, void *)
+{
+    double x, y, z;
+    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
+    self->body->setGravity(btVector3(x, y, z));
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_linear_damping(Body *self, void *)
+{
+    btScalar damping = self->body->getLinearDamping();
+    return PyFloat_FromDouble(damping);
+}
+
+
+int
+Body_Setter_linear_damping(Body *self, PyObject *value, void *)
+{
+    double damping = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setDamping(damping, self->body->getAngularDamping());
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_linear_sleep_threshold(Body *self, void *)
+{
+    btScalar threshold = self->body->getLinearSleepingThreshold();
+    return PyFloat_FromDouble(threshold);
+}
+
+
+int
+Body_Setter_linear_sleep_threshold(Body *self, PyObject *value, void *)
+{
+    double threshold = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setSleepingThresholds(
+        threshold,
+        self->body->getAngularSleepingThreshold()
+    );
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_linear_velocity(Body *self, void *)
+{
+    btVector3 v = self->body->getLinearVelocity();
+    return Py_BuildValue("ddd", v.x(), v.y(), v.z());
+}
+
+
+int
+Body_Setter_linear_velocity(Body *self, PyObject *value, void *)
+{
+    double x, y, z;
+    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
+    self->body->setLinearVelocity(btVector3(x, y, z));
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_rolling_friction(Body *self, void *)
+{
+    btScalar friction = self->body->getRollingFriction();
+    return PyFloat_FromDouble(friction);
+}
+
+
+int
+Body_Setter_rolling_friction(Body *self, PyObject *value, void *)
+{
+    double friction = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setRollingFriction(friction);
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_restitution(Body *self, void *)
+{
+    btScalar restitution = self->body->getRestitution();
+    return PyFloat_FromDouble(restitution);
+}
+
+
+int
+Body_Setter_restitution(Body *self, PyObject *value, void *)
+{
+    double restitution = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setRestitution(restitution);
+    return 0;
+}
+
+
+static PyObject *
+Body_Getter_spinning_friction(Body *self, void *)
+{
+    btScalar friction = self->body->getSpinningFriction();
+    return PyFloat_FromDouble(friction);
+}
+
+
+int
+Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
+{
+    double friction = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()){ return 0; }
+    self->body->setSpinningFriction(friction);
+    return 0;
+}
+
+static PyObject *
+Body_Getter_transform(Body *self, void *)
+{
+    btScalar matrix[16];
+    btTransform transform = self->body->getWorldTransform();
+    transform.getOpenGLMatrix(matrix);
+    return Py_BuildValue(
+        "(dddd)(dddd)(dddd)(dddd)",
+        matrix[0], matrix[1], matrix[2], matrix[3],
+        matrix[4], matrix[5], matrix[6], matrix[7],
+        matrix[8], matrix[9], matrix[10], matrix[11],
+        matrix[12], matrix[13], matrix[14], matrix[15]
+    );
+}
+
+
+int
+Body_Setter_transform(Body *self, PyObject *value, void *)
+{
+    btScalar matrix[16];
+    if (!PyArg_ParseTuple(
+        value, "(dddd)(dddd)(dddd)(dddd)",
+        &matrix[0], &matrix[1], &matrix[2], &matrix[3],
+        &matrix[4], &matrix[5], &matrix[6], &matrix[7],
+        &matrix[8], &matrix[9], &matrix[10], &matrix[11],
+        &matrix[12], &matrix[13], &matrix[14], &matrix[15]
+    )){ return -1; }
+
+    btTransform transform;
+    transform.setFromOpenGLMatrix(matrix);
+
+    self->body->setWorldTransform(transform);
+    return 0;
+}
+
+
 static PyGetSetDef Body_PyGetSetDef[] = {
+    {
+        "angular_damping",
+        (getter)Body_Getter_angular_damping,
+        (setter)Body_Setter_angular_damping,
+        0,
+        0
+    },
+    {
+        "angular_sleep_threshold",
+        (getter)Body_Getter_angular_sleep_threshold,
+        (setter)Body_Setter_angular_sleep_threshold,
+        0,
+        0
+    },
+    {
+        "angular_velocity",
+        (getter)Body_Getter_angular_velocity,
+        (setter)Body_Setter_angular_velocity,
+        0,
+        0
+    },
+    {
+        "friction",
+        (getter)Body_Getter_friction,
+        (setter)Body_Setter_friction,
+        0,
+        0
+    },
+    {
+        "gravity",
+        (getter)Body_Getter_gravity,
+        (setter)Body_Setter_gravity,
+        0,
+        0
+    },
+    { "is_sleeping", (getter)Body_Getter_is_sleeping, 0, 0, 0 },
+    {
+        "linear_damping",
+        (getter)Body_Getter_linear_damping,
+        (setter)Body_Setter_linear_damping,
+        0,
+        0
+    },
+    {
+        "linear_velocity",
+        (getter)Body_Getter_linear_velocity,
+        (setter)Body_Setter_linear_velocity,
+        0,
+        0
+    },
+    {
+        "linear_sleep_threshold",
+        (getter)Body_Getter_linear_sleep_threshold,
+        (setter)Body_Setter_linear_sleep_threshold,
+        0,
+        0
+    },
+    {
+        "rolling_friction",
+        (getter)Body_Getter_rolling_friction,
+        (setter)Body_Setter_rolling_friction,
+        0,
+        0
+    },
+    {
+        "spinning_friction",
+        (getter)Body_Getter_spinning_friction,
+        (setter)Body_Setter_spinning_friction,
+        0,
+        0
+    },
+    {
+        "restitution",
+        (getter)Body_Getter_restitution,
+        (setter)Body_Setter_restitution,
+        0,
+        0
+    },
+    {
+        "transform",
+        (getter)Body_Getter_transform,
+        (setter)Body_Setter_transform,
+        0,
+        0
+    },
     {0, 0, 0, 0, 0}
 };
 
@@ -285,6 +756,145 @@ define_body_type(PyObject *module)
 }
 
 
+// Shape
+// ----------------------------------------------------------------------------
+
+
+static PyObject *
+Shape___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwds, "", kwlist
+    )){ return 0; }
+
+    Shape *self = (Shape*)cls->tp_alloc(cls, 0);
+
+    self->shape = new btCompoundShape();
+
+    return (PyObject *)self;
+}
+
+
+static void
+Shape___dealloc__(Shape *self)
+{
+    delete self->shape;
+
+    PyTypeObject *type = Py_TYPE(self);
+    type->tp_free(self);
+    Py_DECREF(type);
+}
+
+
+static PyMemberDef Shape_PyMemberDef[] = {
+    {0, 0, 0, 0}
+};
+
+
+static void
+sphere_capsule_destructor(PyObject *capsule)
+{
+    btSphereShape *sphere = (btSphereShape *)PyCapsule_GetPointer(capsule, 0);
+    delete sphere;
+}
+
+
+static PyObject *
+Shape_add_sphere(Shape *self, PyObject *args)
+{
+    double radius = 0;
+    double center_x = 0;
+    double center_y = 0;
+    double center_z = 0;
+    if (!PyArg_ParseTuple(
+        args, "dddd",
+        &radius,
+        &center_x, &center_y, &center_z
+    )){ return 0; }
+
+    auto sphere = new btSphereShape(radius);
+    self->shape->addChildShape(btTransform::getIdentity(), sphere);
+    return PyCapsule_New(sphere, 0, sphere_capsule_destructor);
+}
+
+
+static PyObject *
+Shape_calculate_local_inertia(Shape *self, PyObject *args)
+{
+    double mass = PyFloat_AsDouble(args);
+    if (PyErr_Occurred()){ return 0; }
+
+    btVector3 inertia;
+    self->shape->calculateLocalInertia(mass, inertia);
+
+    return Py_BuildValue("ddd", inertia.x(), inertia.y(), inertia.z());
+}
+
+
+static PyMethodDef Shape_PyMethodDef[] = {
+    {
+        "add_sphere",
+        (PyCFunction)Shape_add_sphere,
+        METH_O,
+        0
+    },
+    {
+        "calculate_local_inertia",
+        (PyCFunction)Shape_calculate_local_inertia,
+        METH_O,
+        0
+    },
+    {0, 0, 0, 0}
+};
+
+
+static PyGetSetDef Shape_PyGetSetDef[] = {
+    {0, 0, 0, 0, 0}
+};
+
+
+static PyType_Slot Shape_PyType_Slots [] = {
+    {Py_tp_new, (void*)Shape___new__},
+    {Py_tp_dealloc, (void*)Shape___dealloc__},
+    {Py_tp_members, (void*)Shape_PyMemberDef},
+    {Py_tp_methods, (void*)Shape_PyMethodDef},
+    {Py_tp_getset, (void*)Shape_PyGetSetDef},
+    {0, 0},
+};
+
+
+static PyType_Spec Shape_PyTypeSpec = {
+    "gamut.physics._physics.Shape",
+    sizeof(Shape),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    Shape_PyType_Slots
+};
+
+
+static PyTypeObject *
+define_shape_type(PyObject *module)
+{
+    ASSERT(module);
+    PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
+        module,
+        &Shape_PyTypeSpec,
+        0
+    );
+    if (!type){ return 0; }
+    // Note:
+    // Unlike other functions that steal references, PyModule_AddObject() only
+    // decrements the reference count of value on success.
+    if (PyModule_AddObject(module, "Shape", (PyObject *)type) < 0)
+    {
+        Py_DECREF(type);
+        return 0;
+    }
+    return type;
+}
+
+
 // module
 // ----------------------------------------------------------------------------
 
@@ -313,6 +923,7 @@ PyInit__physics()
 
     if (!define_world_type(module)){ goto error; }
     if (!define_body_type(module)){ goto error; }
+    if (!define_shape_type(module)){ goto error; }
 
     return module;
 error:

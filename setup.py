@@ -11,17 +11,17 @@ physics = Extension(
         #r'/home/erik/bullet3/src',
     ],
     library_dirs=[
-        r'C:\Users\erik\Documents\code\bullet3\build\lib\Release',
+        r'C:\Users\erik\Documents\code\bullet3\build\lib\Debug',
         #r'/home/erik/bullet3/src/BulletCollision/',
         #r'/home/erik/bullet3/src/BulletDynamics/',
         #r'/home/erik/bullet3/src/LinearMath/',
     ],
-    libraries=['BulletDynamics', 'BulletCollision', 'LinearMath'],
+    libraries=['BulletDynamics_Debug', 'BulletCollision_Debug', 'LinearMath_Debug'],
     sources=[
         'src/gamut/physics/_physics.cpp',
     ],
-    #extra_compile_args=['/Zi'],
-    #extra_link_args=['/DEBUG'],
+    extra_compile_args=['/Zi'],
+    extra_link_args=['/DEBUG'],
     language='c++',
 )
 

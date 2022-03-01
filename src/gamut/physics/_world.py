@@ -27,10 +27,16 @@ class World:
     def __repr__(self) -> str:
         return '<gamut.physics.World>'
 
-    def _add_body(self, body: Body, body_implementation: Any) -> None:
+    def _add_body(
+        self,
+        body: Body,
+        body_implementation: Any,
+        groups: int,
+        mask: int
+    ) -> None:
         if body in self._bodies:
             return
-        self._imp.add_body(body_implementation)
+        self._imp.add_body((body_implementation, groups, mask))
         self._bodies.add(body)
 
     def _remove_body(self, body: Body, body_implementation: Any) -> None:
@@ -58,9 +64,11 @@ class World:
 def add_body_to_world(
     world: World,
     body: Body,
-    body_implementation: Any
+    body_implementation: Any,
+    groups: int,
+    mask: int
 ) -> None:
-    world._add_body(body, body_implementation)
+    world._add_body(body, body_implementation, groups, mask)
 
 
 def remove_body_from_world(
