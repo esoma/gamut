@@ -3,7 +3,7 @@ import os
 from subprocess import run
 import sys
 # setuptools
-from setuptools import Command, Extension, find_packages, msvc, setup
+from setuptools import Command, Extension, msvc, setup
 
 
 def msbuild(project):

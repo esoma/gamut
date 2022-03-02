@@ -2,11 +2,9 @@
 # gamut
 from gamut.geometry import Cylinder
 # python
-from math import pi
 from typing import Any
 # pyglm
-from glm import (length, mat4, quat, radians, rotate, scale, translate, vec2,
-                 vec3, vec4)
+from glm import quat
 # pytest
 import pytest
 

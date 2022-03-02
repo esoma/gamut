@@ -11,9 +11,7 @@ from ._world import add_body_to_world, remove_body_from_world, World
 from gamut.geometry import Cylinder, Plane, Sphere
 from gamut.glmhelp import dmat4_exact, dvec3_exact, F64Matrix4x4, F64Vector3
 # python
-from datetime import timedelta
 from enum import auto, Enum
-from math import isinf
 import struct
 from typing import Any, Final
 from weakref import ref, WeakKeyDictionary

@@ -96,4 +96,3 @@ def dmat4_exact(input: Any) -> dmat4:
 
 def quat_exact(input: Any) -> quat:
     return quat(input)
-

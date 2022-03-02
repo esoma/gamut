@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['add_body_to_world', 'World']
+__all__ = ['add_body_to_world', 'remove_body_from_world', 'World']
 
 # gamut
 from ._physics import World as BaseWorld
@@ -24,7 +24,13 @@ class World:
     def __init__(self, fixed_time_step: timedelta) -> None:
         self._imp = BaseWorld()
         self._bodies: set[Body] = set()
-        self._fixed_time_step = fixed_time_step.total_seconds()
+
+        try:
+            self._fixed_time_step = fixed_time_step.total_seconds()
+        except AttributeError:
+            raise TypeError('fixed time step must be timedelta')
+        if self._fixed_time_step <= 0:
+            raise ValueError('fixed time step must be greater than 0 seconds')
         self._leftover_step_duration = 0.0
 
     def __repr__(self) -> str:
@@ -55,8 +61,8 @@ class World:
         self._leftover_step_duration = duration % self._fixed_time_step
 
     @property
-    def bodies(self) -> set[Body]:
-        return set(self._bodies)
+    def bodies(self) -> list[Body]:
+        return list(self._bodies)
 
     @property
     def gravity(self) -> dvec3:
@@ -64,7 +70,11 @@ class World:
 
     @gravity.setter
     def gravity(self, value: F64Vector3) -> None:
-        self._imp.gravity = tuple(dvec3_exact(value))
+        try:
+            value = dvec3_exact(value)
+        except TypeError:
+            raise TypeError('gravity must be dvec3')
+        self._imp.gravity = tuple(value)
 
 
 def add_body_to_world(

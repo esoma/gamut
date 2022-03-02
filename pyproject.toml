@@ -22,6 +22,9 @@ warn_return_any = true
 warn_unreachable = false
 warn_unused_configs = true
 
+[tool.pytest.ini_options]
+norecursedirs = ['vendor']
+
 [[tool.mypy.overrides]]
 module = [
     'freetype',
