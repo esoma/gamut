@@ -12,6 +12,7 @@ from datetime import timedelta
 from typing import Any, TYPE_CHECKING
 # pyglm
 from glm import dvec3
+from math import floor
 
 if TYPE_CHECKING:
     # gamut
@@ -20,9 +21,11 @@ if TYPE_CHECKING:
 
 class World:
 
-    def __init__(self) -> None:
+    def __init__(self, fixed_time_step: timedelta) -> None:
         self._imp = BaseWorld()
         self._bodies: set[Body] = set()
+        self._fixed_time_step = fixed_time_step.total_seconds()
+        self._leftover_step_duration = 0.0
 
     def __repr__(self) -> str:
         return '<gamut.physics.World>'
@@ -46,7 +49,10 @@ class World:
         self._bodies.remove(body)
 
     def simulate(self, duration: timedelta) -> None:
-        return self._imp.simulate(duration.total_seconds())
+        duration = self._leftover_step_duration + duration.total_seconds()
+        for _ in range(floor(duration / self._fixed_time_step)):
+            self._imp.simulate(self._fixed_time_step)
+        self._leftover_step_duration = duration % self._fixed_time_step
 
     @property
     def bodies(self) -> set[Body]:

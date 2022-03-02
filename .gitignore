@@ -1,6 +1,9 @@
 
+build/
+
 /test.py
 
+*.pyd
 *.pyc
 *.egg-info
 

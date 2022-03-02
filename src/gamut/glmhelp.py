@@ -13,6 +13,7 @@ __all__ = [
     'I32Vector3',
     'uvec2_exact',
     'F32Matrix4x4',
+    'F32Quaternion',
     'F32Vector3',
     'F32Vector4',
     'F64Vector3',
@@ -25,9 +26,10 @@ __all__ = [
 from typing import Any, Union
 # pyglm
 from glm import (dmat4, dvec3, imvec2, imvec3, ivec1, ivec2, ivec3, mat4,
-                 mvec3, uvec2, vec3, vec4)
+                 mvec3, uvec2, vec3, vec4, quat)
 # pyglm-typing
-from glm_typing import F32Matrix4x4, F32Vector4, Number
+from glm_typing import F32Matrix4x4, F32Vector4, Number, F32Quaternion
+
 
 I32Vector1 = Union[ivec1, tuple[Number]]
 def ivec1_exact(input: Any) -> ivec1:
@@ -91,3 +93,8 @@ F64Matrix4x4 = Union[
 ]
 def dmat4_exact(input: Any) -> dmat4:
     return dmat4(input)
+    
+    
+def quat_exact(input: Any) -> quat:
+    return quat(input)
+

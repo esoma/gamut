@@ -293,9 +293,28 @@ Body_set_disabled(Body *self, PyObject *)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+Body_set_gravity(Body *self, PyObject *value, void *)
+{
+    bool is_explicit;
+    double x, y, z;
+    if (!PyArg_ParseTuple(value, "b(ddd)",
+        &is_explicit, &x, &y, &z)){ return 0; }
+    if (is_explicit)
+    {
+        self->body->setFlags(BT_DISABLE_WORLD_GRAVITY);
+    }
+    else
+    {
+        self->body->setFlags(0);
+    }
+    self->body->setGravity(btVector3(x, y, z));
+    Py_RETURN_NONE;
+}
+
 
 static PyObject *
-Body_set_dynamic(Body *self, PyObject *)
+Body_set_to_dynamic(Body *self, PyObject *)
 {
     self->body->setCollisionFlags(0);
     Py_RETURN_NONE;
@@ -303,15 +322,14 @@ Body_set_dynamic(Body *self, PyObject *)
 
 
 static PyObject *
-Body_set_kinematic(Body *self, PyObject *)
+Body_set_to_kinematic(Body *self, PyObject *)
 {
     self->body->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     Py_RETURN_NONE;
 }
 
-
 static PyObject *
-Body_set_static(Body *self, PyObject *)
+Body_set_to_static(Body *self, PyObject *)
 {
     self->body->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     Py_RETURN_NONE;
@@ -352,20 +370,26 @@ static PyMethodDef Body_PyMethodDef[] = {
         0
     },
     {
+        "set_gravity",
+        (PyCFunction)Body_set_gravity,
+        METH_NOARGS,
+        0
+    },
+    {
         "set_to_dynamic",
-        (PyCFunction)Body_set_dynamic,
+        (PyCFunction)Body_set_to_dynamic,
         METH_NOARGS,
         0
     },
     {
         "set_to_kinematic",
-        (PyCFunction)Body_set_kinematic,
+        (PyCFunction)Body_set_to_kinematic,
         METH_NOARGS,
         0
     },
     {
         "set_to_static",
-        (PyCFunction)Body_set_static,
+        (PyCFunction)Body_set_to_static,
         METH_NOARGS,
         0
     },
@@ -458,24 +482,6 @@ static PyObject *
 Body_Getter_is_sleeping(Body *self, void *)
 {
     return PyBool_FromLong(!self->body->isActive());
-}
-
-
-static PyObject *
-Body_Getter_gravity(Body *self, void *)
-{
-    btVector3 g = self->body->getGravity();
-    return Py_BuildValue("ddd", g.x(), g.y(), g.z());
-}
-
-
-int
-Body_Setter_gravity(Body *self, PyObject *value, void *)
-{
-    double x, y, z;
-    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
-    self->body->setGravity(btVector3(x, y, z));
-    return 0;
 }
 
 
@@ -654,13 +660,6 @@ static PyGetSetDef Body_PyGetSetDef[] = {
         0,
         0
     },
-    {
-        "gravity",
-        (getter)Body_Getter_gravity,
-        (setter)Body_Setter_gravity,
-        0,
-        0
-    },
     { "is_sleeping", (getter)Body_Getter_is_sleeping, 0, 0, 0 },
     {
         "linear_damping",
@@ -793,10 +792,74 @@ static PyMemberDef Shape_PyMemberDef[] = {
 
 
 static void
+plane_capsule_destructor(PyObject *capsule)
+{
+    btStaticPlaneShape *plane = (btStaticPlaneShape *)PyCapsule_GetPointer(
+        capsule,
+        0
+    );
+    delete plane;
+}
+
+
+static void
 sphere_capsule_destructor(PyObject *capsule)
 {
     btSphereShape *sphere = (btSphereShape *)PyCapsule_GetPointer(capsule, 0);
     delete sphere;
+}
+
+static PyObject *
+Shape_add_cylinder(Shape *self, PyObject *args)
+{
+    double radius = 0;
+    double height = 0;
+    double center_x = 0;
+    double center_y = 0;
+    double center_z = 0;
+    double rotation_w = 0;
+    double rotation_x = 0;
+    double rotation_y = 0;
+    double rotation_z = 0;
+    if (!PyArg_ParseTuple(
+        args, "ddddddddd",
+        &radius, &height,
+        &center_x, &center_y, &center_z,
+        &rotation_w, &rotation_x, &rotation_y, &rotation_z
+    )){ return 0; }
+
+    auto cylinder = new btCylinderShape(
+        btVector3(radius, height * .5, radius)
+    );
+    btTransform transform = btTransform::getIdentity();
+    transform.setOrigin(btVector3(center_x, center_y, center_z));
+    transform.setRotation(btQuaternion(
+        rotation_x, rotation_y, rotation_z, rotation_w
+    ));
+    self->shape->addChildShape(transform, cylinder);
+    return PyCapsule_New(cylinder, 0, plane_capsule_destructor);
+}
+
+
+static PyObject *
+Shape_add_plane(Shape *self, PyObject *args)
+{
+    double distance = 0;
+    double normal_x = 0;
+    double normal_y = 0;
+    double normal_z = 0;
+    if (!PyArg_ParseTuple(
+        args, "dddd",
+        &distance,
+        &normal_x, &normal_y, &normal_z
+    )){ return 0; }
+
+    auto plane = new btStaticPlaneShape(
+        btVector3(normal_x, normal_y, normal_z),
+        distance
+    );
+    self->shape->addChildShape(btTransform::getIdentity(), plane);
+    return PyCapsule_New(plane, 0, plane_capsule_destructor);
 }
 
 
@@ -814,7 +877,9 @@ Shape_add_sphere(Shape *self, PyObject *args)
     )){ return 0; }
 
     auto sphere = new btSphereShape(radius);
-    self->shape->addChildShape(btTransform::getIdentity(), sphere);
+    btTransform transform = btTransform::getIdentity();
+    transform.setOrigin(btVector3(center_x, center_y, center_z));
+    self->shape->addChildShape(transform, sphere);
     return PyCapsule_New(sphere, 0, sphere_capsule_destructor);
 }
 
@@ -833,6 +898,18 @@ Shape_calculate_local_inertia(Shape *self, PyObject *args)
 
 
 static PyMethodDef Shape_PyMethodDef[] = {
+    {
+        "add_cylinder",
+        (PyCFunction)Shape_add_cylinder,
+        METH_O,
+        0
+    },
+    {
+        "add_plane",
+        (PyCFunction)Shape_add_plane,
+        METH_O,
+        0
+    },
     {
         "add_sphere",
         (PyCFunction)Shape_add_sphere,

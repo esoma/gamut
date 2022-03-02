@@ -74,6 +74,11 @@ jobs:
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
         unset CC CXX
         python -m pip install --no-binary=:pyicu: pyicu
+        
+    - name: Build Bullet
+      run: |
+        git submodule update --init
+        python setup.py build_bullet
 
     - name: Install Test Dependencies
       run: |

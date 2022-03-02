@@ -8,7 +8,7 @@ from ._physics import Body as BaseBody
 from ._physics import Shape
 from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
-from gamut.geometry import Sphere
+from gamut.geometry import Cylinder, Sphere, Plane
 from gamut.glmhelp import dmat4_exact, dvec3_exact, F64Matrix4x4, F64Vector3
 # python
 from datetime import timedelta
@@ -20,7 +20,8 @@ from weakref import ref, WeakKeyDictionary
 # pyglm
 from glm import dmat4, dvec3
 
-BodyShape = Sphere
+
+BodyShape = Cylinder | Plane | Sphere
 
 
 class BodyType(Enum):
@@ -57,6 +58,7 @@ class Body:
         )
         self.type = self._type
 
+        self._gravity: dvec3 | None = None
         self._groups = groups
         self._mask = mask
         self._world = None
@@ -153,12 +155,21 @@ class Body:
         self._imp.friction = float(value)
 
     @property
-    def gravity(self) -> dvec3:
-        return dvec3(self._imp.gravity)
+    def gravity(self) -> dvec3 | None:
+        return self._gravity
 
     @gravity.setter
-    def gravity(self, value: F64Vector3) -> None:
-        self._imp.gravity = tuple(dvec3_exact(value))
+    def gravity(self, value: F64Vector3 | None) -> None:
+        is_explicit = value is not None
+        if value is None:
+            value = tuple(dvec3_exact(value))
+        else:
+            world = self.world
+            if world:
+                value = tuple(world.gravity)
+            else:
+                values = (0, 0, 0)
+        self._imp.set_gravity((is_explicit, value))
 
     @property
     def groups(self) -> int:
@@ -312,6 +323,21 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
         shape_capsules.append(
             shape_imp.add_sphere((shape.radius, *shape.center))
         )
+    elif isinstance(shape, Plane):
+        shape_capsules.append(
+            shape_imp.add_plane((shape.distance, *shape.normal))
+        )
+    elif isinstance(shape, Cylinder):
+        shape_capsules.append(
+            shape_imp.add_cylinder((
+                shape.radius,
+                shape.height,
+                *shape.center,
+                *shape.rotation
+            ))
+        )
+    else:
+        raise TypeError('invalid shape: {shape}')
 
     _shape_imps[shape] = (shape_imp, tuple(shape_capsules))
 
