@@ -4,7 +4,7 @@ from gamut.geometry import Cylinder
 # python
 from typing import Any
 # pyglm
-from glm import quat
+from glm import quat, vec4
 # pytest
 import pytest
 

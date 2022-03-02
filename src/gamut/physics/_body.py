@@ -165,7 +165,7 @@ class Body:
             if world:
                 value = tuple(world.gravity)
             else:
-                values = (0, 0, 0)
+                value = (0, 0, 0)
         self._imp.set_gravity((is_explicit, value))
 
     @property

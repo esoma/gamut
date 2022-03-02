@@ -26,12 +26,12 @@ class World:
         self._bodies: set[Body] = set()
 
         try:
-            self._fixed_time_step = fixed_time_step.total_seconds()
+            self._fixed_time_seconds = fixed_time_step.total_seconds()
         except AttributeError:
             raise TypeError('fixed time step must be timedelta')
-        if self._fixed_time_step <= 0:
+        if self._fixed_time_seconds <= 0:
             raise ValueError('fixed time step must be greater than 0 seconds')
-        self._leftover_step_duration = 0.0
+        self._leftover_simulation_seconds = 0.0
 
     def __repr__(self) -> str:
         return '<gamut.physics.World>'
@@ -55,10 +55,19 @@ class World:
         self._bodies.remove(body)
 
     def simulate(self, duration: timedelta) -> None:
-        duration = self._leftover_step_duration + duration.total_seconds()
-        for _ in range(floor(duration / self._fixed_time_step)):
-            self._imp.simulate(self._fixed_time_step)
-        self._leftover_step_duration = duration % self._fixed_time_step
+        try:
+            duration_seconds = duration.total_seconds()
+        except AttributeError:
+            raise TypeError('duration must be timedelta')
+        if duration_seconds < 0:
+            raise ValueError(
+                'duration must be greater than or equal to 0 seconds'
+            )
+
+        seconds = self._leftover_simulation_seconds + duration_seconds
+        for _ in range(floor(seconds / self._fixed_time_seconds)):
+            self._imp.simulate(self._fixed_time_seconds)
+        self._leftover_simulation_seconds = seconds % self._fixed_time_seconds
 
     @property
     def bodies(self) -> list[Body]:

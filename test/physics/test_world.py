@@ -95,3 +95,25 @@ def test_bodies_mutable() -> None:
     bodies = w.bodies
     assert bodies is not w.bodies
     assert isinstance(bodies, list)
+
+
+@pytest.mark.parametrize("duration", [None, 'abc', 123, 1.0])
+def test_simulate_duration_invalid_type(duration: timedelta) -> None:
+    w = World(timedelta(seconds=1))
+    with pytest.raises(TypeError) as excinfo:
+        w.simulate(duration)
+    assert str(excinfo.value) == 'duration must be timedelta'
+
+
+@pytest.mark.parametrize("duration", [
+    timedelta(seconds=-10),
+    timedelta(seconds=-1),
+])
+def test_invalid_fixed_time_step_value(duration: timedelta) -> None:
+    w = World(timedelta(seconds=1))
+    with pytest.raises(ValueError) as excinfo:
+        w.simulate(duration)
+    assert (
+        str(excinfo.value) ==
+        'duration must be greater than or equal to 0 seconds'
+    )
