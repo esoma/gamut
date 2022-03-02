@@ -8,7 +8,7 @@ from ._physics import Body as BaseBody
 from ._physics import Shape
 from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
-from gamut.geometry import Cylinder, Sphere, Plane
+from gamut.geometry import Cylinder, Plane, Sphere
 from gamut.glmhelp import dmat4_exact, dvec3_exact, F64Matrix4x4, F64Vector3
 # python
 from datetime import timedelta
@@ -19,7 +19,6 @@ from typing import Any, Final
 from weakref import ref, WeakKeyDictionary
 # pyglm
 from glm import dmat4, dvec3
-
 
 BodyShape = Cylinder | Plane | Sphere
 

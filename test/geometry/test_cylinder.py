@@ -5,8 +5,8 @@ from gamut.geometry import Cylinder
 from math import pi
 from typing import Any
 # pyglm
-from glm import (length, mat4, radians, rotate, scale, translate, vec2, vec3,
-                 vec4, quat)
+from glm import (length, mat4, quat, radians, rotate, scale, translate, vec2,
+                 vec3, vec4)
 # pytest
 import pytest
 
@@ -31,8 +31,8 @@ def test_invalid_radius(radius: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Cylinder(vec3(0), radius, 1.0)
     assert str(excinfo.value) == 'radius must be float'
-    
-    
+
+
 @pytest.mark.parametrize("height", [None, 'x', object()])
 def test_invalid_height(height: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
@@ -51,7 +51,7 @@ def test_invalid_center(center: Any) -> None:
 def test_radius(radius: Any) -> None:
     cylinder = Cylinder(vec3(0), radius, 1.0)
     assert cylinder.radius == abs(float(radius))
-    
+
 
 @pytest.mark.parametrize("height", [-1, 1, -1.5, 1.5, '-2.0', '2.0'])
 def test_height(height: Any) -> None:

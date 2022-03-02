@@ -9,10 +9,10 @@ from ._physics import World as BaseWorld
 from gamut.glmhelp import dvec3_exact, F64Vector3
 # python
 from datetime import timedelta
+from math import floor
 from typing import Any, TYPE_CHECKING
 # pyglm
 from glm import dvec3
-from math import floor
 
 if TYPE_CHECKING:
     # gamut

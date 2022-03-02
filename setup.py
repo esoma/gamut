@@ -1,8 +1,9 @@
-# setuptools
-from setuptools import Extension, find_packages, setup, msvc, Command
-from subprocess import run
+# python
 import os
+from subprocess import run
 import sys
+# setuptools
+from setuptools import Command, Extension, find_packages, msvc, setup
 
 
 def msbuild(project):
@@ -12,23 +13,23 @@ def msbuild(project):
         project,
         '/property:Configuration=Release'
     ], env=env, shell=True, check=True)
-    
-    
+
+
 def make(directory):
     run(['make', '-C', directory])
 
 
 class BuildBullet(Command):
-    
+
     description = 'build bullet'
     user_options = []
-    
+
     def initialize_options(self):
         pass
-        
+
     def finalize_options(self):
         pass
-    
+
     def run(self):
         build_dir = 'build/bullet3'
         os.makedirs(build_dir, exist_ok=True)
@@ -63,7 +64,7 @@ class BuildBullet(Command):
             msbuild('build/bullet3/ALL_BUILD.vcxproj')
         else:
             make('build/bullet3')
-    
+
 
 physics = Extension(
     'gamut.physics._physics',

@@ -18,8 +18,8 @@ def test_cullable() -> None:
 
 def test_point_container() -> None:
     assert isinstance(Sphere(vec3(0), 0), Shape3dPointContainer)
-    
-    
+
+
 def test_sphere() -> None:
     s1 = Sphere(vec3(1, 2, 3), 4)
     s2 = Sphere(vec3(1, 2, 3), 4)

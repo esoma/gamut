@@ -4,9 +4,9 @@ from __future__ import annotations
 __all__ = ['Cylinder']
 
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact, quat_exact, F32Quaternion
+from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
 # pyglm
-from glm import vec3, quat
+from glm import quat, vec3
 
 
 class Cylinder:
@@ -33,7 +33,7 @@ class Cylinder:
             self._height = abs(float(height))
         except (TypeError, ValueError):
             raise TypeError('height must be float')
-            
+
         if rotation is None:
             self._rotation = quat()
         else:
@@ -74,7 +74,7 @@ class Cylinder:
     @property
     def radius(self) -> float:
         return self._radius
-    
+
     @property
     def rotation(self) -> quat:
         return quat(self._rotation)
