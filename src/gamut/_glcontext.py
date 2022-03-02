@@ -205,7 +205,6 @@ class GlContext:
         assert isinstance(alpha, bool)
         assert identify_thread() == self._rendering_thread
         mask = (red, green, blue, alpha)
-        print(mask)
         if self._color_mask != mask:
             glColorMask(red, green, blue, alpha)
             self._color_mask = mask
