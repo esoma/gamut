@@ -115,7 +115,11 @@ World_simulate(World *self, PyObject *args)
     ASSERT(self->world);
     double time = PyFloat_AsDouble(args);
     if (PyErr_Occurred()){ return 0; }
+
+    Py_BEGIN_ALLOW_THREADS;
     self->world->stepSimulation(time, 0);
+    Py_END_ALLOW_THREADS;
+
     Py_RETURN_NONE;
 }
 
@@ -314,6 +318,15 @@ Body_set_gravity(Body *self, PyObject *value, void *)
 
 
 static PyObject *
+Body_set_shape(Body *self, Shape *shape)
+{
+    self->shape = shape;
+    self->body->setCollisionShape(shape->shape);
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
 Body_set_to_dynamic(Body *self, PyObject *)
 {
     self->body->setCollisionFlags(0);
@@ -372,7 +385,13 @@ static PyMethodDef Body_PyMethodDef[] = {
     {
         "set_gravity",
         (PyCFunction)Body_set_gravity,
-        METH_NOARGS,
+        METH_O,
+        0
+    },
+    {
+        "set_shape",
+        (PyCFunction)Body_set_shape,
+        METH_O,
         0
     },
     {
@@ -768,7 +787,6 @@ Shape___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     )){ return 0; }
 
     Shape *self = (Shape*)cls->tp_alloc(cls, 0);
-
     self->shape = new btCompoundShape();
 
     return (PyObject *)self;
@@ -792,6 +810,70 @@ static PyMemberDef Shape_PyMemberDef[] = {
 
 
 static void
+bvh_tri_mesh_capsule_destructor(PyObject *capsule)
+{
+    btBvhTriangleMeshShape *bvh_tri_mesh = (
+        (btBvhTriangleMeshShape *)PyCapsule_GetPointer(capsule, 0)
+    );
+    auto mesh_interface = bvh_tri_mesh->getMeshInterface();
+    delete bvh_tri_mesh;
+    delete mesh_interface;
+}
+
+
+static void
+box_capsule_destructor(PyObject *capsule)
+{
+    btBoxShape *box = (btBoxShape *)PyCapsule_GetPointer(capsule, 0);
+    delete box;
+}
+
+
+static void
+capsule_capsule_destructor(PyObject *capsule)
+{
+    btCapsuleShape *shape = (btCapsuleShape *)PyCapsule_GetPointer(
+        capsule,
+        0
+    );
+    delete shape;
+}
+
+
+static void
+cone_capsule_destructor(PyObject *capsule)
+{
+    btConeShape *cone = (btConeShape *)PyCapsule_GetPointer(
+        capsule,
+        0
+    );
+    delete cone;
+}
+
+
+static void
+convex_hull_capsule_destructor(PyObject *capsule)
+{
+    btConvexHullShape *convex_hull = (btConvexHullShape *)PyCapsule_GetPointer(
+        capsule,
+        0
+    );
+    delete convex_hull;
+}
+
+
+static void
+cylinder_capsule_destructor(PyObject *capsule)
+{
+    btCylinderShape *cylinder = (btCylinderShape *)PyCapsule_GetPointer(
+        capsule,
+        0
+    );
+    delete cylinder;
+}
+
+
+static void
 plane_capsule_destructor(PyObject *capsule)
 {
     btStaticPlaneShape *plane = (btStaticPlaneShape *)PyCapsule_GetPointer(
@@ -808,6 +890,91 @@ sphere_capsule_destructor(PyObject *capsule)
     btSphereShape *sphere = (btSphereShape *)PyCapsule_GetPointer(capsule, 0);
     delete sphere;
 }
+
+
+static PyObject *
+Shape_add_capsule(Shape *self, PyObject *args)
+{
+    double radius = 0;
+    double height = 0;
+    double center_x = 0;
+    double center_y = 0;
+    double center_z = 0;
+    double rotation_w = 0;
+    double rotation_x = 0;
+    double rotation_y = 0;
+    double rotation_z = 0;
+    if (!PyArg_ParseTuple(
+        args, "ddddddddd",
+        &radius, &height,
+        &center_x, &center_y, &center_z,
+        &rotation_w, &rotation_x, &rotation_y, &rotation_z
+    )){ return 0; }
+
+    auto capsule = new btCapsuleShape(radius, height);
+    btTransform transform = btTransform::getIdentity();
+    transform.setOrigin(btVector3(center_x, center_y, center_z));
+    transform.setRotation(btQuaternion(
+        rotation_x, rotation_y, rotation_z, rotation_w
+    ));
+    self->shape->addChildShape(transform, capsule);
+    return PyCapsule_New(capsule, 0, capsule_capsule_destructor);
+}
+
+
+static PyObject *
+Shape_add_cone(Shape *self, PyObject *args)
+{
+    double radius = 0;
+    double height = 0;
+    double center_x = 0;
+    double center_y = 0;
+    double center_z = 0;
+    double rotation_w = 0;
+    double rotation_x = 0;
+    double rotation_y = 0;
+    double rotation_z = 0;
+    if (!PyArg_ParseTuple(
+        args, "ddddddddd",
+        &radius, &height,
+        &center_x, &center_y, &center_z,
+        &rotation_w, &rotation_x, &rotation_y, &rotation_z
+    )){ return 0; }
+
+    auto cone = new btConeShape(radius, height);
+    btTransform transform = btTransform::getIdentity();
+    transform.setOrigin(btVector3(center_x, center_y, center_z));
+    transform.setRotation(btQuaternion(
+        rotation_x, rotation_y, rotation_z, rotation_w
+    ));
+    self->shape->addChildShape(transform, cone);
+    return PyCapsule_New(cone, 0, cone_capsule_destructor);
+}
+
+
+static PyObject *
+Shape_add_convex_hull(Shape *self, PyObject *points)
+{
+    auto convex_hull_shape = new btConvexHullShape();
+
+    size_t point_count = PyTuple_GET_SIZE(points);
+    for (size_t i = 0; i < point_count; i++)
+    {
+        auto point = PyTuple_GET_ITEM(points, i);
+        double x, y, z;
+        if (!PyArg_ParseTuple(
+            point, "ddd",
+            &x, &y, &z
+        )){ return 0; }
+        convex_hull_shape->addPoint(btVector3(x, y, z), false);
+    }
+    convex_hull_shape->recalcLocalAabb();
+    convex_hull_shape->optimizeConvexHull();
+
+    self->shape->addChildShape(btTransform::getIdentity(), convex_hull_shape);
+    return PyCapsule_New(convex_hull_shape, 0, convex_hull_capsule_destructor);
+}
+
 
 static PyObject *
 Shape_add_cylinder(Shape *self, PyObject *args)
@@ -837,7 +1004,7 @@ Shape_add_cylinder(Shape *self, PyObject *args)
         rotation_x, rotation_y, rotation_z, rotation_w
     ));
     self->shape->addChildShape(transform, cylinder);
-    return PyCapsule_New(cylinder, 0, plane_capsule_destructor);
+    return PyCapsule_New(cylinder, 0, cylinder_capsule_destructor);
 }
 
 
@@ -861,6 +1028,83 @@ Shape_add_plane(Shape *self, PyObject *args)
     self->shape->addChildShape(btTransform::getIdentity(), plane);
     return PyCapsule_New(plane, 0, plane_capsule_destructor);
 }
+
+
+static PyObject *
+Shape_add_mesh(Shape *self, PyObject *args)
+{
+    int num_vertices;
+    double *vertices = 0;
+    int num_triangle_indices;
+    int *triangle_indices = 0;
+    if (!PyArg_ParseTuple(
+        args, "iLiL",
+        &num_vertices, &vertices,
+        &num_triangle_indices, &triangle_indices
+    )){ return 0; }
+
+    std::cout << num_vertices << " | " << vertices << std::endl;
+    std::cout << num_triangle_indices << " | " << triangle_indices << std::endl;
+
+    for (int i = 0; i < num_vertices; i++)
+    {
+        std::cout << vertices[i * 3] << ", " << vertices[(i * 3) + 1] << ", " << vertices[(i * 3) + 2] << std::endl;
+    }
+
+    auto mesh_interface = new btTriangleIndexVertexArray(
+        num_triangle_indices,
+        triangle_indices,
+        sizeof(int) * 3,
+        num_vertices,
+        vertices,
+        sizeof(double) * 3
+    );
+    std::cout << "?" << std::endl;
+
+    auto bvh_tri_mesh = new btBvhTriangleMeshShape(mesh_interface, true);
+    std::cout << "?" << std::endl;
+
+    self->shape->addChildShape(btTransform::getIdentity(), bvh_tri_mesh);
+    std::cout << "?" << std::endl;
+
+    return PyCapsule_New(bvh_tri_mesh, 0, bvh_tri_mesh_capsule_destructor);
+}
+
+
+static PyObject *
+Shape_add_rectangular_cuboid(Shape *self, PyObject *args)
+{
+    double center_x = 0;
+    double center_y = 0;
+    double center_z = 0;
+    double dimensions_x = 0;
+    double dimensions_y = 0;
+    double dimensions_z = 0;
+    double rotation_w = 0;
+    double rotation_x = 0;
+    double rotation_y = 0;
+    double rotation_z = 0;
+    if (!PyArg_ParseTuple(
+        args, "dddddddddd",
+        &center_x, &center_y, &center_z,
+        &dimensions_x, &dimensions_y, &dimensions_z,
+        &rotation_w, &rotation_x, &rotation_y, &rotation_z
+    )){ return 0; }
+
+    auto box = new btBoxShape(btVector3(
+        dimensions_x * .5,
+        dimensions_y * .5,
+        dimensions_z * .5
+    ));
+    btTransform transform = btTransform::getIdentity();
+    transform.setOrigin(btVector3(center_x, center_y, center_z));
+    transform.setRotation(btQuaternion(
+        rotation_x, rotation_y, rotation_z, rotation_w
+    ));
+    self->shape->addChildShape(transform, box);
+    return PyCapsule_New(box, 0, box_capsule_destructor);
+}
+
 
 
 static PyObject *
@@ -899,6 +1143,24 @@ Shape_calculate_local_inertia(Shape *self, PyObject *args)
 
 static PyMethodDef Shape_PyMethodDef[] = {
     {
+        "add_capsule",
+        (PyCFunction)Shape_add_capsule,
+        METH_O,
+        0
+    },
+    {
+        "add_cone",
+        (PyCFunction)Shape_add_cone,
+        METH_O,
+        0
+    },
+    {
+        "add_convex_hull",
+        (PyCFunction)Shape_add_convex_hull,
+        METH_O,
+        0
+    },
+    {
         "add_cylinder",
         (PyCFunction)Shape_add_cylinder,
         METH_O,
@@ -907,6 +1169,18 @@ static PyMethodDef Shape_PyMethodDef[] = {
     {
         "add_plane",
         (PyCFunction)Shape_add_plane,
+        METH_O,
+        0
+    },
+    {
+        "add_mesh",
+        (PyCFunction)Shape_add_mesh,
+        METH_O,
+        0
+    },
+    {
+        "add_rectangular_cuboid",
+        (PyCFunction)Shape_add_rectangular_cuboid,
         METH_O,
         0
     },

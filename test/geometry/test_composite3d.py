@@ -10,6 +10,12 @@ from glm import mat4, radians, rotate, scale, translate, vec2, vec3, vec4
 import pytest
 
 
+def test_hash() -> None:
+    c1 = Composite3d()
+    c2 = Composite3d()
+    assert hash(c1) != hash(c2)
+
+
 def test_cullable() -> None:
     assert isinstance(Composite3d(), Shape3dCullable)
 

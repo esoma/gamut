@@ -8,7 +8,8 @@ from ._physics import Body as BaseBody
 from ._physics import Shape
 from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
-from gamut.geometry import Cylinder, Plane, Sphere
+from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
+                            Mesh, Plane, RectangularCuboid, Sphere)
 from gamut.glmhelp import dmat4_exact, dvec3_exact, F64Matrix4x4, F64Vector3
 # python
 from enum import auto, Enum
@@ -18,7 +19,9 @@ from weakref import ref, WeakKeyDictionary
 # pyglm
 from glm import dmat4, dvec3
 
-BodyShape = Cylinder | Plane | Sphere
+BodyShape = (
+    Capsule | Cone | ConvexHull | Cylinder | Plane | RectangularCuboid | Sphere
+)
 
 
 class BodyType(Enum):
@@ -41,7 +44,10 @@ class Body:
         type: BodyType = BodyType.DYNAMIC,
         world: World | None = None,
     ) -> None:
-        self._type = BodyType(type)
+        try:
+            self._type = BodyType(type)
+        except ValueError:
+            raise TypeError(f'type must be {BodyType}')
         self._mass = _verify_mass(mass)
 
         self._is_enabled = True
@@ -56,13 +62,13 @@ class Body:
         self.type = self._type
 
         self._gravity: dvec3 | None = None
-        self._groups = groups
-        self._mask = mask
+        self._groups = _verify_groups(groups)
+        self._mask = _verify_mask(mask)
         self._world = None
         self.world = world
 
     def __repr__(self) -> str:
-        return '<gamut.physics.Body>'
+        return f'<gamut.physics.Body mass={self.mass} shape={self.shape!r}>'
 
     def _set_state(self) -> None:
         if self._is_enabled:
@@ -79,7 +85,13 @@ class Body:
 
     @angular_damping.setter
     def angular_damping(self, value: float) -> None:
-        self._imp.angular_damping = float(value)
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            raise TypeError('angular damping must be float')
+        if value < 0 or value > 1:
+            raise ValueError('angular damping must be between 0 and 1')
+        self._imp.angular_damping = value
 
     @property
     def angular_sleep_threshold(self) -> float:
@@ -87,7 +99,11 @@ class Body:
 
     @angular_sleep_threshold.setter
     def angular_sleep_threshold(self, value: float) -> None:
-        self._imp.angular_sleep_threshold = float(value)
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            raise TypeError('angular sleep threshold must be float')
+        self._imp.angular_sleep_threshold = value
 
     @property
     def angular_velocity(self) -> dvec3:
@@ -95,7 +111,11 @@ class Body:
 
     @angular_velocity.setter
     def angular_velocity(self, value: F64Vector3) -> None:
-        self._imp.angular_velocity = tuple(dvec3_exact(value))
+        try:
+            value = dvec3_exact(value)
+        except TypeError:
+            raise TypeError('angular velocity must be dvec3')
+        self._imp.angular_velocity = tuple(value)
 
     @property
     def can_sleep(self) -> bool:
@@ -125,7 +145,13 @@ class Body:
 
     @linear_damping.setter
     def linear_damping(self, value: float) -> None:
-        self._imp.linear_damping = float(value)
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            raise TypeError('linear damping must be float')
+        if value < 0 or value > 1:
+            raise ValueError('linear damping must be between 0 and 1')
+        self._imp.linear_damping = value
 
     @property
     def linear_sleep_threshold(self) -> float:
@@ -133,7 +159,11 @@ class Body:
 
     @linear_sleep_threshold.setter
     def linear_sleep_threshold(self, value: float) -> None:
-        self._imp.linear_sleep_threshold = float(value)
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            raise TypeError('linear sleep threshold must be float')
+        self._imp.linear_sleep_threshold = value
 
     @property
     def linear_velocity(self) -> dvec3:
@@ -141,7 +171,11 @@ class Body:
 
     @linear_velocity.setter
     def linear_velocity(self, value: F64Vector3) -> None:
-        self._imp.linear_velocity = tuple(dvec3_exact(value))
+        try:
+            value = dvec3_exact(value)
+        except TypeError:
+            raise TypeError('linear velocity must be dvec3')
+        self._imp.linear_velocity = tuple(value)
 
     @property
     def friction(self) -> float:
@@ -149,7 +183,11 @@ class Body:
 
     @friction.setter
     def friction(self, value: float) -> None:
-        self._imp.friction = float(value)
+        try:
+            value = float(value)
+        except (ValueError, TypeError):
+            raise TypeError('friction must be float')
+        self._imp.friction = value
 
     @property
     def gravity(self) -> dvec3 | None:
@@ -159,13 +197,18 @@ class Body:
     def gravity(self, value: F64Vector3 | None) -> None:
         is_explicit = value is not None
         if value is None:
-            value = tuple(dvec3_exact(value))
-        else:
             world = self.world
             if world:
                 value = tuple(world.gravity)
             else:
                 value = (0, 0, 0)
+            self._gravity = None
+        else:
+            try:
+                self._gravity = dvec3_exact(value)
+            except (ValueError, TypeError):
+                raise TypeError('gravity must be None or dvec3')
+            value = tuple(self._gravity)
         self._imp.set_gravity((is_explicit, value))
 
     @property
@@ -174,13 +217,8 @@ class Body:
 
     @groups.setter
     def groups(self, value: int) -> None:
-        value = int(value)
-        try:
-            struct.pack('=i', value)
-        except struct.error:
-            raise ValueError('groups must be 32 bit signed int')
-        self._groups = value
-
+        self._groups = _verify_groups(value)
+        # re-add the body to the current world to change the groups internally
         world = self.world
         if world:
             self.world = None
@@ -192,13 +230,8 @@ class Body:
 
     @mask.setter
     def mask(self, value: int) -> None:
-        value = int(value)
-        try:
-            struct.pack('=i', value)
-        except struct.error:
-            raise ValueError('mask must be 32 bit signed int')
-        self._mask = value
-
+        self._mask = _verify_mask(value)
+        # re-add the body to the current world to change the mask internally
         world = self.world
         if world:
             self.world = None
@@ -221,7 +254,11 @@ class Body:
 
     @restitution.setter
     def restitution(self, value: float) -> None:
-        self._imp.restitution = float(value)
+        try:
+            value = float(value)
+        except (ValueError, TypeError):
+            raise TypeError('restitution must be float')
+        self._imp.restitution = value
 
     @property
     def rolling_friction(self) -> float:
@@ -229,11 +266,30 @@ class Body:
 
     @rolling_friction.setter
     def rolling_friction(self, value: float) -> None:
-        self._imp.rolling_friction = float(value)
+        try:
+            value = float(value)
+        except (ValueError, TypeError):
+            raise TypeError('rolling friction must be float')
+        self._imp.rolling_friction = value
 
     @property
     def shape(self) -> BodyShape:
         return self._shape
+
+    @shape.setter
+    def shape(self, shape: BodyShape) -> None:
+        # order here is important, _get_shape_implementation can fail on an
+        # invalid shape so we don't want to set anything yet
+        self._shape_imp = _get_shape_implementation(shape)
+        # again order is important, the implementation doesn't hold a strong
+        # ref to the current shape, so some weirdness could happen if the
+        # current shape is deleted prior to setting the new one
+        self._imp.set_shape(self._shape_imp)
+        self._shape = shape
+        # we have to recalculate the local inertia by setting the mass
+        self._imp.set_mass(
+            _mass_to_implementation_mass(self._mass, self._type)
+        )
 
     @property
     def spinning_friction(self) -> float:
@@ -241,6 +297,10 @@ class Body:
 
     @spinning_friction.setter
     def spinning_friction(self, value: float) -> None:
+        try:
+            value = float(value)
+        except (ValueError, TypeError):
+            raise TypeError('spinning friction must be float')
         self._imp.spinning_friction = float(value)
 
     @property
@@ -249,7 +309,11 @@ class Body:
 
     @transform.setter
     def transform(self, value: F64Matrix4x4) -> None:
-        self._imp.transform = tuple(dmat4_exact(value))
+        try:
+            value = dmat4_exact(value)
+        except TypeError:
+            raise TypeError('transform must be dmat4')
+        self._imp.transform = tuple(value)
 
     @property
     def type(self) -> BodyType:
@@ -257,7 +321,10 @@ class Body:
 
     @type.setter
     def type(self, value: BodyType) -> None:
-        self._type = BodyType(value)
+        try:
+            self._type = BodyType(value)
+        except ValueError:
+            raise TypeError(f'type must be {BodyType}')
 
         if value == BodyType.DYNAMIC:
             self._imp.set_to_dynamic()
@@ -278,6 +345,9 @@ class Body:
 
     @world.setter
     def world(self, world: World | None) -> None:
+        if world is not None and not isinstance(world, World):
+            raise TypeError(f'world must be None or {World}')
+
         current_world = self.world
         if current_world is not None:
             remove_body_from_world(current_world, self, self._imp)
@@ -295,8 +365,35 @@ def _mass_to_implementation_mass(mass: float, body_type: BodyType) -> float:
     return mass
 
 
+def _verify_groups(value: int) -> int:
+    try:
+        value = int(value)
+    except (ValueError, TypeError):
+        raise TypeError('groups must be int')
+    try:
+        struct.pack('=i', value)
+    except struct.error:
+        raise ValueError('groups must be 32 bit signed int')
+    return value
+
+
+def _verify_mask(value: int) -> int:
+    try:
+        value = int(value)
+    except (ValueError, TypeError):
+        raise TypeError('mask must be int')
+    try:
+        struct.pack('=i', value)
+    except struct.error:
+        raise ValueError('mask must be 32 bit signed int')
+    return value
+
+
 def _verify_mass(value: float) -> float:
-    value = float(value)
+    try:
+        value = float(value)
+    except (ValueError, TypeError):
+        raise TypeError('mass must be float')
     if value <= 0.0:
         raise ValueError('mass must be > 0')
     return value
@@ -311,31 +408,82 @@ _shape_imps: WeakKeyDictionary[
 def _get_shape_implementation(shape: BodyShape) -> Shape:
     try:
         return _shape_imps[shape][0]
+    except TypeError:
+        raise TypeError(f'invalid shape: {shape}')
     except KeyError:
         pass
 
-    shape_imp = Shape()
-    shape_capsules: list[Any] = []
-    if isinstance(shape, Sphere):
-        shape_capsules.append(
-            shape_imp.add_sphere((shape.radius, *shape.center))
-        )
-    elif isinstance(shape, Plane):
-        shape_capsules.append(
-            shape_imp.add_plane((shape.distance, *shape.normal))
-        )
-    elif isinstance(shape, Cylinder):
-        shape_capsules.append(
-            shape_imp.add_cylinder((
-                shape.radius,
-                shape.height,
-                *shape.center,
-                *shape.rotation
-            ))
-        )
+    if isinstance(shape, Composite3d):
+        shapes = shape.shapes_flattened
     else:
-        raise TypeError('invalid shape: {shape}')
+        shapes = [shape]
 
-    _shape_imps[shape] = (shape_imp, tuple(shape_capsules))
+    shape_imp = Shape()
+    shape_data: list[Any] = []
 
+    for sub_shape in shapes:
+        if isinstance(sub_shape, Sphere):
+            shape_data.append(
+                shape_imp.add_sphere((sub_shape.radius, *sub_shape.center))
+            )
+        elif isinstance(sub_shape, Plane):
+            shape_data.append(
+                shape_imp.add_plane((sub_shape.distance, *sub_shape.normal))
+            )
+        elif isinstance(sub_shape, Cylinder):
+            shape_data.append(
+                shape_imp.add_cylinder((
+                    sub_shape.radius,
+                    sub_shape.height,
+                    *sub_shape.center,
+                    *sub_shape.rotation
+                ))
+            )
+        elif isinstance(sub_shape, RectangularCuboid):
+            shape_data.append(
+                shape_imp.add_rectangular_cuboid((
+                    *sub_shape.center,
+                    *sub_shape.dimensions,
+                    *sub_shape.rotation
+                ))
+            )
+        elif isinstance(sub_shape, Capsule):
+            shape_data.append(
+                shape_imp.add_capsule((
+                    sub_shape.radius,
+                    sub_shape.height,
+                    *sub_shape.center,
+                    *sub_shape.rotation
+                ))
+            )
+        elif isinstance(sub_shape, Cone):
+            shape_data.append(
+                shape_imp.add_cone((
+                    sub_shape.radius,
+                    sub_shape.height,
+                    *sub_shape.center,
+                    *sub_shape.rotation
+                ))
+            )
+        elif isinstance(sub_shape, ConvexHull):
+            shape_data.append(shape_imp.add_convex_hull(
+                tuple(tuple(p) for p in sub_shape.points)
+            ))
+        elif isinstance(sub_shape, Mesh):
+            vertices = sub_shape.vertices
+            triangle_indices = sub_shape.triangle_indices
+            shape_data.append(vertices)
+            shape_data.append(triangle_indices)
+            shape_data.append(
+                shape_imp.add_mesh((
+                    len(vertices),
+                    vertices.address,
+                    len(triangle_indices),
+                    triangle_indices.address
+                ))
+            )
+        else:
+            raise TypeError(f'invalid shape: {sub_shape}')
+
+    _shape_imps[shape] = (shape_imp, tuple(shape_data))
     return shape_imp

@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Cylinder']
+__all__ = ['RectangularCuboid']
 
 # gamut
 from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
@@ -9,13 +9,12 @@ from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
 from glm import quat, vec3
 
 
-class Cylinder:
+class RectangularCuboid:
 
     def __init__(
         self,
         center: F32Vector3,
-        radius: float,
-        height: float,
+        dimensions: F32Vector3,
         *,
         rotation: F32Quaternion | None = None
     ):
@@ -25,14 +24,9 @@ class Cylinder:
             raise TypeError('center must be vec3')
 
         try:
-            self._radius = abs(float(radius))
-        except (TypeError, ValueError):
-            raise TypeError('radius must be float')
-
-        try:
-            self._height = abs(float(height))
-        except (TypeError, ValueError):
-            raise TypeError('height must be float')
+            self._dimensions = abs(vec3_exact(dimensions))
+        except TypeError:
+            raise TypeError('dimensions must be vec3')
 
         if rotation is None:
             self._rotation = quat()
@@ -45,21 +39,21 @@ class Cylinder:
     def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other: Cylinder) -> bool:
-        if not isinstance(other, Cylinder):
+    def __eq__(self, other: RectangularCuboid) -> bool:
+        if not isinstance(other, RectangularCuboid):
             return False
         return (
             self._center == other._center and
-            self._radius == other._radius and
-            self._height == other._height and
+            self._dimensions == other._dimensions and
             self._rotation == other._rotation
         )
 
     def __repr__(self) -> str:
         return (
-            f'<gamut.geometry.Cylinder '
+            f'<gamut.geometry.RectangularCuboid '
             f'center=({self._center.x}, {self._center.y}, {self._center.z}) '
-            f'radius={self._radius} height={self._height} '
+            f'dimensions=({self._dimensions.x}, {self._dimensions.y}, '
+            f'{self._dimensions.z}) '
             f'rotation=({self._rotation.w}, {self._rotation.x}, '
             f'{self._rotation.y}, {self._rotation.z})>'
         )
@@ -69,12 +63,8 @@ class Cylinder:
         return vec3(self._center)
 
     @property
-    def height(self) -> float:
-        return self._height
-
-    @property
-    def radius(self) -> float:
-        return self._radius
+    def dimensions(self) -> vec3:
+        return vec3(self._dimensions)
 
     @property
     def rotation(self) -> quat:

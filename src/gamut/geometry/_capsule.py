@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-__all__ = ['Cylinder']
+__all__ = ['Capsule']
 
 # gamut
 from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
@@ -9,7 +9,7 @@ from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
 from glm import quat, vec3
 
 
-class Cylinder:
+class Capsule:
 
     def __init__(
         self,
@@ -45,8 +45,8 @@ class Cylinder:
     def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other: Cylinder) -> bool:
-        if not isinstance(other, Cylinder):
+    def __eq__(self, other: Capsule) -> bool:
+        if not isinstance(other, Capsule):
             return False
         return (
             self._center == other._center and
@@ -57,7 +57,7 @@ class Cylinder:
 
     def __repr__(self) -> str:
         return (
-            f'<gamut.geometry.Cylinder '
+            f'<gamut.geometry.Capsule '
             f'center=({self._center.x}, {self._center.y}, {self._center.z}) '
             f'radius={self._radius} height={self._height} '
             f'rotation=({self._rotation.w}, {self._rotation.x}, '
