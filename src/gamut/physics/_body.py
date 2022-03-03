@@ -14,14 +14,21 @@ from gamut.glmhelp import dmat4_exact, dvec3_exact, F64Matrix4x4, F64Vector3
 # python
 from enum import auto, Enum
 import struct
-from typing import Any, Final
+from typing import Any, Final, Union
 from weakref import ref, WeakKeyDictionary
 # pyglm
 from glm import dmat4, dvec3
 
-BodyShape = (
-    Capsule | Cone | ConvexHull | Cylinder | Plane | RectangularCuboid | Sphere
-)
+BodyShape = Union[
+    Capsule,
+    Composite3d,
+    Cone,
+    ConvexHull,
+    Cylinder,
+    Plane,
+    RectangularCuboid,
+    Sphere
+]
 
 
 class BodyType(Enum):
