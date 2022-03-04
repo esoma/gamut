@@ -71,3 +71,21 @@ def test_transform(convex_hull: ConvexHull, transform: mat4) -> None:
     new_ch = transform * convex_hull
     assert new_ch is not convex_hull
     assert new_ch.points == tuple(transform * p for p in convex_hull.points)
+
+
+@pytest.mark.parametrize("left_side", [None, 1, '123'])
+def test_invalid_multiply(left_side: Any) -> None:
+    with pytest.raises(TypeError):
+        left_side * ConvexHull(vec3(0, 0, 0), vec3(0, 0, 0))
+
+
+def test_equal() -> None:
+    c = ConvexHull(vec3(0, 0, 0), vec3(0, 0, 0))
+    assert c == ConvexHull(vec3(0, 0, 0), vec3(0, 0, 0))
+    assert c != ConvexHull(vec3(1, 0, 0), vec3(0, 0, 0))
+    assert c != ConvexHull(vec3(0, 1, 0), vec3(0, 0, 0))
+    assert c != ConvexHull(vec3(0, 0, 1), vec3(0, 0, 0))
+    assert c != ConvexHull(vec3(0, 0, 0), vec3(1, 0, 0))
+    assert c != ConvexHull(vec3(0, 0, 0), vec3(0, 1, 0))
+    assert c != ConvexHull(vec3(0, 0, 0), vec3(0, 0, 1))
+    assert c != object()

@@ -68,6 +68,8 @@ class Body:
         )
         self.type = self._type
 
+        self._kinematic_angular_velocity = dvec3(0)
+        self._kinematic_linear_velocity = dvec3(0)
         self._gravity: dvec3 | None = None
         self._groups = _verify_groups(groups)
         self._mask = _verify_mask(mask)
@@ -79,7 +81,7 @@ class Body:
 
     def _set_state(self) -> None:
         if self._is_enabled:
-            if self._can_sleep:
+            if self._can_sleep and self._type != BodyType.KINEMATIC:
                 self._imp.set_enabled()
             else:
                 self._imp.set_cannot_sleep()
@@ -110,11 +112,19 @@ class Body:
             value = float(value)
         except (TypeError, ValueError):
             raise TypeError('angular sleep threshold must be float')
+        if value < 0:
+            raise ValueError('angular sleep threshold must be 0 or more')
         self._imp.angular_sleep_threshold = value
 
     @property
     def angular_velocity(self) -> dvec3:
-        return dvec3(self._imp.angular_velocity)
+        if self._type == BodyType.DYNAMIC:
+            return dvec3(self._imp.angular_velocity)
+        elif self._type == BodyType.KINEMATIC:
+            return dvec3(self._kinematic_angular_velocity)
+        else:
+            assert self._type == BodyType.STATIC
+            return dvec3(0)
 
     @angular_velocity.setter
     def angular_velocity(self, value: F64Vector3) -> None:
@@ -122,6 +132,7 @@ class Body:
             value = dvec3_exact(value)
         except TypeError:
             raise TypeError('angular velocity must be dvec3')
+        self._kinematic_angular_velocity = value
         self._imp.angular_velocity = tuple(value)
 
     @property
@@ -170,11 +181,19 @@ class Body:
             value = float(value)
         except (TypeError, ValueError):
             raise TypeError('linear sleep threshold must be float')
+        if value < 0:
+            raise ValueError('linear sleep threshold must be 0 or more')
         self._imp.linear_sleep_threshold = value
 
     @property
     def linear_velocity(self) -> dvec3:
-        return dvec3(self._imp.linear_velocity)
+        if self._type == BodyType.DYNAMIC:
+            return dvec3(self._imp.linear_velocity)
+        elif self._type == BodyType.KINEMATIC:
+            return dvec3(self._kinematic_linear_velocity)
+        else:
+            assert self._type == BodyType.STATIC
+            return dvec3(0)
 
     @linear_velocity.setter
     def linear_velocity(self, value: F64Vector3) -> None:
@@ -182,6 +201,7 @@ class Body:
             value = dvec3_exact(value)
         except TypeError:
             raise TypeError('linear velocity must be dvec3')
+        self._kinematic_linear_velocity = value
         self._imp.linear_velocity = tuple(value)
 
     @property
@@ -340,6 +360,9 @@ class Body:
         else:
             assert value == BodyType.KINEMATIC
             self._imp.set_to_kinematic()
+            self._kinematic_angular_velocity = self._imp.angular_velocity
+            self._kinematic_linear_velocity = self._imp.linear_velocity
+        self._set_state()
 
     def wake(self) -> None:
         self._imp.wake()

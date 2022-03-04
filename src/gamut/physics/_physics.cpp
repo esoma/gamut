@@ -115,7 +115,6 @@ World_simulate(World *self, PyObject *args)
     ASSERT(self->world);
     double time = PyFloat_AsDouble(args);
     if (PyErr_Occurred()){ return 0; }
-
     Py_BEGIN_ALLOW_THREADS;
     self->world->stepSimulation(time, 0);
     Py_END_ALLOW_THREADS;
@@ -297,6 +296,7 @@ Body_set_disabled(Body *self, PyObject *)
     Py_RETURN_NONE;
 }
 
+
 static PyObject *
 Body_set_gravity(Body *self, PyObject *value, void *)
 {
@@ -345,6 +345,8 @@ static PyObject *
 Body_set_to_static(Body *self, PyObject *)
 {
     self->body->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    self->body->setAngularVelocity(btVector3(0, 0, 0));
+    self->body->setLinearVelocity(btVector3(0, 0, 0));
     Py_RETURN_NONE;
 }
 
@@ -613,6 +615,7 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
     self->body->setSpinningFriction(friction);
     return 0;
 }
+
 
 static PyObject *
 Body_Getter_transform(Body *self, void *)
@@ -1043,14 +1046,6 @@ Shape_add_mesh(Shape *self, PyObject *args)
         &num_triangle_indices, &triangle_indices
     )){ return 0; }
 
-    std::cout << num_vertices << " | " << vertices << std::endl;
-    std::cout << num_triangle_indices << " | " << triangle_indices << std::endl;
-
-    for (int i = 0; i < num_vertices; i++)
-    {
-        std::cout << vertices[i * 3] << ", " << vertices[(i * 3) + 1] << ", " << vertices[(i * 3) + 2] << std::endl;
-    }
-
     auto mesh_interface = new btTriangleIndexVertexArray(
         num_triangle_indices,
         triangle_indices,
@@ -1059,13 +1054,8 @@ Shape_add_mesh(Shape *self, PyObject *args)
         vertices,
         sizeof(double) * 3
     );
-    std::cout << "?" << std::endl;
-
     auto bvh_tri_mesh = new btBvhTriangleMeshShape(mesh_interface, true);
-    std::cout << "?" << std::endl;
-
     self->shape->addChildShape(btTransform::getIdentity(), bvh_tri_mesh);
-    std::cout << "?" << std::endl;
 
     return PyCapsule_New(bvh_tri_mesh, 0, bvh_tri_mesh_capsule_destructor);
 }

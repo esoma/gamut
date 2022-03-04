@@ -43,14 +43,12 @@ class World:
         groups: int,
         mask: int
     ) -> None:
-        if body in self._bodies:
-            return
+        assert body not in self._bodies
         self._imp.add_body((body_implementation, groups, mask))
         self._bodies.add(body)
 
     def _remove_body(self, body: Body, body_implementation: Any) -> None:
-        if body not in self._bodies:
-            return
+        assert body in self._bodies
         self._imp.remove_body(body_implementation)
         self._bodies.remove(body)
 

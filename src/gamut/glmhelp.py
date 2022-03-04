@@ -95,4 +95,6 @@ def dmat4_exact(input: Any) -> dmat4:
 
 
 def quat_exact(input: Any) -> quat:
+    if len(input) != 4:
+        raise TypeError('input length must be 4')
     return quat(input)

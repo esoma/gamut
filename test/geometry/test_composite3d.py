@@ -50,6 +50,15 @@ def test_shapes(shapes: Any) -> None:
     )
 
 
+def test_shapes_flattened():
+    composite = Composite3d(
+        1, 2, 3,
+        Composite3d(4, 5, 6),
+        7, 8, 9
+    )
+    assert tuple(composite.shapes_flattened) == (1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+
 @pytest.mark.parametrize("composite", [
     Composite3d(),
     Composite3d(Sphere(vec3(0), 0), Sphere(vec3(0), 0)),
@@ -96,6 +105,7 @@ def test_equal() -> None:
     assert Composite3d(1, None, '123', 1) == Composite3d('123', None, 1, 1)
     assert Composite3d(1, None, '123', 1) != Composite3d('123', None, 1)
     assert Composite3d(1, None, '123') != Composite3d('123', None, 1, 1)
+    assert Composite3d() != object()
 
 
 def test_contains_point() -> None:

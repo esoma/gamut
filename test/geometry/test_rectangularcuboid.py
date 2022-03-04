@@ -50,6 +50,13 @@ def test_invalid_dimensions(dimensions: Any) -> None:
     assert str(excinfo.value) == 'dimensions must be vec3'
 
 
+@pytest.mark.parametrize("rotation", ['123', 123, vec3(1), vec2(1)])
+def test_invalid_rotation(rotation: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        RectangularCuboid(vec3(0), vec3(1), rotation=rotation)
+    assert str(excinfo.value) == 'rotation must be quat'
+
+
 @pytest.mark.parametrize("center", [vec3(1), (1, 2, 3)])
 def test_center(center: Any) -> None:
     capsule = RectangularCuboid(center, vec3(1))

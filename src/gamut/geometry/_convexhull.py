@@ -30,7 +30,7 @@ class ConvexHull:
     def __repr__(self) -> str:
         return f'<gamut.geometry.ConvexHull>'
 
-    def __rmul__(self, transform: mat4) -> BoundingBox3d:
+    def __rmul__(self, transform: mat4) -> ConvexHull:
         if not isinstance(transform, mat4):
             return NotImplemented
 

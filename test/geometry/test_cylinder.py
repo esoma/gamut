@@ -45,6 +45,13 @@ def test_invalid_center(center: Any) -> None:
     assert str(excinfo.value) == 'center must be vec3'
 
 
+@pytest.mark.parametrize("rotation", ['123', 123, vec3(1), vec2(1)])
+def test_invalid_rotation(rotation: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Cylinder(vec3(0), 0, 0, rotation=rotation)
+    assert str(excinfo.value) == 'rotation must be quat'
+
+
 @pytest.mark.parametrize("radius", [-1, 1, -1.5, 1.5, '-2.0', '2.0'])
 def test_radius(radius: Any) -> None:
     cylinder = Cylinder(vec3(0), radius, 1.0)

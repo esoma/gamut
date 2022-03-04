@@ -154,7 +154,17 @@ def test_invalid_angular_sleep_threshold_type(
     assert str(excinfo.value) == f'angular sleep threshold must be float'
 
 
-@pytest.mark.parametrize("angular_sleep_threshold", [-100, 0, 1, '.5', 100])
+@pytest.mark.parametrize("angular_sleep_threshold", [-100, -.1])
+def test_invalid_angular_sleep_threshold_value(
+    angular_sleep_threshold: Any
+) -> None:
+    b = Body(1, Sphere(vec3(0), 1))
+    with pytest.raises(ValueError) as excinfo:
+        b.angular_sleep_threshold = angular_sleep_threshold
+    assert str(excinfo.value) == f'angular sleep threshold must be 0 or more'
+
+
+@pytest.mark.parametrize("angular_sleep_threshold", [0, 1, '.5', 100])
 def test_angular_sleep_threshold(angular_sleep_threshold: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     b.angular_sleep_threshold = angular_sleep_threshold
@@ -254,7 +264,17 @@ def test_invalid_linear_sleep_threshold_type(
     assert str(excinfo.value) == f'linear sleep threshold must be float'
 
 
-@pytest.mark.parametrize("linear_sleep_threshold", [-100, 0, 1, '.5', 100])
+@pytest.mark.parametrize("linear_sleep_threshold", [-100, -.1])
+def test_invalid_linear_sleep_threshold_value(
+    linear_sleep_threshold: Any
+) -> None:
+    b = Body(1, Sphere(vec3(0), 1))
+    with pytest.raises(ValueError) as excinfo:
+        b.linear_sleep_threshold = linear_sleep_threshold
+    assert str(excinfo.value) == f'linear sleep threshold must be 0 or more'
+
+
+@pytest.mark.parametrize("linear_sleep_threshold", [0, 1, '.5', 100])
 def test_linear_sleep_threshold(linear_sleep_threshold: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     b.linear_sleep_threshold = linear_sleep_threshold
