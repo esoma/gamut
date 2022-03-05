@@ -24,6 +24,9 @@ class Sphere:
         except (TypeError, ValueError):
             raise TypeError('radius must be float')
 
+    def __hash__(self) -> int:
+        return id(self)
+
     def __eq__(self, other: Sphere) -> bool:
         if not isinstance(other, Sphere):
             return False

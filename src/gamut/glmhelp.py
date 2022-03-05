@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 __all__ = [
+    'dmat4_exact',
+    'dvec3_exact',
     'mat4_exact',
     'ivec1_exact',
     'ivec2_exact',
@@ -11,8 +13,11 @@ __all__ = [
     'I32Vector3',
     'uvec2_exact',
     'F32Matrix4x4',
+    'F32Quaternion',
     'F32Vector3',
     'F32Vector4',
+    'F64Vector3',
+    'F64Matrix4x4',
     'vec3_exact',
     'vec4_exact',
 ]
@@ -20,10 +25,10 @@ __all__ = [
 # python
 from typing import Any, Union
 # pyglm
-from glm import (imvec2, imvec3, ivec1, ivec2, ivec3, mat4, mvec3, uvec2, vec3,
-                 vec4)
+from glm import (dmat4, dvec3, imvec2, imvec3, ivec1, ivec2, ivec3, mat4,
+                 mvec3, quat, uvec2, vec3, vec4)
 # pyglm-typing
-from glm_typing import F32Matrix4x4, F32Vector4, Number
+from glm_typing import F32Matrix4x4, F32Quaternion, F32Vector4, Number
 
 I32Vector1 = Union[ivec1, tuple[Number]]
 def ivec1_exact(input: Any) -> ivec1:
@@ -52,6 +57,13 @@ def vec3_exact(input: Any) -> vec3:
     return vec3(input)
 
 
+F64Vector3 = Union[dvec3, tuple[Number, Number, Number]]
+def dvec3_exact(input: Any) -> dvec3:
+    if len(input) != 3:
+        raise TypeError('input length must be 3')
+    return dvec3(input)
+
+
 I32Vector3 = Union[imvec3, ivec3, tuple[Number, Number, Number]]
 def ivec3_exact(input: Any) -> ivec3:
     if len(input) != 3:
@@ -67,3 +79,22 @@ def vec4_exact(input: Any) -> vec4:
 
 def mat4_exact(input: Any) -> mat4:
     return mat4(input)
+
+
+F64Matrix4x4 = Union[
+    dmat4,
+    tuple[
+        Number, Number, Number, Number,
+        Number, Number, Number, Number,
+        Number, Number, Number, Number,
+        Number, Number, Number, Number,
+    ]
+]
+def dmat4_exact(input: Any) -> dmat4:
+    return dmat4(input)
+
+
+def quat_exact(input: Any) -> quat:
+    if len(input) != 4:
+        raise TypeError('input length must be 4')
+    return quat(input)

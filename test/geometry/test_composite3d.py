@@ -10,6 +10,12 @@ from glm import mat4, radians, rotate, scale, translate, vec2, vec3, vec4
 import pytest
 
 
+def test_hash() -> None:
+    c1 = Composite3d()
+    c2 = Composite3d()
+    assert hash(c1) != hash(c2)
+
+
 def test_cullable() -> None:
     assert isinstance(Composite3d(), Shape3dCullable)
 
@@ -42,6 +48,15 @@ def test_shapes(shapes: Any) -> None:
         actual is expected
         for actual, expected in zip(composite.shapes, shapes)
     )
+
+
+def test_shapes_flattened():
+    composite = Composite3d(
+        1, 2, 3,
+        Composite3d(4, 5, 6),
+        7, 8, 9
+    )
+    assert tuple(composite.shapes_flattened) == (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
 
 @pytest.mark.parametrize("composite", [
@@ -90,6 +105,7 @@ def test_equal() -> None:
     assert Composite3d(1, None, '123', 1) == Composite3d('123', None, 1, 1)
     assert Composite3d(1, None, '123', 1) != Composite3d('123', None, 1)
     assert Composite3d(1, None, '123') != Composite3d('123', None, 1, 1)
+    assert Composite3d() != object()
 
 
 def test_contains_point() -> None:

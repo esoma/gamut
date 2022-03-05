@@ -8,7 +8,7 @@ from ._viewfrustum3d import ViewFrustum3d
 # gamut
 from gamut.glmhelp import F32Vector3
 # python
-from typing import Generic, TypeVar
+from typing import Generator, Generic, TypeVar
 # pyglm
 from glm import mat4
 
@@ -19,6 +19,9 @@ class Composite3d(Generic[S]):
 
     def __init__(self, *shapes: S):
         self._shapes = tuple(shapes)
+
+    def __hash__(self) -> int:
+        return id(self)
 
     def __eq__(self, other: Composite3d) -> bool:
         if not isinstance(other, Composite3d):
@@ -47,6 +50,14 @@ class Composite3d(Generic[S]):
     @property
     def shapes(self) -> tuple[S, ...]:
         return self._shapes
+
+    @property
+    def shapes_flattened(self) -> Generator[S, None, None]:
+        for shape in self._shapes:
+            if isinstance(shape, Composite3d):
+                yield from shape.shapes_flattened
+            else:
+                yield shape
 
     def contains_point(self, point: F32Vector3) -> bool:
         for shape in self._shapes:

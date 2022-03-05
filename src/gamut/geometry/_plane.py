@@ -28,6 +28,9 @@ class Plane:
         except ZeroDivisionError:
             raise ValueError('invalid normal')
 
+    def __hash__(self) -> int:
+        return id(self)
+
     def __repr__(self) -> str:
         return (
             f'<gamut.geometry.Plane distance={self._distance} '
