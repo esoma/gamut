@@ -61,7 +61,7 @@ def test_lots_of_collisions() -> None:
                 world=w,
                 type=BodyType.KINEMATIC
             )
-            ball.transform = translate(dmat4(1), dvec3(x, 1, z))
+            ball.transform = translate(dmat4(1), dvec3(x, .25, z))
 
     floor = Body(1, Plane(0, dvec3(0, 1, 0)), world=w, type=BodyType.STATIC)
     world_simulation = w.simulate(timedelta(seconds=1))
