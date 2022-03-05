@@ -63,6 +63,7 @@ class Body:
         self._shape = shape
         self._shape_imp = _get_shape_implementation(shape)
         self._imp = BaseBody(
+            self,
             _mass_to_implementation_mass(self._mass, self._type),
             self._shape_imp,
         )

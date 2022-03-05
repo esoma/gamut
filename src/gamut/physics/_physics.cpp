@@ -32,6 +32,7 @@ struct Shape
 struct Body
 {
     PyObject_HEAD
+    PyObject *wrapper;
     btDefaultMotionState *motion_state;
     btRigidBody *body;
     Shape *shape;
@@ -113,13 +114,67 @@ static PyObject *
 World_simulate(World *self, PyObject *args)
 {
     ASSERT(self->world);
-    double time = PyFloat_AsDouble(args);
-    if (PyErr_Occurred()){ return 0; }
+
+    double time;
+    bool get_collisions;
+
+    if (!PyArg_ParseTuple(args, "dp", &time, &get_collisions)){ return 0; }
+
     Py_BEGIN_ALLOW_THREADS;
     self->world->stepSimulation(time, 0);
     Py_END_ALLOW_THREADS;
 
-    Py_RETURN_NONE;
+    if (!get_collisions){ Py_RETURN_NONE; }
+
+    int manifold_count = self->collision_dispatcher->getNumManifolds();
+    PyObject *collisions = PyList_New(0);
+    for (int i = 0; i < manifold_count; i++)
+    {
+        auto manifold =
+            self->collision_dispatcher->getManifoldByIndexInternal(i);
+        if (manifold->getNumContacts() == 0){ continue; }
+        PyObject *contacts = PyList_New(manifold->getNumContacts());
+        if (!contacts)
+        {
+            Py_DECREF(collisions);
+            return 0;
+        }
+        for (int j = 0; j < manifold->getNumContacts(); j++)
+        {
+            const auto& point = manifold->getContactPoint(j);
+            PyObject *contact = Py_BuildValue(
+                "(ddd)(ddd)(ddd)(ddd)(ddd)",
+                point.m_localPointA.x(),
+                point.m_localPointA.y(),
+                point.m_localPointA.z(),
+                point.m_positionWorldOnA.x(),
+                point.m_positionWorldOnA.y(),
+                point.m_positionWorldOnA.z(),
+                point.m_localPointB.x(),
+                point.m_localPointB.y(),
+                point.m_localPointB.z(),
+                point.m_positionWorldOnB.x(),
+                point.m_positionWorldOnB.y(),
+                point.m_positionWorldOnB.z(),
+                point.m_normalWorldOnB.x(),
+                point.m_normalWorldOnB.y(),
+                point.m_normalWorldOnB.z()
+            );
+            PyList_SET_ITEM(contacts, j, contact);
+        }
+        Body *body_a = (Body*)manifold->getBody0()->getUserPointer();
+        Body *body_b = (Body*)manifold->getBody1()->getUserPointer();
+        PyObject *collision = PyTuple_Pack(
+            3,
+            body_a->wrapper,
+            body_b->wrapper,
+            contacts
+        );
+        PyList_Append(collisions, collision);
+        Py_DECREF(collision);
+    }
+
+    return collisions;
 }
 
 
@@ -209,16 +264,19 @@ define_world_type(PyObject *module)
 static PyObject *
 Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
+    PyObject *wrapper = 0;
     double mass = 0;
     Shape *shape = 0;
 
     static char *kwlist[] = {
+        "wrapper",
         "mass",
         "shape",
         NULL
     };
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwds, "dO", kwlist,
+        args, kwds, "OdO", kwlist,
+        &wrapper,
         &mass,
         &shape
     )){ return 0; }
@@ -236,8 +294,11 @@ Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     );
     info.m_friction = 0;
 
+    self->wrapper = wrapper;
     self->body = new btRigidBody(info);
     self->shape = shape;
+
+    self->body->setUserPointer(self);
 
     return (PyObject *)self;
 }
@@ -648,6 +709,7 @@ Body_Setter_transform(Body *self, PyObject *value, void *)
     btTransform transform;
     transform.setFromOpenGLMatrix(matrix);
 
+    self->motion_state->setWorldTransform(transform);
     self->body->setWorldTransform(transform);
     return 0;
 }
