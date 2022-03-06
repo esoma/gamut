@@ -27,6 +27,11 @@ Demonstrates rendering text with both orthographic and perspective projections.
 
 ![](screenshots/text.py.png)
 
+## physics.py
+A very basic physics demo.
+
+![](screenshots/physics.py.png)
+
 ## breakout.py
 A Breakout style game.
 

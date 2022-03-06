@@ -81,3 +81,8 @@ def test_equal() -> None:
     assert rc != RectangularCuboid(vec3(0), vec3(0, 1, 0))
     assert rc != RectangularCuboid(vec3(0), vec3(0, 0, 1))
     assert rc != object()
+
+
+def test_render() -> None:
+    rc = RectangularCuboid(vec3(0), vec3(1))
+    positions, normals, indices = rc.render()
