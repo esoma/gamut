@@ -12,15 +12,12 @@ from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
-from pathlib import Path
 import random
-from typing import Any, Final
+from typing import Any
 # pyglm
 from glm import (array, cos, cross, inverse, lookAt, mat3, mat4, normalize,
                  perspective, radians, scale, sin, translate, transpose, uint8,
                  vec3)
-
-DIR: Final = Path(__file__).parent
 
 
 class Draw(TimerExpired):

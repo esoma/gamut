@@ -14,9 +14,9 @@ from pathlib import Path
 from typing import Any, Final
 # pyglm
 from glm import (array, cos, cross, lookAt, mat4, normalize, perspective, pi,
-                 rotate, sin, uint8, vec2, vec3)
+                 radians, rotate, sin, uint8, vec2, vec3)
 
-DIR: Final = Path(__file__).parent
+RESOURCES: Final = Path(__file__).parent / 'resources'
 
 
 class Draw(TimerExpired):
@@ -47,10 +47,7 @@ class App(Application):
         self.player_yaw = -pi() / 2
         self.player_pitch = 0.0
         self.player_node: TransformNode[Any] = TransformNode()
-        self.camera_node = TransformNode(
-            local_transform=perspective(45, 1, 1.0, -1.0),
-            parent=self.player_node
-        )
+        self.projection = perspective(radians(45), 1, .1, 100)
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
         self.cube_transform = mat4(1)
@@ -93,7 +90,7 @@ class App(Application):
             ).to_bytes()),
             uint8
         )
-        self.cube_texture = Image(DIR / 'yee.jpg').to_texture()
+        self.cube_texture = Image(RESOURCES / 'yee.jpg').to_texture()
 
         with (
             Bind.on(self.keyboard.Key.escape.Pressed, self.escape),
@@ -149,12 +146,12 @@ class App(Application):
             vec3(0, 1, 0),
         )
 
-        self.cube_transform *= rotate(.02, vec3(1, 1, 1))
+        self.cube_transform = self.cube_transform * rotate(.02, vec3(1, 1, 1))
 
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
-            depth=0
+            depth=1
         )
         execute_shader(
             self.window_render_target,
@@ -162,7 +159,8 @@ class App(Application):
             PrimitiveMode.TRIANGLE,
             self.cube_attributes,
             {
-                "camera_transform": self.camera_node.transform,
+                "camera_transform":
+                    self.projection * self.player_node.transform,
                 "model_transform": self.cube_transform,
                 "tex": self.cube_texture,
             },
