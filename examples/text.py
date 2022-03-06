@@ -14,10 +14,9 @@ from pathlib import Path
 from typing import Any, Final
 # pyglm
 from glm import (cos, cross, lookAt, mat4, normalize, ortho, perspective, pi,
-                 scale, sin, translate, vec3, vec4)
+                 radians, scale, sin, translate, vec3, vec4)
 
-DIR: Final = Path(__file__).parent
-RESOURCES: Final = DIR / 'resources'
+RESOURCES: Final = Path(__file__).parent / 'resources'
 
 
 class Draw(TimerExpired):
@@ -50,10 +49,7 @@ class App(Application):
         self.player_yaw = -pi() / 2
         self.player_pitch = 0.0
         self.player_node: TransformNode[Any] = TransformNode()
-        self.camera_node = TransformNode(
-            local_transform=perspective(45, 1, 1.0, -1.0),
-            parent=self.player_node
-        )
+        self.projection = perspective(radians(45), 1, .1, 100)
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
         face = Face(RESOURCES / 'OpenSans-Regular.ttf')
@@ -133,7 +129,7 @@ class App(Application):
                 }),
                 {
                     "transform": (
-                        self.camera_node.transform *
+                        self.projection * self.player_node.transform *
                         scale(
                             translate(
                                 mat4(1),
