@@ -6,7 +6,7 @@ __all__ = ['RectangularCuboid']
 # gamut
 from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
 # pyglm
-from glm import quat, vec3
+from glm import array, quat, uint8, vec3
 
 
 class RectangularCuboid:
@@ -69,3 +69,67 @@ class RectangularCuboid:
     @property
     def rotation(self) -> quat:
         return quat(self._rotation)
+
+    def render(self) -> tuple['array[vec3]', 'array[vec3]', 'array[uint8]']:
+        half_dimensions = self._dimensions * .5
+        positions = array(
+            # top
+            self._center + half_dimensions * vec3(1, 1, 1),
+            self._center + half_dimensions * vec3(1, 1, -1),
+            self._center + half_dimensions * vec3(-1, 1, -1),
+            self._center + half_dimensions * vec3(-1, 1, 1),
+            # bottom
+            self._center + half_dimensions * vec3(-1, -1, -1),
+            self._center + half_dimensions * vec3(1, -1, -1),
+            self._center + half_dimensions * vec3(1, -1, 1),
+            self._center + half_dimensions * vec3(-1, -1, 1),
+            # right
+            self._center + half_dimensions * vec3(1, -1, 1),
+            self._center + half_dimensions * vec3(1, -1, -1),
+            self._center + half_dimensions * vec3(1, 1, -1),
+            self._center + half_dimensions * vec3(1, 1, 1),
+            # left
+            self._center + half_dimensions * vec3(-1, 1, -1),
+            self._center + half_dimensions * vec3(-1, -1, -1),
+            self._center + half_dimensions * vec3(-1, -1, 1),
+            self._center + half_dimensions * vec3(-1, 1, 1),
+            # front
+            self._center + half_dimensions * vec3(1, -1, 1),
+            self._center + half_dimensions * vec3(1, 1, 1),
+            self._center + half_dimensions * vec3(-1, 1, 1),
+            self._center + half_dimensions * vec3(-1, -1, 1),
+            # back
+            self._center + half_dimensions * vec3(1, 1, -1),
+            self._center + half_dimensions * vec3(1, -1, -1),
+            self._center + half_dimensions * vec3(-1, -1, -1),
+            self._center + half_dimensions * vec3(-1, 1, -1),
+        )
+        normals = array(
+            # top
+            vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0),
+            # bottom
+            vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0),
+            # right
+            vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0),
+            # left
+            vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0),
+            # front
+            vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
+            # back
+            vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1),
+        )
+        indices = array.from_numbers(uint8,
+            # top
+            0, 1, 2, 2, 3, 0,
+            # bottom
+            4, 5, 6, 6, 7, 4,
+            # right
+            8, 9, 10, 10, 11, 8,
+            # left
+            12, 13, 14, 14, 15, 12,
+            # front
+            16, 17, 18, 18, 19, 16,
+            # back
+            20, 21, 22, 22, 23, 20,
+        )
+        return positions, normals, indices
