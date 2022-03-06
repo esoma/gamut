@@ -1,9 +1,14 @@
+# gamut
+from codegen import generate_math_files
 # python
 import os
+from pathlib import Path
 from subprocess import run
 import sys
 # setuptools
 from setuptools import Command, Extension, msvc, setup
+
+generate_math_files(Path('src/gamut/math'))
 
 
 def msbuild(project):
@@ -82,9 +87,17 @@ physics = Extension(
 )
 
 
+math = Extension(
+    'gamut.math._math',
+    include_dirs=['vendor/glm', 'src/gamut/math'],
+    sources=['src/gamut/math/_math.cpp'],
+    language='c++',
+)
+
+
 setup(
     cmdclass={
         "build_bullet": BuildBullet,
     },
-    ext_modules=[physics]
+    ext_modules=[math, physics]
 )
