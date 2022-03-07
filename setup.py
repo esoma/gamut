@@ -1,5 +1,4 @@
-# gamut
-from codegen import generate_math_files
+
 # python
 import os
 from pathlib import Path
@@ -7,8 +6,6 @@ from subprocess import run
 import sys
 # setuptools
 from setuptools import Command, Extension, msvc, setup
-
-generate_math_files(Path('src/gamut/math'))
 
 
 def msbuild(project):
@@ -22,6 +19,24 @@ def msbuild(project):
 
 def make(directory):
     run(['make', '-C', directory])
+
+
+class GenerateMathCode(Command):
+
+    description = 'generate math code'
+    user_options = []
+
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        # gamut
+        from codegen import generate_math_files
+        generate_math_files(Path('src/gamut/math'))
 
 
 class BuildBullet(Command):
@@ -98,6 +113,7 @@ math = Extension(
 setup(
     cmdclass={
         "build_bullet": BuildBullet,
+        "codegen_math": GenerateMathCode,
     },
     ext_modules=[math, physics]
 )

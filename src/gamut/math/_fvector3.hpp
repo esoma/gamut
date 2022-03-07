@@ -1,4 +1,4 @@
-// generated 2022-03-07 03:05:30.757373
+// generated 2022-03-07 03:05:30.756874
 
 #include <stdio.h>
 #include <iostream>
@@ -14,33 +14,33 @@
 // gamut
 #include "_type.hpp"
 
-typedef glm::vec<3, double, glm::defaultp> DVector3Glm;
+typedef glm::vec<3, float, glm::defaultp> FVector3Glm;
 
 
-struct DVector3
+struct FVector3
 {
     PyObject_HEAD
     PyObject *weakreflist;
-    DVector3Glm *glm;
+    FVector3Glm *glm;
 };
 
 
 static PyObject *
-DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+FVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
 
-        double c_0 = 0;
+        float c_0 = 0;
 
-        double c_1 = 0;
+        float c_1 = 0;
 
-        double c_2 = 0;
+        float c_2 = 0;
 
 
     if (kwds && PyDict_Size(kwds) != 0)
     {
         PyErr_SetString(
             PyExc_TypeError,
-            "DVector3 does accept any keyword arguments"
+            "FVector3 does accept any keyword arguments"
         );
         return 0;
     }
@@ -54,7 +54,7 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         case 1:
         {
             auto arg = PyTuple_GET_ITEM(args, 0);
-            double arg_c = pyobject_to_c_double(arg);
+            float arg_c = pyobject_to_c_float(arg);
             auto error_occurred = PyErr_Occurred();
             if (error_occurred){ return 0; }
 
@@ -71,21 +71,21 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 0);
-                c_0 = pyobject_to_c_double(arg);
+                c_0 = pyobject_to_c_float(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 1);
-                c_1 = pyobject_to_c_double(arg);
+                c_1 = pyobject_to_c_float(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 2);
-                c_2 = pyobject_to_c_double(arg);
+                c_2 = pyobject_to_c_float(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
@@ -96,7 +96,7 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         {
             PyErr_Format(
                 PyExc_TypeError,
-                "invalid number of arguments supplied to DVector3, expected "
+                "invalid number of arguments supplied to FVector3, expected "
                 "0, 1 or 3 (got %zd)",
                 arg_count
             );
@@ -104,9 +104,9 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         }
     }
 
-    DVector3 *self = (DVector3*)cls->tp_alloc(cls, 0);
+    FVector3 *self = (FVector3*)cls->tp_alloc(cls, 0);
     if (!self){ return 0; }
-    self->glm = new DVector3Glm(
+    self->glm = new FVector3Glm(
 
             c_0,
 
@@ -121,7 +121,7 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
 
 static void
-DVector3__dealloc__(DVector3 *self)
+FVector3__dealloc__(FVector3 *self)
 {
     if (self->weakreflist)
     {
@@ -137,7 +137,7 @@ DVector3__dealloc__(DVector3 *self)
 
 
 static Py_hash_t
-DVector3__hash__(DVector3 *self)
+FVector3__hash__(FVector3 *self)
 {
     Py_hash_t hash = 0;
 
@@ -153,7 +153,7 @@ DVector3__hash__(DVector3 *self)
 
 
 static PyObject *
-DVector3__repr__(DVector3 *self)
+FVector3__repr__(FVector3 *self)
 {
     PyObject *result = 0;
 
@@ -165,17 +165,17 @@ DVector3__repr__(DVector3 *self)
 
 
 
-        py_0 = c_double_to_pyobject((*self->glm)[0]);
+        py_0 = c_float_to_pyobject((*self->glm)[0]);
         if (!py_0){ goto cleanup; }
 
-        py_1 = c_double_to_pyobject((*self->glm)[1]);
+        py_1 = c_float_to_pyobject((*self->glm)[1]);
         if (!py_1){ goto cleanup; }
 
-        py_2 = c_double_to_pyobject((*self->glm)[2]);
+        py_2 = c_float_to_pyobject((*self->glm)[2]);
         if (!py_2){ goto cleanup; }
 
     result = PyUnicode_FromFormat(
-        "DVector3("
+        "FVector3("
 
             "%R, "
 
@@ -205,14 +205,14 @@ cleanup:
 
 
 static Py_ssize_t
-DVector3__len__(DVector3 *self)
+FVector3__len__(FVector3 *self)
 {
     return 3;
 }
 
 
 static PyObject *
-DVector3__getitem__(DVector3 *self, Py_ssize_t index)
+FVector3__getitem__(FVector3 *self, Py_ssize_t index)
 {
     if (index < 0 || index > 2)
     {
@@ -220,12 +220,12 @@ DVector3__getitem__(DVector3 *self, Py_ssize_t index)
         return 0;
     }
     auto c = (*self->glm)[index];
-    return c_double_to_pyobject(c);
+    return c_float_to_pyobject(c);
 }
 
 
 static PyObject *
-DVector3__richcmp__(DVector3 *self, DVector3 *other, int op)
+FVector3__richcmp__(FVector3 *self, FVector3 *other, int op)
 {
     if (Py_TYPE(self) != Py_TYPE(other))
     {
@@ -262,24 +262,24 @@ DVector3__richcmp__(DVector3 *self, DVector3 *other, int op)
 
 
 static PyObject *
-DVector3__add__(DVector3 *self, PyObject *other)
+FVector3__add__(FVector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    FVector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_float(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) + c_other;
     }
     else
     {
-        vector = (*self->glm) + (*((DVector3 *)other)->glm);
+        vector = (*self->glm) + (*((FVector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -294,24 +294,24 @@ DVector3__add__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__sub__(DVector3 *self, PyObject *other)
+FVector3__sub__(FVector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    FVector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_float(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) - c_other;
     }
     else
     {
-        vector = (*self->glm) - (*((DVector3 *)other)->glm);
+        vector = (*self->glm) - (*((FVector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -326,24 +326,24 @@ DVector3__sub__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__mul__(DVector3 *self, PyObject *other)
+FVector3__mul__(FVector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    FVector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_float(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) * c_other;
     }
     else
     {
-        vector = (*self->glm) * (*((DVector3 *)other)->glm);
+        vector = (*self->glm) * (*((FVector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -358,34 +358,34 @@ DVector3__mul__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__matmul__(DVector3 *self, DVector3 *other)
+FVector3__matmul__(FVector3 *self, FVector3 *other)
 {
     auto cls = Py_TYPE(self);
     if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
     auto c_result = glm::dot(*self->glm, *other->glm);
-    return c_double_to_pyobject(c_result);
+    return c_float_to_pyobject(c_result);
 }
 
 
 static PyObject *
-DVector3__truediv__(DVector3 *self, PyObject *other)
+FVector3__truediv__(FVector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    FVector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_float(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) / c_other;
     }
     else
     {
-        vector = (*self->glm) / (*((DVector3 *)other)->glm);
+        vector = (*self->glm) / (*((FVector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -400,24 +400,24 @@ DVector3__truediv__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__mod__(DVector3 *self, PyObject *other)
+FVector3__mod__(FVector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    FVector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_float(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = glm::mod((*self->glm), c_other);
     }
     else
     {
-        vector = glm::mod((*self->glm), (*((DVector3 *)other)->glm));
+        vector = glm::mod((*self->glm), (*((FVector3 *)other)->glm));
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -432,24 +432,24 @@ DVector3__mod__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__pow__(DVector3 *self, PyObject *other)
+FVector3__pow__(FVector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    FVector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_float(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = glm::pow((*self->glm), DVector3Glm(c_other));
+        vector = glm::pow((*self->glm), FVector3Glm(c_other));
     }
     else
     {
-        vector = glm::pow((*self->glm), (*((DVector3 *)other)->glm));
+        vector = glm::pow((*self->glm), (*((FVector3 *)other)->glm));
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -464,14 +464,14 @@ DVector3__pow__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__neg__(DVector3 *self)
+FVector3__neg__(FVector3 *self)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector = -(*self->glm);
+    FVector3Glm vector = -(*self->glm);
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -486,14 +486,14 @@ DVector3__neg__(DVector3 *self)
 
 
 static PyObject *
-DVector3__abs__(DVector3 *self)
+FVector3__abs__(FVector3 *self)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector = glm::abs(*self->glm);
+    FVector3Glm vector = glm::abs(*self->glm);
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -508,7 +508,7 @@ DVector3__abs__(DVector3 *self)
 
 
 static int
-DVector3__bool__(DVector3 *self)
+FVector3__bool__(FVector3 *self)
 {
 
         if ((*self->glm)[0] == 0)
@@ -531,20 +531,20 @@ DVector3__bool__(DVector3 *self)
 
 
 static int
-DVector3_getbufferproc(DVector3 *self, Py_buffer *view, int flags)
+FVector3_getbufferproc(FVector3 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "DVector3 is not read only");
+        PyErr_SetString(PyExc_TypeError, "FVector3 is not read only");
         view->obj = 0;
         return -1;
     }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
-    view->len = sizeof(double) * 3;
+    view->len = sizeof(float) * 3;
     view->readonly = 1;
-    view->itemsize = sizeof(double);
-    view->format = "d";
+    view->itemsize = sizeof(float);
+    view->format = "f";
     view->ndim = 1;
     static Py_ssize_t shape = 3;
     view->shape = &shape;
@@ -558,60 +558,60 @@ DVector3_getbufferproc(DVector3 *self, Py_buffer *view, int flags)
 
 
     static PyObject *
-    DVector3_Getter_0(DVector3 *self, void *)
+    FVector3_Getter_0(FVector3 *self, void *)
     {
         auto c = (*self->glm)[0];
-        return c_double_to_pyobject(c);
+        return c_float_to_pyobject(c);
     }
 
     static PyObject *
-    DVector3_Getter_1(DVector3 *self, void *)
+    FVector3_Getter_1(FVector3 *self, void *)
     {
         auto c = (*self->glm)[1];
-        return c_double_to_pyobject(c);
+        return c_float_to_pyobject(c);
     }
 
     static PyObject *
-    DVector3_Getter_2(DVector3 *self, void *)
+    FVector3_Getter_2(FVector3 *self, void *)
     {
         auto c = (*self->glm)[2];
-        return c_double_to_pyobject(c);
+        return c_float_to_pyobject(c);
     }
 
 
 
 static PyObject *
-DVector3_magnitude(DVector3 *self, void *)
+FVector3_magnitude(FVector3 *self, void *)
 {
     auto magnitude = glm::length(*self->glm);
-    return c_double_to_pyobject(magnitude);
+    return c_float_to_pyobject(magnitude);
 }
 
 
-static PyGetSetDef DVector3_PyGetSetDef[] = {
-    {"x", (getter)DVector3_Getter_0, 0, 0, 0},
-    {"r", (getter)DVector3_Getter_0, 0, 0, 0},
-    {"s", (getter)DVector3_Getter_0, 0, 0, 0},
-    {"u", (getter)DVector3_Getter_0, 0, 0, 0},
+static PyGetSetDef FVector3_PyGetSetDef[] = {
+    {"x", (getter)FVector3_Getter_0, 0, 0, 0},
+    {"r", (getter)FVector3_Getter_0, 0, 0, 0},
+    {"s", (getter)FVector3_Getter_0, 0, 0, 0},
+    {"u", (getter)FVector3_Getter_0, 0, 0, 0},
 
-        {"y", (getter)DVector3_Getter_1, 0, 0, 0},
-        {"g", (getter)DVector3_Getter_1, 0, 0, 0},
-        {"t", (getter)DVector3_Getter_1, 0, 0, 0},
-        {"v", (getter)DVector3_Getter_1, 0, 0, 0},
-
-
-        {"z", (getter)DVector3_Getter_2, 0, 0, 0},
-        {"b", (getter)DVector3_Getter_2, 0, 0, 0},
-        {"p", (getter)DVector3_Getter_2, 0, 0, 0},
+        {"y", (getter)FVector3_Getter_1, 0, 0, 0},
+        {"g", (getter)FVector3_Getter_1, 0, 0, 0},
+        {"t", (getter)FVector3_Getter_1, 0, 0, 0},
+        {"v", (getter)FVector3_Getter_1, 0, 0, 0},
 
 
-    {"magnitude", (getter)DVector3_magnitude, 0, 0, 0},
+        {"z", (getter)FVector3_Getter_2, 0, 0, 0},
+        {"b", (getter)FVector3_Getter_2, 0, 0, 0},
+        {"p", (getter)FVector3_Getter_2, 0, 0, 0},
+
+
+    {"magnitude", (getter)FVector3_magnitude, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
 
 static PyObject *
-DVector3__getattr__(DVector3 *self, PyObject *py_attr)
+FVector3__getattr__(FVector3 *self, PyObject *py_attr)
 {
     PyObject *result = PyObject_GenericGetAttr((PyObject *)self, py_attr);
     if (result != 0){ return result; }
@@ -658,7 +658,7 @@ DVector3__getattr__(DVector3 *self, PyObject *py_attr)
                 return 0;
             }
         }
-        auto py_c = c_double_to_pyobject((*self->glm)[glm_index]);
+        auto py_c = c_float_to_pyobject((*self->glm)[glm_index]);
         PyTuple_SET_ITEM(result, i, py_c);
     }
 
@@ -667,26 +667,26 @@ DVector3__getattr__(DVector3 *self, PyObject *py_attr)
 }
 
 
-static PyMemberDef DVector3_PyMemberDef[] = {
-    {"__weaklistoffset__", T_PYSSIZET, offsetof(DVector3, weakreflist), READONLY},
+static PyMemberDef FVector3_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof(FVector3, weakreflist), READONLY},
     {0}
 };
 
 
 
-    static DVector3 *
-    DVector3_cross(DVector3 *self, DVector3 *other)
+    static FVector3 *
+    FVector3_cross(FVector3 *self, FVector3 *other)
     {
         auto cls = Py_TYPE(self);
         if (Py_TYPE(other) != cls)
         {
-            PyErr_Format(PyExc_TypeError, "%R is not DVector3", other);
+            PyErr_Format(PyExc_TypeError, "%R is not FVector3", other);
             return 0;
         }
         auto vector = glm::cross(*self->glm, *other->glm);
-        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+        FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new DVector3Glm(
+        result->glm = new FVector3Glm(
 
                 vector[0],
 
@@ -700,14 +700,14 @@ static PyMemberDef DVector3_PyMemberDef[] = {
 
 
 
-static DVector3 *
-DVector3_normalize(DVector3 *self, void*)
+static FVector3 *
+FVector3_normalize(FVector3 *self, void*)
 {
     auto cls = Py_TYPE(self);
     auto vector = glm::normalize(*self->glm);
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    FVector3 *result = (FVector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new FVector3Glm(
 
             vector[0],
 
@@ -721,78 +721,78 @@ DVector3_normalize(DVector3 *self, void*)
 
 
 static PyObject *
-DVector3_distance(DVector3 *self, DVector3 *other)
+FVector3_distance(FVector3 *self, FVector3 *other)
 {
     auto cls = Py_TYPE(self);
     if (Py_TYPE(other) != cls)
     {
-        PyErr_Format(PyExc_TypeError, "%R is not DVector3", other);
+        PyErr_Format(PyExc_TypeError, "%R is not FVector3", other);
         return 0;
     }
     auto result = glm::distance(*self->glm, *other->glm);
-    return c_double_to_pyobject(result);
+    return c_float_to_pyobject(result);
 }
 
 
-static PyMethodDef DVector3_PyMethodDef[] = {
+static PyMethodDef FVector3_PyMethodDef[] = {
 
-        {"cross", (PyCFunction)DVector3_cross, METH_O, 0},
+        {"cross", (PyCFunction)FVector3_cross, METH_O, 0},
 
-    {"normalize", (PyCFunction)DVector3_normalize, METH_NOARGS, 0},
-    {"distance", (PyCFunction)DVector3_distance, METH_O, 0},
+    {"normalize", (PyCFunction)FVector3_normalize, METH_NOARGS, 0},
+    {"distance", (PyCFunction)FVector3_distance, METH_O, 0},
     {0, 0, 0, 0}
 };
 
 
-static PyType_Slot DVector3_PyType_Slots [] = {
-    {Py_tp_new, (void*)DVector3__new__},
-    {Py_tp_dealloc, (void*)DVector3__dealloc__},
-    {Py_tp_hash, (void*)DVector3__hash__},
-    {Py_tp_repr, (void*)DVector3__repr__},
-    {Py_sq_length, (void*)DVector3__len__},
-    {Py_sq_item, (void*)DVector3__getitem__},
-    {Py_tp_richcompare, (void*)DVector3__richcmp__},
-    {Py_nb_add, (void*)DVector3__add__},
-    {Py_nb_subtract, (void*)DVector3__sub__},
-    {Py_nb_multiply, (void*)DVector3__mul__},
-    {Py_nb_matrix_multiply, (void*)DVector3__matmul__},
-    {Py_nb_true_divide, (void*)DVector3__truediv__},
-    {Py_nb_remainder, (void*)DVector3__mod__},
-    {Py_nb_power, (void*)DVector3__pow__},
-    {Py_nb_negative, (void*)DVector3__neg__},
-    {Py_nb_absolute, (void*)DVector3__abs__},
-    {Py_nb_bool, (void*)DVector3__bool__},
-    {Py_bf_getbuffer, (void*)DVector3_getbufferproc},
-    {Py_tp_getset, (void*)DVector3_PyGetSetDef},
-    {Py_tp_getattro, (void*)DVector3__getattr__},
-    {Py_tp_members, (void*)DVector3_PyMemberDef},
-    {Py_tp_methods, (void*)DVector3_PyMethodDef},
+static PyType_Slot FVector3_PyType_Slots [] = {
+    {Py_tp_new, (void*)FVector3__new__},
+    {Py_tp_dealloc, (void*)FVector3__dealloc__},
+    {Py_tp_hash, (void*)FVector3__hash__},
+    {Py_tp_repr, (void*)FVector3__repr__},
+    {Py_sq_length, (void*)FVector3__len__},
+    {Py_sq_item, (void*)FVector3__getitem__},
+    {Py_tp_richcompare, (void*)FVector3__richcmp__},
+    {Py_nb_add, (void*)FVector3__add__},
+    {Py_nb_subtract, (void*)FVector3__sub__},
+    {Py_nb_multiply, (void*)FVector3__mul__},
+    {Py_nb_matrix_multiply, (void*)FVector3__matmul__},
+    {Py_nb_true_divide, (void*)FVector3__truediv__},
+    {Py_nb_remainder, (void*)FVector3__mod__},
+    {Py_nb_power, (void*)FVector3__pow__},
+    {Py_nb_negative, (void*)FVector3__neg__},
+    {Py_nb_absolute, (void*)FVector3__abs__},
+    {Py_nb_bool, (void*)FVector3__bool__},
+    {Py_bf_getbuffer, (void*)FVector3_getbufferproc},
+    {Py_tp_getset, (void*)FVector3_PyGetSetDef},
+    {Py_tp_getattro, (void*)FVector3__getattr__},
+    {Py_tp_members, (void*)FVector3_PyMemberDef},
+    {Py_tp_methods, (void*)FVector3_PyMethodDef},
     {0, 0},
 };
 
 
-static PyType_Spec DVector3_PyTypeSpec = {
-    "gamut.math.DVector3",
-    sizeof(DVector3),
+static PyType_Spec FVector3_PyTypeSpec = {
+    "gamut.math.FVector3",
+    sizeof(FVector3),
     0,
     Py_TPFLAGS_DEFAULT,
-    DVector3_PyType_Slots
+    FVector3_PyType_Slots
 };
 
 
 static PyTypeObject *
-define_DVector3_type(PyObject *module)
+define_FVector3_type(PyObject *module)
 {
     PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
         module,
-        &DVector3_PyTypeSpec,
+        &FVector3_PyTypeSpec,
         0
     );
     if (!type){ return 0; }
     // Note:
     // Unlike other functions that steal references, PyModule_AddObject() only
     // decrements the reference count of value on success.
-    if (PyModule_AddObject(module, "DVector3", (PyObject *)type) < 0)
+    if (PyModule_AddObject(module, "FVector3", (PyObject *)type) < 0)
     {
         Py_DECREF(type);
         return 0;
