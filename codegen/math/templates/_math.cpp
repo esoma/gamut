@@ -1,4 +1,4 @@
-// generated {{ when }}
+// generated {{ when }} from codegen/math/templates/_math.hpp
 
 // python
 #define PY_SSIZE_T_CLEAN

@@ -1,7 +1,14 @@
 
 # gamut
-from gamut.math import (DVector2, DVector3, DVector4, FVector2, FVector3,
-                        FVector4)
+from gamut.math import (BVector2, BVector3, BVector4, DVector2, DVector3,
+                        DVector4, FVector2, FVector3, FVector4, I8Vector2,
+                        I8Vector3, I8Vector4, I16Vector2, I16Vector3,
+                        I16Vector4, I32Vector2, I32Vector3, I32Vector4,
+                        I64Vector2, I64Vector3, I64Vector4, IVector2, IVector3,
+                        IVector4, U8Vector2, U8Vector3, U8Vector4, U16Vector2,
+                        U16Vector3, U16Vector4, U32Vector2, U32Vector3,
+                        U32Vector4, U64Vector2, U64Vector3, U64Vector4,
+                        UVector2, UVector3, UVector4)
 # python
 import itertools
 from math import inf
@@ -31,28 +38,36 @@ class VectorTest:
         cls,
         component_count,
         type,
-        struct_format
+        struct_format,
+        struct_byte_order='',
+        unsigned=False
     ):
         this_cls.cls = cls
         this_cls.component_count = component_count
         this_cls.type = type
+        this_cls.struct_byte_order = struct_byte_order
         this_cls.struct_format = struct_format
+        this_cls.unsigned = unsigned
 
     def test_empty_init(self) -> None:
         vector = self.cls()
         for i in range(self.component_count):
             assert vector[i] == 0
 
-    @pytest.mark.parametrize("arg", [-100, -1, 0, 1, 100])
-    def test_single_init(self, arg: int) -> None:
-        vector = self.cls(arg)
-        for i in range(self.component_count):
-            assert vector[i] == arg
+    def test_single_init(self) -> None:
+        for arg in [-100, -1, 0, 1, 100]:
+            if arg < 0 and self.unsigned:
+                with pytest.raises(OverflowError):
+                    self.cls(arg)
+            else:
+                vector = self.cls(arg)
+                for i in range(self.component_count):
+                    assert vector[i] == self.type(arg)
 
     def test_all_init(self) -> None:
         vector = self.cls(*range(self.component_count))
         for i in range(self.component_count):
-            assert vector[i] == i
+            assert vector[i] == self.type(i)
 
     def test_invalid_arg_count(self) -> None:
         with pytest.raises(TypeError) as excinfo:
@@ -79,8 +94,10 @@ class VectorTest:
     def test_getitem(self) -> None:
         vector = self.cls(*range(self.component_count))
         for i in range(self.component_count):
-            assert vector[i] == i
-            assert vector[i - self.component_count] == i
+            assert isinstance(vector[i], self.type)
+            assert vector[i] == self.type(i)
+            assert isinstance(vector[i - self.component_count], self.type)
+            assert vector[i - self.component_count] == self.type(i)
 
         with pytest.raises(IndexError) as excinfo:
             vector[self.component_count]
@@ -109,7 +126,7 @@ class VectorTest:
             for i, attr_name in enumerate(attributes):
                 if i < self.component_count:
                     result = getattr(vector, attr_name)
-                    assert result == i
+                    assert result == self.type(i)
                     assert isinstance(result, self.type)
                     with pytest.raises(AttributeError):
                         setattr(vector, attr_name, i)
@@ -150,8 +167,14 @@ class VectorTest:
             vector.not_a_swizzle
 
     def test_hash(self) -> None:
-        for i in range(-100, 100):
+        for i in range(0 if self.unsigned else -100, 100):
             assert hash(self.cls(i)) == hash(self.cls(i))
+
+        if not self.unsigned:
+            assert hash(self.cls(0)) != hash(self.cls(-1))
+        assert hash(self.cls(0)) != hash(self.cls(1))
+        if self.type != bool and not self.unsigned:
+            assert hash(self.cls(1)) != hash(self.cls(-1))
         assert hash(self.cls(0)) != hash(
             self.cls(*range(self.component_count))
         )
@@ -167,26 +190,29 @@ class VectorTest:
     def test_iterate(self) -> None:
         vector = self.cls(*range(self.component_count))
         for i, c in enumerate(vector):
-            assert c == i
+            assert c == self.type(i)
+            assert isinstance(c, self.type)
 
     def test_weakref(self) -> None:
         vector = self.cls()
         weak_vector = ref(vector)
 
     def test_equal(self) -> None:
-        for i in range(-100, 100):
+        for i in range(0 if self.unsigned else -100, 100):
             assert self.cls(i) == self.cls(i)
         assert not (self.cls(0) == self.cls(1))
-        assert not (self.cls(-1) == self.cls(1))
+        if self.type != bool and not self.unsigned:
+            assert not (self.cls(-1) == self.cls(1))
 
         assert not (self.cls() == 1)
         assert not (self.cls() == object())
 
     def test_not_equal(self) -> None:
-        for i in range(-100, 100):
+        for i in range(0 if self.unsigned else -100, 100):
             assert not (self.cls(i) != self.cls(i))
         assert self.cls(0) != self.cls(1)
-        assert self.cls(-1) != self.cls(1)
+        if self.type != bool and not self.unsigned:
+            assert self.cls(-1) != self.cls(1)
 
         assert self.cls() != 1
         assert self.cls() != object()
@@ -204,10 +230,25 @@ class VectorTest:
             a >= b
 
     def test_add(self) -> None:
-        assert self.cls(-1) + self.cls(-1) == self.cls(-2)
-        assert self.cls(-1) + -1 == self.cls(-2)
-        assert self.cls(1) + self.cls(-1) == self.cls(0)
-        assert self.cls(1) + -1 == self.cls(0)
+        if not self.unsigned:
+            assert self.cls(-1) + self.cls(-1) == self.cls(-2)
+            assert self.cls(-1) + -1 == self.cls(-2)
+            assert self.cls(1) + self.cls(-1) == self.cls(
+                self.type(1) + self.type(-1)
+            )
+            assert self.cls(1) + -1 == self.cls(
+                self.type(1) + self.type(-1)
+            )
+            self.cls(self.cls.get_limits()[1]) + self.cls(1)
+        else:
+            print(self.cls.get_limits())
+            print(self.cls(self.cls.get_limits()[1]))
+            print(self.cls(self.cls.get_limits()[1]) + self.cls(1))
+            print(self.cls(self.cls.get_limits()[0]))
+            assert (
+                self.cls(self.cls.get_limits()[1]) + self.cls(1) ==
+                self.cls(self.cls.get_limits()[0])
+            )
         assert self.cls(1) + self.cls(1) == self.cls(2)
         assert self.cls(1) + 1 == self.cls(2)
 
@@ -235,57 +276,86 @@ class VectorTest:
             i + 1 for i in range(self.component_count)
         ))
 
-        with pytest.raises(TypeError):
-            vector + None
-        with pytest.raises(TypeError):
-            vector + '123'
-        with pytest.raises(TypeError):
-            vector + object()
+        if self.type == bool:
+            assert (self.cls(1) + None) == self.cls(1)
+            assert (self.cls(0) + '123') == self.cls(1)
+            assert (self.cls(0) + object()) == self.cls(1)
+        else:
+            with pytest.raises(TypeError):
+                vector + None
+            with pytest.raises(TypeError):
+                vector + '123'
+            with pytest.raises(TypeError):
+                vector + object()
 
     def test_subtract(self) -> None:
-        assert self.cls(-1) - self.cls(-1) == self.cls(0)
-        assert self.cls(-1) - -1 == self.cls(0)
-        assert self.cls(1) - self.cls(-1) == self.cls(2)
-        assert self.cls(1) - -1 == self.cls(2)
+        if not self.unsigned:
+            assert self.cls(-1) - self.cls(-1) == self.cls(0)
+            assert self.cls(-1) - -1 == self.cls(0)
+            assert self.cls(1) - self.cls(-1) == self.cls(
+                self.type(1) - self.type(-1)
+            )
+            assert self.cls(1) - -1 == self.cls(
+                self.type(1) - self.type(-1)
+            )
+            self.cls(self.cls.get_limits()[1]) - self.cls(1)
+        else:
+            assert (
+                self.cls(0) - self.cls(1) ==
+                self.cls(self.cls.get_limits()[1])
+            )
         assert self.cls(1) - self.cls(1) == self.cls(0)
         assert self.cls(1) - 1 == self.cls(0)
 
-        vector = self.cls(*range(self.component_count))
+        vector = self.cls(*range(1, self.component_count + 1))
         assert vector - vector == self.cls(*(
-            i - i for i in range(self.component_count)
+            i - i for i in range(1, self.component_count + 1)
         ))
         assert vector - 1 == self.cls(*(
-            i - 1 for i in range(self.component_count)
+            self.type(i) - self.type(1)
+            for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
         i_vec -= vector
         assert i_vec is not vector
-        assert vector == self.cls(*range(self.component_count))
+        assert vector == self.cls(*range(1, self.component_count + 1))
         assert i_vec == self.cls(*(
-            i - i for i in range(self.component_count)
+            i - i for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
         i_vec -= 1
         assert i_vec is not vector
-        assert vector == self.cls(*range(self.component_count))
+        assert vector == self.cls(*range(1, self.component_count + 1))
         assert i_vec == self.cls(*(
-            i - 1 for i in range(self.component_count)
+            self.type(i) - self.type(1)
+            for i in range(1, self.component_count + 1)
         ))
 
-        with pytest.raises(TypeError):
-            vector - None
-        with pytest.raises(TypeError):
-            vector - '123'
-        with pytest.raises(TypeError):
-            vector - object()
+        if self.type == bool:
+            assert (self.cls(1) - None) == self.cls(1)
+            assert (self.cls(0) - '123') == self.cls(1)
+            assert (self.cls(0) - object()) == self.cls(1)
+        else:
+            with pytest.raises(TypeError):
+                vector - None
+            with pytest.raises(TypeError):
+                vector - '123'
+            with pytest.raises(TypeError):
+                vector - object()
 
     def test_multiply(self) -> None:
-        assert self.cls(-1) * self.cls(-2) == self.cls(2)
-        assert self.cls(-1) * -2 == self.cls(2)
-        assert self.cls(1) * self.cls(-2) == self.cls(-2)
-        assert self.cls(1) * -2 == self.cls(-2)
+        if not self.unsigned:
+            assert self.cls(-1) * self.cls(-2) == self.cls(2)
+            assert self.cls(-1) * -2 == self.cls(2)
+            assert self.cls(1) * self.cls(-2) == self.cls(-2)
+            assert self.cls(1) * -2 == self.cls(-2)
+        else:
+            assert (
+                self.cls(self.cls.get_limits()[1]) * self.cls(2) ==
+                self.cls(self.cls.get_limits()[1] - 1)
+            )
         assert self.cls(1) * self.cls(2) == self.cls(2)
         assert self.cls(1) * 2 == self.cls(2)
 
@@ -313,14 +383,26 @@ class VectorTest:
             i * 2 for i in range(self.component_count)
         ))
 
-        with pytest.raises(TypeError):
-            vector * None
-        with pytest.raises(TypeError):
-            vector * '123'
-        with pytest.raises(TypeError):
-            vector * object()
+        if self.type == bool:
+            assert (self.cls(1) * None) == self.cls(0)
+            assert (self.cls(0) * '123') == self.cls(0)
+            assert (self.cls(0) * object()) == self.cls(0)
+            assert (self.cls(1) * '123') == self.cls(1)
+            assert (self.cls(1) * object()) == self.cls(1)
+        else:
+            with pytest.raises(TypeError):
+                vector * None
+            with pytest.raises(TypeError):
+                vector * '123'
+            with pytest.raises(TypeError):
+                vector * object()
 
     def test_matrix_multiply(self) -> None:
+        if self.type != float:
+            with pytest.raises(TypeError):
+                self.cls() @ self.cls()
+            return
+
         assert self.cls(0) @ self.cls(0) == 0
         assert self.cls(1) @ self.cls(1) == sum(
             self.cls(1)[i] * self.cls(1)[i]
@@ -350,22 +432,35 @@ class VectorTest:
             vector @ object()
 
     def test_divide(self) -> None:
-        assert self.cls(-1) / self.cls(-2) == self.cls(.5)
-        assert self.cls(-1) / -2 == self.cls(.5)
-        assert self.cls(1) / self.cls(-2) == self.cls(-.5)
-        assert self.cls(1) / -2 == self.cls(-.5)
-        assert self.cls(1) / self.cls(2) == self.cls(.5)
-        assert self.cls(1) / 2 == self.cls(.5)
+        if self.type == bool:
+            with pytest.raises(TypeError):
+                self.cls() / self.cls()
+            return
 
-        assert self.cls(1) / 0 == self.cls(inf)
-        assert self.cls(1) / self.cls(0) == self.cls(inf)
+        if not self.unsigned:
+            assert self.cls(-1) / self.cls(-2) == self.cls(self.type(.5))
+            assert self.cls(-1) / -2 == self.cls(self.type(.5))
+            assert self.cls(1) / self.cls(-2) == self.cls(self.type(-.5))
+            assert self.cls(1) / -2 == self.cls(self.type(-.5))
+
+        assert self.cls(1) / self.cls(2) == self.cls(self.type(.5))
+        assert self.cls(1) / 2 == self.cls(self.type(.5))
+
+        if self.type == float:
+            assert self.cls(1) / 0 == self.cls(inf)
+            assert self.cls(1) / self.cls(0) == self.cls(inf)
+        else:
+            with pytest.raises(ZeroDivisionError):
+                assert self.cls(1) / 0
+            with pytest.raises(ZeroDivisionError):
+                assert self.cls(1) / self.cls(0)
 
         vector = self.cls(*range(1, self.component_count + 1))
         assert vector / vector == self.cls(*(
-            i / i for i in range(1, self.component_count + 1)
+            self.type(i / i) for i in range(1, self.component_count + 1)
         ))
         assert vector / 2 == self.cls(*(
-            i / 2 for i in range(1, self.component_count + 1)
+            self.type(i / 2) for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
@@ -373,7 +468,7 @@ class VectorTest:
         assert i_vec is not vector
         assert vector == self.cls(*range(1, self.component_count + 1))
         assert i_vec == self.cls(*(
-            i / i for i in range(1, self.component_count + 1)
+            self.type(i / i) for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
@@ -381,7 +476,7 @@ class VectorTest:
         assert i_vec is not vector
         assert vector == self.cls(*range(1, self.component_count + 1))
         assert i_vec == self.cls(*(
-            i / 2 for i in range(1, self.component_count + 1)
+            self.type(i / 2) for i in range(1, self.component_count + 1)
         ))
 
         with pytest.raises(TypeError):
@@ -393,6 +488,11 @@ class VectorTest:
 
 
     def test_modulus(self) -> None:
+        if self.type != float:
+            with pytest.raises(TypeError):
+                self.cls() % self.cls()
+            return
+
         assert self.cls(-3) % self.cls(-2) == self.cls(-1)
         assert self.cls(-3) % -2 == self.cls(-1)
         assert self.cls(3) % self.cls(-2) == self.cls(-1)
@@ -436,6 +536,11 @@ class VectorTest:
 
 
     def test_power(self) -> None:
+        if self.type != float:
+            with pytest.raises(TypeError):
+                self.cls() ** self.cls()
+            return
+
         assert self.cls(-3) ** self.cls(-2) == self.cls(3 ** -2)
         assert self.cls(-3) ** -2 == self.cls(3 ** -2)
         assert self.cls(3) ** self.cls(-2) == self.cls(3 ** -2)
@@ -478,6 +583,11 @@ class VectorTest:
             vector ** object()
 
     def test_negative(self) -> None:
+        if self.unsigned:
+            with pytest.raises(TypeError):
+                -self.cls(0)
+            return
+
         assert -self.cls(0) == self.cls(-0)
         assert -self.cls(1) == self.cls(-1)
         assert -self.cls(-1) == self.cls(1)
@@ -487,19 +597,21 @@ class VectorTest:
             -i for i in range(self.component_count)
         ))
 
-
     def test_abs(self) -> None:
         assert abs(self.cls(0)) == self.cls(0)
         assert abs(self.cls(1)) == self.cls(1)
-        assert abs(self.cls(-1)) == self.cls(1)
+        if not self.unsigned:
+            assert abs(self.cls(-1)) == self.cls(1)
 
         vector = self.cls(*range(self.component_count))
         assert abs(vector) == self.cls(*(range(self.component_count)))
-        assert abs(-vector) == self.cls(*(range(self.component_count)))
+        if not self.unsigned:
+            assert abs(-vector) == self.cls(*(range(self.component_count)))
 
     def test_bool(self) -> None:
         assert self.cls(1)
-        assert self.cls(-1)
+        if not self.unsigned:
+            assert self.cls(-1)
         assert not self.cls(0)
 
         for i in range(self.component_count):
@@ -509,23 +621,31 @@ class VectorTest:
 
     def test_buffer(self) -> None:
         assert bytes(self.cls(*range(self.component_count))) == struct.pack(
-            self.struct_format * self.component_count,
+            self.struct_byte_order + (
+                self.struct_format * self.component_count
+            ),
             *range(self.component_count)
         )
         memory_view = memoryview(self.cls(0))
         assert memory_view.readonly
-        assert memory_view.format == self.struct_format
-        assert memory_view.itemsize == struct.calcsize(self.struct_format)
+        assert memory_view.format == (
+            self.struct_byte_order + self.struct_format
+        )
+        assert memory_view.itemsize == struct.calcsize(
+            self.struct_byte_order + self.struct_format
+        )
         assert memory_view.ndim == 1
         assert memory_view.shape == (self.component_count,)
-        assert memory_view.strides == (struct.calcsize(self.struct_format),)
+        assert memory_view.strides == (struct.calcsize(
+            self.struct_byte_order + self.struct_format
+        ),)
         assert memory_view.suboffsets == tuple()
         assert memory_view.c_contiguous
         assert memory_view.f_contiguous
         assert memory_view.contiguous
 
     def test_cross(self) -> None:
-        if self.component_count != 3:
+        if self.component_count != 3 or self.type != float:
             with pytest.raises(AttributeError):
                 self.cls().cross(self.cls())
             return
@@ -546,6 +666,11 @@ class VectorTest:
         assert str(excinfo.value) == f'{1!r} is not {self.cls.__name__}'
 
     def test_magnitude(self) -> None:
+        if self.type != float:
+            with pytest.raises(AttributeError):
+                self.cls().magnitude
+            return
+
         assert isclose(
             self.cls(-1).magnitude,
             sqrt(sum(1 ** 2 for _ in range(self.component_count)))
@@ -567,7 +692,15 @@ class VectorTest:
             sqrt(sum(i ** 2 for i in range(self.component_count)))
         )
 
+        with pytest.raises(AttributeError):
+            self.cls().magnitude = 1
+
     def test_normalize(self) -> None:
+        if self.type != float:
+            with pytest.raises(AttributeError):
+                self.cls().normalize()
+            return
+
         assert all(isnan(c) for c in self.cls(0).normalize())
 
         vector = self.cls(1)
@@ -580,6 +713,11 @@ class VectorTest:
 
 
     def test_distance(self) -> None:
+        if self.type != float:
+            with pytest.raises(AttributeError):
+                self.cls().distance(self.cls())
+            return
+
         assert self.cls(-1).distance(self.cls(-1)) == 0
         assert self.cls(0).distance(self.cls(0)) == 0
         assert self.cls(1).distance(self.cls(1)) == 0
@@ -604,6 +742,16 @@ class VectorTest:
         assert str(excinfo.value) == f'{1!r} is not {self.cls.__name__}'
 
 
+class TestBVector2(
+    VectorTest,
+    cls=BVector2,
+    component_count=2,
+    type=bool,
+    struct_format='?'
+):
+    pass
+
+
 class TestDVector2(
     VectorTest,
     cls=DVector2,
@@ -620,6 +768,129 @@ class TestFVector2(
     component_count=2,
     type=float,
     struct_format='f'
+):
+    pass
+
+
+class TestI8Vector2(
+    VectorTest,
+    cls=I8Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='b'
+):
+    pass
+
+
+class TestU8Vector2(
+    VectorTest,
+    cls=U8Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='B',
+    unsigned=True
+):
+    pass
+
+
+class TestI16Vector2(
+    VectorTest,
+    cls=I16Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='h'
+):
+    pass
+
+
+class TestU16Vector2(
+    VectorTest,
+    cls=U16Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='H',
+    unsigned=True
+):
+    pass
+
+
+class TestI32Vector2(
+    VectorTest,
+    cls=I32Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='i'
+):
+    pass
+
+
+class TestU32Vector2(
+    VectorTest,
+    cls=U32Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestIVector2(
+    VectorTest,
+    cls=IVector2,
+    component_count=2,
+    type=int,
+    struct_format='i'
+):
+    pass
+
+
+class TestUVector2(
+    VectorTest,
+    cls=UVector2,
+    component_count=2,
+    type=int,
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestI64Vector2(
+    VectorTest,
+    cls=I64Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='q'
+):
+    pass
+
+
+class TestU64Vector2(
+    VectorTest,
+    cls=U64Vector2,
+    component_count=2,
+    type=int,
+    struct_byte_order='=',
+    struct_format='Q',
+    unsigned=True
+):
+    pass
+
+
+class TestBVector3(
+    VectorTest,
+    cls=BVector3,
+    component_count=3,
+    type=bool,
+    struct_format='?'
 ):
     pass
 
@@ -644,6 +915,129 @@ class TestFVector3(
     pass
 
 
+class TestI8Vector3(
+    VectorTest,
+    cls=I8Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='b'
+):
+    pass
+
+
+class TestU8Vector3(
+    VectorTest,
+    cls=U8Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='B',
+    unsigned=True
+):
+    pass
+
+
+class TestI16Vector3(
+    VectorTest,
+    cls=I16Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='h'
+):
+    pass
+
+
+class TestU16Vector3(
+    VectorTest,
+    cls=U16Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='H',
+    unsigned=True
+):
+    pass
+
+
+class TestI32Vector3(
+    VectorTest,
+    cls=I32Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='i'
+):
+    pass
+
+
+class TestU32Vector3(
+    VectorTest,
+    cls=U32Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestIVector3(
+    VectorTest,
+    cls=IVector3,
+    component_count=3,
+    type=int,
+    struct_format='i'
+):
+    pass
+
+
+class TestUVector3(
+    VectorTest,
+    cls=UVector3,
+    component_count=3,
+    type=int,
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestI64Vector3(
+    VectorTest,
+    cls=I64Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='q'
+):
+    pass
+
+
+class TestU64Vector3(
+    VectorTest,
+    cls=U64Vector3,
+    component_count=3,
+    type=int,
+    struct_byte_order='=',
+    struct_format='Q',
+    unsigned=True
+):
+    pass
+
+
+class TestBVector4(
+    VectorTest,
+    cls=BVector4,
+    component_count=4,
+    type=bool,
+    struct_format='?'
+):
+    pass
+
+
 class TestDVector4(
     VectorTest,
     cls=DVector4,
@@ -660,5 +1054,119 @@ class TestFVector4(
     component_count=4,
     type=float,
     struct_format='f'
+):
+    pass
+
+
+class TestI8Vector4(
+    VectorTest,
+    cls=I8Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='b'
+):
+    pass
+
+
+class TestU8Vector4(
+    VectorTest,
+    cls=U8Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='B',
+    unsigned=True
+):
+    pass
+
+
+class TestI16Vector4(
+    VectorTest,
+    cls=I16Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='h'
+):
+    pass
+
+
+class TestU16Vector4(
+    VectorTest,
+    cls=U16Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='H',
+    unsigned=True
+):
+    pass
+
+
+
+class TestI32Vector4(
+    VectorTest,
+    cls=I32Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='i'
+):
+    pass
+
+
+class TestU32Vector4(
+    VectorTest,
+    cls=U32Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestIVector4(
+    VectorTest,
+    cls=IVector4,
+    component_count=4,
+    type=int,
+    struct_format='i'
+):
+    pass
+
+
+class TestUVector4(
+    VectorTest,
+    cls=UVector4,
+    component_count=4,
+    type=int,
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestI64Vector4(
+    VectorTest,
+    cls=I64Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='q'
+):
+    pass
+
+
+class TestU64Vector4(
+    VectorTest,
+    cls=U64Vector4,
+    component_count=4,
+    type=int,
+    struct_byte_order='=',
+    struct_format='Q',
+    unsigned=True
 ):
     pass

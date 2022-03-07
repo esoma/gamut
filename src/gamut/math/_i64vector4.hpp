@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.211094 from codegen/math/templates/_vector.hpp
+// generated 2022-03-07 23:13:00.217595 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -15,35 +15,35 @@
 // gamut
 #include "_type.hpp"
 
-typedef glm::vec<4, double, glm::defaultp> DVector4Glm;
+typedef glm::vec<4, int64_t, glm::defaultp> I64Vector4Glm;
 
 
-struct DVector4
+struct I64Vector4
 {
     PyObject_HEAD
     PyObject *weakreflist;
-    DVector4Glm *glm;
+    I64Vector4Glm *glm;
 };
 
 
 static PyObject *
-DVector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+I64Vector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
 
-        double c_0 = 0;
+        int64_t c_0 = 0;
 
-        double c_1 = 0;
+        int64_t c_1 = 0;
 
-        double c_2 = 0;
+        int64_t c_2 = 0;
 
-        double c_3 = 0;
+        int64_t c_3 = 0;
 
 
     if (kwds && PyDict_Size(kwds) != 0)
     {
         PyErr_SetString(
             PyExc_TypeError,
-            "DVector4 does accept any keyword arguments"
+            "I64Vector4 does accept any keyword arguments"
         );
         return 0;
     }
@@ -57,7 +57,7 @@ DVector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         case 1:
         {
             auto arg = PyTuple_GET_ITEM(args, 0);
-            double arg_c = pyobject_to_c_double(arg);
+            int64_t arg_c = pyobject_to_c_int64_t(arg);
             auto error_occurred = PyErr_Occurred();
             if (error_occurred){ return 0; }
 
@@ -76,28 +76,28 @@ DVector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 0);
-                c_0 = pyobject_to_c_double(arg);
+                c_0 = pyobject_to_c_int64_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 1);
-                c_1 = pyobject_to_c_double(arg);
+                c_1 = pyobject_to_c_int64_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 2);
-                c_2 = pyobject_to_c_double(arg);
+                c_2 = pyobject_to_c_int64_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 3);
-                c_3 = pyobject_to_c_double(arg);
+                c_3 = pyobject_to_c_int64_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
@@ -108,7 +108,7 @@ DVector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         {
             PyErr_Format(
                 PyExc_TypeError,
-                "invalid number of arguments supplied to DVector4, expected "
+                "invalid number of arguments supplied to I64Vector4, expected "
                 "0, 1 or 4 (got %zd)",
                 arg_count
             );
@@ -116,9 +116,9 @@ DVector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         }
     }
 
-    DVector4 *self = (DVector4*)cls->tp_alloc(cls, 0);
+    I64Vector4 *self = (I64Vector4*)cls->tp_alloc(cls, 0);
     if (!self){ return 0; }
-    self->glm = new DVector4Glm(
+    self->glm = new I64Vector4Glm(
 
             c_0,
 
@@ -135,7 +135,7 @@ DVector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
 
 static void
-DVector4__dealloc__(DVector4 *self)
+I64Vector4__dealloc__(I64Vector4 *self)
 {
     if (self->weakreflist)
     {
@@ -164,13 +164,13 @@ DVector4__dealloc__(DVector4 *self)
 #endif
 
 static Py_hash_t
-DVector4__hash__(DVector4 *self)
+I64Vector4__hash__(I64Vector4 *self)
 {
     Py_ssize_t i, len = 4;
     Py_uhash_t acc = _HASH_XXPRIME_5;
     for (i = 0; i < len; i++)
     {
-        Py_uhash_t lane = std::hash<double>{}((*self->glm)[i]);
+        Py_uhash_t lane = std::hash<int64_t>{}((*self->glm)[i]);
         if (lane == (Py_uhash_t)-1)
         {
             return -1;
@@ -189,7 +189,7 @@ DVector4__hash__(DVector4 *self)
 
 
 static PyObject *
-DVector4__repr__(DVector4 *self)
+I64Vector4__repr__(I64Vector4 *self)
 {
     PyObject *result = 0;
 
@@ -203,20 +203,20 @@ DVector4__repr__(DVector4 *self)
 
 
 
-        py_0 = c_double_to_pyobject((*self->glm)[0]);
+        py_0 = c_int64_t_to_pyobject((*self->glm)[0]);
         if (!py_0){ goto cleanup; }
 
-        py_1 = c_double_to_pyobject((*self->glm)[1]);
+        py_1 = c_int64_t_to_pyobject((*self->glm)[1]);
         if (!py_1){ goto cleanup; }
 
-        py_2 = c_double_to_pyobject((*self->glm)[2]);
+        py_2 = c_int64_t_to_pyobject((*self->glm)[2]);
         if (!py_2){ goto cleanup; }
 
-        py_3 = c_double_to_pyobject((*self->glm)[3]);
+        py_3 = c_int64_t_to_pyobject((*self->glm)[3]);
         if (!py_3){ goto cleanup; }
 
     result = PyUnicode_FromFormat(
-        "DVector4("
+        "I64Vector4("
 
             "%R, "
 
@@ -252,14 +252,14 @@ cleanup:
 
 
 static Py_ssize_t
-DVector4__len__(DVector4 *self)
+I64Vector4__len__(I64Vector4 *self)
 {
     return 4;
 }
 
 
 static PyObject *
-DVector4__getitem__(DVector4 *self, Py_ssize_t index)
+I64Vector4__getitem__(I64Vector4 *self, Py_ssize_t index)
 {
     if (index < 0 || index > 3)
     {
@@ -267,12 +267,12 @@ DVector4__getitem__(DVector4 *self, Py_ssize_t index)
         return 0;
     }
     auto c = (*self->glm)[index];
-    return c_double_to_pyobject(c);
+    return c_int64_t_to_pyobject(c);
 }
 
 
 static PyObject *
-DVector4__richcmp__(DVector4 *self, DVector4 *other, int op)
+I64Vector4__richcmp__(I64Vector4 *self, I64Vector4 *other, int op)
 {
     if (Py_TYPE(self) != Py_TYPE(other))
     {
@@ -309,24 +309,24 @@ DVector4__richcmp__(DVector4 *self, DVector4 *other, int op)
 
 
 static PyObject *
-DVector4__add__(DVector4 *self, PyObject *other)
+I64Vector4__add__(I64Vector4 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector4Glm vector;
+    I64Vector4Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_int64_t(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) + c_other;
     }
     else
     {
-        vector = (*self->glm) + (*((DVector4 *)other)->glm);
+        vector = (*self->glm) + (*((I64Vector4 *)other)->glm);
     }
 
-    DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+    I64Vector4 *result = (I64Vector4 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector4Glm(
+    result->glm = new I64Vector4Glm(
 
             vector[0],
 
@@ -343,24 +343,24 @@ DVector4__add__(DVector4 *self, PyObject *other)
 
 
 static PyObject *
-DVector4__sub__(DVector4 *self, PyObject *other)
+I64Vector4__sub__(I64Vector4 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector4Glm vector;
+    I64Vector4Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_int64_t(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) - c_other;
     }
     else
     {
-        vector = (*self->glm) - (*((DVector4 *)other)->glm);
+        vector = (*self->glm) - (*((I64Vector4 *)other)->glm);
     }
 
-    DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+    I64Vector4 *result = (I64Vector4 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector4Glm(
+    result->glm = new I64Vector4Glm(
 
             vector[0],
 
@@ -377,24 +377,24 @@ DVector4__sub__(DVector4 *self, PyObject *other)
 
 
 static PyObject *
-DVector4__mul__(DVector4 *self, PyObject *other)
+I64Vector4__mul__(I64Vector4 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector4Glm vector;
+    I64Vector4Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_int64_t(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) * c_other;
     }
     else
     {
-        vector = (*self->glm) * (*((DVector4 *)other)->glm);
+        vector = (*self->glm) * (*((I64Vector4 *)other)->glm);
     }
 
-    DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+    I64Vector4 *result = (I64Vector4 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector4Glm(
+    result->glm = new I64Vector4Glm(
 
             vector[0],
 
@@ -411,107 +411,52 @@ DVector4__mul__(DVector4 *self, PyObject *other)
 
 
 
-    static PyObject *
-    DVector4__matmul__(DVector4 *self, DVector4 *other)
-    {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-        auto c_result = glm::dot(*self->glm, *other->glm);
-        return c_double_to_pyobject(c_result);
-    }
+
 
 
     static PyObject *
-    DVector4__mod__(DVector4 *self, PyObject *other)
+    I64Vector4__truediv__(I64Vector4 *self, PyObject *other)
     {
         auto cls = Py_TYPE(self);
-        DVector4Glm vector;
+        I64Vector4Glm vector;
         if (Py_TYPE(other) != cls)
         {
-            auto c_other = pyobject_to_c_double(other);
+            auto c_other = pyobject_to_c_int64_t(other);
             if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::mod((*self->glm), c_other);
-        }
-        else
-        {
-            vector = glm::mod((*self->glm), (*((DVector4 *)other)->glm));
-        }
 
-        DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new DVector4Glm(
-
-                vector[0],
-
-                vector[1],
-
-                vector[2],
-
-                vector[3]
-
-        );
-
-        return (PyObject *)result;
-    }
-
-
-    static PyObject *
-    DVector4__pow__(DVector4 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        DVector4Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::pow((*self->glm), DVector4Glm(c_other));
-        }
-        else
-        {
-            vector = glm::pow((*self->glm), (*((DVector4 *)other)->glm));
-        }
-
-        DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new DVector4Glm(
-
-                vector[0],
-
-                vector[1],
-
-                vector[2],
-
-                vector[3]
-
-        );
-
-        return (PyObject *)result;
-    }
-
-
-
-
-    static PyObject *
-    DVector4__truediv__(DVector4 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        DVector4Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (c_other == 0)
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
 
             vector = (*self->glm) / c_other;
         }
         else
         {
 
-            vector = (*self->glm) / (*((DVector4 *)other)->glm);
+                if (
+
+                        (*((I64Vector4 *)other)->glm)[0] == 0 ||
+
+                        (*((I64Vector4 *)other)->glm)[1] == 0 ||
+
+                        (*((I64Vector4 *)other)->glm)[2] == 0 ||
+
+                        (*((I64Vector4 *)other)->glm)[3] == 0
+
+                )
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
+
+            vector = (*self->glm) / (*((I64Vector4 *)other)->glm);
         }
 
-        DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+        I64Vector4 *result = (I64Vector4 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new DVector4Glm(
+        result->glm = new I64Vector4Glm(
 
                 vector[0],
 
@@ -530,16 +475,16 @@ DVector4__mul__(DVector4 *self, PyObject *other)
 
 
     static PyObject *
-    DVector4__neg__(DVector4 *self)
+    I64Vector4__neg__(I64Vector4 *self)
     {
         auto cls = Py_TYPE(self);
 
-            DVector4Glm vector = -(*self->glm);
+            I64Vector4Glm vector = -(*self->glm);
 
 
-        DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+        I64Vector4 *result = (I64Vector4 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new DVector4Glm(
+        result->glm = new I64Vector4Glm(
 
                 vector[0],
 
@@ -557,14 +502,14 @@ DVector4__mul__(DVector4 *self, PyObject *other)
 
 
 static PyObject *
-DVector4__abs__(DVector4 *self)
+I64Vector4__abs__(I64Vector4 *self)
 {
     auto cls = Py_TYPE(self);
-    DVector4Glm vector = glm::abs(*self->glm);
+    I64Vector4Glm vector = glm::abs(*self->glm);
 
-    DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+    I64Vector4 *result = (I64Vector4 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector4Glm(
+    result->glm = new I64Vector4Glm(
 
             vector[0],
 
@@ -581,7 +526,7 @@ DVector4__abs__(DVector4 *self)
 
 
 static int
-DVector4__bool__(DVector4 *self)
+I64Vector4__bool__(I64Vector4 *self)
 {
 
         if ((*self->glm)[0] == 0)
@@ -609,20 +554,20 @@ DVector4__bool__(DVector4 *self)
 
 
 static int
-DVector4_getbufferproc(DVector4 *self, Py_buffer *view, int flags)
+I64Vector4_getbufferproc(I64Vector4 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "DVector4 is not read only");
+        PyErr_SetString(PyExc_TypeError, "I64Vector4 is not read only");
         view->obj = 0;
         return -1;
     }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
-    view->len = sizeof(double) * 4;
+    view->len = sizeof(int64_t) * 4;
     view->readonly = 1;
-    view->itemsize = sizeof(double);
-    view->format = "d";
+    view->itemsize = sizeof(int64_t);
+    view->format = "=q";
     view->ndim = 1;
     static Py_ssize_t shape = 4;
     view->shape = &shape;
@@ -636,75 +581,66 @@ DVector4_getbufferproc(DVector4 *self, Py_buffer *view, int flags)
 
 
     static PyObject *
-    DVector4_Getter_0(DVector4 *self, void *)
+    I64Vector4_Getter_0(I64Vector4 *self, void *)
     {
         auto c = (*self->glm)[0];
-        return c_double_to_pyobject(c);
+        return c_int64_t_to_pyobject(c);
     }
 
     static PyObject *
-    DVector4_Getter_1(DVector4 *self, void *)
+    I64Vector4_Getter_1(I64Vector4 *self, void *)
     {
         auto c = (*self->glm)[1];
-        return c_double_to_pyobject(c);
+        return c_int64_t_to_pyobject(c);
     }
 
     static PyObject *
-    DVector4_Getter_2(DVector4 *self, void *)
+    I64Vector4_Getter_2(I64Vector4 *self, void *)
     {
         auto c = (*self->glm)[2];
-        return c_double_to_pyobject(c);
+        return c_int64_t_to_pyobject(c);
     }
 
     static PyObject *
-    DVector4_Getter_3(DVector4 *self, void *)
+    I64Vector4_Getter_3(I64Vector4 *self, void *)
     {
         auto c = (*self->glm)[3];
-        return c_double_to_pyobject(c);
+        return c_int64_t_to_pyobject(c);
     }
 
 
 
 
-    static PyObject *
-    DVector4_magnitude(DVector4 *self, void *)
-    {
-        auto magnitude = glm::length(*self->glm);
-        return c_double_to_pyobject(magnitude);
-    }
 
 
+static PyGetSetDef I64Vector4_PyGetSetDef[] = {
+    {"x", (getter)I64Vector4_Getter_0, 0, 0, 0},
+    {"r", (getter)I64Vector4_Getter_0, 0, 0, 0},
+    {"s", (getter)I64Vector4_Getter_0, 0, 0, 0},
+    {"u", (getter)I64Vector4_Getter_0, 0, 0, 0},
 
-static PyGetSetDef DVector4_PyGetSetDef[] = {
-    {"x", (getter)DVector4_Getter_0, 0, 0, 0},
-    {"r", (getter)DVector4_Getter_0, 0, 0, 0},
-    {"s", (getter)DVector4_Getter_0, 0, 0, 0},
-    {"u", (getter)DVector4_Getter_0, 0, 0, 0},
-
-        {"y", (getter)DVector4_Getter_1, 0, 0, 0},
-        {"g", (getter)DVector4_Getter_1, 0, 0, 0},
-        {"t", (getter)DVector4_Getter_1, 0, 0, 0},
-        {"v", (getter)DVector4_Getter_1, 0, 0, 0},
-
-
-        {"z", (getter)DVector4_Getter_2, 0, 0, 0},
-        {"b", (getter)DVector4_Getter_2, 0, 0, 0},
-        {"p", (getter)DVector4_Getter_2, 0, 0, 0},
+        {"y", (getter)I64Vector4_Getter_1, 0, 0, 0},
+        {"g", (getter)I64Vector4_Getter_1, 0, 0, 0},
+        {"t", (getter)I64Vector4_Getter_1, 0, 0, 0},
+        {"v", (getter)I64Vector4_Getter_1, 0, 0, 0},
 
 
-        {"w", (getter)DVector4_Getter_3, 0, 0, 0},
-        {"a", (getter)DVector4_Getter_3, 0, 0, 0},
-        {"q", (getter)DVector4_Getter_3, 0, 0, 0},
+        {"z", (getter)I64Vector4_Getter_2, 0, 0, 0},
+        {"b", (getter)I64Vector4_Getter_2, 0, 0, 0},
+        {"p", (getter)I64Vector4_Getter_2, 0, 0, 0},
 
 
-        {"magnitude", (getter)DVector4_magnitude, 0, 0, 0},
+        {"w", (getter)I64Vector4_Getter_3, 0, 0, 0},
+        {"a", (getter)I64Vector4_Getter_3, 0, 0, 0},
+        {"q", (getter)I64Vector4_Getter_3, 0, 0, 0},
+
 
     {0, 0, 0, 0, 0}
 };
 
 
 static PyObject *
-DVector4__getattr__(DVector4 *self, PyObject *py_attr)
+I64Vector4__getattr__(I64Vector4 *self, PyObject *py_attr)
 {
     PyObject *result = PyObject_GenericGetAttr((PyObject *)self, py_attr);
     if (result != 0){ return result; }
@@ -757,7 +693,7 @@ DVector4__getattr__(DVector4 *self, PyObject *py_attr)
                 return 0;
             }
         }
-        auto py_c = c_double_to_pyobject((*self->glm)[glm_index]);
+        auto py_c = c_int64_t_to_pyobject((*self->glm)[glm_index]);
         PyTuple_SET_ITEM(result, i, py_c);
     }
 
@@ -766,8 +702,8 @@ DVector4__getattr__(DVector4 *self, PyObject *py_attr)
 }
 
 
-static PyMemberDef DVector4_PyMemberDef[] = {
-    {"__weaklistoffset__", T_PYSSIZET, offsetof(DVector4, weakreflist), READONLY},
+static PyMemberDef I64Vector4_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof(I64Vector4, weakreflist), READONLY},
     {0}
 };
 
@@ -775,51 +711,14 @@ static PyMemberDef DVector4_PyMemberDef[] = {
 
 
 
-    static DVector4 *
-    DVector4_normalize(DVector4 *self, void*)
-    {
-        auto cls = Py_TYPE(self);
-        auto vector = glm::normalize(*self->glm);
-        DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new DVector4Glm(
-
-                vector[0],
-
-                vector[1],
-
-                vector[2],
-
-                vector[3]
-
-        );
-        return result;
-    }
-
-
-    static PyObject *
-    DVector4_distance(DVector4 *self, DVector4 *other)
-    {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls)
-        {
-            PyErr_Format(PyExc_TypeError, "%R is not DVector4", other);
-            return 0;
-        }
-        auto result = glm::distance(*self->glm, *other->glm);
-        return c_double_to_pyobject(result);
-    }
-
-
-
 static PyObject *
-DVector4_get_limits(DVector4 *self, void *)
+I64Vector4_get_limits(I64Vector4 *self, void *)
 {
-    auto c_min = std::numeric_limits<double>::min();
-    auto c_max = std::numeric_limits<double>::max();
-    auto py_min = c_double_to_pyobject(c_min);
+    auto c_min = std::numeric_limits<int64_t>::min();
+    auto c_max = std::numeric_limits<int64_t>::max();
+    auto py_min = c_int64_t_to_pyobject(c_min);
     if (!py_min){ return 0; }
-    auto py_max = c_double_to_pyobject(c_max);
+    auto py_max = c_int64_t_to_pyobject(c_max);
     if (!py_max)
     {
         Py_DECREF(py_min);
@@ -838,72 +737,64 @@ DVector4_get_limits(DVector4 *self, void *)
 }
 
 
-static PyMethodDef DVector4_PyMethodDef[] = {
+static PyMethodDef I64Vector4_PyMethodDef[] = {
 
-
-        {"normalize", (PyCFunction)DVector4_normalize, METH_NOARGS, 0},
-        {"distance", (PyCFunction)DVector4_distance, METH_O, 0},
-
-    {"get_limits", (PyCFunction)DVector4_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_limits", (PyCFunction)I64Vector4_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}
 };
 
 
-static PyType_Slot DVector4_PyType_Slots [] = {
-    {Py_tp_new, (void*)DVector4__new__},
-    {Py_tp_dealloc, (void*)DVector4__dealloc__},
-    {Py_tp_hash, (void*)DVector4__hash__},
-    {Py_tp_repr, (void*)DVector4__repr__},
-    {Py_sq_length, (void*)DVector4__len__},
-    {Py_sq_item, (void*)DVector4__getitem__},
-    {Py_tp_richcompare, (void*)DVector4__richcmp__},
-    {Py_nb_add, (void*)DVector4__add__},
-    {Py_nb_subtract, (void*)DVector4__sub__},
-    {Py_nb_multiply, (void*)DVector4__mul__},
-
-        {Py_nb_matrix_multiply, (void*)DVector4__matmul__},
-        {Py_nb_remainder, (void*)DVector4__mod__},
-        {Py_nb_power, (void*)DVector4__pow__},
+static PyType_Slot I64Vector4_PyType_Slots [] = {
+    {Py_tp_new, (void*)I64Vector4__new__},
+    {Py_tp_dealloc, (void*)I64Vector4__dealloc__},
+    {Py_tp_hash, (void*)I64Vector4__hash__},
+    {Py_tp_repr, (void*)I64Vector4__repr__},
+    {Py_sq_length, (void*)I64Vector4__len__},
+    {Py_sq_item, (void*)I64Vector4__getitem__},
+    {Py_tp_richcompare, (void*)I64Vector4__richcmp__},
+    {Py_nb_add, (void*)I64Vector4__add__},
+    {Py_nb_subtract, (void*)I64Vector4__sub__},
+    {Py_nb_multiply, (void*)I64Vector4__mul__},
 
 
-        {Py_nb_true_divide, (void*)DVector4__truediv__},
+        {Py_nb_true_divide, (void*)I64Vector4__truediv__},
 
 
-        {Py_nb_negative, (void*)DVector4__neg__},
+        {Py_nb_negative, (void*)I64Vector4__neg__},
 
-    {Py_nb_absolute, (void*)DVector4__abs__},
-    {Py_nb_bool, (void*)DVector4__bool__},
-    {Py_bf_getbuffer, (void*)DVector4_getbufferproc},
-    {Py_tp_getset, (void*)DVector4_PyGetSetDef},
-    {Py_tp_getattro, (void*)DVector4__getattr__},
-    {Py_tp_members, (void*)DVector4_PyMemberDef},
-    {Py_tp_methods, (void*)DVector4_PyMethodDef},
+    {Py_nb_absolute, (void*)I64Vector4__abs__},
+    {Py_nb_bool, (void*)I64Vector4__bool__},
+    {Py_bf_getbuffer, (void*)I64Vector4_getbufferproc},
+    {Py_tp_getset, (void*)I64Vector4_PyGetSetDef},
+    {Py_tp_getattro, (void*)I64Vector4__getattr__},
+    {Py_tp_members, (void*)I64Vector4_PyMemberDef},
+    {Py_tp_methods, (void*)I64Vector4_PyMethodDef},
     {0, 0},
 };
 
 
-static PyType_Spec DVector4_PyTypeSpec = {
-    "gamut.math.DVector4",
-    sizeof(DVector4),
+static PyType_Spec I64Vector4_PyTypeSpec = {
+    "gamut.math.I64Vector4",
+    sizeof(I64Vector4),
     0,
     Py_TPFLAGS_DEFAULT,
-    DVector4_PyType_Slots
+    I64Vector4_PyType_Slots
 };
 
 
 static PyTypeObject *
-define_DVector4_type(PyObject *module)
+define_I64Vector4_type(PyObject *module)
 {
     PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
         module,
-        &DVector4_PyTypeSpec,
+        &I64Vector4_PyTypeSpec,
         0
     );
     if (!type){ return 0; }
     // Note:
     // Unlike other functions that steal references, PyModule_AddObject() only
     // decrements the reference count of value on success.
-    if (PyModule_AddObject(module, "DVector4", (PyObject *)type) < 0)
+    if (PyModule_AddObject(module, "I64Vector4", (PyObject *)type) < 0)
     {
         Py_DECREF(type);
         return 0;

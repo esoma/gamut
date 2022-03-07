@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.203094 from codegen/math/templates/_vector.hpp
+// generated 2022-03-07 23:13:00.207095 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -15,33 +15,33 @@
 // gamut
 #include "_type.hpp"
 
-typedef glm::vec<3, double, glm::defaultp> DVector3Glm;
+typedef glm::vec<3, int32_t, glm::defaultp> I32Vector3Glm;
 
 
-struct DVector3
+struct I32Vector3
 {
     PyObject_HEAD
     PyObject *weakreflist;
-    DVector3Glm *glm;
+    I32Vector3Glm *glm;
 };
 
 
 static PyObject *
-DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+I32Vector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
 
-        double c_0 = 0;
+        int32_t c_0 = 0;
 
-        double c_1 = 0;
+        int32_t c_1 = 0;
 
-        double c_2 = 0;
+        int32_t c_2 = 0;
 
 
     if (kwds && PyDict_Size(kwds) != 0)
     {
         PyErr_SetString(
             PyExc_TypeError,
-            "DVector3 does accept any keyword arguments"
+            "I32Vector3 does accept any keyword arguments"
         );
         return 0;
     }
@@ -55,7 +55,7 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         case 1:
         {
             auto arg = PyTuple_GET_ITEM(args, 0);
-            double arg_c = pyobject_to_c_double(arg);
+            int32_t arg_c = pyobject_to_c_int32_t(arg);
             auto error_occurred = PyErr_Occurred();
             if (error_occurred){ return 0; }
 
@@ -72,21 +72,21 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 0);
-                c_0 = pyobject_to_c_double(arg);
+                c_0 = pyobject_to_c_int32_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 1);
-                c_1 = pyobject_to_c_double(arg);
+                c_1 = pyobject_to_c_int32_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 2);
-                c_2 = pyobject_to_c_double(arg);
+                c_2 = pyobject_to_c_int32_t(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
@@ -97,7 +97,7 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         {
             PyErr_Format(
                 PyExc_TypeError,
-                "invalid number of arguments supplied to DVector3, expected "
+                "invalid number of arguments supplied to I32Vector3, expected "
                 "0, 1 or 3 (got %zd)",
                 arg_count
             );
@@ -105,9 +105,9 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         }
     }
 
-    DVector3 *self = (DVector3*)cls->tp_alloc(cls, 0);
+    I32Vector3 *self = (I32Vector3*)cls->tp_alloc(cls, 0);
     if (!self){ return 0; }
-    self->glm = new DVector3Glm(
+    self->glm = new I32Vector3Glm(
 
             c_0,
 
@@ -122,7 +122,7 @@ DVector3__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
 
 static void
-DVector3__dealloc__(DVector3 *self)
+I32Vector3__dealloc__(I32Vector3 *self)
 {
     if (self->weakreflist)
     {
@@ -151,13 +151,13 @@ DVector3__dealloc__(DVector3 *self)
 #endif
 
 static Py_hash_t
-DVector3__hash__(DVector3 *self)
+I32Vector3__hash__(I32Vector3 *self)
 {
     Py_ssize_t i, len = 3;
     Py_uhash_t acc = _HASH_XXPRIME_5;
     for (i = 0; i < len; i++)
     {
-        Py_uhash_t lane = std::hash<double>{}((*self->glm)[i]);
+        Py_uhash_t lane = std::hash<int32_t>{}((*self->glm)[i]);
         if (lane == (Py_uhash_t)-1)
         {
             return -1;
@@ -176,7 +176,7 @@ DVector3__hash__(DVector3 *self)
 
 
 static PyObject *
-DVector3__repr__(DVector3 *self)
+I32Vector3__repr__(I32Vector3 *self)
 {
     PyObject *result = 0;
 
@@ -188,17 +188,17 @@ DVector3__repr__(DVector3 *self)
 
 
 
-        py_0 = c_double_to_pyobject((*self->glm)[0]);
+        py_0 = c_int32_t_to_pyobject((*self->glm)[0]);
         if (!py_0){ goto cleanup; }
 
-        py_1 = c_double_to_pyobject((*self->glm)[1]);
+        py_1 = c_int32_t_to_pyobject((*self->glm)[1]);
         if (!py_1){ goto cleanup; }
 
-        py_2 = c_double_to_pyobject((*self->glm)[2]);
+        py_2 = c_int32_t_to_pyobject((*self->glm)[2]);
         if (!py_2){ goto cleanup; }
 
     result = PyUnicode_FromFormat(
-        "DVector3("
+        "I32Vector3("
 
             "%R, "
 
@@ -228,14 +228,14 @@ cleanup:
 
 
 static Py_ssize_t
-DVector3__len__(DVector3 *self)
+I32Vector3__len__(I32Vector3 *self)
 {
     return 3;
 }
 
 
 static PyObject *
-DVector3__getitem__(DVector3 *self, Py_ssize_t index)
+I32Vector3__getitem__(I32Vector3 *self, Py_ssize_t index)
 {
     if (index < 0 || index > 2)
     {
@@ -243,12 +243,12 @@ DVector3__getitem__(DVector3 *self, Py_ssize_t index)
         return 0;
     }
     auto c = (*self->glm)[index];
-    return c_double_to_pyobject(c);
+    return c_int32_t_to_pyobject(c);
 }
 
 
 static PyObject *
-DVector3__richcmp__(DVector3 *self, DVector3 *other, int op)
+I32Vector3__richcmp__(I32Vector3 *self, I32Vector3 *other, int op)
 {
     if (Py_TYPE(self) != Py_TYPE(other))
     {
@@ -285,24 +285,24 @@ DVector3__richcmp__(DVector3 *self, DVector3 *other, int op)
 
 
 static PyObject *
-DVector3__add__(DVector3 *self, PyObject *other)
+I32Vector3__add__(I32Vector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    I32Vector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_int32_t(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) + c_other;
     }
     else
     {
-        vector = (*self->glm) + (*((DVector3 *)other)->glm);
+        vector = (*self->glm) + (*((I32Vector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new I32Vector3Glm(
 
             vector[0],
 
@@ -317,24 +317,24 @@ DVector3__add__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__sub__(DVector3 *self, PyObject *other)
+I32Vector3__sub__(I32Vector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    I32Vector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_int32_t(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) - c_other;
     }
     else
     {
-        vector = (*self->glm) - (*((DVector3 *)other)->glm);
+        vector = (*self->glm) - (*((I32Vector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new I32Vector3Glm(
 
             vector[0],
 
@@ -349,24 +349,24 @@ DVector3__sub__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__mul__(DVector3 *self, PyObject *other)
+I32Vector3__mul__(I32Vector3 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector;
+    I32Vector3Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_double(other);
+        auto c_other = pyobject_to_c_int32_t(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) * c_other;
     }
     else
     {
-        vector = (*self->glm) * (*((DVector3 *)other)->glm);
+        vector = (*self->glm) * (*((I32Vector3 *)other)->glm);
     }
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new I32Vector3Glm(
 
             vector[0],
 
@@ -381,103 +381,50 @@ DVector3__mul__(DVector3 *self, PyObject *other)
 
 
 
-    static PyObject *
-    DVector3__matmul__(DVector3 *self, DVector3 *other)
-    {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-        auto c_result = glm::dot(*self->glm, *other->glm);
-        return c_double_to_pyobject(c_result);
-    }
+
 
 
     static PyObject *
-    DVector3__mod__(DVector3 *self, PyObject *other)
+    I32Vector3__truediv__(I32Vector3 *self, PyObject *other)
     {
         auto cls = Py_TYPE(self);
-        DVector3Glm vector;
+        I32Vector3Glm vector;
         if (Py_TYPE(other) != cls)
         {
-            auto c_other = pyobject_to_c_double(other);
+            auto c_other = pyobject_to_c_int32_t(other);
             if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::mod((*self->glm), c_other);
-        }
-        else
-        {
-            vector = glm::mod((*self->glm), (*((DVector3 *)other)->glm));
-        }
 
-        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new DVector3Glm(
-
-                vector[0],
-
-                vector[1],
-
-                vector[2]
-
-        );
-
-        return (PyObject *)result;
-    }
-
-
-    static PyObject *
-    DVector3__pow__(DVector3 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        DVector3Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::pow((*self->glm), DVector3Glm(c_other));
-        }
-        else
-        {
-            vector = glm::pow((*self->glm), (*((DVector3 *)other)->glm));
-        }
-
-        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new DVector3Glm(
-
-                vector[0],
-
-                vector[1],
-
-                vector[2]
-
-        );
-
-        return (PyObject *)result;
-    }
-
-
-
-
-    static PyObject *
-    DVector3__truediv__(DVector3 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        DVector3Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (c_other == 0)
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
 
             vector = (*self->glm) / c_other;
         }
         else
         {
 
-            vector = (*self->glm) / (*((DVector3 *)other)->glm);
+                if (
+
+                        (*((I32Vector3 *)other)->glm)[0] == 0 ||
+
+                        (*((I32Vector3 *)other)->glm)[1] == 0 ||
+
+                        (*((I32Vector3 *)other)->glm)[2] == 0
+
+                )
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
+
+            vector = (*self->glm) / (*((I32Vector3 *)other)->glm);
         }
 
-        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+        I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new DVector3Glm(
+        result->glm = new I32Vector3Glm(
 
                 vector[0],
 
@@ -494,16 +441,16 @@ DVector3__mul__(DVector3 *self, PyObject *other)
 
 
     static PyObject *
-    DVector3__neg__(DVector3 *self)
+    I32Vector3__neg__(I32Vector3 *self)
     {
         auto cls = Py_TYPE(self);
 
-            DVector3Glm vector = -(*self->glm);
+            I32Vector3Glm vector = -(*self->glm);
 
 
-        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+        I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new DVector3Glm(
+        result->glm = new I32Vector3Glm(
 
                 vector[0],
 
@@ -519,14 +466,14 @@ DVector3__mul__(DVector3 *self, PyObject *other)
 
 
 static PyObject *
-DVector3__abs__(DVector3 *self)
+I32Vector3__abs__(I32Vector3 *self)
 {
     auto cls = Py_TYPE(self);
-    DVector3Glm vector = glm::abs(*self->glm);
+    I32Vector3Glm vector = glm::abs(*self->glm);
 
-    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector3Glm(
+    result->glm = new I32Vector3Glm(
 
             vector[0],
 
@@ -541,7 +488,7 @@ DVector3__abs__(DVector3 *self)
 
 
 static int
-DVector3__bool__(DVector3 *self)
+I32Vector3__bool__(I32Vector3 *self)
 {
 
         if ((*self->glm)[0] == 0)
@@ -564,20 +511,20 @@ DVector3__bool__(DVector3 *self)
 
 
 static int
-DVector3_getbufferproc(DVector3 *self, Py_buffer *view, int flags)
+I32Vector3_getbufferproc(I32Vector3 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "DVector3 is not read only");
+        PyErr_SetString(PyExc_TypeError, "I32Vector3 is not read only");
         view->obj = 0;
         return -1;
     }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
-    view->len = sizeof(double) * 3;
+    view->len = sizeof(int32_t) * 3;
     view->readonly = 1;
-    view->itemsize = sizeof(double);
-    view->format = "d";
+    view->itemsize = sizeof(int32_t);
+    view->format = "=i";
     view->ndim = 1;
     static Py_ssize_t shape = 3;
     view->shape = &shape;
@@ -591,64 +538,55 @@ DVector3_getbufferproc(DVector3 *self, Py_buffer *view, int flags)
 
 
     static PyObject *
-    DVector3_Getter_0(DVector3 *self, void *)
+    I32Vector3_Getter_0(I32Vector3 *self, void *)
     {
         auto c = (*self->glm)[0];
-        return c_double_to_pyobject(c);
+        return c_int32_t_to_pyobject(c);
     }
 
     static PyObject *
-    DVector3_Getter_1(DVector3 *self, void *)
+    I32Vector3_Getter_1(I32Vector3 *self, void *)
     {
         auto c = (*self->glm)[1];
-        return c_double_to_pyobject(c);
+        return c_int32_t_to_pyobject(c);
     }
 
     static PyObject *
-    DVector3_Getter_2(DVector3 *self, void *)
+    I32Vector3_Getter_2(I32Vector3 *self, void *)
     {
         auto c = (*self->glm)[2];
-        return c_double_to_pyobject(c);
+        return c_int32_t_to_pyobject(c);
     }
 
 
 
 
-    static PyObject *
-    DVector3_magnitude(DVector3 *self, void *)
-    {
-        auto magnitude = glm::length(*self->glm);
-        return c_double_to_pyobject(magnitude);
-    }
 
 
+static PyGetSetDef I32Vector3_PyGetSetDef[] = {
+    {"x", (getter)I32Vector3_Getter_0, 0, 0, 0},
+    {"r", (getter)I32Vector3_Getter_0, 0, 0, 0},
+    {"s", (getter)I32Vector3_Getter_0, 0, 0, 0},
+    {"u", (getter)I32Vector3_Getter_0, 0, 0, 0},
 
-static PyGetSetDef DVector3_PyGetSetDef[] = {
-    {"x", (getter)DVector3_Getter_0, 0, 0, 0},
-    {"r", (getter)DVector3_Getter_0, 0, 0, 0},
-    {"s", (getter)DVector3_Getter_0, 0, 0, 0},
-    {"u", (getter)DVector3_Getter_0, 0, 0, 0},
-
-        {"y", (getter)DVector3_Getter_1, 0, 0, 0},
-        {"g", (getter)DVector3_Getter_1, 0, 0, 0},
-        {"t", (getter)DVector3_Getter_1, 0, 0, 0},
-        {"v", (getter)DVector3_Getter_1, 0, 0, 0},
-
-
-        {"z", (getter)DVector3_Getter_2, 0, 0, 0},
-        {"b", (getter)DVector3_Getter_2, 0, 0, 0},
-        {"p", (getter)DVector3_Getter_2, 0, 0, 0},
+        {"y", (getter)I32Vector3_Getter_1, 0, 0, 0},
+        {"g", (getter)I32Vector3_Getter_1, 0, 0, 0},
+        {"t", (getter)I32Vector3_Getter_1, 0, 0, 0},
+        {"v", (getter)I32Vector3_Getter_1, 0, 0, 0},
 
 
+        {"z", (getter)I32Vector3_Getter_2, 0, 0, 0},
+        {"b", (getter)I32Vector3_Getter_2, 0, 0, 0},
+        {"p", (getter)I32Vector3_Getter_2, 0, 0, 0},
 
-        {"magnitude", (getter)DVector3_magnitude, 0, 0, 0},
+
 
     {0, 0, 0, 0, 0}
 };
 
 
 static PyObject *
-DVector3__getattr__(DVector3 *self, PyObject *py_attr)
+I32Vector3__getattr__(I32Vector3 *self, PyObject *py_attr)
 {
     PyObject *result = PyObject_GenericGetAttr((PyObject *)self, py_attr);
     if (result != 0){ return result; }
@@ -695,7 +633,7 @@ DVector3__getattr__(DVector3 *self, PyObject *py_attr)
                 return 0;
             }
         }
-        auto py_c = c_double_to_pyobject((*self->glm)[glm_index]);
+        auto py_c = c_int32_t_to_pyobject((*self->glm)[glm_index]);
         PyTuple_SET_ITEM(result, i, py_c);
     }
 
@@ -704,82 +642,23 @@ DVector3__getattr__(DVector3 *self, PyObject *py_attr)
 }
 
 
-static PyMemberDef DVector3_PyMemberDef[] = {
-    {"__weaklistoffset__", T_PYSSIZET, offsetof(DVector3, weakreflist), READONLY},
+static PyMemberDef I32Vector3_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof(I32Vector3, weakreflist), READONLY},
     {0}
 };
 
 
 
 
-        static DVector3 *
-        DVector3_cross(DVector3 *self, DVector3 *other)
-        {
-            auto cls = Py_TYPE(self);
-            if (Py_TYPE(other) != cls)
-            {
-                PyErr_Format(PyExc_TypeError, "%R is not DVector3", other);
-                return 0;
-            }
-            auto vector = glm::cross(*self->glm, *other->glm);
-            DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
-            if (!result){ return 0; }
-            result->glm = new DVector3Glm(
-
-                    vector[0],
-
-                    vector[1],
-
-                    vector[2]
-
-            );
-            return result;
-        }
-
-
-    static DVector3 *
-    DVector3_normalize(DVector3 *self, void*)
-    {
-        auto cls = Py_TYPE(self);
-        auto vector = glm::normalize(*self->glm);
-        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new DVector3Glm(
-
-                vector[0],
-
-                vector[1],
-
-                vector[2]
-
-        );
-        return result;
-    }
-
-
-    static PyObject *
-    DVector3_distance(DVector3 *self, DVector3 *other)
-    {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls)
-        {
-            PyErr_Format(PyExc_TypeError, "%R is not DVector3", other);
-            return 0;
-        }
-        auto result = glm::distance(*self->glm, *other->glm);
-        return c_double_to_pyobject(result);
-    }
-
-
 
 static PyObject *
-DVector3_get_limits(DVector3 *self, void *)
+I32Vector3_get_limits(I32Vector3 *self, void *)
 {
-    auto c_min = std::numeric_limits<double>::min();
-    auto c_max = std::numeric_limits<double>::max();
-    auto py_min = c_double_to_pyobject(c_min);
+    auto c_min = std::numeric_limits<int32_t>::min();
+    auto c_max = std::numeric_limits<int32_t>::max();
+    auto py_min = c_int32_t_to_pyobject(c_min);
     if (!py_min){ return 0; }
-    auto py_max = c_double_to_pyobject(c_max);
+    auto py_max = c_int32_t_to_pyobject(c_max);
     if (!py_max)
     {
         Py_DECREF(py_min);
@@ -798,74 +677,64 @@ DVector3_get_limits(DVector3 *self, void *)
 }
 
 
-static PyMethodDef DVector3_PyMethodDef[] = {
+static PyMethodDef I32Vector3_PyMethodDef[] = {
 
-
-            {"cross", (PyCFunction)DVector3_cross, METH_O, 0},
-
-        {"normalize", (PyCFunction)DVector3_normalize, METH_NOARGS, 0},
-        {"distance", (PyCFunction)DVector3_distance, METH_O, 0},
-
-    {"get_limits", (PyCFunction)DVector3_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_limits", (PyCFunction)I32Vector3_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}
 };
 
 
-static PyType_Slot DVector3_PyType_Slots [] = {
-    {Py_tp_new, (void*)DVector3__new__},
-    {Py_tp_dealloc, (void*)DVector3__dealloc__},
-    {Py_tp_hash, (void*)DVector3__hash__},
-    {Py_tp_repr, (void*)DVector3__repr__},
-    {Py_sq_length, (void*)DVector3__len__},
-    {Py_sq_item, (void*)DVector3__getitem__},
-    {Py_tp_richcompare, (void*)DVector3__richcmp__},
-    {Py_nb_add, (void*)DVector3__add__},
-    {Py_nb_subtract, (void*)DVector3__sub__},
-    {Py_nb_multiply, (void*)DVector3__mul__},
-
-        {Py_nb_matrix_multiply, (void*)DVector3__matmul__},
-        {Py_nb_remainder, (void*)DVector3__mod__},
-        {Py_nb_power, (void*)DVector3__pow__},
+static PyType_Slot I32Vector3_PyType_Slots [] = {
+    {Py_tp_new, (void*)I32Vector3__new__},
+    {Py_tp_dealloc, (void*)I32Vector3__dealloc__},
+    {Py_tp_hash, (void*)I32Vector3__hash__},
+    {Py_tp_repr, (void*)I32Vector3__repr__},
+    {Py_sq_length, (void*)I32Vector3__len__},
+    {Py_sq_item, (void*)I32Vector3__getitem__},
+    {Py_tp_richcompare, (void*)I32Vector3__richcmp__},
+    {Py_nb_add, (void*)I32Vector3__add__},
+    {Py_nb_subtract, (void*)I32Vector3__sub__},
+    {Py_nb_multiply, (void*)I32Vector3__mul__},
 
 
-        {Py_nb_true_divide, (void*)DVector3__truediv__},
+        {Py_nb_true_divide, (void*)I32Vector3__truediv__},
 
 
-        {Py_nb_negative, (void*)DVector3__neg__},
+        {Py_nb_negative, (void*)I32Vector3__neg__},
 
-    {Py_nb_absolute, (void*)DVector3__abs__},
-    {Py_nb_bool, (void*)DVector3__bool__},
-    {Py_bf_getbuffer, (void*)DVector3_getbufferproc},
-    {Py_tp_getset, (void*)DVector3_PyGetSetDef},
-    {Py_tp_getattro, (void*)DVector3__getattr__},
-    {Py_tp_members, (void*)DVector3_PyMemberDef},
-    {Py_tp_methods, (void*)DVector3_PyMethodDef},
+    {Py_nb_absolute, (void*)I32Vector3__abs__},
+    {Py_nb_bool, (void*)I32Vector3__bool__},
+    {Py_bf_getbuffer, (void*)I32Vector3_getbufferproc},
+    {Py_tp_getset, (void*)I32Vector3_PyGetSetDef},
+    {Py_tp_getattro, (void*)I32Vector3__getattr__},
+    {Py_tp_members, (void*)I32Vector3_PyMemberDef},
+    {Py_tp_methods, (void*)I32Vector3_PyMethodDef},
     {0, 0},
 };
 
 
-static PyType_Spec DVector3_PyTypeSpec = {
-    "gamut.math.DVector3",
-    sizeof(DVector3),
+static PyType_Spec I32Vector3_PyTypeSpec = {
+    "gamut.math.I32Vector3",
+    sizeof(I32Vector3),
     0,
     Py_TPFLAGS_DEFAULT,
-    DVector3_PyType_Slots
+    I32Vector3_PyType_Slots
 };
 
 
 static PyTypeObject *
-define_DVector3_type(PyObject *module)
+define_I32Vector3_type(PyObject *module)
 {
     PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
         module,
-        &DVector3_PyTypeSpec,
+        &I32Vector3_PyTypeSpec,
         0
     );
     if (!type){ return 0; }
     // Note:
     // Unlike other functions that steal references, PyModule_AddObject() only
     // decrements the reference count of value on success.
-    if (PyModule_AddObject(module, "DVector3", (PyObject *)type) < 0)
+    if (PyModule_AddObject(module, "I32Vector3", (PyObject *)type) < 0)
     {
         Py_DECREF(type);
         return 0;

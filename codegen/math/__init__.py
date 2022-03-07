@@ -16,7 +16,7 @@ def generate_math_files(build_dir: Path) -> None:
 
 
 def generate_math_file(build_dir: Path, types: Sequence[str]) -> None:
-    template = get_template('math.cpp')
+    template = get_template('_math.cpp')
     with open(build_dir / f'_math.cpp', 'w') as f:
         f.write(template.render(
             types=types,

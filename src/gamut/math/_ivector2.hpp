@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.195594 from codegen/math/templates/_vector.hpp
+// generated 2022-03-07 23:13:00.200596 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -15,31 +15,31 @@
 // gamut
 #include "_type.hpp"
 
-typedef glm::vec<2, float, glm::defaultp> FVector2Glm;
+typedef glm::vec<2, int, glm::defaultp> IVector2Glm;
 
 
-struct FVector2
+struct IVector2
 {
     PyObject_HEAD
     PyObject *weakreflist;
-    FVector2Glm *glm;
+    IVector2Glm *glm;
 };
 
 
 static PyObject *
-FVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+IVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
 
-        float c_0 = 0;
+        int c_0 = 0;
 
-        float c_1 = 0;
+        int c_1 = 0;
 
 
     if (kwds && PyDict_Size(kwds) != 0)
     {
         PyErr_SetString(
             PyExc_TypeError,
-            "FVector2 does accept any keyword arguments"
+            "IVector2 does accept any keyword arguments"
         );
         return 0;
     }
@@ -53,7 +53,7 @@ FVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         case 1:
         {
             auto arg = PyTuple_GET_ITEM(args, 0);
-            float arg_c = pyobject_to_c_float(arg);
+            int arg_c = pyobject_to_c_int(arg);
             auto error_occurred = PyErr_Occurred();
             if (error_occurred){ return 0; }
 
@@ -68,14 +68,14 @@ FVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 0);
-                c_0 = pyobject_to_c_float(arg);
+                c_0 = pyobject_to_c_int(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
 
             {
                 auto arg = PyTuple_GET_ITEM(args, 1);
-                c_1 = pyobject_to_c_float(arg);
+                c_1 = pyobject_to_c_int(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
@@ -86,7 +86,7 @@ FVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         {
             PyErr_Format(
                 PyExc_TypeError,
-                "invalid number of arguments supplied to FVector2, expected "
+                "invalid number of arguments supplied to IVector2, expected "
                 "0, 1 or 2 (got %zd)",
                 arg_count
             );
@@ -94,9 +94,9 @@ FVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         }
     }
 
-    FVector2 *self = (FVector2*)cls->tp_alloc(cls, 0);
+    IVector2 *self = (IVector2*)cls->tp_alloc(cls, 0);
     if (!self){ return 0; }
-    self->glm = new FVector2Glm(
+    self->glm = new IVector2Glm(
 
             c_0,
 
@@ -109,7 +109,7 @@ FVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
 
 static void
-FVector2__dealloc__(FVector2 *self)
+IVector2__dealloc__(IVector2 *self)
 {
     if (self->weakreflist)
     {
@@ -138,13 +138,13 @@ FVector2__dealloc__(FVector2 *self)
 #endif
 
 static Py_hash_t
-FVector2__hash__(FVector2 *self)
+IVector2__hash__(IVector2 *self)
 {
     Py_ssize_t i, len = 2;
     Py_uhash_t acc = _HASH_XXPRIME_5;
     for (i = 0; i < len; i++)
     {
-        Py_uhash_t lane = std::hash<float>{}((*self->glm)[i]);
+        Py_uhash_t lane = std::hash<int>{}((*self->glm)[i]);
         if (lane == (Py_uhash_t)-1)
         {
             return -1;
@@ -163,7 +163,7 @@ FVector2__hash__(FVector2 *self)
 
 
 static PyObject *
-FVector2__repr__(FVector2 *self)
+IVector2__repr__(IVector2 *self)
 {
     PyObject *result = 0;
 
@@ -173,14 +173,14 @@ FVector2__repr__(FVector2 *self)
 
 
 
-        py_0 = c_float_to_pyobject((*self->glm)[0]);
+        py_0 = c_int_to_pyobject((*self->glm)[0]);
         if (!py_0){ goto cleanup; }
 
-        py_1 = c_float_to_pyobject((*self->glm)[1]);
+        py_1 = c_int_to_pyobject((*self->glm)[1]);
         if (!py_1){ goto cleanup; }
 
     result = PyUnicode_FromFormat(
-        "FVector2("
+        "IVector2("
 
             "%R, "
 
@@ -204,14 +204,14 @@ cleanup:
 
 
 static Py_ssize_t
-FVector2__len__(FVector2 *self)
+IVector2__len__(IVector2 *self)
 {
     return 2;
 }
 
 
 static PyObject *
-FVector2__getitem__(FVector2 *self, Py_ssize_t index)
+IVector2__getitem__(IVector2 *self, Py_ssize_t index)
 {
     if (index < 0 || index > 1)
     {
@@ -219,12 +219,12 @@ FVector2__getitem__(FVector2 *self, Py_ssize_t index)
         return 0;
     }
     auto c = (*self->glm)[index];
-    return c_float_to_pyobject(c);
+    return c_int_to_pyobject(c);
 }
 
 
 static PyObject *
-FVector2__richcmp__(FVector2 *self, FVector2 *other, int op)
+IVector2__richcmp__(IVector2 *self, IVector2 *other, int op)
 {
     if (Py_TYPE(self) != Py_TYPE(other))
     {
@@ -261,24 +261,24 @@ FVector2__richcmp__(FVector2 *self, FVector2 *other, int op)
 
 
 static PyObject *
-FVector2__add__(FVector2 *self, PyObject *other)
+IVector2__add__(IVector2 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    FVector2Glm vector;
+    IVector2Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_float(other);
+        auto c_other = pyobject_to_c_int(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) + c_other;
     }
     else
     {
-        vector = (*self->glm) + (*((FVector2 *)other)->glm);
+        vector = (*self->glm) + (*((IVector2 *)other)->glm);
     }
 
-    FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
+    IVector2 *result = (IVector2 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new FVector2Glm(
+    result->glm = new IVector2Glm(
 
             vector[0],
 
@@ -291,24 +291,24 @@ FVector2__add__(FVector2 *self, PyObject *other)
 
 
 static PyObject *
-FVector2__sub__(FVector2 *self, PyObject *other)
+IVector2__sub__(IVector2 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    FVector2Glm vector;
+    IVector2Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_float(other);
+        auto c_other = pyobject_to_c_int(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) - c_other;
     }
     else
     {
-        vector = (*self->glm) - (*((FVector2 *)other)->glm);
+        vector = (*self->glm) - (*((IVector2 *)other)->glm);
     }
 
-    FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
+    IVector2 *result = (IVector2 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new FVector2Glm(
+    result->glm = new IVector2Glm(
 
             vector[0],
 
@@ -321,24 +321,24 @@ FVector2__sub__(FVector2 *self, PyObject *other)
 
 
 static PyObject *
-FVector2__mul__(FVector2 *self, PyObject *other)
+IVector2__mul__(IVector2 *self, PyObject *other)
 {
     auto cls = Py_TYPE(self);
-    FVector2Glm vector;
+    IVector2Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_float(other);
+        auto c_other = pyobject_to_c_int(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) * c_other;
     }
     else
     {
-        vector = (*self->glm) * (*((FVector2 *)other)->glm);
+        vector = (*self->glm) * (*((IVector2 *)other)->glm);
     }
 
-    FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
+    IVector2 *result = (IVector2 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new FVector2Glm(
+    result->glm = new IVector2Glm(
 
             vector[0],
 
@@ -351,99 +351,48 @@ FVector2__mul__(FVector2 *self, PyObject *other)
 
 
 
-    static PyObject *
-    FVector2__matmul__(FVector2 *self, FVector2 *other)
-    {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-        auto c_result = glm::dot(*self->glm, *other->glm);
-        return c_float_to_pyobject(c_result);
-    }
+
 
 
     static PyObject *
-    FVector2__mod__(FVector2 *self, PyObject *other)
+    IVector2__truediv__(IVector2 *self, PyObject *other)
     {
         auto cls = Py_TYPE(self);
-        FVector2Glm vector;
+        IVector2Glm vector;
         if (Py_TYPE(other) != cls)
         {
-            auto c_other = pyobject_to_c_float(other);
+            auto c_other = pyobject_to_c_int(other);
             if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::mod((*self->glm), c_other);
-        }
-        else
-        {
-            vector = glm::mod((*self->glm), (*((FVector2 *)other)->glm));
-        }
 
-        FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new FVector2Glm(
-
-                vector[0],
-
-                vector[1]
-
-        );
-
-        return (PyObject *)result;
-    }
-
-
-    static PyObject *
-    FVector2__pow__(FVector2 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        FVector2Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_float(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::pow((*self->glm), FVector2Glm(c_other));
-        }
-        else
-        {
-            vector = glm::pow((*self->glm), (*((FVector2 *)other)->glm));
-        }
-
-        FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new FVector2Glm(
-
-                vector[0],
-
-                vector[1]
-
-        );
-
-        return (PyObject *)result;
-    }
-
-
-
-
-    static PyObject *
-    FVector2__truediv__(FVector2 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        FVector2Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_float(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (c_other == 0)
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
 
             vector = (*self->glm) / c_other;
         }
         else
         {
 
-            vector = (*self->glm) / (*((FVector2 *)other)->glm);
+                if (
+
+                        (*((IVector2 *)other)->glm)[0] == 0 ||
+
+                        (*((IVector2 *)other)->glm)[1] == 0
+
+                )
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
+
+            vector = (*self->glm) / (*((IVector2 *)other)->glm);
         }
 
-        FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
+        IVector2 *result = (IVector2 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new FVector2Glm(
+        result->glm = new IVector2Glm(
 
                 vector[0],
 
@@ -458,16 +407,16 @@ FVector2__mul__(FVector2 *self, PyObject *other)
 
 
     static PyObject *
-    FVector2__neg__(FVector2 *self)
+    IVector2__neg__(IVector2 *self)
     {
         auto cls = Py_TYPE(self);
 
-            FVector2Glm vector = -(*self->glm);
+            IVector2Glm vector = -(*self->glm);
 
 
-        FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
+        IVector2 *result = (IVector2 *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
-        result->glm = new FVector2Glm(
+        result->glm = new IVector2Glm(
 
                 vector[0],
 
@@ -481,14 +430,14 @@ FVector2__mul__(FVector2 *self, PyObject *other)
 
 
 static PyObject *
-FVector2__abs__(FVector2 *self)
+IVector2__abs__(IVector2 *self)
 {
     auto cls = Py_TYPE(self);
-    FVector2Glm vector = glm::abs(*self->glm);
+    IVector2Glm vector = glm::abs(*self->glm);
 
-    FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
+    IVector2 *result = (IVector2 *)cls->tp_alloc(cls, 0);
     if (!result){ return 0; }
-    result->glm = new FVector2Glm(
+    result->glm = new IVector2Glm(
 
             vector[0],
 
@@ -501,7 +450,7 @@ FVector2__abs__(FVector2 *self)
 
 
 static int
-FVector2__bool__(FVector2 *self)
+IVector2__bool__(IVector2 *self)
 {
 
         if ((*self->glm)[0] == 0)
@@ -519,20 +468,20 @@ FVector2__bool__(FVector2 *self)
 
 
 static int
-FVector2_getbufferproc(FVector2 *self, Py_buffer *view, int flags)
+IVector2_getbufferproc(IVector2 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "FVector2 is not read only");
+        PyErr_SetString(PyExc_TypeError, "IVector2 is not read only");
         view->obj = 0;
         return -1;
     }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
-    view->len = sizeof(float) * 2;
+    view->len = sizeof(int) * 2;
     view->readonly = 1;
-    view->itemsize = sizeof(float);
-    view->format = "f";
+    view->itemsize = sizeof(int);
+    view->format = "i";
     view->ndim = 1;
     static Py_ssize_t shape = 2;
     view->shape = &shape;
@@ -546,53 +495,44 @@ FVector2_getbufferproc(FVector2 *self, Py_buffer *view, int flags)
 
 
     static PyObject *
-    FVector2_Getter_0(FVector2 *self, void *)
+    IVector2_Getter_0(IVector2 *self, void *)
     {
         auto c = (*self->glm)[0];
-        return c_float_to_pyobject(c);
+        return c_int_to_pyobject(c);
     }
 
     static PyObject *
-    FVector2_Getter_1(FVector2 *self, void *)
+    IVector2_Getter_1(IVector2 *self, void *)
     {
         auto c = (*self->glm)[1];
-        return c_float_to_pyobject(c);
+        return c_int_to_pyobject(c);
     }
 
 
 
 
-    static PyObject *
-    FVector2_magnitude(FVector2 *self, void *)
-    {
-        auto magnitude = glm::length(*self->glm);
-        return c_float_to_pyobject(magnitude);
-    }
+
+
+static PyGetSetDef IVector2_PyGetSetDef[] = {
+    {"x", (getter)IVector2_Getter_0, 0, 0, 0},
+    {"r", (getter)IVector2_Getter_0, 0, 0, 0},
+    {"s", (getter)IVector2_Getter_0, 0, 0, 0},
+    {"u", (getter)IVector2_Getter_0, 0, 0, 0},
+
+        {"y", (getter)IVector2_Getter_1, 0, 0, 0},
+        {"g", (getter)IVector2_Getter_1, 0, 0, 0},
+        {"t", (getter)IVector2_Getter_1, 0, 0, 0},
+        {"v", (getter)IVector2_Getter_1, 0, 0, 0},
 
 
 
-static PyGetSetDef FVector2_PyGetSetDef[] = {
-    {"x", (getter)FVector2_Getter_0, 0, 0, 0},
-    {"r", (getter)FVector2_Getter_0, 0, 0, 0},
-    {"s", (getter)FVector2_Getter_0, 0, 0, 0},
-    {"u", (getter)FVector2_Getter_0, 0, 0, 0},
-
-        {"y", (getter)FVector2_Getter_1, 0, 0, 0},
-        {"g", (getter)FVector2_Getter_1, 0, 0, 0},
-        {"t", (getter)FVector2_Getter_1, 0, 0, 0},
-        {"v", (getter)FVector2_Getter_1, 0, 0, 0},
-
-
-
-
-        {"magnitude", (getter)FVector2_magnitude, 0, 0, 0},
 
     {0, 0, 0, 0, 0}
 };
 
 
 static PyObject *
-FVector2__getattr__(FVector2 *self, PyObject *py_attr)
+IVector2__getattr__(IVector2 *self, PyObject *py_attr)
 {
     PyObject *result = PyObject_GenericGetAttr((PyObject *)self, py_attr);
     if (result != 0){ return result; }
@@ -633,7 +573,7 @@ FVector2__getattr__(FVector2 *self, PyObject *py_attr)
                 return 0;
             }
         }
-        auto py_c = c_float_to_pyobject((*self->glm)[glm_index]);
+        auto py_c = c_int_to_pyobject((*self->glm)[glm_index]);
         PyTuple_SET_ITEM(result, i, py_c);
     }
 
@@ -642,8 +582,8 @@ FVector2__getattr__(FVector2 *self, PyObject *py_attr)
 }
 
 
-static PyMemberDef FVector2_PyMemberDef[] = {
-    {"__weaklistoffset__", T_PYSSIZET, offsetof(FVector2, weakreflist), READONLY},
+static PyMemberDef IVector2_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof(IVector2, weakreflist), READONLY},
     {0}
 };
 
@@ -651,47 +591,14 @@ static PyMemberDef FVector2_PyMemberDef[] = {
 
 
 
-    static FVector2 *
-    FVector2_normalize(FVector2 *self, void*)
-    {
-        auto cls = Py_TYPE(self);
-        auto vector = glm::normalize(*self->glm);
-        FVector2 *result = (FVector2 *)cls->tp_alloc(cls, 0);
-        if (!result){ return 0; }
-        result->glm = new FVector2Glm(
-
-                vector[0],
-
-                vector[1]
-
-        );
-        return result;
-    }
-
-
-    static PyObject *
-    FVector2_distance(FVector2 *self, FVector2 *other)
-    {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls)
-        {
-            PyErr_Format(PyExc_TypeError, "%R is not FVector2", other);
-            return 0;
-        }
-        auto result = glm::distance(*self->glm, *other->glm);
-        return c_float_to_pyobject(result);
-    }
-
-
-
 static PyObject *
-FVector2_get_limits(FVector2 *self, void *)
+IVector2_get_limits(IVector2 *self, void *)
 {
-    auto c_min = std::numeric_limits<float>::min();
-    auto c_max = std::numeric_limits<float>::max();
-    auto py_min = c_float_to_pyobject(c_min);
+    auto c_min = std::numeric_limits<int>::min();
+    auto c_max = std::numeric_limits<int>::max();
+    auto py_min = c_int_to_pyobject(c_min);
     if (!py_min){ return 0; }
-    auto py_max = c_float_to_pyobject(c_max);
+    auto py_max = c_int_to_pyobject(c_max);
     if (!py_max)
     {
         Py_DECREF(py_min);
@@ -710,72 +617,64 @@ FVector2_get_limits(FVector2 *self, void *)
 }
 
 
-static PyMethodDef FVector2_PyMethodDef[] = {
+static PyMethodDef IVector2_PyMethodDef[] = {
 
-
-        {"normalize", (PyCFunction)FVector2_normalize, METH_NOARGS, 0},
-        {"distance", (PyCFunction)FVector2_distance, METH_O, 0},
-
-    {"get_limits", (PyCFunction)FVector2_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_limits", (PyCFunction)IVector2_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}
 };
 
 
-static PyType_Slot FVector2_PyType_Slots [] = {
-    {Py_tp_new, (void*)FVector2__new__},
-    {Py_tp_dealloc, (void*)FVector2__dealloc__},
-    {Py_tp_hash, (void*)FVector2__hash__},
-    {Py_tp_repr, (void*)FVector2__repr__},
-    {Py_sq_length, (void*)FVector2__len__},
-    {Py_sq_item, (void*)FVector2__getitem__},
-    {Py_tp_richcompare, (void*)FVector2__richcmp__},
-    {Py_nb_add, (void*)FVector2__add__},
-    {Py_nb_subtract, (void*)FVector2__sub__},
-    {Py_nb_multiply, (void*)FVector2__mul__},
-
-        {Py_nb_matrix_multiply, (void*)FVector2__matmul__},
-        {Py_nb_remainder, (void*)FVector2__mod__},
-        {Py_nb_power, (void*)FVector2__pow__},
+static PyType_Slot IVector2_PyType_Slots [] = {
+    {Py_tp_new, (void*)IVector2__new__},
+    {Py_tp_dealloc, (void*)IVector2__dealloc__},
+    {Py_tp_hash, (void*)IVector2__hash__},
+    {Py_tp_repr, (void*)IVector2__repr__},
+    {Py_sq_length, (void*)IVector2__len__},
+    {Py_sq_item, (void*)IVector2__getitem__},
+    {Py_tp_richcompare, (void*)IVector2__richcmp__},
+    {Py_nb_add, (void*)IVector2__add__},
+    {Py_nb_subtract, (void*)IVector2__sub__},
+    {Py_nb_multiply, (void*)IVector2__mul__},
 
 
-        {Py_nb_true_divide, (void*)FVector2__truediv__},
+        {Py_nb_true_divide, (void*)IVector2__truediv__},
 
 
-        {Py_nb_negative, (void*)FVector2__neg__},
+        {Py_nb_negative, (void*)IVector2__neg__},
 
-    {Py_nb_absolute, (void*)FVector2__abs__},
-    {Py_nb_bool, (void*)FVector2__bool__},
-    {Py_bf_getbuffer, (void*)FVector2_getbufferproc},
-    {Py_tp_getset, (void*)FVector2_PyGetSetDef},
-    {Py_tp_getattro, (void*)FVector2__getattr__},
-    {Py_tp_members, (void*)FVector2_PyMemberDef},
-    {Py_tp_methods, (void*)FVector2_PyMethodDef},
+    {Py_nb_absolute, (void*)IVector2__abs__},
+    {Py_nb_bool, (void*)IVector2__bool__},
+    {Py_bf_getbuffer, (void*)IVector2_getbufferproc},
+    {Py_tp_getset, (void*)IVector2_PyGetSetDef},
+    {Py_tp_getattro, (void*)IVector2__getattr__},
+    {Py_tp_members, (void*)IVector2_PyMemberDef},
+    {Py_tp_methods, (void*)IVector2_PyMethodDef},
     {0, 0},
 };
 
 
-static PyType_Spec FVector2_PyTypeSpec = {
-    "gamut.math.FVector2",
-    sizeof(FVector2),
+static PyType_Spec IVector2_PyTypeSpec = {
+    "gamut.math.IVector2",
+    sizeof(IVector2),
     0,
     Py_TPFLAGS_DEFAULT,
-    FVector2_PyType_Slots
+    IVector2_PyType_Slots
 };
 
 
 static PyTypeObject *
-define_FVector2_type(PyObject *module)
+define_IVector2_type(PyObject *module)
 {
     PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
         module,
-        &FVector2_PyTypeSpec,
+        &IVector2_PyTypeSpec,
         0
     );
     if (!type){ return 0; }
     // Note:
     // Unlike other functions that steal references, PyModule_AddObject() only
     // decrements the reference count of value on success.
-    if (PyModule_AddObject(module, "FVector2", (PyObject *)type) < 0)
+    if (PyModule_AddObject(module, "IVector2", (PyObject *)type) < 0)
     {
         Py_DECREF(type);
         return 0;

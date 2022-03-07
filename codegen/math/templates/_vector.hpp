@@ -1,8 +1,10 @@
-// generated {{ when }}
+// generated {{ when }} from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
 
+// stdlib
+#include <limits>
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -10,7 +12,6 @@
 // glm
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#include <glm/detail/type_vec3.hpp>
 // gamut
 #include "_type.hpp"
 
@@ -50,7 +51,7 @@ static PyObject *
         case 1:
         {
             auto arg = PyTuple_GET_ITEM(args, 0);
-            {{ c_type }} arg_c = pyobject_to_c_{{ c_type }}(arg);
+            {{ c_type }} arg_c = pyobject_to_c_{{ c_type.replace(' ', '_') }}(arg);
             auto error_occurred = PyErr_Occurred();
             if (error_occurred){ return 0; }
             {% for i in range(component_count) %}
@@ -63,7 +64,7 @@ static PyObject *
             {% for i in range(component_count) %}
             {
                 auto arg = PyTuple_GET_ITEM(args, {{i}});
-                c_{{i}} = pyobject_to_c_{{ c_type }}(arg);
+                c_{{i}} = pyobject_to_c_{{ c_type.replace(' ', '_') }}(arg);
                 auto error_occurred = PyErr_Occurred();
                 if (error_occurred){ return 0; }
             }
@@ -110,15 +111,41 @@ static void
 }
 
 
+// this is roughly copied from how python hashes tuples in 3.11
+#if SIZEOF_PY_UHASH_T > 4
+#define _HASH_XXPRIME_1 ((Py_uhash_t)11400714785074694791ULL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)14029467366897019727ULL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)2870177450012600261ULL)
+#define _HASH_XXROTATE(x) ((x << 31) | (x >> 33))  /* Rotate left 31 bits */
+#else
+#define _HASH_XXPRIME_1 ((Py_uhash_t)2654435761UL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)2246822519UL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)374761393UL)
+#define _HASH_XXROTATE(x) ((x << 13) | (x >> 19))  /* Rotate left 13 bits */
+#endif
+
 static Py_hash_t
 {{ name }}__hash__({{ name }} *self)
 {
-    Py_hash_t hash = 0;
-    {% for i in range(component_count) %}
-        hash ^= (Py_hash_t)(*self->glm)[{{i}}];
-    {% endfor %}
-    if (hash == -1){ hash = -123456789; }
-    return hash;
+    Py_ssize_t i, len = {{ component_count }};
+    Py_uhash_t acc = _HASH_XXPRIME_5;
+    for (i = 0; i < len; i++)
+    {
+        Py_uhash_t lane = std::hash<{{ c_type }}>{}((*self->glm)[i]);
+        if (lane == (Py_uhash_t)-1)
+        {
+            return -1;
+        }
+        acc += lane * _HASH_XXPRIME_2;
+        acc = _HASH_XXROTATE(acc);
+        acc *= _HASH_XXPRIME_1;
+    }
+    acc += len ^ (_HASH_XXPRIME_5 ^ 3527539UL);
+
+    if (acc == (Py_uhash_t)-1) {
+        return 1546275796;
+    }
+    return acc;
 }
 
 
@@ -131,7 +158,7 @@ static PyObject *
     {% endfor %}
 
     {% for i in range(component_count) %}
-        py_{{i}} = c_{{ c_type }}_to_pyobject((*self->glm)[{{i}}]);
+        py_{{i}} = c_{{ c_type.replace(' ', '_') }}_to_pyobject((*self->glm)[{{i}}]);
         if (!py_{{i}}){ goto cleanup; }
     {% endfor %}
     result = PyUnicode_FromFormat(
@@ -168,7 +195,7 @@ static PyObject *
         return 0;
     }
     auto c = (*self->glm)[index];
-    return c_{{ c_type }}_to_pyobject(c);
+    return c_{{ c_type.replace(' ', '_') }}_to_pyobject(c);
 }
 
 
@@ -216,7 +243,7 @@ static PyObject *
     {{ name }}Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_{{ c_type }}(other);
+        auto c_other = pyobject_to_c_{{ c_type.replace(' ', '_') }}(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) + c_other;
     }
@@ -244,7 +271,7 @@ static PyObject *
     {{ name }}Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_{{ c_type }}(other);
+        auto c_other = pyobject_to_c_{{ c_type.replace(' ', '_') }}(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) - c_other;
     }
@@ -272,7 +299,7 @@ static PyObject *
     {{ name }}Glm vector;
     if (Py_TYPE(other) != cls)
     {
-        auto c_other = pyobject_to_c_{{ c_type }}(other);
+        auto c_other = pyobject_to_c_{{ c_type.replace(' ', '_') }}(other);
         if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
         vector = (*self->glm) * c_other;
     }
@@ -293,116 +320,144 @@ static PyObject *
 }
 
 
-static PyObject *
-{{ name }}__matmul__({{ name }} *self, {{ name }} *other)
-{
-    auto cls = Py_TYPE(self);
-    if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-    auto c_result = glm::dot(*self->glm, *other->glm);
-    return c_{{ c_type }}_to_pyobject(c_result);
-}
-
-
-static PyObject *
-{{ name}}__truediv__({{ name }} *self, PyObject *other)
-{
-    auto cls = Py_TYPE(self);
-    {{ name }}Glm vector;
-    if (Py_TYPE(other) != cls)
+{% if c_type in ['float', 'double'] %}
+    static PyObject *
+    {{ name }}__matmul__({{ name }} *self, {{ name }} *other)
     {
-        auto c_other = pyobject_to_c_{{ c_type }}(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) / c_other;
-    }
-    else
-    {
-        vector = (*self->glm) / (*(({{name }} *)other)->glm);
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
+        auto c_result = glm::dot(*self->glm, *other->glm);
+        return c_{{ c_type.replace(' ', '_') }}_to_pyobject(c_result);
     }
 
-    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new {{ name }}Glm(
-        {% for i in range(component_count) %}
-            vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
-        {% endfor %}
-    );
 
-    return (PyObject *)result;
-}
-
-
-static PyObject *
-{{ name}}__mod__({{ name }} *self, PyObject *other)
-{
-    auto cls = Py_TYPE(self);
-    {{ name }}Glm vector;
-    if (Py_TYPE(other) != cls)
+    static PyObject *
+    {{ name}}__mod__({{ name }} *self, PyObject *other)
     {
-        auto c_other = pyobject_to_c_{{ c_type }}(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = glm::mod((*self->glm), c_other);
-    }
-    else
-    {
-        vector = glm::mod((*self->glm), (*(({{name }} *)other)->glm));
-    }
+        auto cls = Py_TYPE(self);
+        {{ name }}Glm vector;
+        if (Py_TYPE(other) != cls)
+        {
+            auto c_other = pyobject_to_c_{{ c_type.replace(' ', '_') }}(other);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = glm::mod((*self->glm), c_other);
+        }
+        else
+        {
+            vector = glm::mod((*self->glm), (*(({{name }} *)other)->glm));
+        }
 
-    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new {{ name }}Glm(
-        {% for i in range(component_count) %}
-            vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
-        {% endfor %}
-    );
+        {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(
+            {% for i in range(component_count) %}
+                vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
+            {% endfor %}
+        );
 
-    return (PyObject *)result;
-}
-
-
-static PyObject *
-{{ name}}__pow__({{ name }} *self, PyObject *other)
-{
-    auto cls = Py_TYPE(self);
-    {{ name }}Glm vector;
-    if (Py_TYPE(other) != cls)
-    {
-        auto c_other = pyobject_to_c_{{ c_type }}(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = glm::pow((*self->glm), {{ name }}Glm(c_other));
-    }
-    else
-    {
-        vector = glm::pow((*self->glm), (*(({{name }} *)other)->glm));
+        return (PyObject *)result;
     }
 
-    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new {{ name }}Glm(
-        {% for i in range(component_count) %}
-            vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
-        {% endfor %}
-    );
 
-    return (PyObject *)result;
-}
+    static PyObject *
+    {{ name}}__pow__({{ name }} *self, PyObject *other)
+    {
+        auto cls = Py_TYPE(self);
+        {{ name }}Glm vector;
+        if (Py_TYPE(other) != cls)
+        {
+            auto c_other = pyobject_to_c_{{ c_type.replace(' ', '_') }}(other);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = glm::pow((*self->glm), {{ name }}Glm(c_other));
+        }
+        else
+        {
+            vector = glm::pow((*self->glm), (*(({{name }} *)other)->glm));
+        }
+
+        {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(
+            {% for i in range(component_count) %}
+                vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
+            {% endfor %}
+        );
+
+        return (PyObject *)result;
+    }
+{% endif %}
 
 
-static PyObject *
-{{ name}}__neg__({{ name }} *self)
-{
-    auto cls = Py_TYPE(self);
-    {{ name }}Glm vector = -(*self->glm);
+{% if c_type != 'bool' %}
+    static PyObject *
+    {{ name}}__truediv__({{ name }} *self, PyObject *other)
+    {
+        auto cls = Py_TYPE(self);
+        {{ name }}Glm vector;
+        if (Py_TYPE(other) != cls)
+        {
+            auto c_other = pyobject_to_c_{{ c_type.replace(' ', '_') }}(other);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            {% if c_type not in ['float', 'double'] %}
+                if (c_other == 0)
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
+            {% endif %}
+            vector = (*self->glm) / c_other;
+        }
+        else
+        {
+            {% if c_type not in ['float', 'double'] %}
+                if (
+                    {% for i in range(component_count) %}
+                        (*(({{name }} *)other)->glm)[{{i}}] == 0{% if i < component_count - 1 %} || {% endif %}
+                    {% endfor %}
+                )
+                {
+                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                    return 0;
+                }
+            {% endif %}
+            vector = (*self->glm) / (*(({{name }} *)other)->glm);
+        }
 
-    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new {{ name }}Glm(
-        {% for i in range(component_count) %}
-            vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
-        {% endfor %}
-    );
+        {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(
+            {% for i in range(component_count) %}
+                vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
+            {% endfor %}
+        );
 
-    return (PyObject *)result;
-}
+        return (PyObject *)result;
+    }
+{% endif %}
+
+
+{% if 'unsigned' not in c_type and not (c_type.startswith('u') and c_type.endswith('_t')) %}
+    static PyObject *
+    {{ name}}__neg__({{ name }} *self)
+    {
+        auto cls = Py_TYPE(self);
+        {% if c_type == 'bool' %}
+            {{ name }}Glm vector = (*self->glm);
+        {% else %}
+            {{ name }}Glm vector = -(*self->glm);
+        {% endif %}
+
+        {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(
+            {% for i in range(component_count) %}
+                vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
+            {% endfor %}
+        );
+
+        return (PyObject *)result;
+    }
+{% endif %}
 
 
 static PyObject *
@@ -467,17 +522,19 @@ static int
     {{ name }}_Getter_{{i}}({{ name }} *self, void *)
     {
         auto c = (*self->glm)[{{i}}];
-        return c_{{ c_type }}_to_pyobject(c);
+        return c_{{ c_type.replace(' ', '_') }}_to_pyobject(c);
     }
 {% endfor %}
 
 
-static PyObject *
-{{ name }}_magnitude({{ name }} *self, void *)
-{
-    auto magnitude = glm::length(*self->glm);
-    return c_{{ c_type }}_to_pyobject(magnitude);
-}
+{% if c_type in ['float', 'double'] %}
+    static PyObject *
+    {{ name }}_magnitude({{ name }} *self, void *)
+    {
+        auto magnitude = glm::length(*self->glm);
+        return c_{{ c_type.replace(' ', '_') }}_to_pyobject(magnitude);
+    }
+{% endif %}
 
 
 static PyGetSetDef {{ name }}_PyGetSetDef[] = {
@@ -501,7 +558,9 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
         {"a", (getter){{ name }}_Getter_3, 0, 0, 0},
         {"q", (getter){{ name }}_Getter_3, 0, 0, 0},
     {% endif %}
-    {"magnitude", (getter){{ name }}_magnitude, 0, 0, 0},
+    {% if c_type in ['float', 'double'] %}
+        {"magnitude", (getter){{ name }}_magnitude, 0, 0, 0},
+    {% endif %}
     {0, 0, 0, 0, 0}
 };
 
@@ -560,7 +619,7 @@ static PyObject *
                 return 0;
             }
         }
-        auto py_c = c_{{ c_type }}_to_pyobject((*self->glm)[glm_index]);
+        auto py_c = c_{{ c_type.replace(' ', '_') }}_to_pyobject((*self->glm)[glm_index]);
         PyTuple_SET_ITEM(result, i, py_c);
     }
 
@@ -575,17 +634,34 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
 };
 
 
-{% if component_count == 3 %}
+{% if c_type in ['float', 'double'] %}
+    {% if component_count == 3 %}
+        static {{ name }} *
+        {{ name }}_cross({{ name }} *self, {{ name }} *other)
+        {
+            auto cls = Py_TYPE(self);
+            if (Py_TYPE(other) != cls)
+            {
+                PyErr_Format(PyExc_TypeError, "%R is not {{ name }}", other);
+                return 0;
+            }
+            auto vector = glm::cross(*self->glm, *other->glm);
+            {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+            if (!result){ return 0; }
+            result->glm = new {{ name }}Glm(
+                {% for i in range(component_count) %}
+                    vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
+                {% endfor %}
+            );
+            return result;
+        }
+    {% endif %}
+
     static {{ name }} *
-    {{ name }}_cross({{ name }} *self, {{ name }} *other)
+    {{ name }}_normalize({{ name }} *self, void*)
     {
         auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls)
-        {
-            PyErr_Format(PyExc_TypeError, "%R is not {{ name }}", other);
-            return 0;
-        }
-        auto vector = glm::cross(*self->glm, *other->glm);
+        auto vector = glm::normalize(*self->glm);
         {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
         if (!result){ return 0; }
         result->glm = new {{ name }}Glm(
@@ -595,45 +671,58 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
         );
         return result;
     }
+
+
+    static PyObject *
+    {{ name }}_distance({{ name }} *self, {{ name }} *other)
+    {
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(other) != cls)
+        {
+            PyErr_Format(PyExc_TypeError, "%R is not {{ name }}", other);
+            return 0;
+        }
+        auto result = glm::distance(*self->glm, *other->glm);
+        return c_{{ c_type.replace(' ', '_') }}_to_pyobject(result);
+    }
 {% endif %}
 
 
-static {{ name }} *
-{{ name }}_normalize({{ name }} *self, void*)
+static PyObject *
+{{ name }}_get_limits({{ name }} *self, void *)
 {
-    auto cls = Py_TYPE(self);
-    auto vector = glm::normalize(*self->glm);
-    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new {{ name }}Glm(
-        {% for i in range(component_count) %}
-            vector[{{i}}]{% if i < component_count - 1 %}, {% endif %}
-        {% endfor %}
-    );
+    auto c_min = std::numeric_limits<{{ c_type }}>::min();
+    auto c_max = std::numeric_limits<{{ c_type }}>::max();
+    auto py_min = c_{{ c_type.replace(' ', '_') }}_to_pyobject(c_min);
+    if (!py_min){ return 0; }
+    auto py_max = c_{{ c_type.replace(' ', '_') }}_to_pyobject(c_max);
+    if (!py_max)
+    {
+        Py_DECREF(py_min);
+        return 0;
+    }
+    auto result = PyTuple_New(2);
+    if (!result)
+    {
+        Py_DECREF(py_min);
+        Py_DECREF(py_max);
+        return 0;
+    }
+    PyTuple_SET_ITEM(result, 0, py_min);
+    PyTuple_SET_ITEM(result, 1, py_max);
     return result;
 }
 
 
-static PyObject *
-{{ name }}_distance({{ name }} *self, {{ name }} *other)
-{
-    auto cls = Py_TYPE(self);
-    if (Py_TYPE(other) != cls)
-    {
-        PyErr_Format(PyExc_TypeError, "%R is not {{ name }}", other);
-        return 0;
-    }
-    auto result = glm::distance(*self->glm, *other->glm);
-    return c_{{ c_type }}_to_pyobject(result);
-}
-
-
 static PyMethodDef {{ name }}_PyMethodDef[] = {
-    {% if component_count == 3 %}
-        {"cross", (PyCFunction){{ name }}_cross, METH_O, 0},
+    {% if c_type in ['float', 'double'] %}
+        {% if component_count == 3 %}
+            {"cross", (PyCFunction){{ name }}_cross, METH_O, 0},
+        {% endif %}
+        {"normalize", (PyCFunction){{ name }}_normalize, METH_NOARGS, 0},
+        {"distance", (PyCFunction){{ name }}_distance, METH_O, 0},
     {% endif %}
-    {"normalize", (PyCFunction){{ name }}_normalize, METH_NOARGS, 0},
-    {"distance", (PyCFunction){{ name }}_distance, METH_O, 0},
+    {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}
 };
 
@@ -649,11 +738,17 @@ static PyType_Slot {{ name }}_PyType_Slots [] = {
     {Py_nb_add, (void*){{ name }}__add__},
     {Py_nb_subtract, (void*){{ name }}__sub__},
     {Py_nb_multiply, (void*){{ name }}__mul__},
-    {Py_nb_matrix_multiply, (void*){{ name }}__matmul__},
-    {Py_nb_true_divide, (void*){{ name }}__truediv__},
-    {Py_nb_remainder, (void*){{ name }}__mod__},
-    {Py_nb_power, (void*){{ name }}__pow__},
-    {Py_nb_negative, (void*){{ name }}__neg__},
+    {% if c_type in ['float', 'double'] %}
+        {Py_nb_matrix_multiply, (void*){{ name }}__matmul__},
+        {Py_nb_remainder, (void*){{ name }}__mod__},
+        {Py_nb_power, (void*){{ name }}__pow__},
+    {% endif %}
+    {% if c_type != 'bool' %}
+        {Py_nb_true_divide, (void*){{ name }}__truediv__},
+    {% endif %}
+    {% if 'unsigned' not in c_type and not (c_type.startswith('u') and c_type.endswith('_t')) %}
+        {Py_nb_negative, (void*){{ name }}__neg__},
+    {% endif %}
     {Py_nb_absolute, (void*){{ name }}__abs__},
     {Py_nb_bool, (void*){{ name }}__bool__},
     {Py_bf_getbuffer, (void*){{ name }}_getbufferproc},

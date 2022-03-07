@@ -1,8 +1,10 @@
-// generated 2022-03-07 03:05:30.755874
+// generated 2022-03-07 23:13:00.194594 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
 
+// stdlib
+#include <limits>
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -10,7 +12,6 @@
 // glm
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#include <glm/detail/type_vec3.hpp>
 // gamut
 #include "_type.hpp"
 
@@ -123,17 +124,41 @@ DVector2__dealloc__(DVector2 *self)
 }
 
 
+// this is roughly copied from how python hashes tuples in 3.11
+#if SIZEOF_PY_UHASH_T > 4
+#define _HASH_XXPRIME_1 ((Py_uhash_t)11400714785074694791ULL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)14029467366897019727ULL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)2870177450012600261ULL)
+#define _HASH_XXROTATE(x) ((x << 31) | (x >> 33))  /* Rotate left 31 bits */
+#else
+#define _HASH_XXPRIME_1 ((Py_uhash_t)2654435761UL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)2246822519UL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)374761393UL)
+#define _HASH_XXROTATE(x) ((x << 13) | (x >> 19))  /* Rotate left 13 bits */
+#endif
+
 static Py_hash_t
 DVector2__hash__(DVector2 *self)
 {
-    Py_hash_t hash = 0;
+    Py_ssize_t i, len = 2;
+    Py_uhash_t acc = _HASH_XXPRIME_5;
+    for (i = 0; i < len; i++)
+    {
+        Py_uhash_t lane = std::hash<double>{}((*self->glm)[i]);
+        if (lane == (Py_uhash_t)-1)
+        {
+            return -1;
+        }
+        acc += lane * _HASH_XXPRIME_2;
+        acc = _HASH_XXROTATE(acc);
+        acc *= _HASH_XXPRIME_1;
+    }
+    acc += len ^ (_HASH_XXPRIME_5 ^ 3527539UL);
 
-        hash ^= (Py_hash_t)(*self->glm)[0];
-
-        hash ^= (Py_hash_t)(*self->glm)[1];
-
-    if (hash == -1){ hash = -123456789; }
-    return hash;
+    if (acc == (Py_uhash_t)-1) {
+        return 1546275796;
+    }
+    return acc;
 }
 
 
@@ -325,124 +350,134 @@ DVector2__mul__(DVector2 *self, PyObject *other)
 }
 
 
-static PyObject *
-DVector2__matmul__(DVector2 *self, DVector2 *other)
-{
-    auto cls = Py_TYPE(self);
-    if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-    auto c_result = glm::dot(*self->glm, *other->glm);
-    return c_double_to_pyobject(c_result);
-}
 
-
-static PyObject *
-DVector2__truediv__(DVector2 *self, PyObject *other)
-{
-    auto cls = Py_TYPE(self);
-    DVector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    static PyObject *
+    DVector2__matmul__(DVector2 *self, DVector2 *other)
     {
-        auto c_other = pyobject_to_c_double(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) / c_other;
-    }
-    else
-    {
-        vector = (*self->glm) / (*((DVector2 *)other)->glm);
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
+        auto c_result = glm::dot(*self->glm, *other->glm);
+        return c_double_to_pyobject(c_result);
     }
 
-    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new DVector2Glm(
 
-            vector[0],
-
-            vector[1]
-
-    );
-
-    return (PyObject *)result;
-}
-
-
-static PyObject *
-DVector2__mod__(DVector2 *self, PyObject *other)
-{
-    auto cls = Py_TYPE(self);
-    DVector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    static PyObject *
+    DVector2__mod__(DVector2 *self, PyObject *other)
     {
-        auto c_other = pyobject_to_c_double(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = glm::mod((*self->glm), c_other);
-    }
-    else
-    {
-        vector = glm::mod((*self->glm), (*((DVector2 *)other)->glm));
-    }
+        auto cls = Py_TYPE(self);
+        DVector2Glm vector;
+        if (Py_TYPE(other) != cls)
+        {
+            auto c_other = pyobject_to_c_double(other);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = glm::mod((*self->glm), c_other);
+        }
+        else
+        {
+            vector = glm::mod((*self->glm), (*((DVector2 *)other)->glm));
+        }
 
-    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new DVector2Glm(
+        DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(
 
-            vector[0],
+                vector[0],
 
-            vector[1]
+                vector[1]
 
-    );
+        );
 
-    return (PyObject *)result;
-}
-
-
-static PyObject *
-DVector2__pow__(DVector2 *self, PyObject *other)
-{
-    auto cls = Py_TYPE(self);
-    DVector2Glm vector;
-    if (Py_TYPE(other) != cls)
-    {
-        auto c_other = pyobject_to_c_double(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = glm::pow((*self->glm), DVector2Glm(c_other));
-    }
-    else
-    {
-        vector = glm::pow((*self->glm), (*((DVector2 *)other)->glm));
+        return (PyObject *)result;
     }
 
-    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new DVector2Glm(
 
-            vector[0],
+    static PyObject *
+    DVector2__pow__(DVector2 *self, PyObject *other)
+    {
+        auto cls = Py_TYPE(self);
+        DVector2Glm vector;
+        if (Py_TYPE(other) != cls)
+        {
+            auto c_other = pyobject_to_c_double(other);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = glm::pow((*self->glm), DVector2Glm(c_other));
+        }
+        else
+        {
+            vector = glm::pow((*self->glm), (*((DVector2 *)other)->glm));
+        }
 
-            vector[1]
+        DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(
 
-    );
+                vector[0],
 
-    return (PyObject *)result;
-}
+                vector[1]
+
+        );
+
+        return (PyObject *)result;
+    }
 
 
-static PyObject *
-DVector2__neg__(DVector2 *self)
-{
-    auto cls = Py_TYPE(self);
-    DVector2Glm vector = -(*self->glm);
 
-    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new DVector2Glm(
 
-            vector[0],
+    static PyObject *
+    DVector2__truediv__(DVector2 *self, PyObject *other)
+    {
+        auto cls = Py_TYPE(self);
+        DVector2Glm vector;
+        if (Py_TYPE(other) != cls)
+        {
+            auto c_other = pyobject_to_c_double(other);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
 
-            vector[1]
+            vector = (*self->glm) / c_other;
+        }
+        else
+        {
 
-    );
+            vector = (*self->glm) / (*((DVector2 *)other)->glm);
+        }
 
-    return (PyObject *)result;
-}
+        DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(
+
+                vector[0],
+
+                vector[1]
+
+        );
+
+        return (PyObject *)result;
+    }
+
+
+
+
+    static PyObject *
+    DVector2__neg__(DVector2 *self)
+    {
+        auto cls = Py_TYPE(self);
+
+            DVector2Glm vector = -(*self->glm);
+
+
+        DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(
+
+                vector[0],
+
+                vector[1]
+
+        );
+
+        return (PyObject *)result;
+    }
+
 
 
 static PyObject *
@@ -526,12 +561,14 @@ DVector2_getbufferproc(DVector2 *self, Py_buffer *view, int flags)
 
 
 
-static PyObject *
-DVector2_magnitude(DVector2 *self, void *)
-{
-    auto magnitude = glm::length(*self->glm);
-    return c_double_to_pyobject(magnitude);
-}
+
+    static PyObject *
+    DVector2_magnitude(DVector2 *self, void *)
+    {
+        auto magnitude = glm::length(*self->glm);
+        return c_double_to_pyobject(magnitude);
+    }
+
 
 
 static PyGetSetDef DVector2_PyGetSetDef[] = {
@@ -547,7 +584,9 @@ static PyGetSetDef DVector2_PyGetSetDef[] = {
 
 
 
-    {"magnitude", (getter)DVector2_magnitude, 0, 0, 0},
+
+        {"magnitude", (getter)DVector2_magnitude, 0, 0, 0},
+
     {0, 0, 0, 0, 0}
 };
 
@@ -612,42 +651,72 @@ static PyMemberDef DVector2_PyMemberDef[] = {
 
 
 
-static DVector2 *
-DVector2_normalize(DVector2 *self, void*)
-{
-    auto cls = Py_TYPE(self);
-    auto vector = glm::normalize(*self->glm);
-    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new DVector2Glm(
+    static DVector2 *
+    DVector2_normalize(DVector2 *self, void*)
+    {
+        auto cls = Py_TYPE(self);
+        auto vector = glm::normalize(*self->glm);
+        DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(
 
-            vector[0],
+                vector[0],
 
-            vector[1]
+                vector[1]
 
-    );
-    return result;
-}
+        );
+        return result;
+    }
+
+
+    static PyObject *
+    DVector2_distance(DVector2 *self, DVector2 *other)
+    {
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(other) != cls)
+        {
+            PyErr_Format(PyExc_TypeError, "%R is not DVector2", other);
+            return 0;
+        }
+        auto result = glm::distance(*self->glm, *other->glm);
+        return c_double_to_pyobject(result);
+    }
+
 
 
 static PyObject *
-DVector2_distance(DVector2 *self, DVector2 *other)
+DVector2_get_limits(DVector2 *self, void *)
 {
-    auto cls = Py_TYPE(self);
-    if (Py_TYPE(other) != cls)
+    auto c_min = std::numeric_limits<double>::min();
+    auto c_max = std::numeric_limits<double>::max();
+    auto py_min = c_double_to_pyobject(c_min);
+    if (!py_min){ return 0; }
+    auto py_max = c_double_to_pyobject(c_max);
+    if (!py_max)
     {
-        PyErr_Format(PyExc_TypeError, "%R is not DVector2", other);
+        Py_DECREF(py_min);
         return 0;
     }
-    auto result = glm::distance(*self->glm, *other->glm);
-    return c_double_to_pyobject(result);
+    auto result = PyTuple_New(2);
+    if (!result)
+    {
+        Py_DECREF(py_min);
+        Py_DECREF(py_max);
+        return 0;
+    }
+    PyTuple_SET_ITEM(result, 0, py_min);
+    PyTuple_SET_ITEM(result, 1, py_max);
+    return result;
 }
 
 
 static PyMethodDef DVector2_PyMethodDef[] = {
 
-    {"normalize", (PyCFunction)DVector2_normalize, METH_NOARGS, 0},
-    {"distance", (PyCFunction)DVector2_distance, METH_O, 0},
+
+        {"normalize", (PyCFunction)DVector2_normalize, METH_NOARGS, 0},
+        {"distance", (PyCFunction)DVector2_distance, METH_O, 0},
+
+    {"get_limits", (PyCFunction)DVector2_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}
 };
 
@@ -663,11 +732,17 @@ static PyType_Slot DVector2_PyType_Slots [] = {
     {Py_nb_add, (void*)DVector2__add__},
     {Py_nb_subtract, (void*)DVector2__sub__},
     {Py_nb_multiply, (void*)DVector2__mul__},
-    {Py_nb_matrix_multiply, (void*)DVector2__matmul__},
-    {Py_nb_true_divide, (void*)DVector2__truediv__},
-    {Py_nb_remainder, (void*)DVector2__mod__},
-    {Py_nb_power, (void*)DVector2__pow__},
-    {Py_nb_negative, (void*)DVector2__neg__},
+
+        {Py_nb_matrix_multiply, (void*)DVector2__matmul__},
+        {Py_nb_remainder, (void*)DVector2__mod__},
+        {Py_nb_power, (void*)DVector2__pow__},
+
+
+        {Py_nb_true_divide, (void*)DVector2__truediv__},
+
+
+        {Py_nb_negative, (void*)DVector2__neg__},
+
     {Py_nb_absolute, (void*)DVector2__abs__},
     {Py_nb_bool, (void*)DVector2__bool__},
     {Py_bf_getbuffer, (void*)DVector2_getbufferproc},
