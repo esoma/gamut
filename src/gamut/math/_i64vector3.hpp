@@ -1,8 +1,9 @@
 
-// generated 2022-03-08 23:32:45.017253 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 23:43:08.590688 from codegen/math/templates/_vector.hpp
 
 // stdlib
 #include <limits>
+#include <functional>
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
