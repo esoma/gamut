@@ -13,6 +13,7 @@ __all__ = [
     'U32Vector2', 'U32Vector3', 'U32Vector4',
     'UVector2', 'UVector3', 'UVector4',
     'U64Vector2', 'U64Vector3', 'U64Vector4',
+    'Vector2', 'Vector3', 'Vector4',
 ]
 
 # gamut
@@ -24,3 +25,7 @@ from ._math import (BVector2, BVector3, BVector4, DVector2, DVector3, DVector4,
                     U8Vector4, U16Vector2, U16Vector3, U16Vector4, U32Vector2,
                     U32Vector3, U32Vector4, U64Vector2, U64Vector3, U64Vector4,
                     UVector2, UVector3, UVector4)
+
+Vector2 = DVector2
+Vector3 = DVector3
+Vector4 = DVector4

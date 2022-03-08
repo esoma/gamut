@@ -8,7 +8,8 @@ from gamut.math import (BVector2, BVector3, BVector4, DVector2, DVector3,
                         IVector4, U8Vector2, U8Vector3, U8Vector4, U16Vector2,
                         U16Vector3, U16Vector4, U32Vector2, U32Vector3,
                         U32Vector4, U64Vector2, U64Vector3, U64Vector4,
-                        UVector2, UVector3, UVector4)
+                        UVector2, UVector3, UVector4, Vector2, Vector3,
+                        Vector4)
 # python
 import itertools
 from math import inf
@@ -23,6 +24,12 @@ import pytest
 
 def isclose(a, b):
     return _isclose(a, b, rel_tol=1e-07)
+
+
+def test_alias():
+    assert Vector2 is DVector2
+    assert Vector3 is DVector3
+    assert Vector4 is DVector4
 
 
 class VectorTest:
