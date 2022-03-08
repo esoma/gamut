@@ -106,7 +106,7 @@ math = Extension(
     'gamut.math._math',
     include_dirs=['vendor/glm', 'src/gamut/math'],
     sources=['src/gamut/math/_math.cpp'],
-    language='c++',
+    language='c++11',
 )
 
 
