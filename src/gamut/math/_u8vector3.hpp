@@ -1,7 +1,5 @@
-// generated 2022-03-08 17:09:59.380670 from codegen/math/templates/_vector.hpp
 
-#include <stdio.h>
-#include <iostream>
+// generated 2022-03-08 23:32:45.013254 from codegen/math/templates/_vector.hpp
 
 // stdlib
 #include <limits>
