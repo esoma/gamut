@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.427125 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.388670 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -752,7 +752,7 @@ static PyMemberDef U8Vector4_PyMemberDef[] = {
 static PyObject *
 U8Vector4_get_limits(U8Vector4 *self, void *)
 {
-    auto c_min = std::numeric_limits<uint8_t>::min();
+    auto c_min = std::numeric_limits<uint8_t>::lowest();
     auto c_max = std::numeric_limits<uint8_t>::max();
     auto py_min = c_uint8_t_to_pyobject(c_min);
     if (!py_min){ return 0; }

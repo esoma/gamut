@@ -23,16 +23,7 @@ double pyobject_to_c_double(PyObject *py)
 
 float pyobject_to_c_float(PyObject *py)
 {
-    auto result = PyFloat_AsDouble(py);
-    if (std::isnormal(result) && (
-        result < (double)std::numeric_limits<float>::lowest() ||
-        result > (double)std::numeric_limits<float>::max()
-    ))
-    {
-        PyErr_Format(PyExc_OverflowError, "can't convert %R to float", py);
-        return -1;
-    }
-    return result;
+    return PyFloat_AsDouble(py);
 }
 
 

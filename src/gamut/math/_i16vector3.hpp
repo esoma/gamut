@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.419623 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.381169 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -715,7 +715,7 @@ static PyMemberDef I16Vector3_PyMemberDef[] = {
 static PyObject *
 I16Vector3_get_limits(I16Vector3 *self, void *)
 {
-    auto c_min = std::numeric_limits<int16_t>::min();
+    auto c_min = std::numeric_limits<int16_t>::lowest();
     auto c_max = std::numeric_limits<int16_t>::max();
     auto py_min = c_int16_t_to_pyobject(c_min);
     if (!py_min){ return 0; }

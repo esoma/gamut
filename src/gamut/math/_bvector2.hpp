@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.408621 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.370669 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -578,7 +578,7 @@ static PyMemberDef BVector2_PyMemberDef[] = {
 static PyObject *
 BVector2_get_limits(BVector2 *self, void *)
 {
-    auto c_min = std::numeric_limits<bool>::min();
+    auto c_min = std::numeric_limits<bool>::lowest();
     auto c_max = std::numeric_limits<bool>::max();
     auto py_min = c_bool_to_pyobject(c_min);
     if (!py_min){ return 0; }

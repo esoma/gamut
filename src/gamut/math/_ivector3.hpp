@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.422122 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.383672 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -715,7 +715,7 @@ static PyMemberDef IVector3_PyMemberDef[] = {
 static PyObject *
 IVector3_get_limits(IVector3 *self, void *)
 {
-    auto c_min = std::numeric_limits<int>::min();
+    auto c_min = std::numeric_limits<int>::lowest();
     auto c_max = std::numeric_limits<int>::max();
     auto py_min = c_int_to_pyobject(c_min);
     if (!py_min){ return 0; }

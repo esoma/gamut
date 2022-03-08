@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.414623 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.376669 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -632,7 +632,7 @@ static PyMemberDef UVector2_PyMemberDef[] = {
 static PyObject *
 UVector2_get_limits(UVector2 *self, void *)
 {
-    auto c_min = std::numeric_limits<unsigned int>::min();
+    auto c_min = std::numeric_limits<unsigned int>::lowest();
     auto c_max = std::numeric_limits<unsigned int>::max();
     auto py_min = c_unsigned_int_to_pyobject(c_min);
     if (!py_min){ return 0; }

@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.410123 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.371669 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -764,7 +764,7 @@ static PyMemberDef FVector2_PyMemberDef[] = {
 static PyObject *
 FVector2_get_limits(FVector2 *self, void *)
 {
-    auto c_min = std::numeric_limits<float>::min();
+    auto c_min = std::numeric_limits<float>::lowest();
     auto c_max = std::numeric_limits<float>::max();
     auto py_min = c_float_to_pyobject(c_min);
     if (!py_min){ return 0; }

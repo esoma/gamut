@@ -1,8 +1,5 @@
 // generated {{ when }} from codegen/math/templates/_vector.hpp
 
-#include <stdio.h>
-#include <iostream>
-
 // stdlib
 #include <limits>
 // python
@@ -778,7 +775,7 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
 static PyObject *
 {{ name }}_get_limits({{ name }} *self, void *)
 {
-    auto c_min = std::numeric_limits<{{ c_type }}>::min();
+    auto c_min = std::numeric_limits<{{ c_type }}>::lowest();
     auto c_max = std::numeric_limits<{{ c_type }}>::max();
     auto py_min = c_{{ c_type.replace(' ', '_') }}_to_pyobject(c_min);
     if (!py_min){ return 0; }

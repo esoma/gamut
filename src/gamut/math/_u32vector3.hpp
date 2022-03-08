@@ -1,4 +1,4 @@
-// generated 2022-03-08 03:18:33.421621 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 17:09:59.383169 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -692,7 +692,7 @@ static PyMemberDef U32Vector3_PyMemberDef[] = {
 static PyObject *
 U32Vector3_get_limits(U32Vector3 *self, void *)
 {
-    auto c_min = std::numeric_limits<uint32_t>::min();
+    auto c_min = std::numeric_limits<uint32_t>::lowest();
     auto c_max = std::numeric_limits<uint32_t>::max();
     auto py_min = c_uint32_t_to_pyobject(c_min);
     if (!py_min){ return 0; }
