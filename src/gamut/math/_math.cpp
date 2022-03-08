@@ -1,4 +1,4 @@
-// generated 2022-03-08 02:13:12.901068 from codegen/math/templates/_math.hpp
+// generated 2022-03-08 03:18:33.435625 from codegen/math/templates/_math.hpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -123,9 +123,10 @@ PyMODINIT_FUNC
 PyInit__math()
 {
     PyObject *module = PyModule_Create(&module_PyModuleDef);
+    ModuleState *state = 0;
     if (!module){ goto error; }
     if (PyState_AddModule(module, &module_PyModuleDef) == -1){ goto error; }
-    ModuleState *state = (ModuleState *)PyModule_GetState(module);
+    state = (ModuleState *)PyModule_GetState(module);
 
 
     {

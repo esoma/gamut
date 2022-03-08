@@ -1,4 +1,4 @@
-// generated 2022-03-08 02:13:12.880068 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 03:18:33.414123 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -146,10 +146,6 @@ IVector2__hash__(IVector2 *self)
     for (i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<int>{}((*self->glm)[i]);
-        if (lane == (Py_uhash_t)-1)
-        {
-            return -1;
-        }
         acc += lane * _HASH_XXPRIME_2;
         acc = _HASH_XXROTATE(acc);
         acc *= _HASH_XXPRIME_1;
