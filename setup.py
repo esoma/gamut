@@ -120,7 +120,8 @@ math = Extension(
     include_dirs=['vendor/glm', 'src/gamut/math'],
     sources=['src/gamut/math/_math.cpp'],
     language='c++11',
-    extra_compile_args=coverage_compile_args,
+    extra_compile_args=coverage_compile_args +
+        [] if os.name == 'nt' else ['-std=c++11'],
     extra_link_args=coverage_links_args,
 )
 
