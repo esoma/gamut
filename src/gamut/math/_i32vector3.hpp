@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.207095 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 02:13:12.886568 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 // gamut
+#include "_modulestate.hpp"
 #include "_type.hpp"
 
 typedef glm::vec<3, int32_t, glm::defaultp> I32Vector3Glm;
@@ -285,19 +286,31 @@ I32Vector3__richcmp__(I32Vector3 *self, I32Vector3 *other, int op)
 
 
 static PyObject *
-I32Vector3__add__(I32Vector3 *self, PyObject *other)
+I32Vector3__add__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I32Vector3_PyTypeObject;
+
     I32Vector3Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int32_t(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) + c_other;
+        vector = (*((I32Vector3 *)left)->glm) + (*((I32Vector3 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) + (*((I32Vector3 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int32_t(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((I32Vector3 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int32_t(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left + (*((I32Vector3 *)right)->glm);
+        }
     }
 
     I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
@@ -317,19 +330,31 @@ I32Vector3__add__(I32Vector3 *self, PyObject *other)
 
 
 static PyObject *
-I32Vector3__sub__(I32Vector3 *self, PyObject *other)
+I32Vector3__sub__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I32Vector3_PyTypeObject;
+
     I32Vector3Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int32_t(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) - c_other;
+        vector = (*((I32Vector3 *)left)->glm) - (*((I32Vector3 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) - (*((I32Vector3 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int32_t(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((I32Vector3 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int32_t(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left - (*((I32Vector3 *)right)->glm);
+        }
     }
 
     I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
@@ -349,19 +374,31 @@ I32Vector3__sub__(I32Vector3 *self, PyObject *other)
 
 
 static PyObject *
-I32Vector3__mul__(I32Vector3 *self, PyObject *other)
+I32Vector3__mul__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I32Vector3_PyTypeObject;
+
     I32Vector3Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int32_t(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) * c_other;
+        vector = (*((I32Vector3 *)left)->glm) * (*((I32Vector3 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) * (*((I32Vector3 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int32_t(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((I32Vector3 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int32_t(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left * (*((I32Vector3 *)right)->glm);
+        }
     }
 
     I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);
@@ -378,6 +415,7 @@ I32Vector3__mul__(I32Vector3 *self, PyObject *other)
 
     return (PyObject *)result;
 }
+
 
 
 
@@ -385,33 +423,23 @@ I32Vector3__mul__(I32Vector3 *self, PyObject *other)
 
 
     static PyObject *
-    I32Vector3__truediv__(I32Vector3 *self, PyObject *other)
+    I32Vector3__truediv__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->I32Vector3_PyTypeObject;
+
         I32Vector3Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_int32_t(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-
-                if (c_other == 0)
-                {
-                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
-                    return 0;
-                }
-
-            vector = (*self->glm) / c_other;
-        }
-        else
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
 
                 if (
 
-                        (*((I32Vector3 *)other)->glm)[0] == 0 ||
+                        (*((I32Vector3 *)right)->glm)[0] == 0 ||
 
-                        (*((I32Vector3 *)other)->glm)[1] == 0 ||
+                        (*((I32Vector3 *)right)->glm)[1] == 0 ||
 
-                        (*((I32Vector3 *)other)->glm)[2] == 0
+                        (*((I32Vector3 *)right)->glm)[2] == 0
 
                 )
                 {
@@ -419,7 +447,44 @@ I32Vector3__mul__(I32Vector3 *self, PyObject *other)
                     return 0;
                 }
 
-            vector = (*self->glm) / (*((I32Vector3 *)other)->glm);
+            vector = (*((I32Vector3 *)left)->glm) / (*((I32Vector3 *)right)->glm);
+        }
+        else
+        {
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_int32_t(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                    if (c_right == 0)
+                    {
+                        PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                        return 0;
+                    }
+
+                vector = (*((I32Vector3 *)left)->glm) / c_right;
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_int32_t(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                    if (
+
+                            (*((I32Vector3 *)right)->glm)[0] == 0 ||
+
+                            (*((I32Vector3 *)right)->glm)[1] == 0 ||
+
+                            (*((I32Vector3 *)right)->glm)[2] == 0
+
+                    )
+                    {
+                        PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                        return 0;
+                    }
+
+                vector = c_left / (*((I32Vector3 *)right)->glm);
+            }
         }
 
         I32Vector3 *result = (I32Vector3 *)cls->tp_alloc(cls, 0);

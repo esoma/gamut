@@ -233,24 +233,21 @@ class VectorTest:
         if not self.unsigned:
             assert self.cls(-1) + self.cls(-1) == self.cls(-2)
             assert self.cls(-1) + -1 == self.cls(-2)
+            assert -1 + self.cls(-1) == self.cls(-2)
             assert self.cls(1) + self.cls(-1) == self.cls(
                 self.type(1) + self.type(-1)
             )
-            assert self.cls(1) + -1 == self.cls(
-                self.type(1) + self.type(-1)
-            )
+            assert self.cls(1) + -1 == self.cls(self.type(1) + self.type(-1))
+            assert -1 + self.cls(1) == self.cls(self.type(-1) + self.type(1))
             self.cls(self.cls.get_limits()[1]) + self.cls(1)
         else:
-            print(self.cls.get_limits())
-            print(self.cls(self.cls.get_limits()[1]))
-            print(self.cls(self.cls.get_limits()[1]) + self.cls(1))
-            print(self.cls(self.cls.get_limits()[0]))
             assert (
                 self.cls(self.cls.get_limits()[1]) + self.cls(1) ==
                 self.cls(self.cls.get_limits()[0])
             )
         assert self.cls(1) + self.cls(1) == self.cls(2)
         assert self.cls(1) + 1 == self.cls(2)
+        assert 1 + self.cls(1) == self.cls(2)
 
         vector = self.cls(*range(self.component_count))
         assert vector + vector == self.cls(*(
@@ -258,6 +255,9 @@ class VectorTest:
         ))
         assert vector + 1 == self.cls(*(
             i + 1 for i in range(self.component_count)
+        ))
+        assert 1 + vector == self.cls(*(
+            1 + i for i in range(self.component_count)
         ))
 
         i_vec = vector
@@ -280,24 +280,33 @@ class VectorTest:
             assert (self.cls(1) + None) == self.cls(1)
             assert (self.cls(0) + '123') == self.cls(1)
             assert (self.cls(0) + object()) == self.cls(1)
+            assert (None + self.cls(1)) == self.cls(1)
+            assert ('123' + self.cls(0)) == self.cls(1)
+            assert (object() + self.cls(0)) == self.cls(1)
         else:
             with pytest.raises(TypeError):
                 vector + None
             with pytest.raises(TypeError):
+                None + vector
+            with pytest.raises(TypeError):
                 vector + '123'
             with pytest.raises(TypeError):
+                '123' + vector
+            with pytest.raises(TypeError):
                 vector + object()
+            with pytest.raises(TypeError):
+                object() + vector
 
     def test_subtract(self) -> None:
         if not self.unsigned:
             assert self.cls(-1) - self.cls(-1) == self.cls(0)
             assert self.cls(-1) - -1 == self.cls(0)
+            assert -1 - self.cls(-1) == self.cls(0)
             assert self.cls(1) - self.cls(-1) == self.cls(
                 self.type(1) - self.type(-1)
             )
-            assert self.cls(1) - -1 == self.cls(
-                self.type(1) - self.type(-1)
-            )
+            assert self.cls(1) - -1 == self.cls(self.type(1) - self.type(-1))
+            assert -1 - self.cls(1) == self.cls(self.type(-1) - self.type(1))
             self.cls(self.cls.get_limits()[1]) - self.cls(1)
         else:
             assert (
@@ -306,6 +315,7 @@ class VectorTest:
             )
         assert self.cls(1) - self.cls(1) == self.cls(0)
         assert self.cls(1) - 1 == self.cls(0)
+        assert 1 - self.cls(1) == self.cls(0)
 
         vector = self.cls(*range(1, self.component_count + 1))
         assert vector - vector == self.cls(*(
@@ -313,6 +323,10 @@ class VectorTest:
         ))
         assert vector - 1 == self.cls(*(
             self.type(i) - self.type(1)
+            for i in range(1, self.component_count + 1)
+        ))
+        assert 5 - vector == self.cls(*(
+            self.type(5) - self.type(i)
             for i in range(1, self.component_count + 1)
         ))
 
@@ -337,20 +351,31 @@ class VectorTest:
             assert (self.cls(1) - None) == self.cls(1)
             assert (self.cls(0) - '123') == self.cls(1)
             assert (self.cls(0) - object()) == self.cls(1)
+            assert (None - self.cls(1)) == self.cls(1)
+            assert ('123' - self.cls(0)) == self.cls(1)
+            assert (object() - self.cls(0)) == self.cls(1)
         else:
             with pytest.raises(TypeError):
                 vector - None
             with pytest.raises(TypeError):
+                None - vector
+            with pytest.raises(TypeError):
                 vector - '123'
             with pytest.raises(TypeError):
+                '123' - vector
+            with pytest.raises(TypeError):
                 vector - object()
+            with pytest.raises(TypeError):
+                object() - vector
 
     def test_multiply(self) -> None:
         if not self.unsigned:
             assert self.cls(-1) * self.cls(-2) == self.cls(2)
             assert self.cls(-1) * -2 == self.cls(2)
+            assert -2 * self.cls(-1) == self.cls(2)
             assert self.cls(1) * self.cls(-2) == self.cls(-2)
             assert self.cls(1) * -2 == self.cls(-2)
+            assert -2 * self.cls(1) == self.cls(-2)
         else:
             assert (
                 self.cls(self.cls.get_limits()[1]) * self.cls(2) ==
@@ -358,6 +383,7 @@ class VectorTest:
             )
         assert self.cls(1) * self.cls(2) == self.cls(2)
         assert self.cls(1) * 2 == self.cls(2)
+        assert 2 * self.cls(1) == self.cls(2)
 
         vector = self.cls(*range(self.component_count))
         assert vector * vector == self.cls(*(
@@ -365,6 +391,9 @@ class VectorTest:
         ))
         assert vector * 2 == self.cls(*(
             i * 2 for i in range(self.component_count)
+        ))
+        assert 2 * vector == self.cls(*(
+            2 * i for i in range(self.component_count)
         ))
 
         i_vec = vector
@@ -385,17 +414,28 @@ class VectorTest:
 
         if self.type == bool:
             assert (self.cls(1) * None) == self.cls(0)
+            assert (None * self.cls(1)) == self.cls(0)
             assert (self.cls(0) * '123') == self.cls(0)
+            assert ('123' * self.cls(0)) == self.cls(0)
             assert (self.cls(0) * object()) == self.cls(0)
+            assert (object() * self.cls(0)) == self.cls(0)
             assert (self.cls(1) * '123') == self.cls(1)
+            assert ('123' * self.cls(1)) == self.cls(1)
             assert (self.cls(1) * object()) == self.cls(1)
+            assert (object() * self.cls(1)) == self.cls(1)
         else:
             with pytest.raises(TypeError):
                 vector * None
             with pytest.raises(TypeError):
+                None * vector
+            with pytest.raises(TypeError):
                 vector * '123'
             with pytest.raises(TypeError):
+                '123' * vector
+            with pytest.raises(TypeError):
                 vector * object()
+            with pytest.raises(TypeError):
+                object() * vector
 
     def test_matrix_multiply(self) -> None:
         if self.type != float:
@@ -430,6 +470,12 @@ class VectorTest:
             vector @ '123'
         with pytest.raises(TypeError):
             vector @ object()
+        with pytest.raises(TypeError):
+            None @ vector
+        with pytest.raises(TypeError):
+            '123' @ vector
+        with pytest.raises(TypeError):
+            object() @ vector
 
     def test_divide(self) -> None:
         if self.type == bool:
@@ -440,18 +486,24 @@ class VectorTest:
         if not self.unsigned:
             assert self.cls(-1) / self.cls(-2) == self.cls(self.type(.5))
             assert self.cls(-1) / -2 == self.cls(self.type(.5))
+            assert -1 / self.cls(-2) == self.cls(self.type(.5))
             assert self.cls(1) / self.cls(-2) == self.cls(self.type(-.5))
             assert self.cls(1) / -2 == self.cls(self.type(-.5))
+            assert 1 / self.cls(-2) == self.cls(self.type(-.5))
 
         assert self.cls(1) / self.cls(2) == self.cls(self.type(.5))
         assert self.cls(1) / 2 == self.cls(self.type(.5))
+        assert 1 / self.cls(2) == self.cls(self.type(.5))
 
         if self.type == float:
             assert self.cls(1) / 0 == self.cls(inf)
+            assert 1 / self.cls(0) == self.cls(inf)
             assert self.cls(1) / self.cls(0) == self.cls(inf)
         else:
             with pytest.raises(ZeroDivisionError):
                 assert self.cls(1) / 0
+            with pytest.raises(ZeroDivisionError):
+                assert 1 / self.cls(0)
             with pytest.raises(ZeroDivisionError):
                 assert self.cls(1) / self.cls(0)
 
@@ -461,6 +513,9 @@ class VectorTest:
         ))
         assert vector / 2 == self.cls(*(
             self.type(i / 2) for i in range(1, self.component_count + 1)
+        ))
+        assert 2 / vector == self.cls(*(
+            self.type(2 / i) for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
@@ -482,9 +537,15 @@ class VectorTest:
         with pytest.raises(TypeError):
             vector / None
         with pytest.raises(TypeError):
+            None / vector
+        with pytest.raises(TypeError):
             vector / '123'
         with pytest.raises(TypeError):
+            '123' / vector
+        with pytest.raises(TypeError):
             vector / object()
+        with pytest.raises(TypeError):
+            object() / vector
 
 
     def test_modulus(self) -> None:
@@ -495,10 +556,13 @@ class VectorTest:
 
         assert self.cls(-3) % self.cls(-2) == self.cls(-1)
         assert self.cls(-3) % -2 == self.cls(-1)
+        assert -3 % self.cls(-2) == self.cls(-1)
         assert self.cls(3) % self.cls(-2) == self.cls(-1)
         assert self.cls(3) % -2 == self.cls(-1)
+        assert 3 % self.cls(-2) == self.cls(-1)
         assert self.cls(3) % self.cls(2) == self.cls(1)
         assert self.cls(3) % 2 == self.cls(1)
+        assert 3 % self.cls(2) == self.cls(1)
 
         assert all(isnan(c) for c in self.cls(1) % 0)
         assert all(isnan(c) for c in self.cls(1) % self.cls(0))
@@ -509,6 +573,9 @@ class VectorTest:
         ))
         assert vector % 2 == self.cls(*(
             i % 2 for i in range(1, self.component_count + 1)
+        ))
+        assert 2 % vector == self.cls(*(
+            2 % i for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
@@ -530,9 +597,15 @@ class VectorTest:
         with pytest.raises(TypeError):
             vector % None
         with pytest.raises(TypeError):
+            None % vector
+        with pytest.raises(TypeError):
             vector % '123'
         with pytest.raises(TypeError):
+            '123' % vector
+        with pytest.raises(TypeError):
             vector % object()
+        with pytest.raises(TypeError):
+            object() % vector
 
 
     def test_power(self) -> None:
@@ -543,12 +616,16 @@ class VectorTest:
 
         assert self.cls(-3) ** self.cls(-2) == self.cls(3 ** -2)
         assert self.cls(-3) ** -2 == self.cls(3 ** -2)
+        assert (-3) ** self.cls(-2) == self.cls(3 ** -2)
         assert self.cls(3) ** self.cls(-2) == self.cls(3 ** -2)
         assert self.cls(3) ** -2 == self.cls(3 ** -2)
+        assert 3 ** self.cls(-2) == self.cls(3 ** -2)
         assert self.cls(3) ** self.cls(2) == self.cls(9)
         assert self.cls(3) ** 2 == self.cls(9)
+        assert 3 ** self.cls(2) == self.cls(9)
 
         assert self.cls(5) ** 0 == self.cls(1)
+        assert 5 ** self.cls(0) == self.cls(1)
         assert self.cls(5) ** self.cls(0) == self.cls(1)
 
         vector = self.cls(*range(1, self.component_count + 1))
@@ -557,6 +634,9 @@ class VectorTest:
         ))
         assert vector ** 2 == self.cls(*(
             i ** 2 for i in range(1, self.component_count + 1)
+        ))
+        assert 2 ** vector == self.cls(*(
+            2 ** i for i in range(1, self.component_count + 1)
         ))
 
         i_vec = vector
@@ -581,6 +661,12 @@ class VectorTest:
             vector ** '123'
         with pytest.raises(TypeError):
             vector ** object()
+        with pytest.raises(TypeError):
+            None ** vector
+        with pytest.raises(TypeError):
+            '123' ** vector
+        with pytest.raises(TypeError):
+            object() ** vector
 
     def test_negative(self) -> None:
         if self.unsigned:

@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.212097 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 02:13:12.891568 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 // gamut
+#include "_modulestate.hpp"
 #include "_type.hpp"
 
 typedef glm::vec<4, float, glm::defaultp> FVector4Glm;
@@ -309,19 +310,31 @@ FVector4__richcmp__(FVector4 *self, FVector4 *other, int op)
 
 
 static PyObject *
-FVector4__add__(FVector4 *self, PyObject *other)
+FVector4__add__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector4_PyTypeObject;
+
     FVector4Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_float(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) + c_other;
+        vector = (*((FVector4 *)left)->glm) + (*((FVector4 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) + (*((FVector4 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((FVector4 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_float(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left + (*((FVector4 *)right)->glm);
+        }
     }
 
     FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
@@ -343,19 +356,31 @@ FVector4__add__(FVector4 *self, PyObject *other)
 
 
 static PyObject *
-FVector4__sub__(FVector4 *self, PyObject *other)
+FVector4__sub__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector4_PyTypeObject;
+
     FVector4Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_float(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) - c_other;
+        vector = (*((FVector4 *)left)->glm) - (*((FVector4 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) - (*((FVector4 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((FVector4 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_float(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left - (*((FVector4 *)right)->glm);
+        }
     }
 
     FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
@@ -377,19 +402,31 @@ FVector4__sub__(FVector4 *self, PyObject *other)
 
 
 static PyObject *
-FVector4__mul__(FVector4 *self, PyObject *other)
+FVector4__mul__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector4_PyTypeObject;
+
     FVector4Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_float(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) * c_other;
+        vector = (*((FVector4 *)left)->glm) * (*((FVector4 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) * (*((FVector4 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((FVector4 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_float(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left * (*((FVector4 *)right)->glm);
+        }
     }
 
     FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
@@ -412,29 +449,44 @@ FVector4__mul__(FVector4 *self, PyObject *other)
 
 
     static PyObject *
-    FVector4__matmul__(FVector4 *self, FVector4 *other)
+    FVector4__matmul__(FVector4 *left, FVector4 *right)
     {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-        auto c_result = glm::dot(*self->glm, *other->glm);
+        auto cls = Py_TYPE(left);
+        if (Py_TYPE(left) != Py_TYPE(right)){ Py_RETURN_NOTIMPLEMENTED; }
+        auto c_result = glm::dot(*left->glm, *right->glm);
         return c_float_to_pyobject(c_result);
     }
 
 
     static PyObject *
-    FVector4__mod__(FVector4 *self, PyObject *other)
+    FVector4__mod__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FVector4_PyTypeObject;
+
         FVector4Glm vector;
-        if (Py_TYPE(other) != cls)
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
-            auto c_other = pyobject_to_c_float(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::mod((*self->glm), c_other);
+            vector = glm::mod(
+                *((FVector4 *)left)->glm,
+                *((FVector4 *)right)->glm
+            );
         }
         else
         {
-            vector = glm::mod((*self->glm), (*((FVector4 *)other)->glm));
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_float(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::mod(*((FVector4 *)left)->glm, c_right);
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_float(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::mod(FVector4Glm(c_left), *((FVector4 *)right)->glm);
+            }
         }
 
         FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
@@ -456,19 +508,34 @@ FVector4__mul__(FVector4 *self, PyObject *other)
 
 
     static PyObject *
-    FVector4__pow__(FVector4 *self, PyObject *other)
+    FVector4__pow__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FVector4_PyTypeObject;
+
         FVector4Glm vector;
-        if (Py_TYPE(other) != cls)
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
-            auto c_other = pyobject_to_c_float(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::pow((*self->glm), FVector4Glm(c_other));
+            vector = glm::pow(
+                *((FVector4 *)left)->glm,
+                *((FVector4 *)right)->glm
+            );
         }
         else
         {
-            vector = glm::pow((*self->glm), (*((FVector4 *)other)->glm));
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_float(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::pow(*((FVector4 *)left)->glm, FVector4Glm(c_right));
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_float(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::pow(FVector4Glm(c_left), *((FVector4 *)right)->glm);
+            }
         }
 
         FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
@@ -491,22 +558,36 @@ FVector4__mul__(FVector4 *self, PyObject *other)
 
 
 
-    static PyObject *
-    FVector4__truediv__(FVector4 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        FVector4Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_float(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
 
-            vector = (*self->glm) / c_other;
+    static PyObject *
+    FVector4__truediv__(PyObject *left, PyObject *right)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FVector4_PyTypeObject;
+
+        FVector4Glm vector;
+        if (Py_TYPE(left) == Py_TYPE(right))
+        {
+
+            vector = (*((FVector4 *)left)->glm) / (*((FVector4 *)right)->glm);
         }
         else
         {
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_float(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
 
-            vector = (*self->glm) / (*((FVector4 *)other)->glm);
+                vector = (*((FVector4 *)left)->glm) / c_right;
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_float(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                vector = c_left / (*((FVector4 *)right)->glm);
+            }
         }
 
         FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);

@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.194594 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 02:13:12.875070 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 // gamut
+#include "_modulestate.hpp"
 #include "_type.hpp"
 
 typedef glm::vec<2, double, glm::defaultp> DVector2Glm;
@@ -261,19 +262,31 @@ DVector2__richcmp__(DVector2 *self, DVector2 *other, int op)
 
 
 static PyObject *
-DVector2__add__(DVector2 *self, PyObject *other)
+DVector2__add__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DVector2_PyTypeObject;
+
     DVector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_double(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) + c_other;
+        vector = (*((DVector2 *)left)->glm) + (*((DVector2 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) + (*((DVector2 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_double(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((DVector2 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_double(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left + (*((DVector2 *)right)->glm);
+        }
     }
 
     DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
@@ -291,19 +304,31 @@ DVector2__add__(DVector2 *self, PyObject *other)
 
 
 static PyObject *
-DVector2__sub__(DVector2 *self, PyObject *other)
+DVector2__sub__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DVector2_PyTypeObject;
+
     DVector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_double(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) - c_other;
+        vector = (*((DVector2 *)left)->glm) - (*((DVector2 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) - (*((DVector2 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_double(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((DVector2 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_double(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left - (*((DVector2 *)right)->glm);
+        }
     }
 
     DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
@@ -321,19 +346,31 @@ DVector2__sub__(DVector2 *self, PyObject *other)
 
 
 static PyObject *
-DVector2__mul__(DVector2 *self, PyObject *other)
+DVector2__mul__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DVector2_PyTypeObject;
+
     DVector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_double(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) * c_other;
+        vector = (*((DVector2 *)left)->glm) * (*((DVector2 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) * (*((DVector2 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_double(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((DVector2 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_double(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left * (*((DVector2 *)right)->glm);
+        }
     }
 
     DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
@@ -352,29 +389,44 @@ DVector2__mul__(DVector2 *self, PyObject *other)
 
 
     static PyObject *
-    DVector2__matmul__(DVector2 *self, DVector2 *other)
+    DVector2__matmul__(DVector2 *left, DVector2 *right)
     {
-        auto cls = Py_TYPE(self);
-        if (Py_TYPE(other) != cls){ Py_RETURN_NOTIMPLEMENTED; }
-        auto c_result = glm::dot(*self->glm, *other->glm);
+        auto cls = Py_TYPE(left);
+        if (Py_TYPE(left) != Py_TYPE(right)){ Py_RETURN_NOTIMPLEMENTED; }
+        auto c_result = glm::dot(*left->glm, *right->glm);
         return c_double_to_pyobject(c_result);
     }
 
 
     static PyObject *
-    DVector2__mod__(DVector2 *self, PyObject *other)
+    DVector2__mod__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DVector2_PyTypeObject;
+
         DVector2Glm vector;
-        if (Py_TYPE(other) != cls)
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::mod((*self->glm), c_other);
+            vector = glm::mod(
+                *((DVector2 *)left)->glm,
+                *((DVector2 *)right)->glm
+            );
         }
         else
         {
-            vector = glm::mod((*self->glm), (*((DVector2 *)other)->glm));
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_double(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::mod(*((DVector2 *)left)->glm, c_right);
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_double(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::mod(DVector2Glm(c_left), *((DVector2 *)right)->glm);
+            }
         }
 
         DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
@@ -392,19 +444,34 @@ DVector2__mul__(DVector2 *self, PyObject *other)
 
 
     static PyObject *
-    DVector2__pow__(DVector2 *self, PyObject *other)
+    DVector2__pow__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DVector2_PyTypeObject;
+
         DVector2Glm vector;
-        if (Py_TYPE(other) != cls)
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-            vector = glm::pow((*self->glm), DVector2Glm(c_other));
+            vector = glm::pow(
+                *((DVector2 *)left)->glm,
+                *((DVector2 *)right)->glm
+            );
         }
         else
         {
-            vector = glm::pow((*self->glm), (*((DVector2 *)other)->glm));
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_double(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::pow(*((DVector2 *)left)->glm, DVector2Glm(c_right));
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_double(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                vector = glm::pow(DVector2Glm(c_left), *((DVector2 *)right)->glm);
+            }
         }
 
         DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
@@ -423,22 +490,36 @@ DVector2__mul__(DVector2 *self, PyObject *other)
 
 
 
-    static PyObject *
-    DVector2__truediv__(DVector2 *self, PyObject *other)
-    {
-        auto cls = Py_TYPE(self);
-        DVector2Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_double(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
 
-            vector = (*self->glm) / c_other;
+    static PyObject *
+    DVector2__truediv__(PyObject *left, PyObject *right)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DVector2_PyTypeObject;
+
+        DVector2Glm vector;
+        if (Py_TYPE(left) == Py_TYPE(right))
+        {
+
+            vector = (*((DVector2 *)left)->glm) / (*((DVector2 *)right)->glm);
         }
         else
         {
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_double(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
 
-            vector = (*self->glm) / (*((DVector2 *)other)->glm);
+                vector = (*((DVector2 *)left)->glm) / c_right;
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_double(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                vector = c_left / (*((DVector2 *)right)->glm);
+            }
         }
 
         DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);

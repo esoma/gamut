@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.208096 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 02:13:12.887569 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 // gamut
+#include "_modulestate.hpp"
 #include "_type.hpp"
 
 typedef glm::vec<3, int, glm::defaultp> IVector3Glm;
@@ -285,19 +286,31 @@ IVector3__richcmp__(IVector3 *self, IVector3 *other, int op)
 
 
 static PyObject *
-IVector3__add__(IVector3 *self, PyObject *other)
+IVector3__add__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->IVector3_PyTypeObject;
+
     IVector3Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) + c_other;
+        vector = (*((IVector3 *)left)->glm) + (*((IVector3 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) + (*((IVector3 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((IVector3 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left + (*((IVector3 *)right)->glm);
+        }
     }
 
     IVector3 *result = (IVector3 *)cls->tp_alloc(cls, 0);
@@ -317,19 +330,31 @@ IVector3__add__(IVector3 *self, PyObject *other)
 
 
 static PyObject *
-IVector3__sub__(IVector3 *self, PyObject *other)
+IVector3__sub__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->IVector3_PyTypeObject;
+
     IVector3Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) - c_other;
+        vector = (*((IVector3 *)left)->glm) - (*((IVector3 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) - (*((IVector3 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((IVector3 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left - (*((IVector3 *)right)->glm);
+        }
     }
 
     IVector3 *result = (IVector3 *)cls->tp_alloc(cls, 0);
@@ -349,19 +374,31 @@ IVector3__sub__(IVector3 *self, PyObject *other)
 
 
 static PyObject *
-IVector3__mul__(IVector3 *self, PyObject *other)
+IVector3__mul__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->IVector3_PyTypeObject;
+
     IVector3Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) * c_other;
+        vector = (*((IVector3 *)left)->glm) * (*((IVector3 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) * (*((IVector3 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((IVector3 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left * (*((IVector3 *)right)->glm);
+        }
     }
 
     IVector3 *result = (IVector3 *)cls->tp_alloc(cls, 0);
@@ -378,6 +415,7 @@ IVector3__mul__(IVector3 *self, PyObject *other)
 
     return (PyObject *)result;
 }
+
 
 
 
@@ -385,33 +423,23 @@ IVector3__mul__(IVector3 *self, PyObject *other)
 
 
     static PyObject *
-    IVector3__truediv__(IVector3 *self, PyObject *other)
+    IVector3__truediv__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->IVector3_PyTypeObject;
+
         IVector3Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_int(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-
-                if (c_other == 0)
-                {
-                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
-                    return 0;
-                }
-
-            vector = (*self->glm) / c_other;
-        }
-        else
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
 
                 if (
 
-                        (*((IVector3 *)other)->glm)[0] == 0 ||
+                        (*((IVector3 *)right)->glm)[0] == 0 ||
 
-                        (*((IVector3 *)other)->glm)[1] == 0 ||
+                        (*((IVector3 *)right)->glm)[1] == 0 ||
 
-                        (*((IVector3 *)other)->glm)[2] == 0
+                        (*((IVector3 *)right)->glm)[2] == 0
 
                 )
                 {
@@ -419,7 +447,44 @@ IVector3__mul__(IVector3 *self, PyObject *other)
                     return 0;
                 }
 
-            vector = (*self->glm) / (*((IVector3 *)other)->glm);
+            vector = (*((IVector3 *)left)->glm) / (*((IVector3 *)right)->glm);
+        }
+        else
+        {
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_int(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                    if (c_right == 0)
+                    {
+                        PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                        return 0;
+                    }
+
+                vector = (*((IVector3 *)left)->glm) / c_right;
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_int(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                    if (
+
+                            (*((IVector3 *)right)->glm)[0] == 0 ||
+
+                            (*((IVector3 *)right)->glm)[1] == 0 ||
+
+                            (*((IVector3 *)right)->glm)[2] == 0
+
+                    )
+                    {
+                        PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                        return 0;
+                    }
+
+                vector = c_left / (*((IVector3 *)right)->glm);
+            }
         }
 
         IVector3 *result = (IVector3 *)cls->tp_alloc(cls, 0);

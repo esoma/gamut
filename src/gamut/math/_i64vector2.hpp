@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.201595 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 02:13:12.881068 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 // gamut
+#include "_modulestate.hpp"
 #include "_type.hpp"
 
 typedef glm::vec<2, int64_t, glm::defaultp> I64Vector2Glm;
@@ -261,19 +262,31 @@ I64Vector2__richcmp__(I64Vector2 *self, I64Vector2 *other, int op)
 
 
 static PyObject *
-I64Vector2__add__(I64Vector2 *self, PyObject *other)
+I64Vector2__add__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I64Vector2_PyTypeObject;
+
     I64Vector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int64_t(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) + c_other;
+        vector = (*((I64Vector2 *)left)->glm) + (*((I64Vector2 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) + (*((I64Vector2 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int64_t(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((I64Vector2 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int64_t(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left + (*((I64Vector2 *)right)->glm);
+        }
     }
 
     I64Vector2 *result = (I64Vector2 *)cls->tp_alloc(cls, 0);
@@ -291,19 +304,31 @@ I64Vector2__add__(I64Vector2 *self, PyObject *other)
 
 
 static PyObject *
-I64Vector2__sub__(I64Vector2 *self, PyObject *other)
+I64Vector2__sub__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I64Vector2_PyTypeObject;
+
     I64Vector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int64_t(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) - c_other;
+        vector = (*((I64Vector2 *)left)->glm) - (*((I64Vector2 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) - (*((I64Vector2 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int64_t(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((I64Vector2 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int64_t(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left - (*((I64Vector2 *)right)->glm);
+        }
     }
 
     I64Vector2 *result = (I64Vector2 *)cls->tp_alloc(cls, 0);
@@ -321,19 +346,31 @@ I64Vector2__sub__(I64Vector2 *self, PyObject *other)
 
 
 static PyObject *
-I64Vector2__mul__(I64Vector2 *self, PyObject *other)
+I64Vector2__mul__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I64Vector2_PyTypeObject;
+
     I64Vector2Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_int64_t(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) * c_other;
+        vector = (*((I64Vector2 *)left)->glm) * (*((I64Vector2 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) * (*((I64Vector2 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_int64_t(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((I64Vector2 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_int64_t(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left * (*((I64Vector2 *)right)->glm);
+        }
     }
 
     I64Vector2 *result = (I64Vector2 *)cls->tp_alloc(cls, 0);
@@ -348,6 +385,7 @@ I64Vector2__mul__(I64Vector2 *self, PyObject *other)
 
     return (PyObject *)result;
 }
+
 
 
 
@@ -355,31 +393,21 @@ I64Vector2__mul__(I64Vector2 *self, PyObject *other)
 
 
     static PyObject *
-    I64Vector2__truediv__(I64Vector2 *self, PyObject *other)
+    I64Vector2__truediv__(PyObject *left, PyObject *right)
     {
-        auto cls = Py_TYPE(self);
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->I64Vector2_PyTypeObject;
+
         I64Vector2Glm vector;
-        if (Py_TYPE(other) != cls)
-        {
-            auto c_other = pyobject_to_c_int64_t(other);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-
-                if (c_other == 0)
-                {
-                    PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
-                    return 0;
-                }
-
-            vector = (*self->glm) / c_other;
-        }
-        else
+        if (Py_TYPE(left) == Py_TYPE(right))
         {
 
                 if (
 
-                        (*((I64Vector2 *)other)->glm)[0] == 0 ||
+                        (*((I64Vector2 *)right)->glm)[0] == 0 ||
 
-                        (*((I64Vector2 *)other)->glm)[1] == 0
+                        (*((I64Vector2 *)right)->glm)[1] == 0
 
                 )
                 {
@@ -387,7 +415,42 @@ I64Vector2__mul__(I64Vector2 *self, PyObject *other)
                     return 0;
                 }
 
-            vector = (*self->glm) / (*((I64Vector2 *)other)->glm);
+            vector = (*((I64Vector2 *)left)->glm) / (*((I64Vector2 *)right)->glm);
+        }
+        else
+        {
+            if (Py_TYPE(left) == cls)
+            {
+                auto c_right = pyobject_to_c_int64_t(right);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                    if (c_right == 0)
+                    {
+                        PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                        return 0;
+                    }
+
+                vector = (*((I64Vector2 *)left)->glm) / c_right;
+            }
+            else
+            {
+                auto c_left = pyobject_to_c_int64_t(left);
+                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                    if (
+
+                            (*((I64Vector2 *)right)->glm)[0] == 0 ||
+
+                            (*((I64Vector2 *)right)->glm)[1] == 0
+
+                    )
+                    {
+                        PyErr_SetString(PyExc_ZeroDivisionError, "divide by zero");
+                        return 0;
+                    }
+
+                vector = c_left / (*((I64Vector2 *)right)->glm);
+            }
         }
 
         I64Vector2 *result = (I64Vector2 *)cls->tp_alloc(cls, 0);

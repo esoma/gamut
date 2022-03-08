@@ -1,10 +1,11 @@
-// generated 2022-03-07 23:13:00.220094 from codegen/math/templates/_math.hpp
+// generated 2022-03-08 02:13:12.901068 from codegen/math/templates/_math.hpp
 
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <structmember.h>
 
+#include "_modulestate.hpp"
 
     #include "_bvector2.hpp"
 
@@ -85,22 +86,36 @@
     #include "_u64vector4.hpp"
 
 
-// module
-// ----------------------------------------------------------------------------
-
 static PyMethodDef module_methods[] = {
     {0, 0, 0, 0}
 };
+
+
+static int
+module_traverse(PyObject *self, visitproc visit, void *arg)
+{
+    ModuleState *state = (ModuleState *)PyModule_GetState(self);
+    return ModuleState_traverse(state, visit, arg);
+}
+
+
+static int
+module_clear(PyObject *self)
+{
+    ModuleState *state = (ModuleState *)PyModule_GetState(self);
+    return ModuleState_clear(state);
+}
+
 
 static struct PyModuleDef module_PyModuleDef = {
     PyModuleDef_HEAD_INIT,
     "gamut.math._math",
     0,
-    0,
+    sizeof(struct ModuleState),
     module_methods,
     0,
-    0,
-    0
+    module_traverse,
+    module_clear
 };
 
 
@@ -109,90 +124,298 @@ PyInit__math()
 {
     PyObject *module = PyModule_Create(&module_PyModuleDef);
     if (!module){ goto error; }
+    if (PyState_AddModule(module, &module_PyModuleDef) == -1){ goto error; }
+    ModuleState *state = (ModuleState *)PyModule_GetState(module);
 
 
+    {
+        PyTypeObject *type = define_BVector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BVector2_PyTypeObject = type;
+    }
 
-        if (!define_BVector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_DVector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DVector2_PyTypeObject = type;
+    }
 
-        if (!define_DVector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_FVector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FVector2_PyTypeObject = type;
+    }
 
-        if (!define_FVector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I8Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Vector2_PyTypeObject = type;
+    }
 
-        if (!define_I8Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U8Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Vector2_PyTypeObject = type;
+    }
 
-        if (!define_U8Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I16Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Vector2_PyTypeObject = type;
+    }
 
-        if (!define_I16Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U16Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Vector2_PyTypeObject = type;
+    }
 
-        if (!define_U16Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I32Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Vector2_PyTypeObject = type;
+    }
 
-        if (!define_I32Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U32Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Vector2_PyTypeObject = type;
+    }
 
-        if (!define_U32Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_IVector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IVector2_PyTypeObject = type;
+    }
 
-        if (!define_IVector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_UVector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UVector2_PyTypeObject = type;
+    }
 
-        if (!define_UVector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I64Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Vector2_PyTypeObject = type;
+    }
 
-        if (!define_I64Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U64Vector2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Vector2_PyTypeObject = type;
+    }
 
-        if (!define_U64Vector2_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_BVector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BVector3_PyTypeObject = type;
+    }
 
-        if (!define_BVector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_DVector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DVector3_PyTypeObject = type;
+    }
 
-        if (!define_DVector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_FVector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FVector3_PyTypeObject = type;
+    }
 
-        if (!define_FVector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I8Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Vector3_PyTypeObject = type;
+    }
 
-        if (!define_I8Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U8Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Vector3_PyTypeObject = type;
+    }
 
-        if (!define_U8Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I16Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Vector3_PyTypeObject = type;
+    }
 
-        if (!define_I16Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U16Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Vector3_PyTypeObject = type;
+    }
 
-        if (!define_U16Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I32Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Vector3_PyTypeObject = type;
+    }
 
-        if (!define_I32Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U32Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Vector3_PyTypeObject = type;
+    }
 
-        if (!define_U32Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_IVector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IVector3_PyTypeObject = type;
+    }
 
-        if (!define_IVector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_UVector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UVector3_PyTypeObject = type;
+    }
 
-        if (!define_UVector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I64Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Vector3_PyTypeObject = type;
+    }
 
-        if (!define_I64Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U64Vector3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Vector3_PyTypeObject = type;
+    }
 
-        if (!define_U64Vector3_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_BVector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BVector4_PyTypeObject = type;
+    }
 
-        if (!define_BVector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_DVector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DVector4_PyTypeObject = type;
+    }
 
-        if (!define_DVector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_FVector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FVector4_PyTypeObject = type;
+    }
 
-        if (!define_FVector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I8Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Vector4_PyTypeObject = type;
+    }
 
-        if (!define_I8Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U8Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Vector4_PyTypeObject = type;
+    }
 
-        if (!define_U8Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I16Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Vector4_PyTypeObject = type;
+    }
 
-        if (!define_I16Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U16Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Vector4_PyTypeObject = type;
+    }
 
-        if (!define_U16Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I32Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Vector4_PyTypeObject = type;
+    }
 
-        if (!define_I32Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U32Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Vector4_PyTypeObject = type;
+    }
 
-        if (!define_U32Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_IVector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IVector4_PyTypeObject = type;
+    }
 
-        if (!define_IVector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_UVector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UVector4_PyTypeObject = type;
+    }
 
-        if (!define_UVector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_I64Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Vector4_PyTypeObject = type;
+    }
 
-        if (!define_I64Vector4_type(module)){ goto error; }
-
-        if (!define_U64Vector4_type(module)){ goto error; }
+    {
+        PyTypeObject *type = define_U64Vector4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Vector4_PyTypeObject = type;
+    }
 
 
     return module;
 error:
     Py_CLEAR(module);
     return 0;
+}
+
+
+static PyObject *
+get_module()
+{
+    PyObject *module = PyState_FindModule(&module_PyModuleDef);
+    if (!module)
+    {
+        return PyErr_Format(PyExc_RuntimeError, "math module not ready");
+    }
+    return module;
 }

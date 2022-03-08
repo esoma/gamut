@@ -1,4 +1,4 @@
-// generated 2022-03-07 23:13:00.210595 from codegen/math/templates/_vector.hpp
+// generated 2022-03-08 02:13:12.890068 from codegen/math/templates/_vector.hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 // gamut
+#include "_modulestate.hpp"
 #include "_type.hpp"
 
 typedef glm::vec<4, bool, glm::defaultp> BVector4Glm;
@@ -309,19 +310,31 @@ BVector4__richcmp__(BVector4 *self, BVector4 *other, int op)
 
 
 static PyObject *
-BVector4__add__(BVector4 *self, PyObject *other)
+BVector4__add__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->BVector4_PyTypeObject;
+
     BVector4Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_bool(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) + c_other;
+        vector = (*((BVector4 *)left)->glm) + (*((BVector4 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) + (*((BVector4 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_bool(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((BVector4 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_bool(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left + (*((BVector4 *)right)->glm);
+        }
     }
 
     BVector4 *result = (BVector4 *)cls->tp_alloc(cls, 0);
@@ -343,19 +356,31 @@ BVector4__add__(BVector4 *self, PyObject *other)
 
 
 static PyObject *
-BVector4__sub__(BVector4 *self, PyObject *other)
+BVector4__sub__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->BVector4_PyTypeObject;
+
     BVector4Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_bool(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) - c_other;
+        vector = (*((BVector4 *)left)->glm) - (*((BVector4 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) - (*((BVector4 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_bool(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((BVector4 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_bool(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left - (*((BVector4 *)right)->glm);
+        }
     }
 
     BVector4 *result = (BVector4 *)cls->tp_alloc(cls, 0);
@@ -377,19 +402,31 @@ BVector4__sub__(BVector4 *self, PyObject *other)
 
 
 static PyObject *
-BVector4__mul__(BVector4 *self, PyObject *other)
+BVector4__mul__(PyObject *left, PyObject *right)
 {
-    auto cls = Py_TYPE(self);
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->BVector4_PyTypeObject;
+
     BVector4Glm vector;
-    if (Py_TYPE(other) != cls)
+    if (Py_TYPE(left) == Py_TYPE(right))
     {
-        auto c_other = pyobject_to_c_bool(other);
-        if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
-        vector = (*self->glm) * c_other;
+        vector = (*((BVector4 *)left)->glm) * (*((BVector4 *)right)->glm);
     }
     else
     {
-        vector = (*self->glm) * (*((BVector4 *)other)->glm);
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_bool(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = (*((BVector4 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_bool(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            vector = c_left * (*((BVector4 *)right)->glm);
+        }
     }
 
     BVector4 *result = (BVector4 *)cls->tp_alloc(cls, 0);
