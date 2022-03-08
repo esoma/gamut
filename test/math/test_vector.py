@@ -63,6 +63,12 @@ class VectorTest:
                 vector = self.cls(arg)
                 for i in range(self.component_count):
                     assert vector[i] == self.type(arg)
+        if self.type not in (float, bool):
+            min, max = self.cls.get_limits()
+            with pytest.raises(OverflowError):
+                self.cls(min - 1)
+            with pytest.raises(OverflowError):
+                self.cls(max + 1)
 
     def test_all_init(self) -> None:
         vector = self.cls(*range(self.component_count))

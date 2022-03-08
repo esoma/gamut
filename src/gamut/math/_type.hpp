@@ -2,6 +2,8 @@
 #ifndef GAMUT_MATH_TYPE_HPP
 #define GAMUT_MATH_TYPE_HPP
 
+// stdlib
+#include <limits>
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -21,64 +23,120 @@ double pyobject_to_c_double(PyObject *py)
 
 float pyobject_to_c_float(PyObject *py)
 {
-    return PyFloat_AsDouble(py);
-    // todo: check for overflow
+    auto result = PyFloat_AsDouble(py);
+    if (std::isnormal(result) && (
+        result < (double)std::numeric_limits<float>::lowest() ||
+        result > (double)std::numeric_limits<float>::max()
+    ))
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to float", py);
+        return -1;
+    }
+    return result;
 }
 
 
 int8_t pyobject_to_c_int8_t(PyObject *py)
 {
-    return PyLong_AsLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsLong(py);
+    if (result < (long)std::numeric_limits<int8_t>::lowest() ||
+        result > (long)std::numeric_limits<int8_t>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to int8_t", py);
+        return -1;
+    }
+    return result;
 }
 
 
 uint8_t pyobject_to_c_uint8_t(PyObject *py)
 {
-    return PyLong_AsUnsignedLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsUnsignedLong(py);
+    if (result > (unsigned long)std::numeric_limits<uint8_t>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to uint8_t", py);
+        return -1;
+    }
+    return result;
 }
 
 
 int16_t pyobject_to_c_int16_t(PyObject *py)
 {
-    return PyLong_AsLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsLong(py);
+    if (result < (long)std::numeric_limits<int16_t>::lowest() ||
+        result > (long)std::numeric_limits<int16_t>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to int16_t", py);
+        return -1;
+    }
+    return result;
 }
 
 
 uint16_t pyobject_to_c_uint16_t(PyObject *py)
 {
-    return PyLong_AsUnsignedLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsUnsignedLong(py);
+    if (result > (unsigned long)std::numeric_limits<uint16_t>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to uint16_t", py);
+        return -1;
+    }
+    return result;
 }
 
 
 int32_t pyobject_to_c_int32_t(PyObject *py)
 {
-    return PyLong_AsLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsLong(py);
+    if (result < (long)std::numeric_limits<int32_t>::lowest() ||
+        result > (long)std::numeric_limits<int32_t>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to int32_t", py);
+        return -1;
+    }
+    return result;
 }
 
 
 uint32_t pyobject_to_c_uint32_t(PyObject *py)
 {
-    return PyLong_AsUnsignedLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsUnsignedLong(py);
+    if (result > (unsigned long)std::numeric_limits<uint32_t>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to uint32_t", py);
+        return -1;
+    }
+    return result;
 }
 
 
 int pyobject_to_c_int(PyObject *py)
 {
-    return PyLong_AsLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsLong(py);
+    if (result < (long)std::numeric_limits<int>::lowest() ||
+        result > (long)std::numeric_limits<int>::max())
+    {
+        PyErr_Format(PyExc_OverflowError, "can't convert %R to int", py);
+        return -1;
+    }
+    return result;
 }
 
 
 unsigned int pyobject_to_c_unsigned_int(PyObject *py)
 {
-    return PyLong_AsUnsignedLong(py);
-    // todo: check for overflow
+    auto result = PyLong_AsUnsignedLong(py);
+    if (result > (unsigned long)std::numeric_limits<unsigned int>::max())
+    {
+        PyErr_Format(
+            PyExc_OverflowError,
+            "can't convert %R to unsigned int",
+            py
+        );
+        return -1;
+    }
+    return result;
 }
 
 
@@ -86,13 +144,34 @@ int64_t pyobject_to_c_int64_t(PyObject *py)
 {
     if (sizeof(int64_t) > sizeof(long))
     {
-        return PyLong_AsLongLong(py);
+        auto result = PyLong_AsLongLong(py);
+        if (result < (long long)std::numeric_limits<int64_t>::lowest() ||
+            result > (long long)std::numeric_limits<int64_t>::max())
+        {
+            PyErr_Format(
+                PyExc_OverflowError,
+                "can't convert %R to int64_t",
+                py
+            );
+            return -1;
+        }
+        return result;
     }
     else
     {
-        return PyLong_AsLong(py);
+        auto result = PyLong_AsLong(py);
+        if (result < (long)std::numeric_limits<int64_t>::lowest() ||
+            result > (long)std::numeric_limits<int64_t>::max())
+        {
+            PyErr_Format(
+                PyExc_OverflowError,
+                "can't convert %R to int64_t",
+                py
+            );
+            return -1;
+        }
+        return result;
     }
-    // todo: check for overflow
 }
 
 
@@ -100,13 +179,32 @@ uint64_t pyobject_to_c_uint64_t(PyObject *py)
 {
     if (sizeof(uint64_t) > sizeof(long))
     {
-        return PyLong_AsUnsignedLongLong(py);
+        auto result = PyLong_AsUnsignedLongLong(py);
+        if (result > (unsigned long long)std::numeric_limits<uint64_t>::max())
+        {
+            PyErr_Format(
+                PyExc_OverflowError,
+                "can't convert %R to uint64_t",
+                py
+            );
+            return -1;
+        }
+        return result;
     }
     else
     {
-        return PyLong_AsUnsignedLong(py);
+        auto result = PyLong_AsUnsignedLong(py);
+        if (result > (unsigned long)std::numeric_limits<unsigned int>::max())
+        {
+            PyErr_Format(
+                PyExc_OverflowError,
+                "can't convert %R to uint64_t",
+                py
+            );
+            return -1;
+        }
+        return result;
     }
-    // todo: check for overflow
 }
 
 
