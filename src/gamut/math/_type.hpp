@@ -168,7 +168,7 @@ int64_t pyobject_to_c_int64_t(PyObject *py)
 
 uint64_t pyobject_to_c_uint64_t(PyObject *py)
 {
-    if (sizeof(uint64_t) > sizeof(long))
+    if (sizeof(uint64_t) > sizeof(unsigned long))
     {
         auto result = PyLong_AsUnsignedLongLong(py);
         if (result > (unsigned long long)std::numeric_limits<uint64_t>::max())
@@ -185,7 +185,7 @@ uint64_t pyobject_to_c_uint64_t(PyObject *py)
     else
     {
         auto result = PyLong_AsUnsignedLong(py);
-        if (result > (unsigned long)std::numeric_limits<unsigned int>::max())
+        if (result > (unsigned long)std::numeric_limits<uint64_t>::max())
         {
             PyErr_Format(
                 PyExc_OverflowError,
