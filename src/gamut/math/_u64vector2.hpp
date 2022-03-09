@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.583189 from codegen/math/templates/_vector.hpp
+// generated 2022-03-09 03:15:33.417045 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_U64VECTOR2_HPP
+#define GAMUT_MATH_U64VECTOR2_HPP
 
 // stdlib
 #include <limits>
@@ -716,3 +719,19 @@ define_U64Vector2_type(PyObject *module)
     }
     return type;
 }
+
+static U64Vector2 *
+create_U64Vector2_from_glm(const U64Vector2Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->U64Vector2_PyTypeObject;
+
+    U64Vector2 *result = (U64Vector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U64Vector2Glm(glm);
+
+    return result;
+}
+
+#endif

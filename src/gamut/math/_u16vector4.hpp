@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.595688 from codegen/math/templates/_vector.hpp
+// generated 2022-03-09 03:15:33.429046 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_U16VECTOR4_HPP
+#define GAMUT_MATH_U16VECTOR4_HPP
 
 // stdlib
 #include <limits>
@@ -836,3 +839,19 @@ define_U16Vector4_type(PyObject *module)
     }
     return type;
 }
+
+static U16Vector4 *
+create_U16Vector4_from_glm(const U16Vector4Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->U16Vector4_PyTypeObject;
+
+    U16Vector4 *result = (U16Vector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U16Vector4Glm(glm);
+
+    return result;
+}
+
+#endif

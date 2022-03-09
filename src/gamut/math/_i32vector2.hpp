@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.580688 from codegen/math/templates/_vector.hpp
+// generated 2022-03-09 03:15:33.414046 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_I32VECTOR2_HPP
+#define GAMUT_MATH_I32VECTOR2_HPP
 
 // stdlib
 #include <limits>
@@ -739,3 +742,19 @@ define_I32Vector2_type(PyObject *module)
     }
     return type;
 }
+
+static I32Vector2 *
+create_I32Vector2_from_glm(const I32Vector2Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I32Vector2_PyTypeObject;
+
+    I32Vector2 *result = (I32Vector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new I32Vector2Glm(glm);
+
+    return result;
+}
+
+#endif

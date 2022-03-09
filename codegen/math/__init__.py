@@ -2,6 +2,7 @@
 __all__ = ['generate_math_files']
 
 # gamut
+from .matrix import generate_matrix_files
 from .template import get_template
 from .vector import generate_vector_files
 # python
@@ -12,8 +13,9 @@ from typing import Sequence
 
 def generate_math_files(build_dir: Path) -> None:
     vector_types = list(generate_vector_files(build_dir))
-    generate_modulestate_file(build_dir, vector_types)
-    generate_math_file(build_dir, vector_types)
+    matrix_types = list(generate_matrix_files(build_dir))
+    generate_modulestate_file(build_dir, vector_types + matrix_types)
+    generate_math_file(build_dir, vector_types + matrix_types)
     generate_typestubs(build_dir, vector_types)
 
 

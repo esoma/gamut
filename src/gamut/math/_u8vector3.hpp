@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.586188 from codegen/math/templates/_vector.hpp
+// generated 2022-03-09 03:15:33.420045 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_U8VECTOR3_HPP
+#define GAMUT_MATH_U8VECTOR3_HPP
 
 // stdlib
 #include <limits>
@@ -776,3 +779,19 @@ define_U8Vector3_type(PyObject *module)
     }
     return type;
 }
+
+static U8Vector3 *
+create_U8Vector3_from_glm(const U8Vector3Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->U8Vector3_PyTypeObject;
+
+    U8Vector3 *result = (U8Vector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U8Vector3Glm(glm);
+
+    return result;
+}
+
+#endif
