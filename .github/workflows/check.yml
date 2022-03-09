@@ -75,10 +75,18 @@ jobs:
         unset CC CXX
         python -m pip install --no-binary=:pyicu: pyicu
 
-    - name: Build Bullet
+    - name: Initialize Submodules
       run: |
         git submodule update --init
+
+    - name: Build Bullet
+      run: |
         python setup.py build_bullet
+
+    - name: Build Extensions with coverage
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: |
+        python setup.py --build-with-coverage build
 
     - name: Install Test Dependencies
       run: |

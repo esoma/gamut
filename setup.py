@@ -1,9 +1,21 @@
+
 # python
 import os
+from pathlib import Path
 from subprocess import run
 import sys
 # setuptools
 from setuptools import Command, Extension, msvc, setup
+
+coverage_compile_args = []
+coverage_links_args = []
+if len(sys.argv) > 1 and sys.argv[1] == '--build-with-coverage':
+    if os.name == 'nt':
+        print('Cannot build with coverage on windows.')
+        sys.exit(1)
+    coverage_compile_args = ['-fprofile-arcs', '-ftest-coverage', '-O0']
+    coverage_links_args = ['-fprofile-arcs']
+    sys.argv.pop(1)
 
 
 def msbuild(project):
@@ -17,6 +29,24 @@ def msbuild(project):
 
 def make(directory):
     run(['make', '-C', directory])
+
+
+class GenerateMathCode(Command):
+
+    description = 'generate math code'
+    user_options = []
+
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        # gamut
+        from codegen import generate_math_files
+        generate_math_files(Path('src/gamut/math'))
 
 
 class BuildBullet(Command):
@@ -79,12 +109,27 @@ physics = Extension(
     libraries=['BulletDynamics', 'BulletCollision', 'LinearMath'],
     sources=['src/gamut/physics/_physics.cpp'],
     language='c++',
+    extra_compile_args=coverage_compile_args,
+    extra_link_args=coverage_links_args,
+)
+
+
+math = Extension(
+    'gamut.math._math',
+    libraries=[] if os.name == 'nt' else ['stdc++'],
+    include_dirs=['vendor/glm', 'src/gamut/math'],
+    sources=['src/gamut/math/_math.cpp'],
+    language='c++11',
+    extra_compile_args=coverage_compile_args +
+        ([] if os.name == 'nt' else ['-std=c++11']),
+    extra_link_args=coverage_links_args,
 )
 
 
 setup(
     cmdclass={
         "build_bullet": BuildBullet,
+        "codegen_math": GenerateMathCode,
     },
-    ext_modules=[physics]
+    ext_modules=[math, physics]
 )

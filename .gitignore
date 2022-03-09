@@ -3,6 +3,7 @@ build/
 
 /test.py
 
+*.so
 *.pyd
 *.pyc
 *.egg-info
