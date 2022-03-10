@@ -130,9 +130,9 @@ static void
 static Py_hash_t
 {{ name }}__hash__({{ name }} *self)
 {
-    Py_ssize_t i, len = {{ component_count }};
+    Py_ssize_t len = {{ component_count }};
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for ({{ name }}Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<{{ c_type }}>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -193,7 +193,7 @@ static PyObject *
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[({{ name }}Glm::length_type)index];
     return c_{{ c_type.replace(' ', '_') }}_to_pyobject(c);
 }
 
@@ -668,7 +668,7 @@ static PyObject *
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for ({{ name }}Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -878,6 +878,8 @@ define_{{ name }}_type(PyObject *module)
     return type;
 }
 
+
+{% if c_type in ['float', 'double'] %}
 static {{ name }} *
 create_{{ name }}_from_glm(const {{ name }}Glm& glm)
 {
@@ -891,5 +893,6 @@ create_{{ name }}_from_glm(const {{ name }}Glm& glm)
 
     return result;
 }
+{% endif %}
 
 #endif

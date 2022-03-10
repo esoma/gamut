@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 02:10:36.702748 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.025560 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_FVECTOR3_HPP
 #define GAMUT_MATH_FVECTOR3_HPP
@@ -156,9 +156,9 @@ FVector3__dealloc__(FVector3 *self)
 static Py_hash_t
 FVector3__hash__(FVector3 *self)
 {
-    Py_ssize_t i, len = 3;
+    Py_ssize_t len = 3;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (FVector3Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<float>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -241,7 +241,7 @@ FVector3__getitem__(FVector3 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(FVector3Glm::length_type)index];
     return c_float_to_pyobject(c);
 }
 
@@ -740,7 +740,7 @@ FVector3__getattr__(FVector3 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (FVector3Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -952,6 +952,8 @@ define_FVector3_type(PyObject *module)
     return type;
 }
 
+
+
 static FVector3 *
 create_FVector3_from_glm(const FVector3Glm& glm)
 {
@@ -965,5 +967,6 @@ create_FVector3_from_glm(const FVector3Glm& glm)
 
     return result;
 }
+
 
 #endif

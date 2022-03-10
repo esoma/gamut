@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 02:10:36.757248 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-10 18:59:39.080560 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X4_HPP
 #define GAMUT_MATH_FMATRIX4X4_HPP
@@ -362,9 +362,9 @@ FMatrix4x4__hash__(FMatrix4x4 *self)
 {
     Py_ssize_t len = 16;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (size_t c = 0; c < 4; c++)
+    for (FMatrix4x4Glm::length_type c = 0; c < 4; c++)
     {
-        for (size_t r = 0; r < 4; r++)
+        for (FMatrix4x4Glm::length_type r = 0; r < 4; r++)
         {
             Py_uhash_t lane = std::hash<float>{}((*self->glm)[r][c]);
             acc += lane * _HASH_XXPRIME_2;
@@ -682,7 +682,7 @@ FMatrix4x4__getitem__(FMatrix4x4 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    const auto& v = (*self->glm)[index];
+    const auto& v = (*self->glm)[(FMatrix4x4Glm::length_type)index];
     return (PyObject *)create_FVector4_from_glm(v);
 }
 

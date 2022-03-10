@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 02:10:36.712748 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.036062 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I16VECTOR4_HPP
 #define GAMUT_MATH_I16VECTOR4_HPP
@@ -169,9 +169,9 @@ I16Vector4__dealloc__(I16Vector4 *self)
 static Py_hash_t
 I16Vector4__hash__(I16Vector4 *self)
 {
-    Py_ssize_t i, len = 4;
+    Py_ssize_t len = 4;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (I16Vector4Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<int16_t>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -265,7 +265,7 @@ I16Vector4__getitem__(I16Vector4 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(I16Vector4Glm::length_type)index];
     return c_int16_t_to_pyobject(c);
 }
 
@@ -718,7 +718,7 @@ I16Vector4__getattr__(I16Vector4 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (I16Vector4Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -867,18 +867,7 @@ define_I16Vector4_type(PyObject *module)
     return type;
 }
 
-static I16Vector4 *
-create_I16Vector4_from_glm(const I16Vector4Glm& glm)
-{
-    auto module_state = get_module_state();
-    if (!module_state){ return 0; }
-    auto cls = module_state->I16Vector4_PyTypeObject;
 
-    I16Vector4 *result = (I16Vector4 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new I16Vector4Glm(glm);
 
-    return result;
-}
 
 #endif

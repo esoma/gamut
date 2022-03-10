@@ -23,7 +23,7 @@ double pyobject_to_c_double(PyObject *py)
 
 float pyobject_to_c_float(PyObject *py)
 {
-    return PyFloat_AsDouble(py);
+    return (float)PyFloat_AsDouble(py);
 }
 
 
@@ -36,7 +36,7 @@ int8_t pyobject_to_c_int8_t(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to int8_t", py);
         return -1;
     }
-    return result;
+    return (int8_t)result;
 }
 
 
@@ -48,7 +48,7 @@ uint8_t pyobject_to_c_uint8_t(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to uint8_t", py);
         return -1;
     }
-    return result;
+    return (uint8_t)result;
 }
 
 
@@ -61,7 +61,7 @@ int16_t pyobject_to_c_int16_t(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to int16_t", py);
         return -1;
     }
-    return result;
+    return (int16_t)result;
 }
 
 
@@ -73,7 +73,7 @@ uint16_t pyobject_to_c_uint16_t(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to uint16_t", py);
         return -1;
     }
-    return result;
+    return (uint16_t)result;
 }
 
 
@@ -86,7 +86,7 @@ int32_t pyobject_to_c_int32_t(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to int32_t", py);
         return -1;
     }
-    return result;
+    return (int32_t)result;
 }
 
 
@@ -98,7 +98,7 @@ uint32_t pyobject_to_c_uint32_t(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to uint32_t", py);
         return -1;
     }
-    return result;
+    return (uint32_t)result;
 }
 
 
@@ -111,7 +111,7 @@ int pyobject_to_c_int(PyObject *py)
         PyErr_Format(PyExc_OverflowError, "can't convert %R to int", py);
         return -1;
     }
-    return result;
+    return (int)result;
 }
 
 
@@ -127,7 +127,7 @@ unsigned int pyobject_to_c_unsigned_int(PyObject *py)
         );
         return -1;
     }
-    return result;
+    return (unsigned int)result;
 }
 
 
@@ -146,7 +146,7 @@ int64_t pyobject_to_c_int64_t(PyObject *py)
             );
             return -1;
         }
-        return result;
+        return (int64_t)result;
     }
     else
     {
@@ -161,7 +161,7 @@ int64_t pyobject_to_c_int64_t(PyObject *py)
             );
             return -1;
         }
-        return result;
+        return (int64_t)result;
     }
 }
 
@@ -180,7 +180,7 @@ uint64_t pyobject_to_c_uint64_t(PyObject *py)
             );
             return -1;
         }
-        return result;
+        return (uint64_t)result;
     }
     else
     {
@@ -194,7 +194,7 @@ uint64_t pyobject_to_c_uint64_t(PyObject *py)
             );
             return -1;
         }
-        return result;
+        return (uint64_t)result;
     }
 }
 
@@ -272,7 +272,7 @@ PyObject *c_int64_t_to_pyobject(int64_t c)
     }
     else
     {
-        return PyLong_FromLong(c);
+        return PyLong_FromLong((long)c);
     }
 }
 
@@ -285,7 +285,7 @@ PyObject *c_uint64_t_to_pyobject(uint64_t c)
     }
     else
     {
-        return PyLong_FromUnsignedLong(c);
+        return PyLong_FromUnsignedLong((unsigned long)c);
     }
 }
 

@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 02:10:36.743748 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-10 18:59:39.067060 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X2_HPP
 #define GAMUT_MATH_DMATRIX2X2_HPP
@@ -202,9 +202,9 @@ DMatrix2x2__hash__(DMatrix2x2 *self)
 {
     Py_ssize_t len = 4;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (size_t c = 0; c < 2; c++)
+    for (DMatrix2x2Glm::length_type c = 0; c < 2; c++)
     {
-        for (size_t r = 0; r < 2; r++)
+        for (DMatrix2x2Glm::length_type r = 0; r < 2; r++)
         {
             Py_uhash_t lane = std::hash<double>{}((*self->glm)[r][c]);
             acc += lane * _HASH_XXPRIME_2;
@@ -336,7 +336,7 @@ DMatrix2x2__getitem__(DMatrix2x2 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    const auto& v = (*self->glm)[index];
+    const auto& v = (*self->glm)[(DMatrix2x2Glm::length_type)index];
     return (PyObject *)create_DVector2_from_glm(v);
 }
 

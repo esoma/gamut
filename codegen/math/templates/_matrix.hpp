@@ -155,9 +155,9 @@ static Py_hash_t
 {
     Py_ssize_t len = {{ component_count }};
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (size_t c = 0; c < {{ column_size }}; c++)
+    for ({{ name }}Glm::length_type c = 0; c < {{ column_size }}; c++)
     {
-        for (size_t r = 0; r < {{ row_size }}; r++)
+        for ({{ name }}Glm::length_type r = 0; r < {{ row_size }}; r++)
         {
             Py_uhash_t lane = std::hash<{{ c_type }}>{}((*self->glm)[r][c]);
             acc += lane * _HASH_XXPRIME_2;
@@ -237,7 +237,7 @@ static PyObject *
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    const auto& v = (*self->glm)[index];
+    const auto& v = (*self->glm)[({{ name }}Glm::length_type)index];
     return (PyObject *)create_{{ column_type }}_from_glm(v);
 }
 

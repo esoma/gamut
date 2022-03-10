@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 02:10:36.744747 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-10 18:59:39.068062 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX2X2_HPP
 #define GAMUT_MATH_FMATRIX2X2_HPP
@@ -202,9 +202,9 @@ FMatrix2x2__hash__(FMatrix2x2 *self)
 {
     Py_ssize_t len = 4;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (size_t c = 0; c < 2; c++)
+    for (FMatrix2x2Glm::length_type c = 0; c < 2; c++)
     {
-        for (size_t r = 0; r < 2; r++)
+        for (FMatrix2x2Glm::length_type r = 0; r < 2; r++)
         {
             Py_uhash_t lane = std::hash<float>{}((*self->glm)[r][c]);
             acc += lane * _HASH_XXPRIME_2;
@@ -336,7 +336,7 @@ FMatrix2x2__getitem__(FMatrix2x2 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    const auto& v = (*self->glm)[index];
+    const auto& v = (*self->glm)[(FMatrix2x2Glm::length_type)index];
     return (PyObject *)create_FVector2_from_glm(v);
 }
 

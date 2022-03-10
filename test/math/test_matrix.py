@@ -67,6 +67,10 @@ class MatrixTest:
         for i in range(self.row_size):
             assert matrix[i] == self.column_cls()
 
+    def test_init_keywords(self) -> None:
+        with pytest.raises(TypeError):
+            self.cls(x=0)
+
     def test_single_init(self) -> None:
         for arg in [-100, -1, 0, 1, 100]:
             matrix = self.cls(arg)
@@ -84,6 +88,13 @@ class MatrixTest:
         matrix = self.cls(*(self.column_cls(i) for i in range(self.row_size)))
         for i in range(self.row_size):
             assert matrix[i] == self.column_cls(i)
+
+        for e in range(self.row_size):
+            with pytest.raises(TypeError):
+                self.cls(*(
+                    None if i == e else self.column_cls(i)
+                    for i in range(self.row_size)
+                ))
 
     def test_all_init(self) -> None:
         matrix = self.cls(*range(self.component_count))
@@ -187,7 +198,7 @@ class MatrixTest:
         assert not (object() == self.cls())
 
     def test_not_equal(self) -> None:
-        for i in range(100, 100):
+        for i in range(-100, 100):
             assert not (self.cls(i) != self.cls(i))
         assert self.cls(0) != self.cls(1)
         assert self.cls(-1) != self.cls(1)
@@ -364,11 +375,15 @@ class MatrixTest:
 
     def test_multiply(self) -> None:
         assert self.cls(1) * 0 == self.cls(0)
+        assert 0 * self.cls(1) == self.cls(0)
         assert self.cls(*range(self.component_count)) * 2 == self.cls(*(
             i * 2 for i in range(self.component_count)
         ))
-        assert self.cls(*range(self.component_count)) * -2 == self.cls(*(
-            i * -2 for i in range(self.component_count)
+        assert 2 * self.cls(*range(self.component_count)) == self.cls(*(
+            2 * i for i in range(self.component_count)
+        ))
+        assert -2 * self.cls(*range(self.component_count)) == self.cls(*(
+            -2 * i for i in range(self.component_count)
         ))
 
         matrix = self.cls()
@@ -491,6 +506,7 @@ class MatrixTest:
         if self.row_size == self.column_size:
             assert isinstance(self.cls() / self.row_cls(), self.row_cls)
             assert isinstance(self.row_cls() / self.cls(), self.row_cls)
+            assert isinstance(self.cls() / self.cls(), self.cls)
             assert all(isnan(c) for c in (self.cls() / self.row_cls(1)))
             assert all(isnan(c) for c in (self.row_cls() / self.cls(
                 *(1 for _ in range(self.component_count))
@@ -506,6 +522,8 @@ class MatrixTest:
             mat = self.cls(1)
             assert mat / vec == mat.inverse() @ vec
             assert vec / mat == vec @ mat.inverse()
+
+            assert mat / mat == mat.inverse() @ mat
 
         matrix = self.cls()
         with pytest.raises(TypeError):

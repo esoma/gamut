@@ -61,6 +61,10 @@ class VectorTest:
         for i in range(self.component_count):
             assert vector[i] == 0
 
+    def test_init_keywords(self) -> None:
+        with pytest.raises(TypeError):
+            self.cls(x=0)
+
     def test_single_init(self) -> None:
         for arg in [-100, -1, 0, 1, 100]:
             if arg < 0 and self.unsigned:

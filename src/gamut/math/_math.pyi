@@ -1,5 +1,5 @@
 
-# generated 2022-03-10 02:10:36.771247 from codegen/math/templates/_math.pyi
+# generated 2022-03-10 18:59:39.102061 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -99,11 +99,11 @@ class BVector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -320,7 +320,7 @@ class BVector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
 
@@ -337,11 +337,11 @@ class DVector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -567,7 +567,7 @@ class DVector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -584,11 +584,11 @@ class FVector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -837,12 +837,12 @@ class FVector2:
     @property
     def magnitude(self) -> float: ...
 
-    def cross(self, other: FVector2) -> FVector2: ...
+    def cross(self, other: FVector2, /) -> FVector2: ...
     def normalize(self) -> float: ...
-    def distance(self, other: FVector2) -> float: ...
+    def distance(self, other: FVector2, /) -> float: ...
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
 
@@ -859,11 +859,11 @@ class I8Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -1089,7 +1089,7 @@ class I8Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -1106,11 +1106,11 @@ class U8Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -1338,7 +1338,7 @@ class U8Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -1355,11 +1355,11 @@ class I16Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -1585,7 +1585,7 @@ class I16Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -1602,11 +1602,11 @@ class U16Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -1834,7 +1834,7 @@ class U16Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -1851,11 +1851,11 @@ class I32Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -2081,7 +2081,7 @@ class I32Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -2098,11 +2098,11 @@ class U32Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -2330,7 +2330,7 @@ class U32Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -2347,11 +2347,11 @@ class IVector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -2577,7 +2577,7 @@ class IVector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -2594,11 +2594,11 @@ class UVector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -2826,7 +2826,7 @@ class UVector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -2843,11 +2843,11 @@ class I64Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -3073,7 +3073,7 @@ class I64Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -3090,11 +3090,11 @@ class U64Vector2:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
     @overload
-    def __init__(self, x: Number, y: Number): ...
+    def __init__(self, x: Number, y: Number, /): ...
 
 
 
@@ -3322,7 +3322,7 @@ class U64Vector2:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -3339,12 +3339,12 @@ class BVector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -3760,7 +3760,7 @@ class BVector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
 
@@ -3777,12 +3777,12 @@ class DVector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -4207,7 +4207,7 @@ class DVector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -4224,12 +4224,12 @@ class FVector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -4677,12 +4677,12 @@ class FVector3:
     @property
     def magnitude(self) -> float: ...
 
-    def cross(self, other: FVector3) -> FVector3: ...
+    def cross(self, other: FVector3, /) -> FVector3: ...
     def normalize(self) -> float: ...
-    def distance(self, other: FVector3) -> float: ...
+    def distance(self, other: FVector3, /) -> float: ...
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
 
@@ -4699,12 +4699,12 @@ class I8Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -5129,7 +5129,7 @@ class I8Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -5146,12 +5146,12 @@ class U8Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -5578,7 +5578,7 @@ class U8Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -5595,12 +5595,12 @@ class I16Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -6025,7 +6025,7 @@ class I16Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -6042,12 +6042,12 @@ class U16Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -6474,7 +6474,7 @@ class U16Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -6491,12 +6491,12 @@ class I32Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -6921,7 +6921,7 @@ class I32Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -6938,12 +6938,12 @@ class U32Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -7370,7 +7370,7 @@ class U32Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -7387,12 +7387,12 @@ class IVector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -7817,7 +7817,7 @@ class IVector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -7834,12 +7834,12 @@ class UVector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -8266,7 +8266,7 @@ class UVector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -8283,12 +8283,12 @@ class I64Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -8713,7 +8713,7 @@ class I64Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -8730,12 +8730,12 @@ class U64Vector3:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, /): ...
 
 
 
@@ -9162,7 +9162,7 @@ class U64Vector3:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -9179,13 +9179,13 @@ class BVector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -9938,7 +9938,7 @@ class BVector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
 
@@ -9955,13 +9955,13 @@ class DVector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -10723,7 +10723,7 @@ class DVector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -10740,13 +10740,13 @@ class FVector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -11531,12 +11531,12 @@ class FVector4:
     @property
     def magnitude(self) -> float: ...
 
-    def cross(self, other: FVector4) -> FVector4: ...
+    def cross(self, other: FVector4, /) -> FVector4: ...
     def normalize(self) -> float: ...
-    def distance(self, other: FVector4) -> float: ...
+    def distance(self, other: FVector4, /) -> float: ...
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
 
@@ -11553,13 +11553,13 @@ class I8Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -12321,7 +12321,7 @@ class I8Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -12338,13 +12338,13 @@ class U8Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -13108,7 +13108,7 @@ class U8Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -13125,13 +13125,13 @@ class I16Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -13893,7 +13893,7 @@ class I16Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -13910,13 +13910,13 @@ class U16Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -14680,7 +14680,7 @@ class U16Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -14697,13 +14697,13 @@ class I32Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -15465,7 +15465,7 @@ class I32Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -15482,13 +15482,13 @@ class U32Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -16252,7 +16252,7 @@ class U32Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -16269,13 +16269,13 @@ class IVector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -17037,7 +17037,7 @@ class IVector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -17054,13 +17054,13 @@ class UVector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -17824,7 +17824,7 @@ class UVector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -17841,13 +17841,13 @@ class I64Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -18609,7 +18609,7 @@ class I64Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
 
@@ -18626,13 +18626,13 @@ class U64Vector4:
     __slots__ = ['__weakref__']
 
     @overload
-    def __init__(self, all: Number): ...
+    def __init__(self, all: Number, /): ...
 
 
 
 
     @overload
-    def __init__(self, x: Number, y: Number, z: Number, w: Number): ...
+    def __init__(self, x: Number, y: Number, z: Number, w: Number, /): ...
 
 
     def __hash__(self) -> int: ...
@@ -19396,8 +19396,2423 @@ class U64Vector4:
 
 
 
-    @staticmethod
+    @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix2x2:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector2,
+
+            _1: DVector2,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector2: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix2x2) -> DMatrix2x2: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix2x2: ...
+    @overload
+    def __radd__(self, other: DMatrix2x2) -> DMatrix2x2: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix2x2: ...
+
+    @overload
+    def __sub__(self, other: DMatrix2x2) -> DMatrix2x2: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix2x2: ...
+    @overload
+    def __rsub__(self, other: DMatrix2x2) -> DMatrix2x2: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix2x2: ...
+
+    def __mul__(self, other: Number) -> DMatrix2x2: ...
+    def __rmul__(self, other: Number) -> DMatrix2x2: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x2) -> DMatrix2x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x2) -> DMatrix3x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x2) -> DMatrix4x2: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector2) -> DVector2: ...
+
+    def __rmatmul__(self, other: DVector2) -> DVector2: ...
+
+
+    @overload
+
+    def __truediv__(self, other: Number) -> DMatrix2x2: ...
+
+    @overload
+    def __truediv__(self, other: DMatrix2x2) -> DMatrix2x2: ...
+    @overload
+    def __truediv__(self, other: DVector2) -> DVector2: ...
+    @overload
+    def __rtruediv__(self, other: DVector2) -> DVector2: ...
+    @overload
+
+    def __rtruediv__(self, other: Number) -> DMatrix2x2: ...
+
+    def __neg__(self) -> DMatrix2x2: ...
+    def __bool__(self) -> bool: ...
+
+
+    def inverse(self) -> DMatrix2x2: ...
+
+
+
+    def transpose(self) -> DMatrix2x2: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix2x2:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector2,
+
+            _1: FVector2,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector2: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix2x2) -> FMatrix2x2: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix2x2: ...
+    @overload
+    def __radd__(self, other: FMatrix2x2) -> FMatrix2x2: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix2x2: ...
+
+    @overload
+    def __sub__(self, other: FMatrix2x2) -> FMatrix2x2: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix2x2: ...
+    @overload
+    def __rsub__(self, other: FMatrix2x2) -> FMatrix2x2: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix2x2: ...
+
+    def __mul__(self, other: Number) -> FMatrix2x2: ...
+    def __rmul__(self, other: Number) -> FMatrix2x2: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x2) -> FMatrix2x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x2) -> FMatrix3x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x2) -> FMatrix4x2: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector2) -> FVector2: ...
+
+    def __rmatmul__(self, other: FVector2) -> FVector2: ...
+
+
+    @overload
+
+    def __truediv__(self, other: Number) -> FMatrix2x2: ...
+
+    @overload
+    def __truediv__(self, other: FMatrix2x2) -> FMatrix2x2: ...
+    @overload
+    def __truediv__(self, other: FVector2) -> FVector2: ...
+    @overload
+    def __rtruediv__(self, other: FVector2) -> FVector2: ...
+    @overload
+
+    def __rtruediv__(self, other: Number) -> FMatrix2x2: ...
+
+    def __neg__(self) -> FMatrix2x2: ...
+    def __bool__(self) -> bool: ...
+
+
+    def inverse(self) -> FMatrix2x2: ...
+
+
+
+    def transpose(self) -> FMatrix2x2: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix2x3:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector3,
+
+            _1: DVector3,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector3: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix2x3) -> DMatrix2x3: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix2x3: ...
+    @overload
+    def __radd__(self, other: DMatrix2x3) -> DMatrix2x3: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix2x3: ...
+
+    @overload
+    def __sub__(self, other: DMatrix2x3) -> DMatrix2x3: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix2x3: ...
+    @overload
+    def __rsub__(self, other: DMatrix2x3) -> DMatrix2x3: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix2x3: ...
+
+    def __mul__(self, other: Number) -> DMatrix2x3: ...
+    def __rmul__(self, other: Number) -> DMatrix2x3: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x2) -> DMatrix2x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x2) -> DMatrix3x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x2) -> DMatrix4x3: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector2) -> DVector3: ...
+
+    def __rmatmul__(self, other: DVector3) -> DVector2: ...
+
+
+    def __truediv__(self, other: Number) -> DMatrix2x3: ...
+
+    def __rtruediv__(self, other: Number) -> DMatrix2x3: ...
+
+    def __neg__(self) -> DMatrix2x3: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> DMatrix3x2: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix2x3:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector3,
+
+            _1: FVector3,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector3: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix2x3) -> FMatrix2x3: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix2x3: ...
+    @overload
+    def __radd__(self, other: FMatrix2x3) -> FMatrix2x3: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix2x3: ...
+
+    @overload
+    def __sub__(self, other: FMatrix2x3) -> FMatrix2x3: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix2x3: ...
+    @overload
+    def __rsub__(self, other: FMatrix2x3) -> FMatrix2x3: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix2x3: ...
+
+    def __mul__(self, other: Number) -> FMatrix2x3: ...
+    def __rmul__(self, other: Number) -> FMatrix2x3: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x2) -> FMatrix2x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x2) -> FMatrix3x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x2) -> FMatrix4x3: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector2) -> FVector3: ...
+
+    def __rmatmul__(self, other: FVector3) -> FVector2: ...
+
+
+    def __truediv__(self, other: Number) -> FMatrix2x3: ...
+
+    def __rtruediv__(self, other: Number) -> FMatrix2x3: ...
+
+    def __neg__(self) -> FMatrix2x3: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> FMatrix3x2: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix2x4:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector4,
+
+            _1: DVector4,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector4: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix2x4) -> DMatrix2x4: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix2x4: ...
+    @overload
+    def __radd__(self, other: DMatrix2x4) -> DMatrix2x4: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix2x4: ...
+
+    @overload
+    def __sub__(self, other: DMatrix2x4) -> DMatrix2x4: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix2x4: ...
+    @overload
+    def __rsub__(self, other: DMatrix2x4) -> DMatrix2x4: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix2x4: ...
+
+    def __mul__(self, other: Number) -> DMatrix2x4: ...
+    def __rmul__(self, other: Number) -> DMatrix2x4: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x2) -> DMatrix2x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x2) -> DMatrix3x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x2) -> DMatrix4x4: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector2) -> DVector4: ...
+
+    def __rmatmul__(self, other: DVector4) -> DVector2: ...
+
+
+    def __truediv__(self, other: Number) -> DMatrix2x4: ...
+
+    def __rtruediv__(self, other: Number) -> DMatrix2x4: ...
+
+    def __neg__(self) -> DMatrix2x4: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> DMatrix4x2: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix2x4:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector4,
+
+            _1: FVector4,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector4: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix2x4) -> FMatrix2x4: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix2x4: ...
+    @overload
+    def __radd__(self, other: FMatrix2x4) -> FMatrix2x4: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix2x4: ...
+
+    @overload
+    def __sub__(self, other: FMatrix2x4) -> FMatrix2x4: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix2x4: ...
+    @overload
+    def __rsub__(self, other: FMatrix2x4) -> FMatrix2x4: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix2x4: ...
+
+    def __mul__(self, other: Number) -> FMatrix2x4: ...
+    def __rmul__(self, other: Number) -> FMatrix2x4: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x2) -> FMatrix2x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x2) -> FMatrix3x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x2) -> FMatrix4x4: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector2) -> FVector4: ...
+
+    def __rmatmul__(self, other: FVector4) -> FVector2: ...
+
+
+    def __truediv__(self, other: Number) -> FMatrix2x4: ...
+
+    def __rtruediv__(self, other: Number) -> FMatrix2x4: ...
+
+    def __neg__(self) -> FMatrix2x4: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> FMatrix4x2: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix3x2:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector2,
+
+            _1: DVector2,
+
+            _2: DVector2,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector2: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix3x2) -> DMatrix3x2: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix3x2: ...
+    @overload
+    def __radd__(self, other: DMatrix3x2) -> DMatrix3x2: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix3x2: ...
+
+    @overload
+    def __sub__(self, other: DMatrix3x2) -> DMatrix3x2: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix3x2: ...
+    @overload
+    def __rsub__(self, other: DMatrix3x2) -> DMatrix3x2: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix3x2: ...
+
+    def __mul__(self, other: Number) -> DMatrix3x2: ...
+    def __rmul__(self, other: Number) -> DMatrix3x2: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x3) -> DMatrix2x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x3) -> DMatrix3x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x3) -> DMatrix4x2: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector3) -> DVector2: ...
+
+    def __rmatmul__(self, other: DVector2) -> DVector3: ...
+
+
+    def __truediv__(self, other: Number) -> DMatrix3x2: ...
+
+    def __rtruediv__(self, other: Number) -> DMatrix3x2: ...
+
+    def __neg__(self) -> DMatrix3x2: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> DMatrix2x3: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix3x2:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector2,
+
+            _1: FVector2,
+
+            _2: FVector2,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector2: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix3x2) -> FMatrix3x2: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix3x2: ...
+    @overload
+    def __radd__(self, other: FMatrix3x2) -> FMatrix3x2: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix3x2: ...
+
+    @overload
+    def __sub__(self, other: FMatrix3x2) -> FMatrix3x2: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix3x2: ...
+    @overload
+    def __rsub__(self, other: FMatrix3x2) -> FMatrix3x2: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix3x2: ...
+
+    def __mul__(self, other: Number) -> FMatrix3x2: ...
+    def __rmul__(self, other: Number) -> FMatrix3x2: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x3) -> FMatrix2x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x3) -> FMatrix3x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x3) -> FMatrix4x2: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector3) -> FVector2: ...
+
+    def __rmatmul__(self, other: FVector2) -> FVector3: ...
+
+
+    def __truediv__(self, other: Number) -> FMatrix3x2: ...
+
+    def __rtruediv__(self, other: Number) -> FMatrix3x2: ...
+
+    def __neg__(self) -> FMatrix3x2: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> FMatrix2x3: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix3x3:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector3,
+
+            _1: DVector3,
+
+            _2: DVector3,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector3: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix3x3) -> DMatrix3x3: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix3x3: ...
+    @overload
+    def __radd__(self, other: DMatrix3x3) -> DMatrix3x3: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix3x3: ...
+
+    @overload
+    def __sub__(self, other: DMatrix3x3) -> DMatrix3x3: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix3x3: ...
+    @overload
+    def __rsub__(self, other: DMatrix3x3) -> DMatrix3x3: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix3x3: ...
+
+    def __mul__(self, other: Number) -> DMatrix3x3: ...
+    def __rmul__(self, other: Number) -> DMatrix3x3: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x3) -> DMatrix2x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x3) -> DMatrix3x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x3) -> DMatrix4x3: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector3) -> DVector3: ...
+
+    def __rmatmul__(self, other: DVector3) -> DVector3: ...
+
+
+    @overload
+
+    def __truediv__(self, other: Number) -> DMatrix3x3: ...
+
+    @overload
+    def __truediv__(self, other: DMatrix3x3) -> DMatrix3x3: ...
+    @overload
+    def __truediv__(self, other: DVector3) -> DVector3: ...
+    @overload
+    def __rtruediv__(self, other: DVector3) -> DVector3: ...
+    @overload
+
+    def __rtruediv__(self, other: Number) -> DMatrix3x3: ...
+
+    def __neg__(self) -> DMatrix3x3: ...
+    def __bool__(self) -> bool: ...
+
+
+    def inverse(self) -> DMatrix3x3: ...
+
+
+
+    def transpose(self) -> DMatrix3x3: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix3x3:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector3,
+
+            _1: FVector3,
+
+            _2: FVector3,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector3: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix3x3) -> FMatrix3x3: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix3x3: ...
+    @overload
+    def __radd__(self, other: FMatrix3x3) -> FMatrix3x3: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix3x3: ...
+
+    @overload
+    def __sub__(self, other: FMatrix3x3) -> FMatrix3x3: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix3x3: ...
+    @overload
+    def __rsub__(self, other: FMatrix3x3) -> FMatrix3x3: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix3x3: ...
+
+    def __mul__(self, other: Number) -> FMatrix3x3: ...
+    def __rmul__(self, other: Number) -> FMatrix3x3: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x3) -> FMatrix2x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x3) -> FMatrix3x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x3) -> FMatrix4x3: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector3) -> FVector3: ...
+
+    def __rmatmul__(self, other: FVector3) -> FVector3: ...
+
+
+    @overload
+
+    def __truediv__(self, other: Number) -> FMatrix3x3: ...
+
+    @overload
+    def __truediv__(self, other: FMatrix3x3) -> FMatrix3x3: ...
+    @overload
+    def __truediv__(self, other: FVector3) -> FVector3: ...
+    @overload
+    def __rtruediv__(self, other: FVector3) -> FVector3: ...
+    @overload
+
+    def __rtruediv__(self, other: Number) -> FMatrix3x3: ...
+
+    def __neg__(self) -> FMatrix3x3: ...
+    def __bool__(self) -> bool: ...
+
+
+    def inverse(self) -> FMatrix3x3: ...
+
+
+
+    def transpose(self) -> FMatrix3x3: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix3x4:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector4,
+
+            _1: DVector4,
+
+            _2: DVector4,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+            _9: Number,
+
+            _10: Number,
+
+            _11: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector4: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix3x4) -> DMatrix3x4: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix3x4: ...
+    @overload
+    def __radd__(self, other: DMatrix3x4) -> DMatrix3x4: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix3x4: ...
+
+    @overload
+    def __sub__(self, other: DMatrix3x4) -> DMatrix3x4: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix3x4: ...
+    @overload
+    def __rsub__(self, other: DMatrix3x4) -> DMatrix3x4: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix3x4: ...
+
+    def __mul__(self, other: Number) -> DMatrix3x4: ...
+    def __rmul__(self, other: Number) -> DMatrix3x4: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x3) -> DMatrix2x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x3) -> DMatrix3x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x3) -> DMatrix4x4: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector3) -> DVector4: ...
+
+    def __rmatmul__(self, other: DVector4) -> DVector3: ...
+
+
+    def __truediv__(self, other: Number) -> DMatrix3x4: ...
+
+    def __rtruediv__(self, other: Number) -> DMatrix3x4: ...
+
+    def __neg__(self) -> DMatrix3x4: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> DMatrix4x3: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix3x4:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector4,
+
+            _1: FVector4,
+
+            _2: FVector4,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+            _9: Number,
+
+            _10: Number,
+
+            _11: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector4: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix3x4) -> FMatrix3x4: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix3x4: ...
+    @overload
+    def __radd__(self, other: FMatrix3x4) -> FMatrix3x4: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix3x4: ...
+
+    @overload
+    def __sub__(self, other: FMatrix3x4) -> FMatrix3x4: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix3x4: ...
+    @overload
+    def __rsub__(self, other: FMatrix3x4) -> FMatrix3x4: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix3x4: ...
+
+    def __mul__(self, other: Number) -> FMatrix3x4: ...
+    def __rmul__(self, other: Number) -> FMatrix3x4: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x3) -> FMatrix2x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x3) -> FMatrix3x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x3) -> FMatrix4x4: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector3) -> FVector4: ...
+
+    def __rmatmul__(self, other: FVector4) -> FVector3: ...
+
+
+    def __truediv__(self, other: Number) -> FMatrix3x4: ...
+
+    def __rtruediv__(self, other: Number) -> FMatrix3x4: ...
+
+    def __neg__(self) -> FMatrix3x4: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> FMatrix4x3: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix4x2:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector2,
+
+            _1: DVector2,
+
+            _2: DVector2,
+
+            _3: DVector2,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector2: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix4x2) -> DMatrix4x2: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix4x2: ...
+    @overload
+    def __radd__(self, other: DMatrix4x2) -> DMatrix4x2: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix4x2: ...
+
+    @overload
+    def __sub__(self, other: DMatrix4x2) -> DMatrix4x2: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix4x2: ...
+    @overload
+    def __rsub__(self, other: DMatrix4x2) -> DMatrix4x2: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix4x2: ...
+
+    def __mul__(self, other: Number) -> DMatrix4x2: ...
+    def __rmul__(self, other: Number) -> DMatrix4x2: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x4) -> DMatrix2x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x4) -> DMatrix3x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x4) -> DMatrix4x2: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector4) -> DVector2: ...
+
+    def __rmatmul__(self, other: DVector2) -> DVector4: ...
+
+
+    def __truediv__(self, other: Number) -> DMatrix4x2: ...
+
+    def __rtruediv__(self, other: Number) -> DMatrix4x2: ...
+
+    def __neg__(self) -> DMatrix4x2: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> DMatrix2x4: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix4x2:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector2,
+
+            _1: FVector2,
+
+            _2: FVector2,
+
+            _3: FVector2,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector2: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix4x2) -> FMatrix4x2: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix4x2: ...
+    @overload
+    def __radd__(self, other: FMatrix4x2) -> FMatrix4x2: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix4x2: ...
+
+    @overload
+    def __sub__(self, other: FMatrix4x2) -> FMatrix4x2: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix4x2: ...
+    @overload
+    def __rsub__(self, other: FMatrix4x2) -> FMatrix4x2: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix4x2: ...
+
+    def __mul__(self, other: Number) -> FMatrix4x2: ...
+    def __rmul__(self, other: Number) -> FMatrix4x2: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x4) -> FMatrix2x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x4) -> FMatrix3x2: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x4) -> FMatrix4x2: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector4) -> FVector2: ...
+
+    def __rmatmul__(self, other: FVector2) -> FVector4: ...
+
+
+    def __truediv__(self, other: Number) -> FMatrix4x2: ...
+
+    def __rtruediv__(self, other: Number) -> FMatrix4x2: ...
+
+    def __neg__(self) -> FMatrix4x2: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> FMatrix2x4: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix4x3:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector3,
+
+            _1: DVector3,
+
+            _2: DVector3,
+
+            _3: DVector3,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+            _9: Number,
+
+            _10: Number,
+
+            _11: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector3: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix4x3) -> DMatrix4x3: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix4x3: ...
+    @overload
+    def __radd__(self, other: DMatrix4x3) -> DMatrix4x3: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix4x3: ...
+
+    @overload
+    def __sub__(self, other: DMatrix4x3) -> DMatrix4x3: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix4x3: ...
+    @overload
+    def __rsub__(self, other: DMatrix4x3) -> DMatrix4x3: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix4x3: ...
+
+    def __mul__(self, other: Number) -> DMatrix4x3: ...
+    def __rmul__(self, other: Number) -> DMatrix4x3: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x4) -> DMatrix2x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x4) -> DMatrix3x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x4) -> DMatrix4x3: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector4) -> DVector3: ...
+
+    def __rmatmul__(self, other: DVector3) -> DVector4: ...
+
+
+    def __truediv__(self, other: Number) -> DMatrix4x3: ...
+
+    def __rtruediv__(self, other: Number) -> DMatrix4x3: ...
+
+    def __neg__(self) -> DMatrix4x3: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> DMatrix3x4: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix4x3:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector3,
+
+            _1: FVector3,
+
+            _2: FVector3,
+
+            _3: FVector3,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+            _9: Number,
+
+            _10: Number,
+
+            _11: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector3: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix4x3) -> FMatrix4x3: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix4x3: ...
+    @overload
+    def __radd__(self, other: FMatrix4x3) -> FMatrix4x3: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix4x3: ...
+
+    @overload
+    def __sub__(self, other: FMatrix4x3) -> FMatrix4x3: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix4x3: ...
+    @overload
+    def __rsub__(self, other: FMatrix4x3) -> FMatrix4x3: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix4x3: ...
+
+    def __mul__(self, other: Number) -> FMatrix4x3: ...
+    def __rmul__(self, other: Number) -> FMatrix4x3: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x4) -> FMatrix2x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x4) -> FMatrix3x3: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x4) -> FMatrix4x3: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector4) -> FVector3: ...
+
+    def __rmatmul__(self, other: FVector3) -> FVector4: ...
+
+
+    def __truediv__(self, other: Number) -> FMatrix4x3: ...
+
+    def __rtruediv__(self, other: Number) -> FMatrix4x3: ...
+
+    def __neg__(self) -> FMatrix4x3: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    def transpose(self) -> FMatrix3x4: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DMatrix4x4:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: DVector4,
+
+            _1: DVector4,
+
+            _2: DVector4,
+
+            _3: DVector4,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+            _9: Number,
+
+            _10: Number,
+
+            _11: Number,
+
+            _12: Number,
+
+            _13: Number,
+
+            _14: Number,
+
+            _15: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector4: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DMatrix4x4) -> DMatrix4x4: ...
+    @overload
+    def __add__(self, other: Number) -> DMatrix4x4: ...
+    @overload
+    def __radd__(self, other: DMatrix4x4) -> DMatrix4x4: ...
+    @overload
+    def __radd__(self, other: Number) -> DMatrix4x4: ...
+
+    @overload
+    def __sub__(self, other: DMatrix4x4) -> DMatrix4x4: ...
+    @overload
+    def __sub__(self, other: Number) -> DMatrix4x4: ...
+    @overload
+    def __rsub__(self, other: DMatrix4x4) -> DMatrix4x4: ...
+    @overload
+    def __rsub__(self, other: Number) -> DMatrix4x4: ...
+
+    def __mul__(self, other: Number) -> DMatrix4x4: ...
+    def __rmul__(self, other: Number) -> DMatrix4x4: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix2x4) -> DMatrix2x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix3x4) -> DMatrix3x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: DMatrix4x4) -> DMatrix4x4: ...
+
+
+
+    @overload
+    def __matmul__(self, other: DVector4) -> DVector4: ...
+
+    def __rmatmul__(self, other: DVector4) -> DVector4: ...
+
+
+    @overload
+
+    def __truediv__(self, other: Number) -> DMatrix4x4: ...
+
+    @overload
+    def __truediv__(self, other: DMatrix4x4) -> DMatrix4x4: ...
+    @overload
+    def __truediv__(self, other: DVector4) -> DVector4: ...
+    @overload
+    def __rtruediv__(self, other: DVector4) -> DVector4: ...
+    @overload
+
+    def __rtruediv__(self, other: Number) -> DMatrix4x4: ...
+
+    def __neg__(self) -> DMatrix4x4: ...
+    def __bool__(self) -> bool: ...
+
+
+    def inverse(self) -> DMatrix4x4: ...
+
+
+
+    def transpose(self) -> DMatrix4x4: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FMatrix4x4:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self, all: Number, /): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: FVector4,
+
+            _1: FVector4,
+
+            _2: FVector4,
+
+            _3: FVector4,
+
+        /
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+
+            _0: Number,
+
+            _1: Number,
+
+            _2: Number,
+
+            _3: Number,
+
+            _4: Number,
+
+            _5: Number,
+
+            _6: Number,
+
+            _7: Number,
+
+            _8: Number,
+
+            _9: Number,
+
+            _10: Number,
+
+            _11: Number,
+
+            _12: Number,
+
+            _13: Number,
+
+            _14: Number,
+
+            _15: Number,
+
+        /
+    ): ...
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector4: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FMatrix4x4) -> FMatrix4x4: ...
+    @overload
+    def __add__(self, other: Number) -> FMatrix4x4: ...
+    @overload
+    def __radd__(self, other: FMatrix4x4) -> FMatrix4x4: ...
+    @overload
+    def __radd__(self, other: Number) -> FMatrix4x4: ...
+
+    @overload
+    def __sub__(self, other: FMatrix4x4) -> FMatrix4x4: ...
+    @overload
+    def __sub__(self, other: Number) -> FMatrix4x4: ...
+    @overload
+    def __rsub__(self, other: FMatrix4x4) -> FMatrix4x4: ...
+    @overload
+    def __rsub__(self, other: Number) -> FMatrix4x4: ...
+
+    def __mul__(self, other: Number) -> FMatrix4x4: ...
+    def __rmul__(self, other: Number) -> FMatrix4x4: ...
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix2x4) -> FMatrix2x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix3x4) -> FMatrix3x4: ...
+
+
+
+
+
+    @overload
+    def __matmul__(self, other: FMatrix4x4) -> FMatrix4x4: ...
+
+
+
+    @overload
+    def __matmul__(self, other: FVector4) -> FVector4: ...
+
+    def __rmatmul__(self, other: FVector4) -> FVector4: ...
+
+
+    @overload
+
+    def __truediv__(self, other: Number) -> FMatrix4x4: ...
+
+    @overload
+    def __truediv__(self, other: FMatrix4x4) -> FMatrix4x4: ...
+    @overload
+    def __truediv__(self, other: FVector4) -> FVector4: ...
+    @overload
+    def __rtruediv__(self, other: FVector4) -> FVector4: ...
+    @overload
+
+    def __rtruediv__(self, other: Number) -> FMatrix4x4: ...
+
+    def __neg__(self) -> FMatrix4x4: ...
+    def __bool__(self) -> bool: ...
+
+
+    def inverse(self) -> FMatrix4x4: ...
+
+
+
+    def transpose(self) -> FMatrix4x4: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+
 
 
 
