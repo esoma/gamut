@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.591688 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.032561 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_BVECTOR4_HPP
+#define GAMUT_MATH_BVECTOR4_HPP
 
 // stdlib
 #include <limits>
@@ -166,9 +169,9 @@ BVector4__dealloc__(BVector4 *self)
 static Py_hash_t
 BVector4__hash__(BVector4 *self)
 {
-    Py_ssize_t i, len = 4;
+    Py_ssize_t len = 4;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (BVector4Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<bool>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -262,7 +265,7 @@ BVector4__getitem__(BVector4 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(BVector4Glm::length_type)index];
     return c_bool_to_pyobject(c);
 }
 
@@ -321,13 +324,13 @@ BVector4__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_bool(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((BVector4 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_bool(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((BVector4 *)right)->glm);
         }
     }
@@ -367,13 +370,13 @@ BVector4__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_bool(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((BVector4 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_bool(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((BVector4 *)right)->glm);
         }
     }
@@ -413,13 +416,13 @@ BVector4__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_bool(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((BVector4 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_bool(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((BVector4 *)right)->glm);
         }
     }
@@ -533,7 +536,7 @@ BVector4_getbufferproc(BVector4 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "BVector4 is not read only");
+        PyErr_SetString(PyExc_TypeError, "BVector4 is read only");
         view->obj = 0;
         return -1;
     }
@@ -628,7 +631,7 @@ BVector4__getattr__(BVector4 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (BVector4Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -774,3 +777,8 @@ define_BVector4_type(PyObject *module)
     }
     return type;
 }
+
+
+
+
+#endif

@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.593188 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.034060 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_FVECTOR4_HPP
+#define GAMUT_MATH_FVECTOR4_HPP
 
 // stdlib
 #include <limits>
@@ -166,9 +169,9 @@ FVector4__dealloc__(FVector4 *self)
 static Py_hash_t
 FVector4__hash__(FVector4 *self)
 {
-    Py_ssize_t i, len = 4;
+    Py_ssize_t len = 4;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (FVector4Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<float>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -262,7 +265,7 @@ FVector4__getitem__(FVector4 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(FVector4Glm::length_type)index];
     return c_float_to_pyobject(c);
 }
 
@@ -321,13 +324,13 @@ FVector4__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_float(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((FVector4 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_float(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((FVector4 *)right)->glm);
         }
     }
@@ -367,13 +370,13 @@ FVector4__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_float(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((FVector4 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_float(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((FVector4 *)right)->glm);
         }
     }
@@ -413,13 +416,13 @@ FVector4__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_float(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((FVector4 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_float(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((FVector4 *)right)->glm);
         }
     }
@@ -473,13 +476,13 @@ FVector4__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_float(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::mod(*((FVector4 *)left)->glm, c_right);
             }
             else
             {
                 auto c_left = pyobject_to_c_float(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::mod(FVector4Glm(c_left), *((FVector4 *)right)->glm);
             }
         }
@@ -522,13 +525,13 @@ FVector4__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_float(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::pow(*((FVector4 *)left)->glm, FVector4Glm(c_right));
             }
             else
             {
                 auto c_left = pyobject_to_c_float(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::pow(FVector4Glm(c_left), *((FVector4 *)right)->glm);
             }
         }
@@ -572,14 +575,14 @@ FVector4__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_float(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                 vector = (*((FVector4 *)left)->glm) / c_right;
             }
             else
             {
                 auto c_left = pyobject_to_c_float(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                 vector = c_left / (*((FVector4 *)right)->glm);
             }
@@ -689,7 +692,7 @@ FVector4_getbufferproc(FVector4 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "FVector4 is not read only");
+        PyErr_SetString(PyExc_TypeError, "FVector4 is read only");
         view->obj = 0;
         return -1;
     }
@@ -793,7 +796,7 @@ FVector4__getattr__(FVector4 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (FVector4Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -986,3 +989,22 @@ define_FVector4_type(PyObject *module)
     }
     return type;
 }
+
+
+
+static FVector4 *
+create_FVector4_from_glm(const FVector4Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector4_PyTypeObject;
+
+    FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FVector4Glm(glm);
+
+    return result;
+}
+
+
+#endif

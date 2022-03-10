@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.585688 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.026560 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_I8VECTOR3_HPP
+#define GAMUT_MATH_I8VECTOR3_HPP
 
 // stdlib
 #include <limits>
@@ -153,9 +156,9 @@ I8Vector3__dealloc__(I8Vector3 *self)
 static Py_hash_t
 I8Vector3__hash__(I8Vector3 *self)
 {
-    Py_ssize_t i, len = 3;
+    Py_ssize_t len = 3;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (I8Vector3Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<int8_t>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -238,7 +241,7 @@ I8Vector3__getitem__(I8Vector3 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(I8Vector3Glm::length_type)index];
     return c_int8_t_to_pyobject(c);
 }
 
@@ -297,13 +300,13 @@ I8Vector3__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int8_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I8Vector3 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int8_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((I8Vector3 *)right)->glm);
         }
     }
@@ -341,13 +344,13 @@ I8Vector3__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int8_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I8Vector3 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int8_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((I8Vector3 *)right)->glm);
         }
     }
@@ -385,13 +388,13 @@ I8Vector3__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int8_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I8Vector3 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int8_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((I8Vector3 *)right)->glm);
         }
     }
@@ -449,7 +452,7 @@ I8Vector3__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_int8_t(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (c_right == 0)
                     {
@@ -462,7 +465,7 @@ I8Vector3__mul__(PyObject *left, PyObject *right)
             else
             {
                 auto c_left = pyobject_to_c_int8_t(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (
 
@@ -575,7 +578,7 @@ I8Vector3_getbufferproc(I8Vector3 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "I8Vector3 is not read only");
+        PyErr_SetString(PyExc_TypeError, "I8Vector3 is read only");
         view->obj = 0;
         return -1;
     }
@@ -659,7 +662,7 @@ I8Vector3__getattr__(I8Vector3 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (I8Vector3Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -801,3 +804,8 @@ define_I8Vector3_type(PyObject *module)
     }
     return type;
 }
+
+
+
+
+#endif

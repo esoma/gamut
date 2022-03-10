@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.581689 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.022061 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_IVECTOR2_HPP
+#define GAMUT_MATH_IVECTOR2_HPP
 
 // stdlib
 #include <limits>
@@ -140,9 +143,9 @@ IVector2__dealloc__(IVector2 *self)
 static Py_hash_t
 IVector2__hash__(IVector2 *self)
 {
-    Py_ssize_t i, len = 2;
+    Py_ssize_t len = 2;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (IVector2Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<int>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -214,7 +217,7 @@ IVector2__getitem__(IVector2 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(IVector2Glm::length_type)index];
     return c_int_to_pyobject(c);
 }
 
@@ -273,13 +276,13 @@ IVector2__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((IVector2 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((IVector2 *)right)->glm);
         }
     }
@@ -315,13 +318,13 @@ IVector2__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((IVector2 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((IVector2 *)right)->glm);
         }
     }
@@ -357,13 +360,13 @@ IVector2__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((IVector2 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((IVector2 *)right)->glm);
         }
     }
@@ -417,7 +420,7 @@ IVector2__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_int(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (c_right == 0)
                     {
@@ -430,7 +433,7 @@ IVector2__mul__(PyObject *left, PyObject *right)
             else
             {
                 auto c_left = pyobject_to_c_int(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (
 
@@ -530,7 +533,7 @@ IVector2_getbufferproc(IVector2 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "IVector2 is not read only");
+        PyErr_SetString(PyExc_TypeError, "IVector2 is read only");
         view->obj = 0;
         return -1;
     }
@@ -603,7 +606,7 @@ IVector2__getattr__(IVector2 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (IVector2Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -739,3 +742,8 @@ define_IVector2_type(PyObject *module)
     }
     return type;
 }
+
+
+
+
+#endif

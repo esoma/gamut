@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.579689 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.020560 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_U16VECTOR2_HPP
+#define GAMUT_MATH_U16VECTOR2_HPP
 
 // stdlib
 #include <limits>
@@ -140,9 +143,9 @@ U16Vector2__dealloc__(U16Vector2 *self)
 static Py_hash_t
 U16Vector2__hash__(U16Vector2 *self)
 {
-    Py_ssize_t i, len = 2;
+    Py_ssize_t len = 2;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (U16Vector2Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<uint16_t>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -214,7 +217,7 @@ U16Vector2__getitem__(U16Vector2 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(U16Vector2Glm::length_type)index];
     return c_uint16_t_to_pyobject(c);
 }
 
@@ -273,13 +276,13 @@ U16Vector2__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_uint16_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((U16Vector2 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_uint16_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((U16Vector2 *)right)->glm);
         }
     }
@@ -315,13 +318,13 @@ U16Vector2__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_uint16_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((U16Vector2 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_uint16_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((U16Vector2 *)right)->glm);
         }
     }
@@ -357,13 +360,13 @@ U16Vector2__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_uint16_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((U16Vector2 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_uint16_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((U16Vector2 *)right)->glm);
         }
     }
@@ -417,7 +420,7 @@ U16Vector2__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_uint16_t(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (c_right == 0)
                     {
@@ -430,7 +433,7 @@ U16Vector2__mul__(PyObject *left, PyObject *right)
             else
             {
                 auto c_left = pyobject_to_c_uint16_t(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (
 
@@ -509,7 +512,7 @@ U16Vector2_getbufferproc(U16Vector2 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "U16Vector2 is not read only");
+        PyErr_SetString(PyExc_TypeError, "U16Vector2 is read only");
         view->obj = 0;
         return -1;
     }
@@ -582,7 +585,7 @@ U16Vector2__getattr__(U16Vector2 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (U16Vector2Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -716,3 +719,8 @@ define_U16Vector2_type(PyObject *module)
     }
     return type;
 }
+
+
+
+
+#endif

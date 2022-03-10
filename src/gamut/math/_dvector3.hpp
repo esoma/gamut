@@ -1,5 +1,8 @@
 
-// generated 2022-03-08 23:43:08.584689 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 18:59:39.025060 from codegen/math/templates/_vector.hpp
+
+#ifndef GAMUT_MATH_DVECTOR3_HPP
+#define GAMUT_MATH_DVECTOR3_HPP
 
 // stdlib
 #include <limits>
@@ -153,9 +156,9 @@ DVector3__dealloc__(DVector3 *self)
 static Py_hash_t
 DVector3__hash__(DVector3 *self)
 {
-    Py_ssize_t i, len = 3;
+    Py_ssize_t len = 3;
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (i = 0; i < len; i++)
+    for (DVector3Glm::length_type i = 0; i < len; i++)
     {
         Py_uhash_t lane = std::hash<double>{}((*self->glm)[i]);
         acc += lane * _HASH_XXPRIME_2;
@@ -238,7 +241,7 @@ DVector3__getitem__(DVector3 *self, Py_ssize_t index)
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
     }
-    auto c = (*self->glm)[index];
+    auto c = (*self->glm)[(DVector3Glm::length_type)index];
     return c_double_to_pyobject(c);
 }
 
@@ -297,13 +300,13 @@ DVector3__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_double(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((DVector3 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_double(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((DVector3 *)right)->glm);
         }
     }
@@ -341,13 +344,13 @@ DVector3__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_double(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((DVector3 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_double(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((DVector3 *)right)->glm);
         }
     }
@@ -385,13 +388,13 @@ DVector3__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_double(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((DVector3 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_double(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((DVector3 *)right)->glm);
         }
     }
@@ -443,13 +446,13 @@ DVector3__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_double(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::mod(*((DVector3 *)left)->glm, c_right);
             }
             else
             {
                 auto c_left = pyobject_to_c_double(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::mod(DVector3Glm(c_left), *((DVector3 *)right)->glm);
             }
         }
@@ -490,13 +493,13 @@ DVector3__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_double(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::pow(*((DVector3 *)left)->glm, DVector3Glm(c_right));
             }
             else
             {
                 auto c_left = pyobject_to_c_double(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::pow(DVector3Glm(c_left), *((DVector3 *)right)->glm);
             }
         }
@@ -538,14 +541,14 @@ DVector3__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_double(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                 vector = (*((DVector3 *)left)->glm) / c_right;
             }
             else
             {
                 auto c_left = pyobject_to_c_double(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                 vector = c_left / (*((DVector3 *)right)->glm);
             }
@@ -644,7 +647,7 @@ DVector3_getbufferproc(DVector3 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "DVector3 is not read only");
+        PyErr_SetString(PyExc_TypeError, "DVector3 is read only");
         view->obj = 0;
         return -1;
     }
@@ -737,7 +740,7 @@ DVector3__getattr__(DVector3 *self, PyObject *py_attr)
 
     const char *attr = PyUnicode_AsUTF8(py_attr);
     if (!attr){ return 0; }
-    for (size_t i = 0; i < attr_length; i++)
+    for (DVector3Glm::length_type i = 0; i < attr_length; i++)
     {
         char c_name = attr[i];
         int glm_index;
@@ -948,3 +951,22 @@ define_DVector3_type(PyObject *module)
     }
     return type;
 }
+
+
+
+static DVector3 *
+create_DVector3_from_glm(const DVector3Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DVector3_PyTypeObject;
+
+    DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector3Glm(glm);
+
+    return result;
+}
+
+
+#endif

@@ -1,5 +1,5 @@
 
-// generated 2022-03-08 23:43:08.603187 from codegen/math/templates/_math.hpp
+// generated 2022-03-10 18:59:39.085561 from codegen/math/templates/_math.hpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -85,6 +85,42 @@
     #include "_i64vector4.hpp"
 
     #include "_u64vector4.hpp"
+
+    #include "_dmatrix2x2.hpp"
+
+    #include "_fmatrix2x2.hpp"
+
+    #include "_dmatrix2x3.hpp"
+
+    #include "_fmatrix2x3.hpp"
+
+    #include "_dmatrix2x4.hpp"
+
+    #include "_fmatrix2x4.hpp"
+
+    #include "_dmatrix3x2.hpp"
+
+    #include "_fmatrix3x2.hpp"
+
+    #include "_dmatrix3x3.hpp"
+
+    #include "_fmatrix3x3.hpp"
+
+    #include "_dmatrix3x4.hpp"
+
+    #include "_fmatrix3x4.hpp"
+
+    #include "_dmatrix4x2.hpp"
+
+    #include "_fmatrix4x2.hpp"
+
+    #include "_dmatrix4x3.hpp"
+
+    #include "_fmatrix4x3.hpp"
+
+    #include "_dmatrix4x4.hpp"
+
+    #include "_fmatrix4x4.hpp"
 
 
 static PyMethodDef module_methods[] = {
@@ -401,6 +437,132 @@ PyInit__math()
         if (!type){ goto error; }
         Py_INCREF(type);
         state->U64Vector4_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix2x2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix2x2_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix2x2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix2x2_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix2x3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix2x3_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix2x3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix2x3_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix2x4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix2x4_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix2x4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix2x4_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix3x2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix3x2_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix3x2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix3x2_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix3x3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix3x3_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix3x3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix3x3_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix3x4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix3x4_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix3x4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix3x4_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix4x2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix4x2_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix4x2_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix4x2_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix4x3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix4x3_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix4x3_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix4x3_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DMatrix4x4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix4x4_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FMatrix4x4_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix4x4_PyTypeObject = type;
     }
 
 

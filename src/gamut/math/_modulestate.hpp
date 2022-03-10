@@ -1,5 +1,5 @@
 
-// generated 2022-03-08 23:43:08.601188 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-10 18:59:39.084060 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP
@@ -91,6 +91,42 @@ struct ModuleState
 
         PyTypeObject *U64Vector4_PyTypeObject;
 
+        PyTypeObject *DMatrix2x2_PyTypeObject;
+
+        PyTypeObject *FMatrix2x2_PyTypeObject;
+
+        PyTypeObject *DMatrix2x3_PyTypeObject;
+
+        PyTypeObject *FMatrix2x3_PyTypeObject;
+
+        PyTypeObject *DMatrix2x4_PyTypeObject;
+
+        PyTypeObject *FMatrix2x4_PyTypeObject;
+
+        PyTypeObject *DMatrix3x2_PyTypeObject;
+
+        PyTypeObject *FMatrix3x2_PyTypeObject;
+
+        PyTypeObject *DMatrix3x3_PyTypeObject;
+
+        PyTypeObject *FMatrix3x3_PyTypeObject;
+
+        PyTypeObject *DMatrix3x4_PyTypeObject;
+
+        PyTypeObject *FMatrix3x4_PyTypeObject;
+
+        PyTypeObject *DMatrix4x2_PyTypeObject;
+
+        PyTypeObject *FMatrix4x2_PyTypeObject;
+
+        PyTypeObject *DMatrix4x3_PyTypeObject;
+
+        PyTypeObject *FMatrix4x3_PyTypeObject;
+
+        PyTypeObject *DMatrix4x4_PyTypeObject;
+
+        PyTypeObject *FMatrix4x4_PyTypeObject;
+
 };
 
 
@@ -180,6 +216,42 @@ ModuleState_traverse(
 
         Py_VISIT(self->U64Vector4_PyTypeObject);
 
+        Py_VISIT(self->DMatrix2x2_PyTypeObject);
+
+        Py_VISIT(self->FMatrix2x2_PyTypeObject);
+
+        Py_VISIT(self->DMatrix2x3_PyTypeObject);
+
+        Py_VISIT(self->FMatrix2x3_PyTypeObject);
+
+        Py_VISIT(self->DMatrix2x4_PyTypeObject);
+
+        Py_VISIT(self->FMatrix2x4_PyTypeObject);
+
+        Py_VISIT(self->DMatrix3x2_PyTypeObject);
+
+        Py_VISIT(self->FMatrix3x2_PyTypeObject);
+
+        Py_VISIT(self->DMatrix3x3_PyTypeObject);
+
+        Py_VISIT(self->FMatrix3x3_PyTypeObject);
+
+        Py_VISIT(self->DMatrix3x4_PyTypeObject);
+
+        Py_VISIT(self->FMatrix3x4_PyTypeObject);
+
+        Py_VISIT(self->DMatrix4x2_PyTypeObject);
+
+        Py_VISIT(self->FMatrix4x2_PyTypeObject);
+
+        Py_VISIT(self->DMatrix4x3_PyTypeObject);
+
+        Py_VISIT(self->FMatrix4x3_PyTypeObject);
+
+        Py_VISIT(self->DMatrix4x4_PyTypeObject);
+
+        Py_VISIT(self->FMatrix4x4_PyTypeObject);
+
     return 0;
 }
 
@@ -265,6 +337,42 @@ ModuleState_clear(struct ModuleState *self)
         Py_CLEAR(self->I64Vector4_PyTypeObject);
 
         Py_CLEAR(self->U64Vector4_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix2x2_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix2x2_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix2x3_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix2x3_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix2x4_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix2x4_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix3x2_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix3x2_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix3x3_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix3x3_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix3x4_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix3x4_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix4x2_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix4x2_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix4x3_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix4x3_PyTypeObject);
+
+        Py_CLEAR(self->DMatrix4x4_PyTypeObject);
+
+        Py_CLEAR(self->FMatrix4x4_PyTypeObject);
 
     return 0;
 }
