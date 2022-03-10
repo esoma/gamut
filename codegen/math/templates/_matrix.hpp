@@ -16,18 +16,9 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_matrixtype.hpp"
 #include "_type.hpp"
 #include "_{{ column_type.lower() }}.hpp"
-
-typedef glm::tmat{{ column_count }}x{{ row_count }}<{{ c_type }}, glm::defaultp> {{ name }}Glm;
-
-
-struct {{ name }}
-{
-    PyObject_HEAD
-    PyObject *weakreflist;
-    {{ name }}Glm *glm;
-};
 
 
 static PyObject *
@@ -60,12 +51,12 @@ static PyObject *
             glm = new {{ name }}Glm(arg_c);
             break;
         }
-        case {{ column_count }}:
+        case {{ row_size }}:
         {
             auto module_state = get_module_state();
             if (!module_state){ return 0; }
             auto column_cls = module_state->{{ column_type }}_PyTypeObject;
-            {% for i in range(column_count) %}
+            {% for i in range(row_size) %}
                 PyObject *p_{{ i }} = PyTuple_GET_ITEM(args, {{ i }});
                 if (Py_TYPE(p_{{ i }}) != column_cls)
                 {
@@ -79,8 +70,8 @@ static PyObject *
                 }
             {% endfor %}
             glm = new {{ name }}Glm(
-                {% for i in range(column_count) %}
-                    *(({{ column_type }} *)p_{{ i }})->glm{% if i != column_count - 1 %}, {% endif %}
+                {% for i in range(row_size) %}
+                    *(({{ column_type }} *)p_{{ i }})->glm{% if i != row_size - 1 %}, {% endif %}
                 {% endfor %}
             );
 
@@ -111,7 +102,7 @@ static PyObject *
             PyErr_Format(
                 PyExc_TypeError,
                 "invalid number of arguments supplied to {{ name }}, expected "
-                "0, 1, {{ column_count }} or {{ component_count }} (got %zd)",
+                "0, 1, {{ row_size }} or {{ component_count }} (got %zd)",
                 arg_count
             );
             return 0;
@@ -164,11 +155,11 @@ static Py_hash_t
 {
     Py_ssize_t len = {{ component_count }};
     Py_uhash_t acc = _HASH_XXPRIME_5;
-    for (size_t c = 0; c < {{ column_count }}; c++)
+    for (size_t c = 0; c < {{ column_size }}; c++)
     {
-        for (size_t r = 0; r < {{ row_count }}; r++)
+        for (size_t r = 0; r < {{ row_size }}; r++)
         {
-            Py_uhash_t lane = std::hash<{{ c_type }}>{}((*self->glm)[c][r]);
+            Py_uhash_t lane = std::hash<{{ c_type }}>{}((*self->glm)[r][c]);
             acc += lane * _HASH_XXPRIME_2;
             acc = _HASH_XXROTATE(acc);
             acc *= _HASH_XXPRIME_1;
@@ -187,43 +178,43 @@ static PyObject *
 {{ name }}__repr__({{ name }} *self)
 {
     PyObject *result = 0;
-    {% for c in range(column_count) %}
-    {% for r in range(row_count) %}
+    {% for c in range(column_size) %}
+    {% for r in range(row_size) %}
         PyObject *py_{{ c }}_{{ r }} = 0;
     {% endfor %}
     {% endfor %}
 
-    {% for c in range(column_count) %}
-    {% for r in range(row_count) %}
-        py_{{ c }}_{{ r }} = c_{{ c_type.replace(' ', '_') }}_to_pyobject((*self->glm)[{{ c }}][{{ r }}]);
+    {% for c in range(column_size) %}
+    {% for r in range(row_size) %}
+        py_{{ c }}_{{ r }} = c_{{ c_type.replace(' ', '_') }}_to_pyobject((*self->glm)[{{ r }}][{{ c }}]);
         if (!py_{{ c }}_{{ r }}){ goto cleanup; }
     {% endfor %}
     {% endfor %}
 
     result = PyUnicode_FromFormat(
         "{{ name }}("
-        {% for c in range(column_count) %}
+        {% for r in range(row_size) %}
         "("
-        {% for r in range(row_count) %}
+        {% for c in range(column_size) %}
             "%R"
-            {% if r != row_count - 1 %}", "{% endif %}
+            {% if c != column_size - 1 %}", "{% endif %}
         {% endfor %}
         ")"
-        {% if c != column_count - 1 %}
+        {% if r != row_size - 1 %}
         ", "
         {% endif %}
         {% endfor %}
         ")",
-        {% for c in range(column_count) %}
-        {% for r in range(row_count) %}
+        {% for r in range(row_size) %}
+        {% for c in range(column_size) %}
             py_{{ c }}_{{ r }}
-            {% if c == column_count - 1 and r == row_count - 1 %}{% else %}, {% endif %}
+            {% if r == row_size - 1 and c == column_size - 1 %}{% else %}, {% endif %}
         {% endfor %}
         {% endfor %}
     );
 cleanup:
-    {% for c in range(column_count) %}
-    {% for r in range(row_count) %}
+    {% for c in range(column_size) %}
+    {% for r in range(row_size) %}
         Py_XDECREF(py_{{ c }}_{{ r }});
     {% endfor %}
     {% endfor %}
@@ -234,14 +225,14 @@ cleanup:
 static Py_ssize_t
 {{ name }}__len__({{ name }} *self)
 {
-    return {{ column_count }};
+    return {{ row_size }};
 }
 
 
 static PyObject *
 {{ name }}__getitem__({{ name }} *self, Py_ssize_t index)
 {
-    if (index < 0 || index > {{ column_count - 1 }})
+    if (index < 0 || index > {{ row_size - 1 }})
     {
         PyErr_Format(PyExc_IndexError, "index out of range");
         return 0;
@@ -251,6 +242,398 @@ static PyObject *
 }
 
 
+static PyObject *
+{{ name}}__richcmp__({{ name }} *self, {{ name }} *other, int op)
+{
+    if (Py_TYPE(self) != Py_TYPE(other))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    switch(op)
+    {
+        case Py_EQ:
+        {
+            if ((*self->glm) == (*other->glm))
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+        case Py_NE:
+        {
+            if ((*self->glm) != (*other->glm))
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+
+static PyObject *
+{{ name}}__add__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->{{ name }}_PyTypeObject;
+
+    {{ name }}Glm matrix;
+    if (Py_TYPE(left) == Py_TYPE(right))
+    {
+        matrix = (*(({{ name }} *)left)->glm) + (*(({{ name }} *)right)->glm);
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*(({{ name }} *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*(({{ name }} *)right)->glm) + c_left;
+        }
+    }
+
+    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+{{ name}}__sub__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->{{ name }}_PyTypeObject;
+
+    {{ name }}Glm matrix;
+    if (Py_TYPE(left) == Py_TYPE(right))
+    {
+        matrix = (*(({{ name }} *)left)->glm) - (*(({{ name }} *)right)->glm);
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*(({{ name }} *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            {% if column_size == row_size %}
+                matrix = c_left - (*(({{ name }} *)right)->glm);
+            {% else %}
+                matrix = {{ name }}Glm(
+                    {% for i in range(component_count) %}
+                        c_left{% if i < component_count - 1 %}, {% endif %}
+                    {% endfor %}
+                ) - (*(({{ name }} *)right)->glm);
+            {% endif %}
+        }
+    }
+
+    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+{{ name}}__mul__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->{{ name }}_PyTypeObject;
+
+    {{ name }}Glm matrix;
+    if (Py_TYPE(left) == cls)
+    {
+        auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = (*(({{name }} *)left)->glm) * c_right;
+    }
+    else
+    {
+        auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = c_left * (*(({{name }} *)right)->glm);
+    }
+
+    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+{{ name}}__matmul__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->{{ name }}_PyTypeObject;
+
+    if (Py_TYPE(left) == cls)
+    {
+        {% for c in range(2, 5) %}
+        {% with right_name=(('D' if c_type == 'double' else 'F') + 'Matrix' + str(c) + 'x' + str(row_size)) %}
+        {% with result_name=(('D' if c_type == 'double' else 'F') + 'Matrix' + str(c) + 'x' + str(column_size)) %}
+        {
+            auto right_cls = module_state->{{ right_name }}_PyTypeObject;
+            auto result_cls = module_state->{{ result_name }}_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                {{ result_name }} *result = ({{ result_name }} *)result_cls->tp_alloc(result_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new {{ result_name }}Glm(
+                    (*(({{ name }} *)left)->glm) * (*(({{ right_name }} *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+        {% endwith %}
+        {% endwith %}
+        {% endfor %}
+
+        {
+            auto row_cls = module_state->{{ row_type }}_PyTypeObject;
+            auto column_cls = module_state->{{ column_type }}_PyTypeObject;
+            if (Py_TYPE(right) == row_cls)
+            {
+                {{ column_type }} *result = ({{ column_type }} *)column_cls->tp_alloc(column_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new {{ column_type }}Glm(
+                    (*(({{ name }} *)left)->glm) * (*(({{ row_type }} *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+    }
+    else
+    {
+        auto row_cls = module_state->{{ row_type }}_PyTypeObject;
+        auto column_cls = module_state->{{ column_type }}_PyTypeObject;
+        if (Py_TYPE(left) == column_cls)
+        {
+            {{ row_type }} *result = ({{ row_type }} *)row_cls->tp_alloc(row_cls, 0);
+            if (!result){ return 0; }
+            result->glm = new {{ row_type }}Glm(
+                (*(({{ column_type }} *)left)->glm) * (*(({{ name }} *)right)->glm)
+            );
+            return (PyObject *)result;
+        }
+    }
+
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+{{ name}}__truediv__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->{{ name }}_PyTypeObject;
+
+    {{ name }}Glm matrix;
+    if (Py_TYPE(left) == cls)
+    {
+        {% if row_size == column_size %}
+        if (Py_TYPE(right) == cls)
+        {
+            {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+            if (!result){ return 0; }
+            result->glm = new {{ name }}Glm(
+                (*(({{ name }} *)left)->glm) / (*(({{ name }} *)right)->glm)
+            );
+            return (PyObject *)result;
+        }
+
+        {
+            auto row_cls = module_state->{{ row_type }}_PyTypeObject;
+            if (Py_TYPE(right) == row_cls)
+            {
+                {{ row_type }} *result = ({{ row_type }} *)row_cls->tp_alloc(row_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new {{ row_type }}Glm(
+                    (*(({{ name }} *)left)->glm) / (*(({{ row_type }} *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+        {% endif %}
+
+        auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = (*(({{ name }} *)left)->glm) / c_right;
+    }
+    else
+    {
+        {% if row_size == column_size %}
+        {
+            auto row_cls = module_state->{{ row_type }}_PyTypeObject;
+            if (Py_TYPE(left) == row_cls)
+            {
+                {{ row_type }} *result = ({{ row_type }} *)row_cls->tp_alloc(row_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new {{ row_type }}Glm(
+                    (*(({{ row_type }} *)left)->glm) / (*(({{ name }} *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+        {% endif %}
+
+        auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = c_left / (*(({{ name }} *)right)->glm);
+    }
+
+    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+{{ name}}__neg__({{ name }} *self)
+{
+    auto cls = Py_TYPE(self);
+
+    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(-(*self->glm));
+
+    return (PyObject *)result;
+}
+
+
+static int
+{{ name}}_getbufferproc({{ name }} *self, Py_buffer *view, int flags)
+{
+    if (flags & PyBUF_WRITABLE)
+    {
+        PyErr_SetString(PyExc_TypeError, "{{ name }} is read only");
+        view->obj = 0;
+        return -1;
+    }
+    view->buf = glm::value_ptr(*self->glm);
+    view->obj = (PyObject *)self;
+    view->len = sizeof({{ c_type }}) * {{ component_count }};
+    view->readonly = 1;
+    view->itemsize = sizeof({{ c_type }});
+    view->format = "{{ struct_format }}";
+    view->ndim = 2;
+    static Py_ssize_t shape[] = { {{ row_size }}, {{ column_size }} };
+    view->shape = &shape[0];
+    static Py_ssize_t strides[] = {
+        sizeof({{ c_type }}) * {{ column_size }},
+        sizeof({{ c_type }})
+    };
+    view->strides = &strides[0];
+    view->suboffsets = 0;
+    view->internal = 0;
+    Py_INCREF(self);
+    return 0;
+}
+
+
+static PyMemberDef {{ name }}_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof({{ name }}, weakreflist), READONLY},
+    {0}
+};
+
+
+{% if row_size == column_size %}
+    static {{ name }} *
+    {{ name }}_inverse({{ name }} *self, void*)
+    {
+        auto cls = Py_TYPE(self);
+        auto matrix = glm::inverse(*self->glm);
+        {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(matrix);
+        return result;
+    }
+{% endif %}
+
+
+{% with transpose_name=(('D' if c_type == 'double' else 'F') + 'Matrix' + str(column_size) + 'x' + str(row_size)) %}
+static {{ transpose_name }} *
+{{ name }}_transpose({{ name }} *self, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->{{ transpose_name }}_PyTypeObject;
+
+    {{ transpose_name }}Glm matrix = glm::transpose(*self->glm);
+    {{ transpose_name }} *result = ({{ transpose_name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ transpose_name }}Glm(matrix);
+    return result;
+}
+{% endwith %}
+
+
+static PyObject *
+{{ name }}_get_limits({{ name }} *self, void *)
+{
+    auto c_min = std::numeric_limits<{{ c_type }}>::lowest();
+    auto c_max = std::numeric_limits<{{ c_type }}>::max();
+    auto py_min = c_{{ c_type.replace(' ', '_') }}_to_pyobject(c_min);
+    if (!py_min){ return 0; }
+    auto py_max = c_{{ c_type.replace(' ', '_') }}_to_pyobject(c_max);
+    if (!py_max)
+    {
+        Py_DECREF(py_min);
+        return 0;
+    }
+    auto result = PyTuple_New(2);
+    if (!result)
+    {
+        Py_DECREF(py_min);
+        Py_DECREF(py_max);
+        return 0;
+    }
+    PyTuple_SET_ITEM(result, 0, py_min);
+    PyTuple_SET_ITEM(result, 1, py_max);
+    return result;
+}
+
+
+static PyMethodDef {{ name }}_PyMethodDef[] = {
+    {% if row_size == column_size %}
+        {"inverse", (PyCFunction){{ name }}_inverse, METH_NOARGS, 0},
+    {% endif %}
+    {"transpose", (PyCFunction){{ name }}_transpose, METH_NOARGS, 0},
+    {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {0, 0, 0, 0}
+};
+
+
 static PyType_Slot {{ name }}_PyType_Slots [] = {
     {Py_tp_new, (void*){{ name }}__new__},
     {Py_tp_dealloc, (void*){{ name }}__dealloc__},
@@ -258,29 +641,16 @@ static PyType_Slot {{ name }}_PyType_Slots [] = {
     {Py_tp_repr, (void*){{ name }}__repr__},
     {Py_sq_length, (void*){{ name }}__len__},
     {Py_sq_item, (void*){{ name }}__getitem__},
-    /*{Py_tp_richcompare, (void*){{ name }}__richcmp__},
+    {Py_tp_richcompare, (void*){{ name }}__richcmp__},
     {Py_nb_add, (void*){{ name }}__add__},
     {Py_nb_subtract, (void*){{ name }}__sub__},
     {Py_nb_multiply, (void*){{ name }}__mul__},
-    {% if c_type in ['float', 'double'] %}
-        {Py_nb_matrix_multiply, (void*){{ name }}__matmul__},
-        {Py_nb_remainder, (void*){{ name }}__mod__},
-        {Py_nb_power, (void*){{ name }}__pow__},
-    {% endif %}
-    {% if c_type != 'bool' %}
-        {Py_nb_true_divide, (void*){{ name }}__truediv__},
-    {% endif %}
-    {% if 'unsigned' not in c_type and not (c_type.startswith('u') and c_type.endswith('_t')) %}
-        {Py_nb_negative, (void*){{ name }}__neg__},
-    {% endif %}
-    {Py_nb_absolute, (void*){{ name }}__abs__},
-    {Py_nb_bool, (void*){{ name }}__bool__},
+    {Py_nb_matrix_multiply, (void*){{ name }}__matmul__},
+    {Py_nb_true_divide, (void*){{ name }}__truediv__},
+    {Py_nb_negative, (void*){{ name }}__neg__},
     {Py_bf_getbuffer, (void*){{ name }}_getbufferproc},
-    {Py_tp_getset, (void*){{ name }}_PyGetSetDef},
-    {Py_tp_getattro, (void*){{ name }}__getattr__},
     {Py_tp_members, (void*){{ name }}_PyMemberDef},
     {Py_tp_methods, (void*){{ name }}_PyMethodDef},
-    */
     {0, 0},
 };
 

@@ -223,6 +223,8 @@ class VectorTest:
 
         assert not (self.cls() == 1)
         assert not (self.cls() == object())
+        assert not (1 == self.cls())
+        assert not (object() == self.cls())
 
     def test_not_equal(self) -> None:
         for i in range(0 if self.unsigned else -100, 100):

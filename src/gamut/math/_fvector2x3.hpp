@@ -1,5 +1,5 @@
 
-// generated 2022-03-09 03:15:33.451045 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-09 14:35:33.682230 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FVECTOR2X3_HPP
 #define GAMUT_MATH_FVECTOR2X3_HPP
@@ -16,18 +16,9 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_matrixtype.hpp"
 #include "_type.hpp"
 #include "_fvector3.hpp"
-
-typedef glm::tmat2x3<float, glm::defaultp> FVector2x3Glm;
-
-
-struct FVector2x3
-{
-    PyObject_HEAD
-    PyObject *weakreflist;
-    FVector2x3Glm *glm;
-};
 
 
 static PyObject *
@@ -398,6 +389,212 @@ FVector2x3__getitem__(FVector2x3 *self, Py_ssize_t index)
 }
 
 
+static PyObject *
+FVector2x3__richcmp__(FVector2x3 *self, FVector2x3 *other, int op)
+{
+    if (Py_TYPE(self) != Py_TYPE(other))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    switch(op)
+    {
+        case Py_EQ:
+        {
+            if ((*self->glm) == (*other->glm))
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+        case Py_NE:
+        {
+            if ((*self->glm) != (*other->glm))
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+
+static PyObject *
+FVector2x3__add__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector2x3_PyTypeObject;
+
+    FVector2x3Glm matrix;
+    if (Py_TYPE(left) == Py_TYPE(right))
+    {
+        matrix = (*((FVector2x3 *)left)->glm) + (*((FVector2x3 *)right)->glm);
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((FVector2x3 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_float(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((FVector2x3 *)right)->glm) + c_left;
+        }
+    }
+
+    FVector2x3 *result = (FVector2x3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FVector2x3Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+FVector2x3__sub__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector2x3_PyTypeObject;
+
+    FVector2x3Glm matrix;
+    if (Py_TYPE(left) == Py_TYPE(right))
+    {
+        matrix = (*((FVector2x3 *)left)->glm) - (*((FVector2x3 *)right)->glm);
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((FVector2x3 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_float(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+
+                matrix = FVector2x3Glm(
+
+                        c_left,
+
+                        c_left,
+
+                        c_left,
+
+                        c_left,
+
+                        c_left,
+
+                        c_left
+
+                ) - (*((FVector2x3 *)right)->glm);
+
+        }
+    }
+
+    FVector2x3 *result = (FVector2x3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FVector2x3Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+FVector2x3__mul__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->FVector2x3_PyTypeObject;
+
+    FVector2x3Glm matrix;
+    if (Py_TYPE(left) == cls)
+    {
+
+
+        {
+            auto right_cls = module_state->FMatrix2x2_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                FMatrix2x2 *result = (FMatrix2x2 *)cls->tp_alloc(cls, 0);
+                if (!result){ return 0; }
+                result->glm = new FMatrix2x2Glm(
+                    (*((FVector2x3 *)left)->glm) * (*((FMatrix2x2 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+
+        {
+            auto right_cls = module_state->FMatrix3x2_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                FMatrix3x2 *result = (FMatrix3x2 *)cls->tp_alloc(cls, 0);
+                if (!result){ return 0; }
+                result->glm = new FMatrix3x2Glm(
+                    (*((FVector2x3 *)left)->glm) * (*((FMatrix3x2 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+
+        {
+            auto right_cls = module_state->FMatrix4x2_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                FMatrix4x2 *result = (FMatrix4x2 *)cls->tp_alloc(cls, 0);
+                if (!result){ return 0; }
+                result->glm = new FMatrix4x2Glm(
+                    (*((FVector2x3 *)left)->glm) * (*((FMatrix4x2 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((FVector2x3 *)left)->glm) * c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_float(left);
+            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((FVector2x3 *)right)->glm) * c_left;
+        }
+    }
+
+    FVector2x3 *result = (FVector2x3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FVector2x3Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
 static PyType_Slot FVector2x3_PyType_Slots [] = {
     {Py_tp_new, (void*)FVector2x3__new__},
     {Py_tp_dealloc, (void*)FVector2x3__dealloc__},
@@ -405,11 +602,11 @@ static PyType_Slot FVector2x3_PyType_Slots [] = {
     {Py_tp_repr, (void*)FVector2x3__repr__},
     {Py_sq_length, (void*)FVector2x3__len__},
     {Py_sq_item, (void*)FVector2x3__getitem__},
-    /*{Py_tp_richcompare, (void*)FVector2x3__richcmp__},
+    {Py_tp_richcompare, (void*)FVector2x3__richcmp__},
     {Py_nb_add, (void*)FVector2x3__add__},
     {Py_nb_subtract, (void*)FVector2x3__sub__},
     {Py_nb_multiply, (void*)FVector2x3__mul__},
-
+    /*
         {Py_nb_matrix_multiply, (void*)FVector2x3__matmul__},
         {Py_nb_remainder, (void*)FVector2x3__mod__},
         {Py_nb_power, (void*)FVector2x3__pow__},

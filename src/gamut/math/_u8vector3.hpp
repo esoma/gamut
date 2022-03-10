@@ -1,5 +1,5 @@
 
-// generated 2022-03-09 03:15:33.420045 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 02:10:36.704246 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U8VECTOR3_HPP
 #define GAMUT_MATH_U8VECTOR3_HPP
@@ -300,13 +300,13 @@ U8Vector3__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_uint8_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((U8Vector3 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_uint8_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((U8Vector3 *)right)->glm);
         }
     }
@@ -344,13 +344,13 @@ U8Vector3__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_uint8_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((U8Vector3 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_uint8_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((U8Vector3 *)right)->glm);
         }
     }
@@ -388,13 +388,13 @@ U8Vector3__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_uint8_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((U8Vector3 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_uint8_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((U8Vector3 *)right)->glm);
         }
     }
@@ -452,7 +452,7 @@ U8Vector3__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_uint8_t(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (c_right == 0)
                     {
@@ -465,7 +465,7 @@ U8Vector3__mul__(PyObject *left, PyObject *right)
             else
             {
                 auto c_left = pyobject_to_c_uint8_t(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (
 
@@ -555,7 +555,7 @@ U8Vector3_getbufferproc(U8Vector3 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "U8Vector3 is not read only");
+        PyErr_SetString(PyExc_TypeError, "U8Vector3 is read only");
         view->obj = 0;
         return -1;
     }

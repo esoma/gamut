@@ -1,5 +1,5 @@
 
-// generated 2022-03-09 03:15:33.409546 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 02:10:36.693747 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR2_HPP
 #define GAMUT_MATH_BVECTOR2_HPP
@@ -276,13 +276,13 @@ BVector2__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_bool(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((BVector2 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_bool(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((BVector2 *)right)->glm);
         }
     }
@@ -318,13 +318,13 @@ BVector2__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_bool(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((BVector2 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_bool(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((BVector2 *)right)->glm);
         }
     }
@@ -360,13 +360,13 @@ BVector2__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_bool(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((BVector2 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_bool(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((BVector2 *)right)->glm);
         }
     }
@@ -458,7 +458,7 @@ BVector2_getbufferproc(BVector2 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "BVector2 is not read only");
+        PyErr_SetString(PyExc_TypeError, "BVector2 is read only");
         view->obj = 0;
         return -1;
     }

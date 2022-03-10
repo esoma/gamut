@@ -252,13 +252,13 @@ static PyObject *
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*(({{name }} *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*(({{name }} *)right)->glm);
         }
     }
@@ -292,13 +292,13 @@ static PyObject *
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*(({{name }} *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*(({{name }} *)right)->glm);
         }
     }
@@ -332,13 +332,13 @@ static PyObject *
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*(({{name }} *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*(({{name }} *)right)->glm);
         }
     }
@@ -386,13 +386,13 @@ static PyObject *
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::mod(*(({{name }} *)left)->glm, c_right);
             }
             else
             {
                 auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::mod({{ name }}Glm(c_left), *(({{name }} *)right)->glm);
             }
         }
@@ -429,13 +429,13 @@ static PyObject *
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::pow(*(({{name }} *)left)->glm, {{ name }}Glm(c_right));
             }
             else
             {
                 auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 vector = glm::pow({{ name }}Glm(c_left), *(({{name }} *)right)->glm);
             }
         }
@@ -483,7 +483,7 @@ static PyObject *
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 {% if c_type not in ['float', 'double'] %}
                     if (c_right == 0)
                     {
@@ -496,7 +496,7 @@ static PyObject *
             else
             {
                 auto c_left = pyobject_to_c_{{ c_type.replace(' ', '_') }}(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
                 {% if c_type not in ['float', 'double'] %}
                     if (
                         {% for i in range(component_count) %}
@@ -585,7 +585,7 @@ static int
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "{{ name }} is not read only");
+        PyErr_SetString(PyExc_TypeError, "{{ name }} is read only");
         view->obj = 0;
         return -1;
     }

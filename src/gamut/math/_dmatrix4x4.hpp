@@ -1,5 +1,5 @@
 
-// generated 2022-03-09 03:15:33.456546 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-10 02:10:36.756246 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX4X4_HPP
 #define GAMUT_MATH_DMATRIX4X4_HPP
@@ -16,18 +16,9 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_matrixtype.hpp"
 #include "_type.hpp"
 #include "_dvector4.hpp"
-
-typedef glm::tmat4x4<double, glm::defaultp> DMatrix4x4Glm;
-
-
-struct DMatrix4x4
-{
-    PyObject_HEAD
-    PyObject *weakreflist;
-    DMatrix4x4Glm *glm;
-};
 
 
 static PyObject *
@@ -375,7 +366,7 @@ DMatrix4x4__hash__(DMatrix4x4 *self)
     {
         for (size_t r = 0; r < 4; r++)
         {
-            Py_uhash_t lane = std::hash<double>{}((*self->glm)[c][r]);
+            Py_uhash_t lane = std::hash<double>{}((*self->glm)[r][c]);
             acc += lane * _HASH_XXPRIME_2;
             acc = _HASH_XXROTATE(acc);
             acc *= _HASH_XXPRIME_1;
@@ -441,52 +432,52 @@ DMatrix4x4__repr__(DMatrix4x4 *self)
         py_0_0 = c_double_to_pyobject((*self->glm)[0][0]);
         if (!py_0_0){ goto cleanup; }
 
-        py_0_1 = c_double_to_pyobject((*self->glm)[0][1]);
+        py_0_1 = c_double_to_pyobject((*self->glm)[1][0]);
         if (!py_0_1){ goto cleanup; }
 
-        py_0_2 = c_double_to_pyobject((*self->glm)[0][2]);
+        py_0_2 = c_double_to_pyobject((*self->glm)[2][0]);
         if (!py_0_2){ goto cleanup; }
 
-        py_0_3 = c_double_to_pyobject((*self->glm)[0][3]);
+        py_0_3 = c_double_to_pyobject((*self->glm)[3][0]);
         if (!py_0_3){ goto cleanup; }
 
 
 
-        py_1_0 = c_double_to_pyobject((*self->glm)[1][0]);
+        py_1_0 = c_double_to_pyobject((*self->glm)[0][1]);
         if (!py_1_0){ goto cleanup; }
 
         py_1_1 = c_double_to_pyobject((*self->glm)[1][1]);
         if (!py_1_1){ goto cleanup; }
 
-        py_1_2 = c_double_to_pyobject((*self->glm)[1][2]);
+        py_1_2 = c_double_to_pyobject((*self->glm)[2][1]);
         if (!py_1_2){ goto cleanup; }
 
-        py_1_3 = c_double_to_pyobject((*self->glm)[1][3]);
+        py_1_3 = c_double_to_pyobject((*self->glm)[3][1]);
         if (!py_1_3){ goto cleanup; }
 
 
 
-        py_2_0 = c_double_to_pyobject((*self->glm)[2][0]);
+        py_2_0 = c_double_to_pyobject((*self->glm)[0][2]);
         if (!py_2_0){ goto cleanup; }
 
-        py_2_1 = c_double_to_pyobject((*self->glm)[2][1]);
+        py_2_1 = c_double_to_pyobject((*self->glm)[1][2]);
         if (!py_2_1){ goto cleanup; }
 
         py_2_2 = c_double_to_pyobject((*self->glm)[2][2]);
         if (!py_2_2){ goto cleanup; }
 
-        py_2_3 = c_double_to_pyobject((*self->glm)[2][3]);
+        py_2_3 = c_double_to_pyobject((*self->glm)[3][2]);
         if (!py_2_3){ goto cleanup; }
 
 
 
-        py_3_0 = c_double_to_pyobject((*self->glm)[3][0]);
+        py_3_0 = c_double_to_pyobject((*self->glm)[0][3]);
         if (!py_3_0){ goto cleanup; }
 
-        py_3_1 = c_double_to_pyobject((*self->glm)[3][1]);
+        py_3_1 = c_double_to_pyobject((*self->glm)[1][3]);
         if (!py_3_1){ goto cleanup; }
 
-        py_3_2 = c_double_to_pyobject((*self->glm)[3][2]);
+        py_3_2 = c_double_to_pyobject((*self->glm)[2][3]);
         if (!py_3_2){ goto cleanup; }
 
         py_3_3 = c_double_to_pyobject((*self->glm)[3][3]);
@@ -577,52 +568,52 @@ DMatrix4x4__repr__(DMatrix4x4 *self)
             py_0_0
             ,
 
-            py_0_1
-            ,
-
-            py_0_2
-            ,
-
-            py_0_3
-            ,
-
-
-
             py_1_0
+            ,
+
+            py_2_0
+            ,
+
+            py_3_0
+            ,
+
+
+
+            py_0_1
             ,
 
             py_1_1
             ,
 
-            py_1_2
-            ,
-
-            py_1_3
-            ,
-
-
-
-            py_2_0
-            ,
-
             py_2_1
-            ,
-
-            py_2_2
-            ,
-
-            py_2_3
-            ,
-
-
-
-            py_3_0
             ,
 
             py_3_1
             ,
 
+
+
+            py_0_2
+            ,
+
+            py_1_2
+            ,
+
+            py_2_2
+            ,
+
             py_3_2
+            ,
+
+
+
+            py_0_3
+            ,
+
+            py_1_3
+            ,
+
+            py_2_3
             ,
 
             py_3_3
@@ -696,6 +687,428 @@ DMatrix4x4__getitem__(DMatrix4x4 *self, Py_ssize_t index)
 }
 
 
+static PyObject *
+DMatrix4x4__richcmp__(DMatrix4x4 *self, DMatrix4x4 *other, int op)
+{
+    if (Py_TYPE(self) != Py_TYPE(other))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    switch(op)
+    {
+        case Py_EQ:
+        {
+            if ((*self->glm) == (*other->glm))
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+        case Py_NE:
+        {
+            if ((*self->glm) != (*other->glm))
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+
+static PyObject *
+DMatrix4x4__add__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+    DMatrix4x4Glm matrix;
+    if (Py_TYPE(left) == Py_TYPE(right))
+    {
+        matrix = (*((DMatrix4x4 *)left)->glm) + (*((DMatrix4x4 *)right)->glm);
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_double(right);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((DMatrix4x4 *)left)->glm) + c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_double(left);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((DMatrix4x4 *)right)->glm) + c_left;
+        }
+    }
+
+    DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix4x4Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DMatrix4x4__sub__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+    DMatrix4x4Glm matrix;
+    if (Py_TYPE(left) == Py_TYPE(right))
+    {
+        matrix = (*((DMatrix4x4 *)left)->glm) - (*((DMatrix4x4 *)right)->glm);
+    }
+    else
+    {
+        if (Py_TYPE(left) == cls)
+        {
+            auto c_right = pyobject_to_c_double(right);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            matrix = (*((DMatrix4x4 *)left)->glm) - c_right;
+        }
+        else
+        {
+            auto c_left = pyobject_to_c_double(left);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+
+                matrix = c_left - (*((DMatrix4x4 *)right)->glm);
+
+        }
+    }
+
+    DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix4x4Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DMatrix4x4__mul__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+    DMatrix4x4Glm matrix;
+    if (Py_TYPE(left) == cls)
+    {
+        auto c_right = pyobject_to_c_double(right);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = (*((DMatrix4x4 *)left)->glm) * c_right;
+    }
+    else
+    {
+        auto c_left = pyobject_to_c_double(left);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = c_left * (*((DMatrix4x4 *)right)->glm);
+    }
+
+    DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix4x4Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DMatrix4x4__matmul__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+    if (Py_TYPE(left) == cls)
+    {
+
+
+
+        {
+            auto right_cls = module_state->DMatrix2x4_PyTypeObject;
+            auto result_cls = module_state->DMatrix2x4_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                DMatrix2x4 *result = (DMatrix2x4 *)result_cls->tp_alloc(result_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DMatrix2x4Glm(
+                    (*((DMatrix4x4 *)left)->glm) * (*((DMatrix2x4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+
+
+
+        {
+            auto right_cls = module_state->DMatrix3x4_PyTypeObject;
+            auto result_cls = module_state->DMatrix3x4_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                DMatrix3x4 *result = (DMatrix3x4 *)result_cls->tp_alloc(result_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DMatrix3x4Glm(
+                    (*((DMatrix4x4 *)left)->glm) * (*((DMatrix3x4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+
+
+
+        {
+            auto right_cls = module_state->DMatrix4x4_PyTypeObject;
+            auto result_cls = module_state->DMatrix4x4_PyTypeObject;
+            if (Py_TYPE(right) == right_cls)
+            {
+                DMatrix4x4 *result = (DMatrix4x4 *)result_cls->tp_alloc(result_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DMatrix4x4Glm(
+                    (*((DMatrix4x4 *)left)->glm) * (*((DMatrix4x4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+
+
+        {
+            auto row_cls = module_state->DVector4_PyTypeObject;
+            auto column_cls = module_state->DVector4_PyTypeObject;
+            if (Py_TYPE(right) == row_cls)
+            {
+                DVector4 *result = (DVector4 *)column_cls->tp_alloc(column_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DVector4Glm(
+                    (*((DMatrix4x4 *)left)->glm) * (*((DVector4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+    }
+    else
+    {
+        auto row_cls = module_state->DVector4_PyTypeObject;
+        auto column_cls = module_state->DVector4_PyTypeObject;
+        if (Py_TYPE(left) == column_cls)
+        {
+            DVector4 *result = (DVector4 *)row_cls->tp_alloc(row_cls, 0);
+            if (!result){ return 0; }
+            result->glm = new DVector4Glm(
+                (*((DVector4 *)left)->glm) * (*((DMatrix4x4 *)right)->glm)
+            );
+            return (PyObject *)result;
+        }
+    }
+
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+DMatrix4x4__truediv__(PyObject *left, PyObject *right)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+    DMatrix4x4Glm matrix;
+    if (Py_TYPE(left) == cls)
+    {
+
+        if (Py_TYPE(right) == cls)
+        {
+            DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+            if (!result){ return 0; }
+            result->glm = new DMatrix4x4Glm(
+                (*((DMatrix4x4 *)left)->glm) / (*((DMatrix4x4 *)right)->glm)
+            );
+            return (PyObject *)result;
+        }
+
+        {
+            auto row_cls = module_state->DVector4_PyTypeObject;
+            if (Py_TYPE(right) == row_cls)
+            {
+                DVector4 *result = (DVector4 *)row_cls->tp_alloc(row_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DVector4Glm(
+                    (*((DMatrix4x4 *)left)->glm) / (*((DVector4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+        auto c_right = pyobject_to_c_double(right);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = (*((DMatrix4x4 *)left)->glm) / c_right;
+    }
+    else
+    {
+
+        {
+            auto row_cls = module_state->DVector4_PyTypeObject;
+            if (Py_TYPE(left) == row_cls)
+            {
+                DVector4 *result = (DVector4 *)row_cls->tp_alloc(row_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DVector4Glm(
+                    (*((DVector4 *)left)->glm) / (*((DMatrix4x4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
+        auto c_left = pyobject_to_c_double(left);
+        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+        matrix = c_left / (*((DMatrix4x4 *)right)->glm);
+    }
+
+    DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix4x4Glm(matrix);
+
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DMatrix4x4__neg__(DMatrix4x4 *self)
+{
+    auto cls = Py_TYPE(self);
+
+    DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix4x4Glm(-(*self->glm));
+
+    return (PyObject *)result;
+}
+
+
+static int
+DMatrix4x4_getbufferproc(DMatrix4x4 *self, Py_buffer *view, int flags)
+{
+    if (flags & PyBUF_WRITABLE)
+    {
+        PyErr_SetString(PyExc_TypeError, "DMatrix4x4 is read only");
+        view->obj = 0;
+        return -1;
+    }
+    view->buf = glm::value_ptr(*self->glm);
+    view->obj = (PyObject *)self;
+    view->len = sizeof(double) * 16;
+    view->readonly = 1;
+    view->itemsize = sizeof(double);
+    view->format = "d";
+    view->ndim = 2;
+    static Py_ssize_t shape[] = { 4, 4 };
+    view->shape = &shape[0];
+    static Py_ssize_t strides[] = {
+        sizeof(double) * 4,
+        sizeof(double)
+    };
+    view->strides = &strides[0];
+    view->suboffsets = 0;
+    view->internal = 0;
+    Py_INCREF(self);
+    return 0;
+}
+
+
+static PyMemberDef DMatrix4x4_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof(DMatrix4x4, weakreflist), READONLY},
+    {0}
+};
+
+
+
+    static DMatrix4x4 *
+    DMatrix4x4_inverse(DMatrix4x4 *self, void*)
+    {
+        auto cls = Py_TYPE(self);
+        auto matrix = glm::inverse(*self->glm);
+        DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(matrix);
+        return result;
+    }
+
+
+
+
+static DMatrix4x4 *
+DMatrix4x4_transpose(DMatrix4x4 *self, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+    DMatrix4x4Glm matrix = glm::transpose(*self->glm);
+    DMatrix4x4 *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix4x4Glm(matrix);
+    return result;
+}
+
+
+
+static PyObject *
+DMatrix4x4_get_limits(DMatrix4x4 *self, void *)
+{
+    auto c_min = std::numeric_limits<double>::lowest();
+    auto c_max = std::numeric_limits<double>::max();
+    auto py_min = c_double_to_pyobject(c_min);
+    if (!py_min){ return 0; }
+    auto py_max = c_double_to_pyobject(c_max);
+    if (!py_max)
+    {
+        Py_DECREF(py_min);
+        return 0;
+    }
+    auto result = PyTuple_New(2);
+    if (!result)
+    {
+        Py_DECREF(py_min);
+        Py_DECREF(py_max);
+        return 0;
+    }
+    PyTuple_SET_ITEM(result, 0, py_min);
+    PyTuple_SET_ITEM(result, 1, py_max);
+    return result;
+}
+
+
+static PyMethodDef DMatrix4x4_PyMethodDef[] = {
+
+        {"inverse", (PyCFunction)DMatrix4x4_inverse, METH_NOARGS, 0},
+
+    {"transpose", (PyCFunction)DMatrix4x4_transpose, METH_NOARGS, 0},
+    {"get_limits", (PyCFunction)DMatrix4x4_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {0, 0, 0, 0}
+};
+
+
 static PyType_Slot DMatrix4x4_PyType_Slots [] = {
     {Py_tp_new, (void*)DMatrix4x4__new__},
     {Py_tp_dealloc, (void*)DMatrix4x4__dealloc__},
@@ -703,29 +1116,16 @@ static PyType_Slot DMatrix4x4_PyType_Slots [] = {
     {Py_tp_repr, (void*)DMatrix4x4__repr__},
     {Py_sq_length, (void*)DMatrix4x4__len__},
     {Py_sq_item, (void*)DMatrix4x4__getitem__},
-    /*{Py_tp_richcompare, (void*)DMatrix4x4__richcmp__},
+    {Py_tp_richcompare, (void*)DMatrix4x4__richcmp__},
     {Py_nb_add, (void*)DMatrix4x4__add__},
     {Py_nb_subtract, (void*)DMatrix4x4__sub__},
     {Py_nb_multiply, (void*)DMatrix4x4__mul__},
-
-        {Py_nb_matrix_multiply, (void*)DMatrix4x4__matmul__},
-        {Py_nb_remainder, (void*)DMatrix4x4__mod__},
-        {Py_nb_power, (void*)DMatrix4x4__pow__},
-
-
-        {Py_nb_true_divide, (void*)DMatrix4x4__truediv__},
-
-
-        {Py_nb_negative, (void*)DMatrix4x4__neg__},
-
-    {Py_nb_absolute, (void*)DMatrix4x4__abs__},
-    {Py_nb_bool, (void*)DMatrix4x4__bool__},
+    {Py_nb_matrix_multiply, (void*)DMatrix4x4__matmul__},
+    {Py_nb_true_divide, (void*)DMatrix4x4__truediv__},
+    {Py_nb_negative, (void*)DMatrix4x4__neg__},
     {Py_bf_getbuffer, (void*)DMatrix4x4_getbufferproc},
-    {Py_tp_getset, (void*)DMatrix4x4_PyGetSetDef},
-    {Py_tp_getattro, (void*)DMatrix4x4__getattr__},
     {Py_tp_members, (void*)DMatrix4x4_PyMemberDef},
     {Py_tp_methods, (void*)DMatrix4x4_PyMethodDef},
-    */
     {0, 0},
 };
 

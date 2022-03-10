@@ -1,5 +1,5 @@
 
-// generated 2022-03-09 03:15:33.412546 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 02:10:36.696749 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I16VECTOR2_HPP
 #define GAMUT_MATH_I16VECTOR2_HPP
@@ -276,13 +276,13 @@ I16Vector2__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int16_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I16Vector2 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int16_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((I16Vector2 *)right)->glm);
         }
     }
@@ -318,13 +318,13 @@ I16Vector2__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int16_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I16Vector2 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int16_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((I16Vector2 *)right)->glm);
         }
     }
@@ -360,13 +360,13 @@ I16Vector2__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int16_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I16Vector2 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int16_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((I16Vector2 *)right)->glm);
         }
     }
@@ -420,7 +420,7 @@ I16Vector2__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_int16_t(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (c_right == 0)
                     {
@@ -433,7 +433,7 @@ I16Vector2__mul__(PyObject *left, PyObject *right)
             else
             {
                 auto c_left = pyobject_to_c_int16_t(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (
 
@@ -533,7 +533,7 @@ I16Vector2_getbufferproc(I16Vector2 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "I16Vector2 is not read only");
+        PyErr_SetString(PyExc_TypeError, "I16Vector2 is read only");
         view->obj = 0;
         return -1;
     }

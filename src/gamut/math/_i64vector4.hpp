@@ -1,5 +1,5 @@
 
-// generated 2022-03-09 03:15:33.432046 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 02:10:36.717247 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I64VECTOR4_HPP
 #define GAMUT_MATH_I64VECTOR4_HPP
@@ -324,13 +324,13 @@ I64Vector4__add__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int64_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I64Vector4 *)left)->glm) + c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int64_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left + (*((I64Vector4 *)right)->glm);
         }
     }
@@ -370,13 +370,13 @@ I64Vector4__sub__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int64_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I64Vector4 *)left)->glm) - c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int64_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left - (*((I64Vector4 *)right)->glm);
         }
     }
@@ -416,13 +416,13 @@ I64Vector4__mul__(PyObject *left, PyObject *right)
         if (Py_TYPE(left) == cls)
         {
             auto c_right = pyobject_to_c_int64_t(right);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = (*((I64Vector4 *)left)->glm) * c_right;
         }
         else
         {
             auto c_left = pyobject_to_c_int64_t(left);
-            if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
             vector = c_left * (*((I64Vector4 *)right)->glm);
         }
     }
@@ -484,7 +484,7 @@ I64Vector4__mul__(PyObject *left, PyObject *right)
             if (Py_TYPE(left) == cls)
             {
                 auto c_right = pyobject_to_c_int64_t(right);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (c_right == 0)
                     {
@@ -497,7 +497,7 @@ I64Vector4__mul__(PyObject *left, PyObject *right)
             else
             {
                 auto c_left = pyobject_to_c_int64_t(left);
-                if (PyErr_Occurred()){ Py_RETURN_NOTIMPLEMENTED; }
+                if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
 
                     if (
 
@@ -623,7 +623,7 @@ I64Vector4_getbufferproc(I64Vector4 *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "I64Vector4 is not read only");
+        PyErr_SetString(PyExc_TypeError, "I64Vector4 is read only");
         view->obj = 0;
         return -1;
     }
