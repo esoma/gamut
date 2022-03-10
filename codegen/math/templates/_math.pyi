@@ -114,10 +114,10 @@ class {{ type }}:
     def __bool__(self) -> bool: ...
 
 {% for attributes in ['xyzw', 'rgba', 'stqp', 'uv'] %}
-{% for count in range(1, component_count + 1) %}
-{% for prop in itertools.combinations_with_replacement(attributes, count) %}
+{% for count in range(1, 5) %}
+{% for prop in itertools.combinations_with_replacement(attributes[:component_count], count) %}
     @property
-    def {{ ''.join(prop) }}(self) -> {% if count > 1 %}tuple[{% for _ in range(count) %}{{ component_type }}, {% endfor %}]{% else %}{{ component_type }}{% endif %}: ...
+    def {{ ''.join(prop) }}(self) -> {% if count > 1 %}{{ type[:-1] }}{{ count }}{% else %}{{ component_type }}{% endif %}: ...
 {% endfor %}
 {% endfor %}
 {% endfor %}

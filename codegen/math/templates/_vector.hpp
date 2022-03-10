@@ -16,17 +16,8 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_vectortype.hpp"
 #include "_type.hpp"
-
-typedef glm::vec<{{ component_count }}, {{ c_type }}, glm::defaultp> {{ name }}Glm;
-
-
-struct {{ name }}
-{
-    PyObject_HEAD
-    PyObject *weakreflist;
-    {{ name }}Glm *glm;
-};
 
 
 static PyObject *
@@ -653,6 +644,74 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
     {0, 0, 0, 0, 0}
 };
 
+{% for swizzle_count in range(2, 5) %}
+{% with result_type=name[:name.index('V')] + 'Vector' + str(swizzle_count) %}
+    static PyObject *
+    swizzle_{{ swizzle_count }}_{{ name }}({{name}} *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        {{ result_type }}Glm vec;
+        for (int i = 0; i < {{ swizzle_count }}; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+                {% if component_count > 1 %}
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+                {% endif %}
+                {% if component_count > 2 %}
+                    case 'z':
+                    case 'b':
+                    case 'p':
+                        glm_index = 2;
+                        break;
+                {% endif %}
+                {% if component_count > 3 %}
+                    case 'w':
+                    case 'a':
+                    case 'q':
+                        glm_index = 3;
+                        break;
+                {% endif %}
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->{{ result_type }}_PyTypeObject;
+
+        {{ result_type }} *result = ({{ result_type }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ result_type }}Glm(vec);
+
+        return (PyObject *)result;
+    }
+{% endwith %}
+{% endfor %}
+
 
 static PyObject *
 {{ name }}__getattr__({{name}} *self, PyObject *py_attr)
@@ -661,59 +720,25 @@ static PyObject *
     if (result != 0){ return result; }
 
     auto attr_length = PyUnicode_GET_LENGTH(py_attr);
-    if (attr_length == 1){ return 0; }
-
-    result = PyTuple_New(attr_length);
-    if (!result){ return 0; }
-
-    const char *attr = PyUnicode_AsUTF8(py_attr);
-    if (!attr){ return 0; }
-    for ({{ name }}Glm::length_type i = 0; i < attr_length; i++)
+    switch(attr_length)
     {
-        char c_name = attr[i];
-        int glm_index;
-        switch(c_name)
+        case 2:
         {
-            case 'x':
-            case 'r':
-            case 's':
-            case 'u':
-                glm_index = 0;
-                break;
-            {% if component_count > 1 %}
-                case 'y':
-                case 'g':
-                case 't':
-                case 'v':
-                    glm_index = 1;
-                    break;
-            {% endif %}
-            {% if component_count > 2 %}
-                case 'z':
-                case 'b':
-                case 'p':
-                    glm_index = 2;
-                    break;
-            {% endif %}
-            {% if component_count > 3 %}
-                case 'w':
-                case 'a':
-                case 'q':
-                    glm_index = 3;
-                    break;
-            {% endif %}
-            default:
-            {
-                Py_DECREF(result);
-                return 0;
-            }
+            PyErr_Clear();
+            return swizzle_2_{{ name }}(self, py_attr);
         }
-        auto py_c = c_{{ c_type.replace(' ', '_') }}_to_pyobject((*self->glm)[glm_index]);
-        PyTuple_SET_ITEM(result, i, py_c);
+        case 3:
+        {
+            PyErr_Clear();
+            return swizzle_3_{{ name }}(self, py_attr);
+        }
+        case 4:
+        {
+            PyErr_Clear();
+            return swizzle_4_{{ name }}(self, py_attr);
+        }
     }
-
-    PyErr_Clear();
-    return result;
+    return 0;
 }
 
 
@@ -879,7 +904,6 @@ define_{{ name }}_type(PyObject *module)
 }
 
 
-{% if c_type in ['float', 'double'] %}
 static {{ name }} *
 create_{{ name }}_from_glm(const {{ name }}Glm& glm)
 {
@@ -893,6 +917,5 @@ create_{{ name }}_from_glm(const {{ name }}Glm& glm)
 
     return result;
 }
-{% endif %}
 
 #endif
