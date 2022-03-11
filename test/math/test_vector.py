@@ -170,20 +170,28 @@ class VectorTest:
             *self.TEXTURE_ATTRIBUTES[self.component_count:],
         ]
 
-        for i in range(2, 6):
+        for i in range(2, 5):
             for attrs in itertools.combinations_with_replacement(good, i):
                 swizzle = ''.join(attrs)
+                swizzle_type = globals()[
+                    self.cls.__name__[:self.cls.__name__.find('V')] +
+                    f'Vector{i}'
+                ]
                 result = getattr(vector, swizzle)
-                assert isinstance(result, tuple)
+                assert isinstance(result, swizzle_type)
                 assert all(isinstance(c, self.type) for c in result)
-                assert result == tuple(getattr(vector, attr) for attr in attrs)
+                assert result == swizzle_type(*(
+                    getattr(vector, attr) for attr in attrs
+                ))
 
-        for i in range(2, 6):
+        for i in range(2, 5):
             for attrs in itertools.combinations_with_replacement(bad, i):
                 swizzle = ''.join(attrs)
                 with pytest.raises(AttributeError):
                     getattr(vector, swizzle)
 
+        with pytest.raises(AttributeError):
+            vector.xxxxx
         with pytest.raises(AttributeError):
             vector.not_a_swizzle
 

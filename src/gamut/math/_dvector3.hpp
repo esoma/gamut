@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 18:59:39.025060 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 23:24:28.419431 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR3_HPP
 #define GAMUT_MATH_DVECTOR3_HPP
@@ -16,17 +16,8 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_vectortype.hpp"
 #include "_type.hpp"
-
-typedef glm::vec<3, double, glm::defaultp> DVector3Glm;
-
-
-struct DVector3
-{
-    PyObject_HEAD
-    PyObject *weakreflist;
-    DVector3Glm *glm;
-};
 
 
 static PyObject *
@@ -726,6 +717,188 @@ static PyGetSetDef DVector3_PyGetSetDef[] = {
 };
 
 
+
+    static PyObject *
+    swizzle_2_DVector3(DVector3 *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        DVector2Glm vec;
+        for (int i = 0; i < 2; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+
+
+                    case 'z':
+                    case 'b':
+                    case 'p':
+                        glm_index = 2;
+                        break;
+
+
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DVector2_PyTypeObject;
+
+        DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(vec);
+
+        return (PyObject *)result;
+    }
+
+
+
+    static PyObject *
+    swizzle_3_DVector3(DVector3 *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        DVector3Glm vec;
+        for (int i = 0; i < 3; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+
+
+                    case 'z':
+                    case 'b':
+                    case 'p':
+                        glm_index = 2;
+                        break;
+
+
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DVector3_PyTypeObject;
+
+        DVector3 *result = (DVector3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector3Glm(vec);
+
+        return (PyObject *)result;
+    }
+
+
+
+    static PyObject *
+    swizzle_4_DVector3(DVector3 *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        DVector4Glm vec;
+        for (int i = 0; i < 4; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+
+
+                    case 'z':
+                    case 'b':
+                    case 'p':
+                        glm_index = 2;
+                        break;
+
+
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DVector4_PyTypeObject;
+
+        DVector4 *result = (DVector4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector4Glm(vec);
+
+        return (PyObject *)result;
+    }
+
+
+
+
 static PyObject *
 DVector3__getattr__(DVector3 *self, PyObject *py_attr)
 {
@@ -733,53 +906,25 @@ DVector3__getattr__(DVector3 *self, PyObject *py_attr)
     if (result != 0){ return result; }
 
     auto attr_length = PyUnicode_GET_LENGTH(py_attr);
-    if (attr_length == 1){ return 0; }
-
-    result = PyTuple_New(attr_length);
-    if (!result){ return 0; }
-
-    const char *attr = PyUnicode_AsUTF8(py_attr);
-    if (!attr){ return 0; }
-    for (DVector3Glm::length_type i = 0; i < attr_length; i++)
+    switch(attr_length)
     {
-        char c_name = attr[i];
-        int glm_index;
-        switch(c_name)
+        case 2:
         {
-            case 'x':
-            case 'r':
-            case 's':
-            case 'u':
-                glm_index = 0;
-                break;
-
-                case 'y':
-                case 'g':
-                case 't':
-                case 'v':
-                    glm_index = 1;
-                    break;
-
-
-                case 'z':
-                case 'b':
-                case 'p':
-                    glm_index = 2;
-                    break;
-
-
-            default:
-            {
-                Py_DECREF(result);
-                return 0;
-            }
+            PyErr_Clear();
+            return swizzle_2_DVector3(self, py_attr);
         }
-        auto py_c = c_double_to_pyobject((*self->glm)[glm_index]);
-        PyTuple_SET_ITEM(result, i, py_c);
+        case 3:
+        {
+            PyErr_Clear();
+            return swizzle_3_DVector3(self, py_attr);
+        }
+        case 4:
+        {
+            PyErr_Clear();
+            return swizzle_4_DVector3(self, py_attr);
+        }
     }
-
-    PyErr_Clear();
-    return result;
+    return 0;
 }
 
 
@@ -953,7 +1098,6 @@ define_DVector3_type(PyObject *module)
 }
 
 
-
 static DVector3 *
 create_DVector3_from_glm(const DVector3Glm& glm)
 {
@@ -967,6 +1111,5 @@ create_DVector3_from_glm(const DVector3Glm& glm)
 
     return result;
 }
-
 
 #endif

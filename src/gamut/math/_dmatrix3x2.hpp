@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 18:59:39.071564 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-10 23:24:28.467932 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX3X2_HPP
 #define GAMUT_MATH_DMATRIX3X2_HPP
@@ -16,9 +16,9 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_vectortype.hpp"
 #include "_matrixtype.hpp"
 #include "_type.hpp"
-#include "_dvector2.hpp"
 
 
 static PyObject *

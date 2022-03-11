@@ -16,9 +16,9 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_vectortype.hpp"
 #include "_matrixtype.hpp"
 #include "_type.hpp"
-#include "_{{ column_type.lower() }}.hpp"
 
 
 static PyObject *

@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 18:59:39.019563 from codegen/math/templates/_vector.hpp
+// generated 2022-03-10 23:24:28.413433 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I16VECTOR2_HPP
 #define GAMUT_MATH_I16VECTOR2_HPP
@@ -16,17 +16,8 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_vectortype.hpp"
 #include "_type.hpp"
-
-typedef glm::vec<2, int16_t, glm::defaultp> I16Vector2Glm;
-
-
-struct I16Vector2
-{
-    PyObject_HEAD
-    PyObject *weakreflist;
-    I16Vector2Glm *glm;
-};
 
 
 static PyObject *
@@ -592,6 +583,170 @@ static PyGetSetDef I16Vector2_PyGetSetDef[] = {
 };
 
 
+
+    static PyObject *
+    swizzle_2_I16Vector2(I16Vector2 *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        I16Vector2Glm vec;
+        for (int i = 0; i < 2; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+
+
+
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->I16Vector2_PyTypeObject;
+
+        I16Vector2 *result = (I16Vector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new I16Vector2Glm(vec);
+
+        return (PyObject *)result;
+    }
+
+
+
+    static PyObject *
+    swizzle_3_I16Vector2(I16Vector2 *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        I16Vector3Glm vec;
+        for (int i = 0; i < 3; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+
+
+
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->I16Vector3_PyTypeObject;
+
+        I16Vector3 *result = (I16Vector3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new I16Vector3Glm(vec);
+
+        return (PyObject *)result;
+    }
+
+
+
+    static PyObject *
+    swizzle_4_I16Vector2(I16Vector2 *self, PyObject *py_attr)
+    {
+        const char *attr = PyUnicode_AsUTF8(py_attr);
+        if (!attr){ return 0; }
+
+        I16Vector4Glm vec;
+        for (int i = 0; i < 4; i++)
+        {
+            char c_name = attr[i];
+            int glm_index;
+            switch(c_name)
+            {
+                case 'x':
+                case 'r':
+                case 's':
+                case 'u':
+                    glm_index = 0;
+                    break;
+
+                    case 'y':
+                    case 'g':
+                    case 't':
+                    case 'v':
+                        glm_index = 1;
+                        break;
+
+
+
+                default:
+                {
+                    PyErr_Format(
+                        PyExc_AttributeError,
+                        "invalid swizzle: %R", py_attr
+                    );
+                    return 0;
+                }
+            }
+            vec[i] = (*self->glm)[glm_index];
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->I16Vector4_PyTypeObject;
+
+        I16Vector4 *result = (I16Vector4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new I16Vector4Glm(vec);
+
+        return (PyObject *)result;
+    }
+
+
+
+
 static PyObject *
 I16Vector2__getattr__(I16Vector2 *self, PyObject *py_attr)
 {
@@ -599,47 +754,25 @@ I16Vector2__getattr__(I16Vector2 *self, PyObject *py_attr)
     if (result != 0){ return result; }
 
     auto attr_length = PyUnicode_GET_LENGTH(py_attr);
-    if (attr_length == 1){ return 0; }
-
-    result = PyTuple_New(attr_length);
-    if (!result){ return 0; }
-
-    const char *attr = PyUnicode_AsUTF8(py_attr);
-    if (!attr){ return 0; }
-    for (I16Vector2Glm::length_type i = 0; i < attr_length; i++)
+    switch(attr_length)
     {
-        char c_name = attr[i];
-        int glm_index;
-        switch(c_name)
+        case 2:
         {
-            case 'x':
-            case 'r':
-            case 's':
-            case 'u':
-                glm_index = 0;
-                break;
-
-                case 'y':
-                case 'g':
-                case 't':
-                case 'v':
-                    glm_index = 1;
-                    break;
-
-
-
-            default:
-            {
-                Py_DECREF(result);
-                return 0;
-            }
+            PyErr_Clear();
+            return swizzle_2_I16Vector2(self, py_attr);
         }
-        auto py_c = c_int16_t_to_pyobject((*self->glm)[glm_index]);
-        PyTuple_SET_ITEM(result, i, py_c);
+        case 3:
+        {
+            PyErr_Clear();
+            return swizzle_3_I16Vector2(self, py_attr);
+        }
+        case 4:
+        {
+            PyErr_Clear();
+            return swizzle_4_I16Vector2(self, py_attr);
+        }
     }
-
-    PyErr_Clear();
-    return result;
+    return 0;
 }
 
 
@@ -744,6 +877,18 @@ define_I16Vector2_type(PyObject *module)
 }
 
 
+static I16Vector2 *
+create_I16Vector2_from_glm(const I16Vector2Glm& glm)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto cls = module_state->I16Vector2_PyTypeObject;
 
+    I16Vector2 *result = (I16Vector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new I16Vector2Glm(glm);
+
+    return result;
+}
 
 #endif
