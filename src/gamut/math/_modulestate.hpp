@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 03:01:13.082564 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-11 18:37:26.842466 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP
@@ -184,6 +184,33 @@ struct ModuleState
         PyTypeObject *FMatrix4x4_PyTypeObject;
         PyTypeObject *FMatrix4x4Array_PyTypeObject;
 
+
+        PyTypeObject *BArray_PyTypeObject;
+
+        PyTypeObject *DArray_PyTypeObject;
+
+        PyTypeObject *FArray_PyTypeObject;
+
+        PyTypeObject *I8Array_PyTypeObject;
+
+        PyTypeObject *U8Array_PyTypeObject;
+
+        PyTypeObject *I16Array_PyTypeObject;
+
+        PyTypeObject *U16Array_PyTypeObject;
+
+        PyTypeObject *I32Array_PyTypeObject;
+
+        PyTypeObject *U32Array_PyTypeObject;
+
+        PyTypeObject *IArray_PyTypeObject;
+
+        PyTypeObject *UArray_PyTypeObject;
+
+        PyTypeObject *I64Array_PyTypeObject;
+
+        PyTypeObject *U64Array_PyTypeObject;
+
 };
 
 
@@ -366,6 +393,33 @@ ModuleState_traverse(
         Py_VISIT(self->FMatrix4x4_PyTypeObject);
         Py_VISIT(self->FMatrix4x4Array_PyTypeObject);
 
+
+        Py_VISIT(self->BArray_PyTypeObject);
+
+        Py_VISIT(self->DArray_PyTypeObject);
+
+        Py_VISIT(self->FArray_PyTypeObject);
+
+        Py_VISIT(self->I8Array_PyTypeObject);
+
+        Py_VISIT(self->U8Array_PyTypeObject);
+
+        Py_VISIT(self->I16Array_PyTypeObject);
+
+        Py_VISIT(self->U16Array_PyTypeObject);
+
+        Py_VISIT(self->I32Array_PyTypeObject);
+
+        Py_VISIT(self->U32Array_PyTypeObject);
+
+        Py_VISIT(self->IArray_PyTypeObject);
+
+        Py_VISIT(self->UArray_PyTypeObject);
+
+        Py_VISIT(self->I64Array_PyTypeObject);
+
+        Py_VISIT(self->U64Array_PyTypeObject);
+
     return 0;
 }
 
@@ -544,6 +598,33 @@ ModuleState_clear(struct ModuleState *self)
 
         Py_CLEAR(self->FMatrix4x4_PyTypeObject);
         Py_CLEAR(self->FMatrix4x4Array_PyTypeObject);
+
+
+        Py_CLEAR(self->BArray_PyTypeObject);
+
+        Py_CLEAR(self->DArray_PyTypeObject);
+
+        Py_CLEAR(self->FArray_PyTypeObject);
+
+        Py_CLEAR(self->I8Array_PyTypeObject);
+
+        Py_CLEAR(self->U8Array_PyTypeObject);
+
+        Py_CLEAR(self->I16Array_PyTypeObject);
+
+        Py_CLEAR(self->U16Array_PyTypeObject);
+
+        Py_CLEAR(self->I32Array_PyTypeObject);
+
+        Py_CLEAR(self->U32Array_PyTypeObject);
+
+        Py_CLEAR(self->IArray_PyTypeObject);
+
+        Py_CLEAR(self->UArray_PyTypeObject);
+
+        Py_CLEAR(self->I64Array_PyTypeObject);
+
+        Py_CLEAR(self->U64Array_PyTypeObject);
 
     return 0;
 }

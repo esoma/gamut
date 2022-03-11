@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 03:01:13.084063 from codegen/math/templates/_math.hpp
+// generated 2022-03-11 18:37:26.844466 from codegen/math/templates/_math.hpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -121,6 +121,33 @@
     #include "_dmatrix4x4.hpp"
 
     #include "_fmatrix4x4.hpp"
+
+
+    #include "_b.hpp"
+
+    #include "_d.hpp"
+
+    #include "_f.hpp"
+
+    #include "_i8.hpp"
+
+    #include "_u8.hpp"
+
+    #include "_i16.hpp"
+
+    #include "_u16.hpp"
+
+    #include "_i32.hpp"
+
+    #include "_u32.hpp"
+
+    #include "_i.hpp"
+
+    #include "_u.hpp"
+
+    #include "_i64.hpp"
+
+    #include "_u64.hpp"
 
 
 static PyMethodDef module_methods[] = {
@@ -905,6 +932,98 @@ PyInit__math()
         if (!type){ goto error; }
         Py_INCREF(type);
         state->FMatrix4x4Array_PyTypeObject = type;
+    }
+
+
+    {
+        PyTypeObject *type = define_BArray_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BArray_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_DArray_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DArray_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_FArray_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FArray_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_I8Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_U8Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_I16Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_U16Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_I32Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_U32Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_IArray_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IArray_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_UArray_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UArray_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_I64Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Array_PyTypeObject = type;
+    }
+
+    {
+        PyTypeObject *type = define_U64Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Array_PyTypeObject = type;
     }
 
 

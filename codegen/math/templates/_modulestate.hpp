@@ -16,6 +16,9 @@ struct ModuleState
         PyTypeObject *{{ type }}_PyTypeObject;
         PyTypeObject *{{ type }}Array_PyTypeObject;
     {% endfor %}
+    {% for pod_type in pod_types %}
+        PyTypeObject *{{ pod_type }}Array_PyTypeObject;
+    {% endfor %}
 };
 
 
@@ -27,8 +30,11 @@ ModuleState_traverse(
 )
 {
     {% for type in types %}
-        Py_VISIT(self->{{type}}_PyTypeObject);
-        Py_VISIT(self->{{type}}Array_PyTypeObject);
+        Py_VISIT(self->{{ type }}_PyTypeObject);
+        Py_VISIT(self->{{ type }}Array_PyTypeObject);
+    {% endfor %}
+    {% for pod_type in pod_types %}
+        Py_VISIT(self->{{ pod_type }}Array_PyTypeObject);
     {% endfor %}
     return 0;
 }
@@ -38,8 +44,11 @@ static int
 ModuleState_clear(struct ModuleState *self)
 {
     {% for type in types %}
-        Py_CLEAR(self->{{type}}_PyTypeObject);
-        Py_CLEAR(self->{{type}}Array_PyTypeObject);
+        Py_CLEAR(self->{{ type }}_PyTypeObject);
+        Py_CLEAR(self->{{ type }}Array_PyTypeObject);
+    {% endfor %}
+    {% for pod_type in pod_types %}
+        Py_CLEAR(self->{{ pod_type }}Array_PyTypeObject);
     {% endfor %}
     return 0;
 }

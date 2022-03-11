@@ -10,6 +10,9 @@
 {% for type in types %}
     #include "_{{ type.lower() }}.hpp"
 {% endfor %}
+{% for pod_type in pod_types %}
+    #include "_{{ pod_type.lower() }}.hpp"
+{% endfor %}
 
 static PyMethodDef module_methods[] = {
     {0, 0, 0, 0}
@@ -65,6 +68,14 @@ PyInit__math()
         if (!type){ goto error; }
         Py_INCREF(type);
         state->{{ type }}Array_PyTypeObject = type;
+    }
+    {% endfor %}
+    {% for pod_type in pod_types %}
+    {
+        PyTypeObject *type = define_{{ pod_type }}Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->{{ pod_type }}Array_PyTypeObject = type;
     }
     {% endfor %}
 
