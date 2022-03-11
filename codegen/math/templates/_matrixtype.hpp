@@ -22,6 +22,14 @@ struct {{ name }}
     {{ name }}Glm *glm;
 };
 
+struct {{ name }}Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    {{ name }}Glm *glm;
+};
+
 {% endfor %}
 
 #endif

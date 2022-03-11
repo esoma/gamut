@@ -14,6 +14,7 @@ struct ModuleState
 {
     {% for type in types %}
         PyTypeObject *{{ type }}_PyTypeObject;
+        PyTypeObject *{{ type }}Array_PyTypeObject;
     {% endfor %}
 };
 
@@ -27,6 +28,7 @@ ModuleState_traverse(
 {
     {% for type in types %}
         Py_VISIT(self->{{type}}_PyTypeObject);
+        Py_VISIT(self->{{type}}Array_PyTypeObject);
     {% endfor %}
     return 0;
 }
@@ -37,6 +39,7 @@ ModuleState_clear(struct ModuleState *self)
 {
     {% for type in types %}
         Py_CLEAR(self->{{type}}_PyTypeObject);
+        Py_CLEAR(self->{{type}}Array_PyTypeObject);
     {% endfor %}
     return 0;
 }

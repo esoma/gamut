@@ -1,14 +1,28 @@
 
 # gamut
-from gamut.math import (DMatrix2, DMatrix2x2, DMatrix2x3, DMatrix2x4, DMatrix3,
-                        DMatrix3x2, DMatrix3x3, DMatrix3x4, DMatrix4,
-                        DMatrix4x2, DMatrix4x3, DMatrix4x4, DVector2, DVector3,
-                        DVector4, FMatrix2, FMatrix2x2, FMatrix2x3, FMatrix2x4,
-                        FMatrix3, FMatrix3x2, FMatrix3x3, FMatrix3x4, FMatrix4,
-                        FMatrix4x2, FMatrix4x3, FMatrix4x4, FVector2, FVector3,
-                        FVector4, Matrix2, Matrix2x2, Matrix2x3, Matrix2x4,
-                        Matrix3, Matrix3x2, Matrix3x3, Matrix3x4, Matrix4,
-                        Matrix4x2, Matrix4x3, Matrix4x4)
+from gamut.math import (DMatrix2, DMatrix2Array, DMatrix2x2, DMatrix2x2Array,
+                        DMatrix2x3, DMatrix2x3Array, DMatrix2x4,
+                        DMatrix2x4Array, DMatrix3, DMatrix3Array, DMatrix3x2,
+                        DMatrix3x2Array, DMatrix3x3, DMatrix3x3Array,
+                        DMatrix3x4, DMatrix3x4Array, DMatrix4, DMatrix4Array,
+                        DMatrix4x2, DMatrix4x2Array, DMatrix4x3,
+                        DMatrix4x3Array, DMatrix4x4, DMatrix4x4Array, DVector2,
+                        DVector2Array, DVector3, DVector3Array, DVector4,
+                        DVector4Array, FMatrix2, FMatrix2Array, FMatrix2x2,
+                        FMatrix2x2Array, FMatrix2x3, FMatrix2x3Array,
+                        FMatrix2x4, FMatrix2x4Array, FMatrix3, FMatrix3Array,
+                        FMatrix3x2, FMatrix3x2Array, FMatrix3x3,
+                        FMatrix3x3Array, FMatrix3x4, FMatrix3x4Array, FMatrix4,
+                        FMatrix4Array, FMatrix4x2, FMatrix4x2Array, FMatrix4x3,
+                        FMatrix4x3Array, FMatrix4x4, FMatrix4x4Array, FVector2,
+                        FVector2Array, FVector3, FVector3Array, FVector4,
+                        FVector4Array, Matrix2, Matrix2Array, Matrix2x2,
+                        Matrix2x2Array, Matrix2x3, Matrix2x3Array, Matrix2x4,
+                        Matrix2x4Array, Matrix3, Matrix3Array, Matrix3x2,
+                        Matrix3x2Array, Matrix3x3, Matrix3x3Array, Matrix3x4,
+                        Matrix3x4Array, Matrix4, Matrix4Array, Matrix4x2,
+                        Matrix4x2Array, Matrix4x3, Matrix4x3Array, Matrix4x4,
+                        Matrix4x4Array)
 # python
 from math import inf, isnan
 import struct
@@ -22,13 +36,25 @@ def test_alias():
     assert FMatrix3 is FMatrix3x3
     assert FMatrix4 is FMatrix4x4
 
+    assert FMatrix2Array is FMatrix2x2Array
+    assert FMatrix3Array is FMatrix3x3Array
+    assert FMatrix4Array is FMatrix4x4Array
+
     assert DMatrix2 is DMatrix2x2
     assert DMatrix3 is DMatrix3x3
     assert DMatrix4 is DMatrix4x4
 
+    assert DMatrix2Array is DMatrix2x2Array
+    assert DMatrix3Array is DMatrix3x3Array
+    assert DMatrix4Array is DMatrix4x4Array
+
     assert Matrix2 is DMatrix2x2
     assert Matrix3 is DMatrix3x3
     assert Matrix4 is DMatrix4x4
+
+    assert Matrix2Array is DMatrix2x2Array
+    assert Matrix3Array is DMatrix3x3Array
+    assert Matrix4Array is DMatrix4x4Array
 
     assert Matrix2x2 is DMatrix2x2
     assert Matrix2x3 is DMatrix2x3
@@ -39,6 +65,16 @@ def test_alias():
     assert Matrix4x2 is DMatrix4x2
     assert Matrix4x3 is DMatrix4x3
     assert Matrix4x4 is DMatrix4x4
+
+    assert Matrix2x2Array is DMatrix2x2Array
+    assert Matrix2x3Array is DMatrix2x3Array
+    assert Matrix2x4Array is DMatrix2x4Array
+    assert Matrix3x2Array is DMatrix3x2Array
+    assert Matrix3x3Array is DMatrix3x3Array
+    assert Matrix3x4Array is DMatrix3x4Array
+    assert Matrix4x2Array is DMatrix4x2Array
+    assert Matrix4x3Array is DMatrix4x3Array
+    assert Matrix4x4Array is DMatrix4x4Array
 
 
 class MatrixTest:
@@ -54,6 +90,7 @@ class MatrixTest:
         struct_format
     ):
         this_cls.cls = cls
+        this_cls.array_cls = globals()[f'{cls.__name__}Array']
         this_cls.row_cls = row_cls
         this_cls.column_cls = column_cls
         this_cls.row_size = row_size
@@ -67,9 +104,17 @@ class MatrixTest:
         for i in range(self.row_size):
             assert matrix[i] == self.column_cls()
 
+    def test_array_init_empty(self) -> None:
+        array = self.array_cls()
+        assert len(array) == 0
+
     def test_init_keywords(self) -> None:
         with pytest.raises(TypeError):
             self.cls(x=0)
+
+    def test_array_init_keywords(self) -> None:
+        with pytest.raises(TypeError):
+            self.array_cls(x=0)
 
     def test_single_init(self) -> None:
         for arg in [-100, -1, 0, 1, 100]:
@@ -83,6 +128,14 @@ class MatrixTest:
         min, max = self.cls.get_limits()
         assert self.cls(min - 1) == self.cls(min)
         assert self.cls(max + 1) == self.cls(max)
+
+    def test_array_init(self) -> None:
+        for i in range(10):
+            array = self.array_cls(*(self.cls(j) for j in range(i)))
+            assert len(array) == i
+            for j, matrix in enumerate(array):
+                assert isinstance(matrix, self.cls)
+                assert matrix == self.cls(j)
 
     def test_column_init(self) -> None:
         matrix = self.cls(*(self.column_cls(i) for i in range(self.row_size)))
@@ -124,6 +177,12 @@ class MatrixTest:
                 f'{ self.component_count } (got { count })'
             )
 
+    def test_array_init_invalid_type(self):
+        with pytest.raises(TypeError):
+            self.array_cls(None)
+        with pytest.raises(TypeError):
+            self.array_cls(1)
+
     def test_len(self) -> None:
         matrix = self.cls()
         assert len(matrix) == self.row_size
@@ -144,6 +203,26 @@ class MatrixTest:
             matrix[-(self.row_size + 1)]
         assert str(excinfo.value) == 'index out of range'
 
+    def test_array_getitem(self) -> None:
+        with pytest.raises(IndexError) as excinfo:
+            self.array_cls()[0]
+        assert str(excinfo.value) == 'index out of range'
+
+        array = self.array_cls(*(self.cls(i) for i in range(10)))
+        for i in range(10):
+            assert isinstance(array[i], self.cls)
+            assert array[i] == self.cls(i)
+            assert isinstance(array[i - 10], self.cls)
+            assert array[i - 10] == self.cls(i)
+
+        with pytest.raises(IndexError) as excinfo:
+            array[10]
+        assert str(excinfo.value) == 'index out of range'
+
+        with pytest.raises(IndexError) as excinfo:
+            array[-11]
+        assert str(excinfo.value) == 'index out of range'
+
     def test_setitem(self) -> None:
         matrix = self.cls()
         for i in range(self.row_size):
@@ -151,6 +230,11 @@ class MatrixTest:
                 matrix[i] = self.column_cls()
             with pytest.raises(TypeError):
                 matrix[i - self.component_count] = self.column_cls()
+
+    def test_array_setitem(self) -> None:
+        array = self.array_cls(self.cls(1))
+        with pytest.raises(TypeError):
+            array[0] = self.cls(2)
 
     def test_hash(self) -> None:
         for i in range(-100, 100):
@@ -161,6 +245,18 @@ class MatrixTest:
         assert hash(self.cls(1)) != hash(self.cls(-1))
         assert hash(self.cls(0)) != hash(
             self.cls(*range(self.component_count))
+        )
+
+    def test_array_hash(self) -> None:
+        assert hash(self.array_cls()) != hash(self.array_cls(self.cls(0)))
+        assert hash(self.array_cls(self.cls(0))) != hash(
+            self.array_cls(self.cls(1))
+        )
+        assert hash(self.array_cls(self.cls(1))) == hash(
+            self.array_cls(self.cls(1))
+        )
+        assert hash(self.array_cls(self.cls(-1))) != (
+            hash(self.array_cls(self.cls(1)))
         )
 
     def test_repr(self) -> None:
@@ -176,6 +272,15 @@ class MatrixTest:
             f')'
         )
 
+    def test_array_repr(self) -> None:
+        assert repr(self.array_cls()) == f'{self.array_cls.__name__}[0]'
+        assert repr(self.array_cls(self.cls())) == (
+            f'{self.array_cls.__name__}[1]'
+        )
+        assert repr(self.array_cls(*(self.cls() for _ in range(100)))) == (
+            f'{self.array_cls.__name__}[100]'
+        )
+
     def test_iterate(self) -> None:
         matrix = self.cls(*(self.column_cls(i) for i in range(self.row_size)))
         for i, c in enumerate(matrix):
@@ -185,6 +290,10 @@ class MatrixTest:
     def test_weakref(self) -> None:
         matrix = self.cls()
         weak_matrix = ref(matrix)
+
+    def test_array_weakref(self) -> None:
+        array = self.array_cls()
+        weak_array = ref(array)
 
     def test_equal(self) -> None:
         for i in range(-100, 100):
@@ -197,6 +306,20 @@ class MatrixTest:
         assert not (1 == self.cls())
         assert not (object() == self.cls())
 
+    def test_array_equal(self) -> None:
+        assert self.array_cls() == self.array_cls()
+        for i in range(-100, 100):
+            assert self.array_cls(self.cls(i)) == self.array_cls(self.cls(i))
+            assert not (
+                self.array_cls(self.cls(i), self.cls(i)) ==
+                self.array_cls(self.cls(i))
+            )
+
+        assert not (self.array_cls() == 1)
+        assert not (self.array_cls() == object())
+        assert not (1 == self.array_cls())
+        assert not (object() == self.array_cls())
+
     def test_not_equal(self) -> None:
         for i in range(-100, 100):
             assert not (self.cls(i) != self.cls(i))
@@ -208,9 +331,37 @@ class MatrixTest:
         assert 1 != self.cls()
         assert object() != self.cls()
 
+    def test_array_equal(self) -> None:
+        assert not (self.array_cls() != self.array_cls())
+        for i in range(-100, 100):
+            assert not (
+                self.array_cls(self.cls(i)) != self.array_cls(self.cls(i))
+            )
+            assert (
+                self.array_cls(self.cls(i), self.cls(i)) !=
+                self.array_cls(self.cls(i))
+            )
+
+        assert self.array_cls() != 1
+        assert self.array_cls() != object()
+        assert 1 != self.array_cls()
+        assert object() != self.array_cls()
+
     def test_comparisons_not_implemented(self) -> None:
         a = self.cls()
         b = self.cls()
+        with pytest.raises(TypeError):
+            a < b
+        with pytest.raises(TypeError):
+            a <= b
+        with pytest.raises(TypeError):
+            a > b
+        with pytest.raises(TypeError):
+            a >= b
+
+    def test_array_comparisons_not_implemented(self) -> None:
+        a = self.array_cls()
+        b = self.array_cls()
         with pytest.raises(TypeError):
             a < b
         with pytest.raises(TypeError):
@@ -549,6 +700,9 @@ class MatrixTest:
             -i for i in range(self.component_count)
         ))
 
+    def test_array_bool(self) -> None:
+        assert not self.array_cls()
+        assert self.array_cls(self.cls())
 
     def test_buffer(self) -> None:
         assert bytes(self.cls(*range(self.component_count))) == struct.pack(
@@ -566,6 +720,39 @@ class MatrixTest:
             struct.calcsize(self.struct_format),
         )
         assert memory_view.suboffsets == tuple()
+        assert memory_view.c_contiguous
+        assert not memory_view.f_contiguous
+        assert memory_view.contiguous
+
+    def test_array_buffer(self) -> None:
+        assert bytes(self.array_cls()) == b''
+
+        array = self.array_cls(
+            self.cls(1),
+            self.cls(*range(self.component_count)),
+            self.cls(0),
+        )
+        assert bytes(array) == struct.pack(
+            self.struct_format * 3 * self.component_count,
+            *(v for c in self.cls(1) for v in c),
+            *range(self.component_count),
+            *(v for c in self.cls(0) for v in c),
+        )
+        memory_view = memoryview(array)
+        assert memory_view.readonly
+        assert memory_view.format == self.struct_format
+        assert memory_view.itemsize == struct.calcsize(self.struct_format)
+        assert memory_view.ndim == 3
+        assert memory_view.shape == (3, self.row_size, self.column_size)
+        assert memory_view.strides == (
+            struct.calcsize(self.struct_format) * self.component_count,
+            struct.calcsize(self.struct_format) * self.column_size,
+            struct.calcsize(self.struct_format)
+        )
+        assert memory_view.suboffsets == tuple()
+        assert memory_view.c_contiguous
+        assert not memory_view.f_contiguous
+        assert memory_view.contiguous
 
     def test_inverse(self) -> None:
         if self.row_size != self.column_size:

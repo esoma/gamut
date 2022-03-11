@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 23:24:28.481931 from codegen/math/templates/_math.hpp
+// generated 2022-03-11 02:51:43.114465 from codegen/math/templates/_math.hpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -172,12 +172,24 @@ PyInit__math()
         Py_INCREF(type);
         state->BVector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_BVector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BVector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DVector2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DVector2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DVector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DVector2Array_PyTypeObject = type;
     }
 
     {
@@ -186,12 +198,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FVector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FVector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FVector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I8Vector2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I8Vector2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I8Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Vector2Array_PyTypeObject = type;
     }
 
     {
@@ -200,12 +224,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U8Vector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U8Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Vector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I16Vector2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I16Vector2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I16Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Vector2Array_PyTypeObject = type;
     }
 
     {
@@ -214,12 +250,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U16Vector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U16Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Vector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I32Vector2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I32Vector2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I32Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Vector2Array_PyTypeObject = type;
     }
 
     {
@@ -228,12 +276,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U32Vector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U32Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Vector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_IVector2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->IVector2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_IVector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IVector2Array_PyTypeObject = type;
     }
 
     {
@@ -242,12 +302,24 @@ PyInit__math()
         Py_INCREF(type);
         state->UVector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_UVector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UVector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I64Vector2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I64Vector2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I64Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Vector2Array_PyTypeObject = type;
     }
 
     {
@@ -256,12 +328,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U64Vector2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U64Vector2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Vector2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_BVector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->BVector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_BVector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BVector3Array_PyTypeObject = type;
     }
 
     {
@@ -270,12 +354,24 @@ PyInit__math()
         Py_INCREF(type);
         state->DVector3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_DVector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DVector3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_FVector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->FVector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_FVector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FVector3Array_PyTypeObject = type;
     }
 
     {
@@ -284,12 +380,24 @@ PyInit__math()
         Py_INCREF(type);
         state->I8Vector3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_I8Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Vector3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_U8Vector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->U8Vector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_U8Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Vector3Array_PyTypeObject = type;
     }
 
     {
@@ -298,12 +406,24 @@ PyInit__math()
         Py_INCREF(type);
         state->I16Vector3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_I16Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Vector3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_U16Vector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->U16Vector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_U16Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Vector3Array_PyTypeObject = type;
     }
 
     {
@@ -312,12 +432,24 @@ PyInit__math()
         Py_INCREF(type);
         state->I32Vector3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_I32Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Vector3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_U32Vector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->U32Vector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_U32Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Vector3Array_PyTypeObject = type;
     }
 
     {
@@ -326,12 +458,24 @@ PyInit__math()
         Py_INCREF(type);
         state->IVector3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_IVector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IVector3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_UVector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->UVector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_UVector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UVector3Array_PyTypeObject = type;
     }
 
     {
@@ -340,12 +484,24 @@ PyInit__math()
         Py_INCREF(type);
         state->I64Vector3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_I64Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Vector3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_U64Vector3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->U64Vector3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_U64Vector3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Vector3Array_PyTypeObject = type;
     }
 
     {
@@ -354,12 +510,24 @@ PyInit__math()
         Py_INCREF(type);
         state->BVector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_BVector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->BVector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DVector4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DVector4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DVector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DVector4Array_PyTypeObject = type;
     }
 
     {
@@ -368,12 +536,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FVector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FVector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FVector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I8Vector4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I8Vector4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I8Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I8Vector4Array_PyTypeObject = type;
     }
 
     {
@@ -382,12 +562,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U8Vector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U8Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U8Vector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I16Vector4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I16Vector4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I16Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I16Vector4Array_PyTypeObject = type;
     }
 
     {
@@ -396,12 +588,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U16Vector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U16Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U16Vector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I32Vector4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I32Vector4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I32Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I32Vector4Array_PyTypeObject = type;
     }
 
     {
@@ -410,12 +614,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U32Vector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U32Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U32Vector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_IVector4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->IVector4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_IVector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->IVector4Array_PyTypeObject = type;
     }
 
     {
@@ -424,12 +640,24 @@ PyInit__math()
         Py_INCREF(type);
         state->UVector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_UVector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->UVector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_I64Vector4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->I64Vector4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_I64Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->I64Vector4Array_PyTypeObject = type;
     }
 
     {
@@ -438,12 +666,24 @@ PyInit__math()
         Py_INCREF(type);
         state->U64Vector4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_U64Vector4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->U64Vector4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix2x2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix2x2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix2x2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix2x2Array_PyTypeObject = type;
     }
 
     {
@@ -452,12 +692,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix2x2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix2x2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix2x2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix2x3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix2x3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix2x3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix2x3Array_PyTypeObject = type;
     }
 
     {
@@ -466,12 +718,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix2x3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix2x3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix2x3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix2x4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix2x4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix2x4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix2x4Array_PyTypeObject = type;
     }
 
     {
@@ -480,12 +744,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix2x4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix2x4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix2x4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix3x2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix3x2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix3x2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix3x2Array_PyTypeObject = type;
     }
 
     {
@@ -494,12 +770,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix3x2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix3x2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix3x2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix3x3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix3x3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix3x3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix3x3Array_PyTypeObject = type;
     }
 
     {
@@ -508,12 +796,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix3x3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix3x3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix3x3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix3x4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix3x4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix3x4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix3x4Array_PyTypeObject = type;
     }
 
     {
@@ -522,12 +822,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix3x4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix3x4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix3x4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix4x2_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix4x2_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix4x2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix4x2Array_PyTypeObject = type;
     }
 
     {
@@ -536,12 +848,24 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix4x2_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix4x2Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix4x2Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix4x3_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->DMatrix4x3_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_DMatrix4x3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix4x3Array_PyTypeObject = type;
     }
 
     {
@@ -550,6 +874,12 @@ PyInit__math()
         Py_INCREF(type);
         state->FMatrix4x3_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_FMatrix4x3Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix4x3Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_DMatrix4x4_type(module);
@@ -557,12 +887,24 @@ PyInit__math()
         Py_INCREF(type);
         state->DMatrix4x4_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_DMatrix4x4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->DMatrix4x4Array_PyTypeObject = type;
+    }
 
     {
         PyTypeObject *type = define_FMatrix4x4_type(module);
         if (!type){ goto error; }
         Py_INCREF(type);
         state->FMatrix4x4_PyTypeObject = type;
+    }
+    {
+        PyTypeObject *type = define_FMatrix4x4Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->FMatrix4x4Array_PyTypeObject = type;
     }
 
 

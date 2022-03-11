@@ -1,15 +1,29 @@
 
 # gamut
-from gamut.math import (BVector2, BVector3, BVector4, DVector2, DVector3,
-                        DVector4, FVector2, FVector3, FVector4, I8Vector2,
-                        I8Vector3, I8Vector4, I16Vector2, I16Vector3,
-                        I16Vector4, I32Vector2, I32Vector3, I32Vector4,
-                        I64Vector2, I64Vector3, I64Vector4, IVector2, IVector3,
-                        IVector4, U8Vector2, U8Vector3, U8Vector4, U16Vector2,
-                        U16Vector3, U16Vector4, U32Vector2, U32Vector3,
-                        U32Vector4, U64Vector2, U64Vector3, U64Vector4,
-                        UVector2, UVector3, UVector4, Vector2, Vector3,
-                        Vector4)
+from gamut.math import (BVector2, BVector2Array, BVector3, BVector3Array,
+                        BVector4, BVector4Array, DVector2, DVector2Array,
+                        DVector3, DVector3Array, DVector4, DVector4Array,
+                        FVector2, FVector2Array, FVector3, FVector3Array,
+                        FVector4, FVector4Array, I8Vector2, I8Vector2Array,
+                        I8Vector3, I8Vector3Array, I8Vector4, I8Vector4Array,
+                        I16Vector2, I16Vector2Array, I16Vector3,
+                        I16Vector3Array, I16Vector4, I16Vector4Array,
+                        I32Vector2, I32Vector2Array, I32Vector3,
+                        I32Vector3Array, I32Vector4, I32Vector4Array,
+                        I64Vector2, I64Vector2Array, I64Vector3,
+                        I64Vector3Array, I64Vector4, I64Vector4Array, IVector2,
+                        IVector2Array, IVector3, IVector3Array, IVector4,
+                        IVector4Array, U8Vector2, U8Vector2Array, U8Vector3,
+                        U8Vector3Array, U8Vector4, U8Vector4Array, U16Vector2,
+                        U16Vector2Array, U16Vector3, U16Vector3Array,
+                        U16Vector4, U16Vector4Array, U32Vector2,
+                        U32Vector2Array, U32Vector3, U32Vector3Array,
+                        U32Vector4, U32Vector4Array, U64Vector2,
+                        U64Vector2Array, U64Vector3, U64Vector3Array,
+                        U64Vector4, U64Vector4Array, UVector2, UVector2Array,
+                        UVector3, UVector3Array, UVector4, UVector4Array,
+                        Vector2, Vector2Array, Vector3, Vector3Array, Vector4,
+                        Vector4Array)
 # python
 import itertools
 from math import inf
@@ -31,6 +45,10 @@ def test_alias():
     assert Vector3 is DVector3
     assert Vector4 is DVector4
 
+    assert Vector2Array is DVector2Array
+    assert Vector3Array is DVector3Array
+    assert Vector4Array is DVector4Array
+
 
 class VectorTest:
 
@@ -50,6 +68,7 @@ class VectorTest:
         unsigned=False
     ):
         this_cls.cls = cls
+        this_cls.array_cls = globals()[f'{cls.__name__}Array']
         this_cls.component_count = component_count
         this_cls.type = type
         this_cls.struct_byte_order = struct_byte_order
@@ -61,9 +80,17 @@ class VectorTest:
         for i in range(self.component_count):
             assert vector[i] == 0
 
+    def test_array_init_empty(self) -> None:
+        array = self.array_cls()
+        assert len(array) == 0
+
     def test_init_keywords(self) -> None:
         with pytest.raises(TypeError):
             self.cls(x=0)
+
+    def test_array_init_keywords(self) -> None:
+        with pytest.raises(TypeError):
+            self.array_cls(x=0)
 
     def test_single_init(self) -> None:
         for arg in [-100, -1, 0, 1, 100]:
@@ -90,6 +117,14 @@ class VectorTest:
         for i in range(self.component_count):
             assert vector[i] == self.type(i)
 
+    def test_array_init(self) -> None:
+        for i in range(10):
+            array = self.array_cls(*(self.cls(j) for j in range(i)))
+            assert len(array) == i
+            for j, vector in enumerate(array):
+                assert isinstance(vector, self.cls)
+                assert vector == self.cls(j)
+
     def test_invalid_arg_count(self) -> None:
         with pytest.raises(TypeError) as excinfo:
             vector = self.cls(*range(self.component_count + 1))
@@ -107,6 +142,12 @@ class VectorTest:
                 f'{ self.cls.__name__ }, expected 0, 1 or '
                 f'{ self.component_count } (got { count })'
             )
+
+    def test_array_init_invalid_type(self):
+        with pytest.raises(TypeError):
+            self.array_cls(None)
+        with pytest.raises(TypeError):
+            self.array_cls(1)
 
     def test_len(self) -> None:
         vector = self.cls()
@@ -128,6 +169,26 @@ class VectorTest:
             vector[-(self.component_count + 1)]
         assert str(excinfo.value) == 'index out of range'
 
+    def test_array_getitem(self) -> None:
+        with pytest.raises(IndexError) as excinfo:
+            self.array_cls()[0]
+        assert str(excinfo.value) == 'index out of range'
+
+        array = self.array_cls(*(self.cls(i) for i in range(10)))
+        for i in range(10):
+            assert isinstance(array[i], self.cls)
+            assert array[i] == self.cls(i)
+            assert isinstance(array[i - 10], self.cls)
+            assert array[i - 10] == self.cls(i)
+
+        with pytest.raises(IndexError) as excinfo:
+            array[10]
+        assert str(excinfo.value) == 'index out of range'
+
+        with pytest.raises(IndexError) as excinfo:
+            array[-11]
+        assert str(excinfo.value) == 'index out of range'
+
     def test_setitem(self) -> None:
         vector = self.cls(*range(self.component_count))
         for i in range(self.component_count):
@@ -135,6 +196,11 @@ class VectorTest:
                 vector[i] = 99
             with pytest.raises(TypeError):
                 vector[i - self.component_count] = 99
+
+    def test_array_setitem(self) -> None:
+        array = self.array_cls(self.cls(1))
+        with pytest.raises(TypeError):
+            array[0] = self.cls(2)
 
     def test_component_attributes(self) -> None:
         vector = self.cls(*range(self.component_count))
@@ -208,12 +274,34 @@ class VectorTest:
             self.cls(*range(self.component_count))
         )
 
+    def test_array_hash(self) -> None:
+        assert hash(self.array_cls()) != hash(self.array_cls(self.cls(0)))
+        assert hash(self.array_cls(self.cls(0))) != hash(
+            self.array_cls(self.cls(1))
+        )
+        assert hash(self.array_cls(self.cls(1))) == hash(
+            self.array_cls(self.cls(1))
+        )
+        if self.type != bool and not self.unsigned:
+            assert hash(self.array_cls(self.cls(-1))) != (
+                hash(self.array_cls(self.cls(1)))
+            )
+
     def test_repr(self) -> None:
         vector = self.cls(*range(self.component_count))
         assert repr(vector) == (
             f'{vector.__class__.__name__}(' +
             ', '.join(repr(vector[i]) for i in range(self.component_count)) +
             f')'
+        )
+
+    def test_array_repr(self) -> None:
+        assert repr(self.array_cls()) == f'{self.array_cls.__name__}[0]'
+        assert repr(self.array_cls(self.cls())) == (
+            f'{self.array_cls.__name__}[1]'
+        )
+        assert repr(self.array_cls(*(self.cls() for _ in range(100)))) == (
+            f'{self.array_cls.__name__}[100]'
         )
 
     def test_iterate(self) -> None:
@@ -225,6 +313,10 @@ class VectorTest:
     def test_weakref(self) -> None:
         vector = self.cls()
         weak_vector = ref(vector)
+
+    def test_array_weakref(self) -> None:
+        array = self.array_cls()
+        weak_array = ref(array)
 
     def test_equal(self) -> None:
         for i in range(0 if self.unsigned else -100, 100):
@@ -238,6 +330,20 @@ class VectorTest:
         assert not (1 == self.cls())
         assert not (object() == self.cls())
 
+    def test_array_equal(self) -> None:
+        assert self.array_cls() == self.array_cls()
+        for i in range(0 if self.unsigned else -100, 100):
+            assert self.array_cls(self.cls(i)) == self.array_cls(self.cls(i))
+            assert not (
+                self.array_cls(self.cls(i), self.cls(i)) ==
+                self.array_cls(self.cls(i))
+            )
+
+        assert not (self.array_cls() == 1)
+        assert not (self.array_cls() == object())
+        assert not (1 == self.array_cls())
+        assert not (object() == self.array_cls())
+
     def test_not_equal(self) -> None:
         for i in range(0 if self.unsigned else -100, 100):
             assert not (self.cls(i) != self.cls(i))
@@ -248,9 +354,37 @@ class VectorTest:
         assert self.cls() != 1
         assert self.cls() != object()
 
+    def test_array_equal(self) -> None:
+        assert not (self.array_cls() != self.array_cls())
+        for i in range(0 if self.unsigned else -100, 100):
+            assert not (
+                self.array_cls(self.cls(i)) != self.array_cls(self.cls(i))
+            )
+            assert (
+                self.array_cls(self.cls(i), self.cls(i)) !=
+                self.array_cls(self.cls(i))
+            )
+
+        assert self.array_cls() != 1
+        assert self.array_cls() != object()
+        assert 1 != self.array_cls()
+        assert object() != self.array_cls()
+
     def test_comparisons_not_implemented(self) -> None:
         a = self.cls()
         b = self.cls()
+        with pytest.raises(TypeError):
+            a < b
+        with pytest.raises(TypeError):
+            a <= b
+        with pytest.raises(TypeError):
+            a > b
+        with pytest.raises(TypeError):
+            a >= b
+
+    def test_array_comparisons_not_implemented(self) -> None:
+        a = self.array_cls()
+        b = self.array_cls()
         with pytest.raises(TypeError):
             a < b
         with pytest.raises(TypeError):
@@ -736,6 +870,10 @@ class VectorTest:
             components[i] = 0
             assert not self.cls(*components)
 
+    def test_array_bool(self) -> None:
+        assert not self.array_cls()
+        assert self.array_cls(self.cls())
+
     def test_buffer(self) -> None:
         assert bytes(self.cls(*range(self.component_count))) == struct.pack(
             self.struct_byte_order + (
@@ -759,6 +897,42 @@ class VectorTest:
         assert memory_view.suboffsets == tuple()
         assert memory_view.c_contiguous
         assert memory_view.f_contiguous
+        assert memory_view.contiguous
+
+    def test_array_buffer(self) -> None:
+        assert bytes(self.array_cls()) == b''
+
+        array = self.array_cls(
+            self.cls(1),
+            self.cls(*range(self.component_count)),
+            self.cls(0),
+        )
+        assert bytes(array) == struct.pack(
+            self.struct_byte_order + (
+                self.struct_format * 3 * self.component_count
+            ),
+            *(1 for _ in range(self.component_count)),
+            *range(self.component_count),
+            *(0 for _ in range(self.component_count)),
+        )
+        memory_view = memoryview(array)
+        assert memory_view.readonly
+        assert memory_view.format == (
+            self.struct_byte_order + self.struct_format
+        )
+        assert memory_view.itemsize == struct.calcsize(
+            self.struct_byte_order + self.struct_format
+        )
+        assert memory_view.ndim == 2
+        assert memory_view.shape == (3, self.component_count)
+        assert memory_view.strides == (
+            struct.calcsize(self.struct_byte_order + self.struct_format) *
+            self.component_count,
+            struct.calcsize(self.struct_byte_order + self.struct_format),
+        )
+        assert memory_view.suboffsets == tuple()
+        assert memory_view.c_contiguous
+        assert not memory_view.f_contiguous
         assert memory_view.contiguous
 
     def test_cross(self) -> None:

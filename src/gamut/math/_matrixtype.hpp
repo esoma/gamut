@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 23:24:28.478932 from codegen/math/templates/_matrixtype.hpp
+// generated 2022-03-11 02:51:43.110961 from codegen/math/templates/_matrixtype.hpp
 
 #ifndef GAMUT_MATH_MATRIXTYPE_HPP
 #define GAMUT_MATH_MATRIXTYPE_HPP
@@ -22,6 +22,14 @@ struct DMatrix2x2
     DMatrix2x2Glm *glm;
 };
 
+struct DMatrix2x2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix2x2Glm *glm;
+};
+
 
 
 typedef glm::tmat2x2<float, glm::defaultp> FMatrix2x2Glm;
@@ -30,6 +38,14 @@ struct FMatrix2x2
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix2x2Glm *glm;
+};
+
+struct FMatrix2x2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix2x2Glm *glm;
 };
 
@@ -44,6 +60,14 @@ struct DMatrix2x3
     DMatrix2x3Glm *glm;
 };
 
+struct DMatrix2x3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix2x3Glm *glm;
+};
+
 
 
 typedef glm::tmat2x3<float, glm::defaultp> FMatrix2x3Glm;
@@ -52,6 +76,14 @@ struct FMatrix2x3
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix2x3Glm *glm;
+};
+
+struct FMatrix2x3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix2x3Glm *glm;
 };
 
@@ -66,6 +98,14 @@ struct DMatrix2x4
     DMatrix2x4Glm *glm;
 };
 
+struct DMatrix2x4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix2x4Glm *glm;
+};
+
 
 
 typedef glm::tmat2x4<float, glm::defaultp> FMatrix2x4Glm;
@@ -74,6 +114,14 @@ struct FMatrix2x4
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix2x4Glm *glm;
+};
+
+struct FMatrix2x4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix2x4Glm *glm;
 };
 
@@ -88,6 +136,14 @@ struct DMatrix3x2
     DMatrix3x2Glm *glm;
 };
 
+struct DMatrix3x2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix3x2Glm *glm;
+};
+
 
 
 typedef glm::tmat3x2<float, glm::defaultp> FMatrix3x2Glm;
@@ -96,6 +152,14 @@ struct FMatrix3x2
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix3x2Glm *glm;
+};
+
+struct FMatrix3x2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix3x2Glm *glm;
 };
 
@@ -110,6 +174,14 @@ struct DMatrix3x3
     DMatrix3x3Glm *glm;
 };
 
+struct DMatrix3x3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix3x3Glm *glm;
+};
+
 
 
 typedef glm::tmat3x3<float, glm::defaultp> FMatrix3x3Glm;
@@ -118,6 +190,14 @@ struct FMatrix3x3
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix3x3Glm *glm;
+};
+
+struct FMatrix3x3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix3x3Glm *glm;
 };
 
@@ -132,6 +212,14 @@ struct DMatrix3x4
     DMatrix3x4Glm *glm;
 };
 
+struct DMatrix3x4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix3x4Glm *glm;
+};
+
 
 
 typedef glm::tmat3x4<float, glm::defaultp> FMatrix3x4Glm;
@@ -140,6 +228,14 @@ struct FMatrix3x4
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix3x4Glm *glm;
+};
+
+struct FMatrix3x4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix3x4Glm *glm;
 };
 
@@ -154,6 +250,14 @@ struct DMatrix4x2
     DMatrix4x2Glm *glm;
 };
 
+struct DMatrix4x2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix4x2Glm *glm;
+};
+
 
 
 typedef glm::tmat4x2<float, glm::defaultp> FMatrix4x2Glm;
@@ -162,6 +266,14 @@ struct FMatrix4x2
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix4x2Glm *glm;
+};
+
+struct FMatrix4x2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix4x2Glm *glm;
 };
 
@@ -176,6 +288,14 @@ struct DMatrix4x3
     DMatrix4x3Glm *glm;
 };
 
+struct DMatrix4x3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix4x3Glm *glm;
+};
+
 
 
 typedef glm::tmat4x3<float, glm::defaultp> FMatrix4x3Glm;
@@ -184,6 +304,14 @@ struct FMatrix4x3
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix4x3Glm *glm;
+};
+
+struct FMatrix4x3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix4x3Glm *glm;
 };
 
@@ -198,6 +326,14 @@ struct DMatrix4x4
     DMatrix4x4Glm *glm;
 };
 
+struct DMatrix4x4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DMatrix4x4Glm *glm;
+};
+
 
 
 typedef glm::tmat4x4<float, glm::defaultp> FMatrix4x4Glm;
@@ -206,6 +342,14 @@ struct FMatrix4x4
 {
     PyObject_HEAD
     PyObject *weakreflist;
+    FMatrix4x4Glm *glm;
+};
+
+struct FMatrix4x4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
     FMatrix4x4Glm *glm;
 };
 
