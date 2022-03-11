@@ -904,19 +904,19 @@ define_{{ name }}_type(PyObject *module)
 }
 
 {% if c_type in ['float', 'double'] %}
-static {{ name }} *
-create_{{ name }}_from_glm(const {{ name }}Glm& glm)
-{
-    auto module_state = get_module_state();
-    if (!module_state){ return 0; }
-    auto cls = module_state->{{ name }}_PyTypeObject;
+    static {{ name }} *
+    create_{{ name }}_from_glm(const {{ name }}Glm& glm)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->{{ name }}_PyTypeObject;
 
-    {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new {{ name }}Glm(glm);
+        {{ name }} *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(glm);
 
-    return result;
-}
+        return result;
+    }
 {% endif %}
 
 

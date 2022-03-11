@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 02:51:43.056462 from codegen/math/templates/_vector.hpp
+// generated 2022-03-11 03:01:13.026063 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_FVECTOR4_HPP
 #define GAMUT_MATH_FVECTOR4_HPP
@@ -1148,19 +1148,19 @@ define_FVector4_type(PyObject *module)
 }
 
 
-static FVector4 *
-create_FVector4_from_glm(const FVector4Glm& glm)
-{
-    auto module_state = get_module_state();
-    if (!module_state){ return 0; }
-    auto cls = module_state->FVector4_PyTypeObject;
+    static FVector4 *
+    create_FVector4_from_glm(const FVector4Glm& glm)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FVector4_PyTypeObject;
 
-    FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
-    if (!result){ return 0; }
-    result->glm = new FVector4Glm(glm);
+        FVector4 *result = (FVector4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FVector4Glm(glm);
 
-    return result;
-}
+        return result;
+    }
 
 
 

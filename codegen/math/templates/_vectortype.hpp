@@ -25,6 +25,7 @@ struct {{ name }}
 static {{ name }} *
 create_{{ name }}_from_glm(const {{ name }}Glm& glm);
 
+
 struct {{ name }}Array
 {
     PyObject_HEAD
