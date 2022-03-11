@@ -4,3 +4,17 @@ src/gamut/math/_math.pyi linguist-generated
 src/gamut/math/_modulestate.hpp linguist-generated
 src/gamut/math/_*matrix*.hpp linguist-generated
 src/gamut/math/_*vector*.hpp linguist-generated
+src/gamut/math/_b.hpp linguist-generated
+src/gamut/math/_d.hpp linguist-generated
+src/gamut/math/_f.hpp linguist-generated
+src/gamut/math/_i.hpp linguist-generated
+src/gamut/math/_u.hpp linguist-generated
+src/gamut/math/_i8.hpp linguist-generated
+src/gamut/math/_u8.hpp linguist-generated
+src/gamut/math/_i16.hpp linguist-generated
+src/gamut/math/_u16.hpp linguist-generated
+src/gamut/math/_i32.hpp linguist-generated
+src/gamut/math/_u32.hpp linguist-generated
+src/gamut/math/_i64.hpp linguist-generated
+src/gamut/math/_u64.hpp linguist-generated
+src/gamut/math/_podtype.hpp linguist-generated
