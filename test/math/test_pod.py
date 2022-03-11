@@ -15,6 +15,11 @@ def isclose(a, b):
     return _isclose(a, b, rel_tol=1e-07)
 
 
+class NotBool:
+    def __bool__(self):
+        raise TypeError('cannot bool')
+
+
 class PodTest:
 
     def __init_subclass__(
@@ -50,6 +55,8 @@ class PodTest:
 
     def test_array_init_invalid_type(self):
         if self.type is bool:
+            with pytest.raises(TypeError):
+                self.array_cls(NotBool())
             return
         with pytest.raises(TypeError):
             self.array_cls(None)
@@ -121,7 +128,7 @@ class PodTest:
         assert not (1 == self.array_cls())
         assert not (object() == self.array_cls())
 
-    def test_array_equal(self) -> None:
+    def test_array_not_equal(self) -> None:
         assert not (self.array_cls() != self.array_cls())
         for i in range(0 if self.unsigned else -100, 100):
             assert not (

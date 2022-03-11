@@ -354,7 +354,7 @@ class VectorTest:
         assert self.cls() != 1
         assert self.cls() != object()
 
-    def test_array_equal(self) -> None:
+    def test_array_not_equal(self) -> None:
         assert not (self.array_cls() != self.array_cls())
         for i in range(0 if self.unsigned else -100, 100):
             assert not (
