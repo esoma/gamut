@@ -60,6 +60,12 @@ PyInit__math()
         Py_INCREF(type);
         state->{{ type }}_PyTypeObject = type;
     }
+    {
+        PyTypeObject *type = define_{{ type }}Array_type(module);
+        if (!type){ goto error; }
+        Py_INCREF(type);
+        state->{{ type }}Array_PyTypeObject = type;
+    }
     {% endfor %}
 
     return module;

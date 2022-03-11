@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 23:24:28.418431 from codegen/math/templates/_vector.hpp
+// generated 2022-03-11 03:01:13.015564 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR3_HPP
 #define GAMUT_MATH_BVECTOR3_HPP
@@ -868,18 +868,288 @@ define_BVector3_type(PyObject *module)
 }
 
 
-static BVector3 *
-create_BVector3_from_glm(const BVector3Glm& glm)
+
+
+static PyObject *
+BVector3Array__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto cls = module_state->BVector3_PyTypeObject;
+    auto element_cls = module_state->BVector3_PyTypeObject;
 
-    BVector3 *result = (BVector3 *)cls->tp_alloc(cls, 0);
+    if (kwds && PyDict_Size(kwds) != 0)
+    {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "BVector3 does accept any keyword arguments"
+        );
+        return 0;
+    }
+
+    auto arg_count = PyTuple_GET_SIZE(args);
+    if (arg_count == 0)
+    {
+        auto self = (BVector3Array *)cls->tp_alloc(cls, 0);
+        if (!self){ return 0; }
+        self->length = 0;
+        self->glm = 0;
+        return (PyObject *)self;
+    }
+
+    auto *self = (BVector3Array *)cls->tp_alloc(cls, 0);
+    if (!self){ return 0; }
+    self->length = arg_count;
+    self->glm = new BVector3Glm[arg_count];
+
+    for (int i = 0; i < arg_count; i++)
+    {
+        auto arg = PyTuple_GET_ITEM(args, i);
+        if (Py_TYPE(arg) == element_cls)
+        {
+            self->glm[i] = *(((BVector3*)arg)->glm);
+        }
+        else
+        {
+            Py_DECREF(self);
+            PyErr_Format(
+                PyExc_TypeError,
+                "invalid type %R, expected %R",
+                arg,
+                element_cls
+            );
+            return 0;
+        }
+    }
+
+    return (PyObject *)self;
+}
+
+
+static void
+BVector3Array__dealloc__(BVector3Array *self)
+{
+    if (self->weakreflist)
+    {
+        PyObject_ClearWeakRefs((PyObject *)self);
+    }
+
+    delete self->glm;
+
+    PyTypeObject *type = Py_TYPE(self);
+    type->tp_free(self);
+    Py_DECREF(type);
+}
+
+
+static Py_hash_t
+BVector3Array__hash__(BVector3Array *self)
+{
+    Py_ssize_t len = self->length * 3;
+    Py_uhash_t acc = _HASH_XXPRIME_5;
+    for (Py_ssize_t i = 0; i < (Py_ssize_t)self->length; i++)
+    {
+        for (BVector3Glm::length_type j = 0; j < 3; j++)
+        {
+            Py_uhash_t lane = std::hash<bool>{}(self->glm[i][j]);
+            acc += lane * _HASH_XXPRIME_2;
+            acc = _HASH_XXROTATE(acc);
+            acc *= _HASH_XXPRIME_1;
+        }
+        acc += len ^ (_HASH_XXPRIME_5 ^ 3527539UL);
+    }
+
+    if (acc == (Py_uhash_t)-1) {
+        return 1546275796;
+    }
+    return acc;
+}
+
+
+static PyObject *
+BVector3Array__repr__(BVector3Array *self)
+{
+    return PyUnicode_FromFormat("BVector3Array[%zu]", self->length);
+}
+
+
+static Py_ssize_t
+BVector3Array__len__(BVector3Array *self)
+{
+    return self->length;
+}
+
+
+static PyObject *
+BVector3Array__getitem__(BVector3Array *self, Py_ssize_t index)
+{
+    if (index < 0 || index > (Py_ssize_t)self->length - 1)
+    {
+        PyErr_Format(PyExc_IndexError, "index out of range");
+        return 0;
+    }
+
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto element_cls = module_state->BVector3_PyTypeObject;
+
+    BVector3 *result = (BVector3 *)element_cls->tp_alloc(element_cls, 0);
     if (!result){ return 0; }
-    result->glm = new BVector3Glm(glm);
+    result->glm = new BVector3Glm(self->glm[index]);
 
-    return result;
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+BVector3Array__richcmp__(
+    BVector3Array *self,
+    BVector3Array *other,
+    int op
+)
+{
+    if (Py_TYPE(self) != Py_TYPE(other))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    switch(op)
+    {
+        case Py_EQ:
+        {
+            if (self->length == other->length)
+            {
+                for (size_t i = 0; i < self->length; i++)
+                {
+                    if (self->glm[i] != other->glm[i])
+                    {
+                        Py_RETURN_FALSE;
+                    }
+                }
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                Py_RETURN_FALSE;
+            }
+        }
+        case Py_NE:
+        {
+            if (self->length != other->length)
+            {
+                Py_RETURN_TRUE;
+            }
+            else
+            {
+                for (size_t i = 0; i < self->length; i++)
+                {
+                    if (self->glm[i] != other->glm[i])
+                    {
+                        Py_RETURN_TRUE;
+                    }
+                }
+                Py_RETURN_FALSE;
+            }
+        }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+
+static int
+BVector3Array__bool__(BVector3Array *self)
+{
+    return self->length ? 1 : 0;
+}
+
+
+static int
+BVector3Array_getbufferproc(BVector3Array *self, Py_buffer *view, int flags)
+{
+    if (flags & PyBUF_WRITABLE)
+    {
+        PyErr_SetString(PyExc_TypeError, "BVector3 is read only");
+        view->obj = 0;
+        return -1;
+    }
+    view->buf = self->glm;
+    view->obj = (PyObject *)self;
+    view->len = sizeof(bool) * 3 * self->length;
+    view->readonly = 1;
+    view->itemsize = sizeof(bool);
+    view->format = "?";
+    view->ndim = 2;
+    view->shape = new Py_ssize_t[2] {
+        (Py_ssize_t)self->length,
+        3
+    };
+    static Py_ssize_t strides[] = {
+        sizeof(bool) * 3,
+        sizeof(bool)
+    };
+    view->strides = &strides[0];
+    view->suboffsets = 0;
+    view->internal = 0;
+    Py_INCREF(self);
+    return 0;
+}
+
+
+static void
+BVector3Array_releasebufferproc(BVector3Array *self, Py_buffer *view)
+{
+    delete view->shape;
+}
+
+
+static PyMemberDef BVector3Array_PyMemberDef[] = {
+    {"__weaklistoffset__", T_PYSSIZET, offsetof(BVector3Array, weakreflist), READONLY},
+    {0}
+};
+
+
+static PyType_Slot BVector3Array_PyType_Slots [] = {
+    {Py_tp_new, (void*)BVector3Array__new__},
+    {Py_tp_dealloc, (void*)BVector3Array__dealloc__},
+    {Py_tp_hash, (void*)BVector3Array__hash__},
+    {Py_tp_repr, (void*)BVector3Array__repr__},
+    {Py_sq_length, (void*)BVector3Array__len__},
+    {Py_sq_item, (void*)BVector3Array__getitem__},
+    {Py_tp_richcompare, (void*)BVector3Array__richcmp__},
+    {Py_nb_bool, (void*)BVector3Array__bool__},
+    {Py_bf_getbuffer, (void*)BVector3Array_getbufferproc},
+    {Py_bf_releasebuffer, (void*)BVector3Array_releasebufferproc},
+    {Py_tp_members, (void*)BVector3Array_PyMemberDef},
+    {0, 0},
+};
+
+
+static PyType_Spec BVector3Array_PyTypeSpec = {
+    "gamut.math.BVector3Array",
+    sizeof(BVector3Array),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    BVector3Array_PyType_Slots
+};
+
+
+static PyTypeObject *
+define_BVector3Array_type(PyObject *module)
+{
+    PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
+        module,
+        &BVector3Array_PyTypeSpec,
+        0
+    );
+    if (!type){ return 0; }
+    // Note:
+    // Unlike other functions that steal references, PyModule_AddObject() only
+    // decrements the reference count of value on success.
+    if (PyModule_AddObject(module, "BVector3Array", (PyObject *)type) < 0)
+    {
+        Py_DECREF(type);
+        return 0;
+    }
+    return type;
 }
 
 #endif

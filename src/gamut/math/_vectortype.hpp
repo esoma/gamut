@@ -1,5 +1,5 @@
 
-// generated 2022-03-10 23:24:28.437931 from codegen/math/templates/_vectortype.hpp
+// generated 2022-03-11 03:01:13.035563 from codegen/math/templates/_vectortype.hpp
 
 #ifndef GAMUT_MATH_VECTORTYPE_HPP
 #define GAMUT_MATH_VECTORTYPE_HPP
@@ -26,6 +26,15 @@ static BVector2 *
 create_BVector2_from_glm(const BVector2Glm& glm);
 
 
+struct BVector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    BVector2Glm *glm;
+};
+
+
 
 typedef glm::vec<2, double, glm::defaultp> DVector2Glm;
 
@@ -38,6 +47,15 @@ struct DVector2
 
 static DVector2 *
 create_DVector2_from_glm(const DVector2Glm& glm);
+
+
+struct DVector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DVector2Glm *glm;
+};
 
 
 
@@ -54,6 +72,15 @@ static FVector2 *
 create_FVector2_from_glm(const FVector2Glm& glm);
 
 
+struct FVector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    FVector2Glm *glm;
+};
+
+
 
 typedef glm::vec<2, int8_t, glm::defaultp> I8Vector2Glm;
 
@@ -66,6 +93,15 @@ struct I8Vector2
 
 static I8Vector2 *
 create_I8Vector2_from_glm(const I8Vector2Glm& glm);
+
+
+struct I8Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I8Vector2Glm *glm;
+};
 
 
 
@@ -82,6 +118,15 @@ static U8Vector2 *
 create_U8Vector2_from_glm(const U8Vector2Glm& glm);
 
 
+struct U8Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U8Vector2Glm *glm;
+};
+
+
 
 typedef glm::vec<2, int16_t, glm::defaultp> I16Vector2Glm;
 
@@ -94,6 +139,15 @@ struct I16Vector2
 
 static I16Vector2 *
 create_I16Vector2_from_glm(const I16Vector2Glm& glm);
+
+
+struct I16Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I16Vector2Glm *glm;
+};
 
 
 
@@ -110,6 +164,15 @@ static U16Vector2 *
 create_U16Vector2_from_glm(const U16Vector2Glm& glm);
 
 
+struct U16Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U16Vector2Glm *glm;
+};
+
+
 
 typedef glm::vec<2, int32_t, glm::defaultp> I32Vector2Glm;
 
@@ -122,6 +185,15 @@ struct I32Vector2
 
 static I32Vector2 *
 create_I32Vector2_from_glm(const I32Vector2Glm& glm);
+
+
+struct I32Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I32Vector2Glm *glm;
+};
 
 
 
@@ -138,6 +210,15 @@ static U32Vector2 *
 create_U32Vector2_from_glm(const U32Vector2Glm& glm);
 
 
+struct U32Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U32Vector2Glm *glm;
+};
+
+
 
 typedef glm::vec<2, int, glm::defaultp> IVector2Glm;
 
@@ -150,6 +231,15 @@ struct IVector2
 
 static IVector2 *
 create_IVector2_from_glm(const IVector2Glm& glm);
+
+
+struct IVector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    IVector2Glm *glm;
+};
 
 
 
@@ -166,6 +256,15 @@ static UVector2 *
 create_UVector2_from_glm(const UVector2Glm& glm);
 
 
+struct UVector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    UVector2Glm *glm;
+};
+
+
 
 typedef glm::vec<2, int64_t, glm::defaultp> I64Vector2Glm;
 
@@ -178,6 +277,15 @@ struct I64Vector2
 
 static I64Vector2 *
 create_I64Vector2_from_glm(const I64Vector2Glm& glm);
+
+
+struct I64Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I64Vector2Glm *glm;
+};
 
 
 
@@ -194,6 +302,15 @@ static U64Vector2 *
 create_U64Vector2_from_glm(const U64Vector2Glm& glm);
 
 
+struct U64Vector2Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U64Vector2Glm *glm;
+};
+
+
 
 typedef glm::vec<3, bool, glm::defaultp> BVector3Glm;
 
@@ -206,6 +323,15 @@ struct BVector3
 
 static BVector3 *
 create_BVector3_from_glm(const BVector3Glm& glm);
+
+
+struct BVector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    BVector3Glm *glm;
+};
 
 
 
@@ -222,6 +348,15 @@ static DVector3 *
 create_DVector3_from_glm(const DVector3Glm& glm);
 
 
+struct DVector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DVector3Glm *glm;
+};
+
+
 
 typedef glm::vec<3, float, glm::defaultp> FVector3Glm;
 
@@ -234,6 +369,15 @@ struct FVector3
 
 static FVector3 *
 create_FVector3_from_glm(const FVector3Glm& glm);
+
+
+struct FVector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    FVector3Glm *glm;
+};
 
 
 
@@ -250,6 +394,15 @@ static I8Vector3 *
 create_I8Vector3_from_glm(const I8Vector3Glm& glm);
 
 
+struct I8Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I8Vector3Glm *glm;
+};
+
+
 
 typedef glm::vec<3, uint8_t, glm::defaultp> U8Vector3Glm;
 
@@ -262,6 +415,15 @@ struct U8Vector3
 
 static U8Vector3 *
 create_U8Vector3_from_glm(const U8Vector3Glm& glm);
+
+
+struct U8Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U8Vector3Glm *glm;
+};
 
 
 
@@ -278,6 +440,15 @@ static I16Vector3 *
 create_I16Vector3_from_glm(const I16Vector3Glm& glm);
 
 
+struct I16Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I16Vector3Glm *glm;
+};
+
+
 
 typedef glm::vec<3, uint16_t, glm::defaultp> U16Vector3Glm;
 
@@ -290,6 +461,15 @@ struct U16Vector3
 
 static U16Vector3 *
 create_U16Vector3_from_glm(const U16Vector3Glm& glm);
+
+
+struct U16Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U16Vector3Glm *glm;
+};
 
 
 
@@ -306,6 +486,15 @@ static I32Vector3 *
 create_I32Vector3_from_glm(const I32Vector3Glm& glm);
 
 
+struct I32Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I32Vector3Glm *glm;
+};
+
+
 
 typedef glm::vec<3, uint32_t, glm::defaultp> U32Vector3Glm;
 
@@ -318,6 +507,15 @@ struct U32Vector3
 
 static U32Vector3 *
 create_U32Vector3_from_glm(const U32Vector3Glm& glm);
+
+
+struct U32Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U32Vector3Glm *glm;
+};
 
 
 
@@ -334,6 +532,15 @@ static IVector3 *
 create_IVector3_from_glm(const IVector3Glm& glm);
 
 
+struct IVector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    IVector3Glm *glm;
+};
+
+
 
 typedef glm::vec<3, unsigned int, glm::defaultp> UVector3Glm;
 
@@ -346,6 +553,15 @@ struct UVector3
 
 static UVector3 *
 create_UVector3_from_glm(const UVector3Glm& glm);
+
+
+struct UVector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    UVector3Glm *glm;
+};
 
 
 
@@ -362,6 +578,15 @@ static I64Vector3 *
 create_I64Vector3_from_glm(const I64Vector3Glm& glm);
 
 
+struct I64Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I64Vector3Glm *glm;
+};
+
+
 
 typedef glm::vec<3, uint64_t, glm::defaultp> U64Vector3Glm;
 
@@ -374,6 +599,15 @@ struct U64Vector3
 
 static U64Vector3 *
 create_U64Vector3_from_glm(const U64Vector3Glm& glm);
+
+
+struct U64Vector3Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U64Vector3Glm *glm;
+};
 
 
 
@@ -390,6 +624,15 @@ static BVector4 *
 create_BVector4_from_glm(const BVector4Glm& glm);
 
 
+struct BVector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    BVector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, double, glm::defaultp> DVector4Glm;
 
@@ -402,6 +645,15 @@ struct DVector4
 
 static DVector4 *
 create_DVector4_from_glm(const DVector4Glm& glm);
+
+
+struct DVector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DVector4Glm *glm;
+};
 
 
 
@@ -418,6 +670,15 @@ static FVector4 *
 create_FVector4_from_glm(const FVector4Glm& glm);
 
 
+struct FVector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    FVector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, int8_t, glm::defaultp> I8Vector4Glm;
 
@@ -430,6 +691,15 @@ struct I8Vector4
 
 static I8Vector4 *
 create_I8Vector4_from_glm(const I8Vector4Glm& glm);
+
+
+struct I8Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I8Vector4Glm *glm;
+};
 
 
 
@@ -446,6 +716,15 @@ static U8Vector4 *
 create_U8Vector4_from_glm(const U8Vector4Glm& glm);
 
 
+struct U8Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U8Vector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, int16_t, glm::defaultp> I16Vector4Glm;
 
@@ -458,6 +737,15 @@ struct I16Vector4
 
 static I16Vector4 *
 create_I16Vector4_from_glm(const I16Vector4Glm& glm);
+
+
+struct I16Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I16Vector4Glm *glm;
+};
 
 
 
@@ -474,6 +762,15 @@ static U16Vector4 *
 create_U16Vector4_from_glm(const U16Vector4Glm& glm);
 
 
+struct U16Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U16Vector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, int32_t, glm::defaultp> I32Vector4Glm;
 
@@ -486,6 +783,15 @@ struct I32Vector4
 
 static I32Vector4 *
 create_I32Vector4_from_glm(const I32Vector4Glm& glm);
+
+
+struct I32Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I32Vector4Glm *glm;
+};
 
 
 
@@ -502,6 +808,15 @@ static U32Vector4 *
 create_U32Vector4_from_glm(const U32Vector4Glm& glm);
 
 
+struct U32Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U32Vector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, int, glm::defaultp> IVector4Glm;
 
@@ -514,6 +829,15 @@ struct IVector4
 
 static IVector4 *
 create_IVector4_from_glm(const IVector4Glm& glm);
+
+
+struct IVector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    IVector4Glm *glm;
+};
 
 
 
@@ -530,6 +854,15 @@ static UVector4 *
 create_UVector4_from_glm(const UVector4Glm& glm);
 
 
+struct UVector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    UVector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, int64_t, glm::defaultp> I64Vector4Glm;
 
@@ -544,6 +877,15 @@ static I64Vector4 *
 create_I64Vector4_from_glm(const I64Vector4Glm& glm);
 
 
+struct I64Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I64Vector4Glm *glm;
+};
+
+
 
 typedef glm::vec<4, uint64_t, glm::defaultp> U64Vector4Glm;
 
@@ -556,6 +898,15 @@ struct U64Vector4
 
 static U64Vector4 *
 create_U64Vector4_from_glm(const U64Vector4Glm& glm);
+
+
+struct U64Vector4Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U64Vector4Glm *glm;
+};
 
 
 
