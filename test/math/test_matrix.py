@@ -331,7 +331,7 @@ class MatrixTest:
         assert 1 != self.cls()
         assert object() != self.cls()
 
-    def test_array_equal(self) -> None:
+    def test_array_not_equal(self) -> None:
         assert not (self.array_cls() != self.array_cls())
         for i in range(-100, 100):
             assert not (
