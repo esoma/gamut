@@ -132,6 +132,8 @@ test_math_api = Extension(
     include_dirs=['include'],
     sources=['src/gamut/math/_test_api.c'],
     language='c',
+    extra_compile_args=coverage_compile_args,
+    extra_link_args=coverage_links_args,
 )
 
 
