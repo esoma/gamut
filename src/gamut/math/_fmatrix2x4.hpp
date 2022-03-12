@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 02:15:25.010288 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 15:44:01.787640 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX2X4_HPP
 #define GAMUT_MATH_FMATRIX2X4_HPP
@@ -790,6 +790,9 @@ static PyMemberDef FMatrix2x4_PyMemberDef[] = {
 
 
 
+
+
+
 static FMatrix4x2 *
 FMatrix2x4_transpose(FMatrix2x4 *self, void*)
 {
@@ -833,6 +836,7 @@ FMatrix2x4_get_limits(FMatrix2x4 *self, void *)
 
 
 static PyMethodDef FMatrix2x4_PyMethodDef[] = {
+
 
     {"transpose", (PyCFunction)FMatrix2x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)FMatrix2x4_get_limits, METH_NOARGS | METH_STATIC, 0},

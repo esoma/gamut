@@ -581,6 +581,96 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
 {% endif %}
 
 
+{% if row_size == 4 and column_size == 4 %}
+    static {{ name }} *
+    {{ name }}_rotate({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 2)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+            return 0;
+        }
+
+        {{ c_type }} angle = ({{ c_type }})PyFloat_AsDouble(args[0]);
+        if (PyErr_Occurred()){ return 0; }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vector_cls = module_state->{{ name[0] }}Vector3_PyTypeObject;
+        if (Py_TYPE(args[1]) != vector_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected {{ name[0] }}Vector3, got %R", args[0]);
+            return 0;
+        }
+        {{ name[0] }}Vector3 *vector = ({{ name[0] }}Vector3 *)args[1];
+
+        auto matrix = glm::rotate(*self->glm, angle, *vector->glm);
+
+        auto cls = Py_TYPE(self);
+        auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(matrix);
+        return result;
+    }
+
+    static {{ name }} *
+    {{ name }}_scale({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 1)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+            return 0;
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vector_cls = module_state->{{ name[0] }}Vector3_PyTypeObject;
+        if (Py_TYPE(args[0]) != vector_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected {{ name[0] }}Vector3, got %R", args[0]);
+            return 0;
+        }
+        {{ name[0] }}Vector3 *vector = ({{ name[0] }}Vector3 *)args[0];
+
+        auto matrix = glm::scale(*self->glm, *vector->glm);
+
+        auto cls = Py_TYPE(self);
+        auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(matrix);
+        return result;
+    }
+
+    static {{ name }} *
+    {{ name }}_translate({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 1)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+            return 0;
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vector_cls = module_state->{{ name[0] }}Vector3_PyTypeObject;
+        if (Py_TYPE(args[0]) != vector_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected {{ name[0] }}Vector3, got %R", args[0]);
+            return 0;
+        }
+        {{ name[0] }}Vector3 *vector = ({{ name[0] }}Vector3 *)args[0];
+
+        auto matrix = glm::translate(*self->glm, *vector->glm);
+
+        auto cls = Py_TYPE(self);
+        auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(matrix);
+        return result;
+    }
+{% endif %}
+
+
 {% with transpose_name=(('D' if c_type == 'double' else 'F') + 'Matrix' + str(column_size) + 'x' + str(row_size)) %}
 static {{ transpose_name }} *
 {{ name }}_transpose({{ name }} *self, void*)
@@ -627,6 +717,11 @@ static PyObject *
 static PyMethodDef {{ name }}_PyMethodDef[] = {
     {% if row_size == column_size %}
         {"inverse", (PyCFunction){{ name }}_inverse, METH_NOARGS, 0},
+    {% endif %}
+    {% if row_size == 4 and column_size == 4 %}
+        {"rotate", (PyCFunction){{ name }}_rotate, METH_FASTCALL, 0},
+        {"scale", (PyCFunction){{ name }}_scale, METH_FASTCALL, 0},
+        {"translate", (PyCFunction){{ name }}_translate, METH_FASTCALL, 0},
     {% endif %}
     {"transpose", (PyCFunction){{ name }}_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
