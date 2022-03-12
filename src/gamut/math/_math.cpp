@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 02:08:08.820392 from codegen/math/templates/_math.cpp
+// generated 2022-03-12 02:15:25.040287 from codegen/math/templates/_math.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -150,7 +150,7 @@
 
     #include "_u64.hpp"
 
-#include "gamut-math-api.h"
+#include "gamut/math.h"
 
 
 static PyMethodDef module_methods[] = {

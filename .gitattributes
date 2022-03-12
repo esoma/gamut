@@ -1,5 +1,5 @@
 
-src/gamut/math/gamut-math-api.hpp linguist-generated
+include/gamut/math.h linguist-generated
 src/gamut/math/_math.cpp linguist-generated
 src/gamut/math/_math.pyi linguist-generated
 src/gamut/math/_modulestate.hpp linguist-generated

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Sequence
 
 
-def generate_math_files(build_dir: Path) -> None:
+def generate_math_files(build_dir: Path, include_dir: Path) -> None:
     vector_types = list(generate_vector_files(build_dir))
     matrix_types = list(generate_matrix_files(build_dir))
     pod_types = list(generate_pod_files(build_dir))
@@ -22,7 +22,7 @@ def generate_math_files(build_dir: Path) -> None:
         pod_types
     )
     generate_math_file(build_dir, vector_types, matrix_types, pod_types)
-    generate_api_file(build_dir, vector_types, matrix_types, pod_types)
+    generate_api_file(include_dir, vector_types, matrix_types, pod_types)
     generate_typestubs(build_dir, vector_types, matrix_types, pod_types)
     generate_test_api_file(build_dir, vector_types, matrix_types, pod_types)
 
@@ -74,13 +74,13 @@ def generate_math_file(
 
 
 def generate_api_file(
-    build_dir: Path,
+    include_dir: Path,
     vector_types: Sequence[str],
     matrix_types: Sequence[str],
     pod_types: Sequence[str],
 ) -> None:
-    template = get_template('gamut-math-api.h')
-    with open(build_dir / f'gamut-math-api.h', 'w') as f:
+    template = get_template('math.h')
+    with open(include_dir / f'math.h', 'w') as f:
         f.write(template.render(
             vector_types=vector_types,
             matrix_types=matrix_types,

@@ -5,7 +5,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 // gamut
-#include "gamut-math-api.h"
+#include "gamut/math.h"
 
 #define TEST(X) if (!(X)){ PyErr_Format(PyExc_AssertionError, #X " (line %i)", __LINE__); return 0; };
 

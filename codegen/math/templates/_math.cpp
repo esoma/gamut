@@ -16,7 +16,7 @@
 {% for type in pod_types %}
     #include "_{{ type.lower() }}.hpp"
 {% endfor %}
-#include "gamut-math-api.h"
+#include "gamut/math.h"
 
 
 static PyMethodDef module_methods[] = {
