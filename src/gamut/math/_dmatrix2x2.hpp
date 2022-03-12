@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.814469 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 02:15:25.006287 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X2_HPP
 #define GAMUT_MATH_DMATRIX2X2_HPP
@@ -1100,6 +1100,103 @@ define_DMatrix2x2Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_DMatrix2x2_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->DMatrix2x2_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_DMatrix2x2Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->DMatrix2x2Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_DMatrix2x2(double *value)
+{
+
+    auto cls = get_DMatrix2x2_type();
+    auto result = (DMatrix2x2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DMatrix2x2Glm(*(DMatrix2x2Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_DMatrix2x2Array(size_t length, double *value)
+{
+    auto cls = get_DMatrix2x2Array_type();
+    auto result = (DMatrix2x2Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new DMatrix2x2Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((DMatrix2x2Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static double *
+get_DMatrix2x2_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_DMatrix2x2_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected DMatrix2x2, got %R", self);
+        return 0;
+    }
+    return (double *)((DMatrix2x2 *)self)->glm;
+}
+
+
+static double *
+get_DMatrix2x2Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_DMatrix2x2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected DMatrix2x2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (double *)((DMatrix2x2Array *)self)->glm;
+}
+
+
+static size_t
+get_DMatrix2x2Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_DMatrix2x2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected DMatrix2x2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((DMatrix2x2Array *)self)->length;
 }
 
 #endif

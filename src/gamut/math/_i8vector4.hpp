@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.775967 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:15:24.966287 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I8VECTOR4_HPP
 #define GAMUT_MATH_I8VECTOR4_HPP
@@ -1307,6 +1307,102 @@ define_I8Vector4Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_I8Vector4_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->I8Vector4_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_I8Vector4Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->I8Vector4Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_I8Vector4(int8_t *value)
+{
+    auto cls = get_I8Vector4_type();
+    auto result = (I8Vector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new I8Vector4Glm(*(I8Vector4Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_I8Vector4Array(size_t length, int8_t *value)
+{
+    auto cls = get_I8Vector4Array_type();
+    auto result = (I8Vector4Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new I8Vector4Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((I8Vector4Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static int8_t *
+get_I8Vector4_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_I8Vector4_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected I8Vector4, got %R", self);
+        return 0;
+    }
+    return (int8_t *)((I8Vector4 *)self)->glm;
+}
+
+
+static int8_t *
+get_I8Vector4Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_I8Vector4Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected I8Vector4Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (int8_t *)((I8Vector4Array *)self)->glm;
+}
+
+
+static size_t
+get_I8Vector4Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_I8Vector4Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected I8Vector4Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((I8Vector4Array *)self)->length;
 }
 
 #endif

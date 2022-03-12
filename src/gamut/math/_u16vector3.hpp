@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.768966 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:15:24.958787 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U16VECTOR3_HPP
 #define GAMUT_MATH_U16VECTOR3_HPP
@@ -1208,6 +1208,102 @@ define_U16Vector3Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_U16Vector3_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U16Vector3_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_U16Vector3Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U16Vector3Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_U16Vector3(uint16_t *value)
+{
+    auto cls = get_U16Vector3_type();
+    auto result = (U16Vector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U16Vector3Glm(*(U16Vector3Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_U16Vector3Array(size_t length, uint16_t *value)
+{
+    auto cls = get_U16Vector3Array_type();
+    auto result = (U16Vector3Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new U16Vector3Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((U16Vector3Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static uint16_t *
+get_U16Vector3_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U16Vector3_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected U16Vector3, got %R", self);
+        return 0;
+    }
+    return (uint16_t *)((U16Vector3 *)self)->glm;
+}
+
+
+static uint16_t *
+get_U16Vector3Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U16Vector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U16Vector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (uint16_t *)((U16Vector3Array *)self)->glm;
+}
+
+
+static size_t
+get_U16Vector3Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U16Vector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U16Vector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((U16Vector3Array *)self)->length;
 }
 
 #endif

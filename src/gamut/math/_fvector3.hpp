@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.765967 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:15:24.955787 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_FVECTOR3_HPP
 #define GAMUT_MATH_FVECTOR3_HPP
@@ -1394,6 +1394,102 @@ define_FVector3Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_FVector3_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->FVector3_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_FVector3Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->FVector3Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_FVector3(float *value)
+{
+    auto cls = get_FVector3_type();
+    auto result = (FVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FVector3Glm(*(FVector3Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_FVector3Array(size_t length, float *value)
+{
+    auto cls = get_FVector3Array_type();
+    auto result = (FVector3Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new FVector3Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((FVector3Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static float *
+get_FVector3_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_FVector3_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected FVector3, got %R", self);
+        return 0;
+    }
+    return (float *)((FVector3 *)self)->glm;
+}
+
+
+static float *
+get_FVector3Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_FVector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected FVector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (float *)((FVector3Array *)self)->glm;
+}
+
+
+static size_t
+get_FVector3Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_FVector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected FVector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((FVector3Array *)self)->length;
 }
 
 #endif

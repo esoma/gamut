@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.822966 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 02:15:25.015287 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX3X4_HPP
 #define GAMUT_MATH_FMATRIX3X4_HPP
@@ -1304,6 +1304,103 @@ define_FMatrix3x4Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_FMatrix3x4_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->FMatrix3x4_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_FMatrix3x4Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->FMatrix3x4Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_FMatrix3x4(float *value)
+{
+
+    auto cls = get_FMatrix3x4_type();
+    auto result = (FMatrix3x4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FMatrix3x4Glm(*(FMatrix3x4Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_FMatrix3x4Array(size_t length, float *value)
+{
+    auto cls = get_FMatrix3x4Array_type();
+    auto result = (FMatrix3x4Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new FMatrix3x4Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((FMatrix3x4Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static float *
+get_FMatrix3x4_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_FMatrix3x4_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected FMatrix3x4, got %R", self);
+        return 0;
+    }
+    return (float *)((FMatrix3x4 *)self)->glm;
+}
+
+
+static float *
+get_FMatrix3x4Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_FMatrix3x4Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected FMatrix3x4Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (float *)((FMatrix3x4Array *)self)->glm;
+}
+
+
+static size_t
+get_FMatrix3x4Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_FMatrix3x4Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected FMatrix3x4Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((FMatrix3x4Array *)self)->length;
 }
 
 #endif

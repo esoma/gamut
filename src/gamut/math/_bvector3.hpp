@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.764465 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:15:24.954788 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR3_HPP
 #define GAMUT_MATH_BVECTOR3_HPP
@@ -1150,6 +1150,102 @@ define_BVector3Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_BVector3_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->BVector3_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_BVector3Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->BVector3Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_BVector3(bool *value)
+{
+    auto cls = get_BVector3_type();
+    auto result = (BVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new BVector3Glm(*(BVector3Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_BVector3Array(size_t length, bool *value)
+{
+    auto cls = get_BVector3Array_type();
+    auto result = (BVector3Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new BVector3Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((BVector3Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static bool *
+get_BVector3_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_BVector3_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected BVector3, got %R", self);
+        return 0;
+    }
+    return (bool *)((BVector3 *)self)->glm;
+}
+
+
+static bool *
+get_BVector3Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_BVector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected BVector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (bool *)((BVector3Array *)self)->glm;
+}
+
+
+static size_t
+get_BVector3Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_BVector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected BVector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((BVector3Array *)self)->length;
 }
 
 #endif

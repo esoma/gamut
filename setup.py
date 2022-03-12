@@ -46,7 +46,7 @@ class GenerateMathCode(Command):
     def run(self):
         # gamut
         from codegen import generate_math_files
-        generate_math_files(Path('src/gamut/math'))
+        generate_math_files(Path('src/gamut/math'), Path('include/gamut'))
 
 
 class BuildBullet(Command):
@@ -117,7 +117,7 @@ physics = Extension(
 math = Extension(
     'gamut.math._math',
     libraries=[] if os.name == 'nt' else ['stdc++'],
-    include_dirs=['vendor/glm', 'src/gamut/math'],
+    include_dirs=['vendor/glm', 'src/gamut/math', 'include'],
     sources=['src/gamut/math/_math.cpp'],
     language='c++11',
     extra_compile_args=coverage_compile_args +
@@ -126,10 +126,18 @@ math = Extension(
 )
 
 
+test_math_api = Extension(
+    'gamut.math._test_api',
+    include_dirs=['include'],
+    sources=['src/gamut/math/_test_api.c'],
+    language='c',
+)
+
+
 setup(
     cmdclass={
         "build_bullet": BuildBullet,
         "codegen_math": GenerateMathCode,
     },
-    ext_modules=[math, physics]
+    ext_modules=[math, physics, test_math_api]
 )

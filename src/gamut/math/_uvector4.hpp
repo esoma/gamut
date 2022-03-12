@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.780966 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:15:24.971287 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_UVECTOR4_HPP
 #define GAMUT_MATH_UVECTOR4_HPP
@@ -1280,6 +1280,102 @@ define_UVector4Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_UVector4_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->UVector4_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_UVector4Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->UVector4Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_UVector4(unsigned int *value)
+{
+    auto cls = get_UVector4_type();
+    auto result = (UVector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new UVector4Glm(*(UVector4Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_UVector4Array(size_t length, unsigned int *value)
+{
+    auto cls = get_UVector4Array_type();
+    auto result = (UVector4Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new UVector4Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((UVector4Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static unsigned int *
+get_UVector4_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_UVector4_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected UVector4, got %R", self);
+        return 0;
+    }
+    return (unsigned int *)((UVector4 *)self)->glm;
+}
+
+
+static unsigned int *
+get_UVector4Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_UVector4Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected UVector4Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (unsigned int *)((UVector4Array *)self)->glm;
+}
+
+
+static size_t
+get_UVector4Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_UVector4Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected UVector4Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((UVector4Array *)self)->length;
 }
 
 #endif

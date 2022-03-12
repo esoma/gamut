@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.838967 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 02:15:25.031787 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U64_HPP
 #define GAMUT_MATH_U64_HPP
@@ -78,6 +78,20 @@ U64Array__dealloc__(U64Array *self)
     type->tp_free(self);
     Py_DECREF(type);
 }
+
+
+// this is roughly copied from how python hashes tuples in 3.11
+#if SIZEOF_PY_UHASH_T > 4
+#define _HASH_XXPRIME_1 ((Py_uhash_t)11400714785074694791ULL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)14029467366897019727ULL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)2870177450012600261ULL)
+#define _HASH_XXROTATE(x) ((x << 31) | (x >> 33))  /* Rotate left 31 bits */
+#else
+#define _HASH_XXPRIME_1 ((Py_uhash_t)2654435761UL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)2246822519UL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)374761393UL)
+#define _HASH_XXROTATE(x) ((x << 13) | (x >> 19))  /* Rotate left 13 bits */
+#endif
 
 
 static Py_hash_t
@@ -272,6 +286,70 @@ define_U64Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_U64Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U64Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_U64Array(size_t length, uint64_t *value)
+{
+    auto cls = get_U64Array_type();
+    auto result = (U64Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->pod = new uint64_t[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->pod[i] = value[i];
+        }
+    }
+    else
+    {
+        result->pod = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static uint64_t *
+get_U64Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U64Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U64Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((U64Array *)self)->pod;
+}
+
+
+static size_t
+get_U64Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U64Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U64Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((U64Array *)self)->length;
 }
 
 #endif

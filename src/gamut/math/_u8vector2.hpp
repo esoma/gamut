@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.758466 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:15:24.948287 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U8VECTOR2_HPP
 #define GAMUT_MATH_U8VECTOR2_HPP
@@ -1136,6 +1136,102 @@ define_U8Vector2Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_U8Vector2_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U8Vector2_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_U8Vector2Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U8Vector2Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_U8Vector2(uint8_t *value)
+{
+    auto cls = get_U8Vector2_type();
+    auto result = (U8Vector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U8Vector2Glm(*(U8Vector2Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_U8Vector2Array(size_t length, uint8_t *value)
+{
+    auto cls = get_U8Vector2Array_type();
+    auto result = (U8Vector2Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new U8Vector2Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((U8Vector2Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static uint8_t *
+get_U8Vector2_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U8Vector2_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected U8Vector2, got %R", self);
+        return 0;
+    }
+    return (uint8_t *)((U8Vector2 *)self)->glm;
+}
+
+
+static uint8_t *
+get_U8Vector2Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U8Vector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U8Vector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (uint8_t *)((U8Vector2Array *)self)->glm;
+}
+
+
+static size_t
+get_U8Vector2Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U8Vector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U8Vector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((U8Vector2Array *)self)->length;
 }
 
 #endif

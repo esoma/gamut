@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.837966 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 02:15:25.031288 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U_HPP
 #define GAMUT_MATH_U_HPP
@@ -78,6 +78,20 @@ UArray__dealloc__(UArray *self)
     type->tp_free(self);
     Py_DECREF(type);
 }
+
+
+// this is roughly copied from how python hashes tuples in 3.11
+#if SIZEOF_PY_UHASH_T > 4
+#define _HASH_XXPRIME_1 ((Py_uhash_t)11400714785074694791ULL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)14029467366897019727ULL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)2870177450012600261ULL)
+#define _HASH_XXROTATE(x) ((x << 31) | (x >> 33))  /* Rotate left 31 bits */
+#else
+#define _HASH_XXPRIME_1 ((Py_uhash_t)2654435761UL)
+#define _HASH_XXPRIME_2 ((Py_uhash_t)2246822519UL)
+#define _HASH_XXPRIME_5 ((Py_uhash_t)374761393UL)
+#define _HASH_XXROTATE(x) ((x << 13) | (x >> 19))  /* Rotate left 13 bits */
+#endif
 
 
 static Py_hash_t
@@ -272,6 +286,70 @@ define_UArray_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_UArray_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->UArray_PyTypeObject;
+}
+
+
+static PyObject *
+create_UArray(size_t length, unsigned int *value)
+{
+    auto cls = get_UArray_type();
+    auto result = (UArray *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->pod = new unsigned int[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->pod[i] = value[i];
+        }
+    }
+    else
+    {
+        result->pod = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static unsigned int *
+get_UArray_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_UArray_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected UArray, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((UArray *)self)->pod;
+}
+
+
+static size_t
+get_UArray_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_UArray_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected UArray, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((UArray *)self)->length;
 }
 
 #endif
