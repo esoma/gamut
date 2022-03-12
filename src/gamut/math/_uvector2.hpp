@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.120413 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.576671 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_UVECTOR2_HPP
 #define GAMUT_MATH_UVECTOR2_HPP
@@ -1158,7 +1158,7 @@ get_UVector2Array_type()
 
 
 static PyObject *
-create_UVector2(unsigned int *value)
+create_UVector2(const unsigned int *value)
 {
     auto cls = get_UVector2_type();
     auto result = (UVector2 *)cls->tp_alloc(cls, 0);
@@ -1169,7 +1169,7 @@ create_UVector2(unsigned int *value)
 
 
 static PyObject *
-create_UVector2Array(size_t length, unsigned int *value)
+create_UVector2Array(size_t length, const unsigned int *value)
 {
     auto cls = get_UVector2Array_type();
     auto result = (UVector2Array *)cls->tp_alloc(cls, 0);
@@ -1192,7 +1192,7 @@ create_UVector2Array(size_t length, unsigned int *value)
 
 
 static unsigned int *
-get_UVector2_value_ptr(PyObject *self)
+get_UVector2_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_UVector2_type())
     {
@@ -1204,7 +1204,7 @@ get_UVector2_value_ptr(PyObject *self)
 
 
 static unsigned int *
-get_UVector2Array_value_ptr(PyObject *self)
+get_UVector2Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_UVector2Array_type())
     {
@@ -1220,7 +1220,7 @@ get_UVector2Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_UVector2Array_length(PyObject *self)
+get_UVector2Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_UVector2Array_type())
     {

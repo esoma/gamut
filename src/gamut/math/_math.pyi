@@ -1,5 +1,5 @@
 
-# generated 2022-03-12 14:15:28.239413 from codegen/math/templates/_math.pyi
+# generated 2022-03-12 17:38:09.706671 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -21089,6 +21089,8 @@ class DMatrix2x2:
     def transpose(self) -> DMatrix2x2: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -21236,6 +21238,8 @@ class FMatrix2x2:
     def transpose(self) -> FMatrix2x2: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -21375,6 +21379,8 @@ class DMatrix2x3:
     def transpose(self) -> DMatrix3x2: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -21512,6 +21518,8 @@ class FMatrix2x3:
 
 
     def transpose(self) -> FMatrix3x2: ...
+
+
 
 
     @classmethod
@@ -21657,6 +21665,8 @@ class DMatrix2x4:
     def transpose(self) -> DMatrix4x2: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -21800,6 +21810,8 @@ class FMatrix2x4:
     def transpose(self) -> FMatrix4x2: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -21941,6 +21953,8 @@ class DMatrix3x2:
     def transpose(self) -> DMatrix2x3: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -22080,6 +22094,8 @@ class FMatrix3x2:
 
 
     def transpose(self) -> FMatrix2x3: ...
+
+
 
 
     @classmethod
@@ -22241,6 +22257,8 @@ class DMatrix3x3:
     def transpose(self) -> DMatrix3x3: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -22400,6 +22418,8 @@ class FMatrix3x3:
     def transpose(self) -> FMatrix3x3: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -22551,6 +22571,8 @@ class DMatrix3x4:
 
 
     def transpose(self) -> DMatrix4x3: ...
+
+
 
 
     @classmethod
@@ -22706,6 +22728,8 @@ class FMatrix3x4:
     def transpose(self) -> FMatrix4x3: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -22853,6 +22877,8 @@ class DMatrix4x2:
     def transpose(self) -> DMatrix2x4: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -22998,6 +23024,8 @@ class FMatrix4x2:
 
 
     def transpose(self) -> FMatrix2x4: ...
+
+
 
 
     @classmethod
@@ -23155,6 +23183,8 @@ class DMatrix4x3:
     def transpose(self) -> DMatrix3x4: ...
 
 
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -23308,6 +23338,8 @@ class FMatrix4x3:
 
 
     def transpose(self) -> FMatrix3x4: ...
+
+
 
 
     @classmethod
@@ -23485,6 +23517,12 @@ class DMatrix4x4:
     def transpose(self) -> DMatrix4x4: ...
 
 
+
+    def rotate(self, angle: float, axis: DVector3, /) -> DMatrix4x4: ...
+    def scale(self, scaling: DVector3, /) -> DMatrix4x4: ...
+    def translate(self, translation: DVector3, /) -> DMatrix4x4: ...
+
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
@@ -23658,6 +23696,12 @@ class FMatrix4x4:
 
 
     def transpose(self) -> FMatrix4x4: ...
+
+
+
+    def rotate(self, angle: float, axis: FVector3, /) -> FMatrix4x4: ...
+    def scale(self, scaling: FVector3, /) -> FMatrix4x4: ...
+    def translate(self, translation: FVector3, /) -> FMatrix4x4: ...
 
 
     @classmethod

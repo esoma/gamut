@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.202414 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.665671 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I_HPP
 #define GAMUT_MATH_I_HPP
@@ -299,7 +299,7 @@ get_IArray_type()
 
 
 static PyObject *
-create_IArray(size_t length, int *value)
+create_IArray(size_t length, const int *value)
 {
     auto cls = get_IArray_type();
     auto result = (IArray *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_IArray(size_t length, int *value)
 
 
 static int *
-get_IArray_value_ptr(PyObject *self)
+get_IArray_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_IArray_type())
     {
@@ -338,7 +338,7 @@ get_IArray_value_ptr(PyObject *self)
 
 
 static size_t
-get_IArray_length(PyObject *self)
+get_IArray_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_IArray_type())
     {

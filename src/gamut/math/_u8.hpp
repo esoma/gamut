@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.200913 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.664170 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U8_HPP
 #define GAMUT_MATH_U8_HPP
@@ -299,7 +299,7 @@ get_U8Array_type()
 
 
 static PyObject *
-create_U8Array(size_t length, uint8_t *value)
+create_U8Array(size_t length, const uint8_t *value)
 {
     auto cls = get_U8Array_type();
     auto result = (U8Array *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_U8Array(size_t length, uint8_t *value)
 
 
 static uint8_t *
-get_U8Array_value_ptr(PyObject *self)
+get_U8Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U8Array_type())
     {
@@ -338,7 +338,7 @@ get_U8Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_U8Array_length(PyObject *self)
+get_U8Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U8Array_type())
     {

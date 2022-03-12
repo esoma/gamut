@@ -6,8 +6,6 @@ from gamut.physics import Body, World
 # python
 from datetime import timedelta
 from typing import Any
-# pyglm
-from glm import vec3
 # pytest
 import pytest
 
@@ -73,7 +71,7 @@ def test_bodies() -> None:
     w = World(timedelta(seconds=1))
     assert not w.bodies
 
-    b1 = Body(1, Sphere(vec3(0), 1), world=w)
+    b1 = Body(1, Sphere(Vector3(0), 1), world=w)
     assert len(w.bodies) == 1
     assert b1 in w.bodies
 

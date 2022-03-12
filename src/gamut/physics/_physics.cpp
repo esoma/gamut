@@ -126,6 +126,7 @@ World_simulate(World *self, PyObject *args)
 {
     ASSERT(self->world);
 
+    auto state = get_module_state();
     double time;
     bool get_collisions;
 
@@ -145,34 +146,7 @@ World_simulate(World *self, PyObject *args)
             self->collision_dispatcher->getManifoldByIndexInternal(i);
         if (manifold->getNumContacts() == 0){ continue; }
         PyObject *contacts = PyList_New(manifold->getNumContacts());
-        if (!contacts)
-        {
-            Py_DECREF(collisions);
-            return 0;
-        }
-        for (int j = 0; j < manifold->getNumContacts(); j++)
-        {
-            const auto& point = manifold->getContactPoint(j);
-            PyObject *contact = Py_BuildValue(
-                "(ddd)(ddd)(ddd)(ddd)(ddd)",
-                point.m_localPointA.x(),
-                point.m_localPointA.y(),
-                point.m_localPointA.z(),
-                point.m_positionWorldOnA.x(),
-                point.m_positionWorldOnA.y(),
-                point.m_positionWorldOnA.z(),
-                point.m_localPointB.x(),
-                point.m_localPointB.y(),
-                point.m_localPointB.z(),
-                point.m_positionWorldOnB.x(),
-                point.m_positionWorldOnB.y(),
-                point.m_positionWorldOnB.z(),
-                point.m_normalWorldOnB.x(),
-                point.m_normalWorldOnB.y(),
-                point.m_normalWorldOnB.z()
-            );
-            PyList_SET_ITEM(contacts, j, contact);
-        }
+        if (!contacts){ goto error; }
         Body *body_a = (Body*)manifold->getBody0()->getUserPointer();
         Body *body_b = (Body*)manifold->getBody1()->getUserPointer();
         PyObject *collision = PyTuple_Pack(
@@ -183,9 +157,45 @@ World_simulate(World *self, PyObject *args)
         );
         PyList_Append(collisions, collision);
         Py_DECREF(collision);
+
+        for (int j = 0; j < manifold->getNumContacts(); j++)
+        {
+            const auto& point = manifold->getContactPoint(j);
+            PyObject *contact = PyTuple_New(5);
+            if (!contact){ goto error; }
+            PyList_SET_ITEM(contacts, j, contact);
+            auto local_position_a = state->api->GamutMathDVector3_Create(
+                point.m_localPointA.m_floats
+            );
+            if (!local_position_a){ goto error; }
+            PyTuple_SET_ITEM(contact, 0, local_position_a);
+            auto world_position_a = state->api->GamutMathDVector3_Create(
+                point.m_positionWorldOnA.m_floats
+            );
+            if (!world_position_a){ goto error; }
+            PyTuple_SET_ITEM(contact, 1, world_position_a);
+            auto local_position_b = state->api->GamutMathDVector3_Create(
+                point.m_localPointB.m_floats
+            );
+            if (!local_position_b){ goto error; }
+            PyTuple_SET_ITEM(contact, 2, local_position_b);
+            auto world_position_b = state->api->GamutMathDVector3_Create(
+                point.m_positionWorldOnB.m_floats
+            );
+            if (!world_position_b){ goto error; }
+            PyTuple_SET_ITEM(contact, 3, world_position_b);
+            auto normal_b = state->api->GamutMathDVector3_Create(
+                point.m_normalWorldOnB.m_floats
+            );
+            if (!normal_b){ goto error; }
+            PyTuple_SET_ITEM(contact, 4, normal_b);
+        }
     }
 
     return collisions;
+error:
+    Py_XDECREF(collisions);
+    return 0;
 }
 
 

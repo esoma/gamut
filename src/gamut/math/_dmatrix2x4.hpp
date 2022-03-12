@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.179914 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 17:38:09.642171 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X4_HPP
 #define GAMUT_MATH_DMATRIX2X4_HPP
@@ -790,6 +790,9 @@ static PyMemberDef DMatrix2x4_PyMemberDef[] = {
 
 
 
+
+
+
 static DMatrix4x2 *
 DMatrix2x4_transpose(DMatrix2x4 *self, void*)
 {
@@ -833,6 +836,7 @@ DMatrix2x4_get_limits(DMatrix2x4 *self, void *)
 
 
 static PyMethodDef DMatrix2x4_PyMethodDef[] = {
+
 
     {"transpose", (PyCFunction)DMatrix2x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix2x4_get_limits, METH_NOARGS | METH_STATIC, 0},
@@ -1199,7 +1203,7 @@ get_DMatrix2x4Array_type()
 
 
 static PyObject *
-create_DMatrix2x4(double *value)
+create_DMatrix2x4(const double *value)
 {
 
     auto cls = get_DMatrix2x4_type();
@@ -1211,7 +1215,7 @@ create_DMatrix2x4(double *value)
 
 
 static PyObject *
-create_DMatrix2x4Array(size_t length, double *value)
+create_DMatrix2x4Array(size_t length, const double *value)
 {
     auto cls = get_DMatrix2x4Array_type();
     auto result = (DMatrix2x4Array *)cls->tp_alloc(cls, 0);
@@ -1234,7 +1238,7 @@ create_DMatrix2x4Array(size_t length, double *value)
 
 
 static double *
-get_DMatrix2x4_value_ptr(PyObject *self)
+get_DMatrix2x4_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix2x4_type())
     {
@@ -1246,7 +1250,7 @@ get_DMatrix2x4_value_ptr(PyObject *self)
 
 
 static double *
-get_DMatrix2x4Array_value_ptr(PyObject *self)
+get_DMatrix2x4Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix2x4Array_type())
     {
@@ -1262,7 +1266,7 @@ get_DMatrix2x4Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_DMatrix2x4Array_length(PyObject *self)
+get_DMatrix2x4Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix2x4Array_type())
     {

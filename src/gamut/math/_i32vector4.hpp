@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.136913 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.594670 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I32VECTOR4_HPP
 #define GAMUT_MATH_I32VECTOR4_HPP
@@ -1329,7 +1329,7 @@ get_I32Vector4Array_type()
 
 
 static PyObject *
-create_I32Vector4(int32_t *value)
+create_I32Vector4(const int32_t *value)
 {
     auto cls = get_I32Vector4_type();
     auto result = (I32Vector4 *)cls->tp_alloc(cls, 0);
@@ -1340,7 +1340,7 @@ create_I32Vector4(int32_t *value)
 
 
 static PyObject *
-create_I32Vector4Array(size_t length, int32_t *value)
+create_I32Vector4Array(size_t length, const int32_t *value)
 {
     auto cls = get_I32Vector4Array_type();
     auto result = (I32Vector4Array *)cls->tp_alloc(cls, 0);
@@ -1363,7 +1363,7 @@ create_I32Vector4Array(size_t length, int32_t *value)
 
 
 static int32_t *
-get_I32Vector4_value_ptr(PyObject *self)
+get_I32Vector4_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I32Vector4_type())
     {
@@ -1375,7 +1375,7 @@ get_I32Vector4_value_ptr(PyObject *self)
 
 
 static int32_t *
-get_I32Vector4Array_value_ptr(PyObject *self)
+get_I32Vector4Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I32Vector4Array_type())
     {
@@ -1391,7 +1391,7 @@ get_I32Vector4Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_I32Vector4Array_length(PyObject *self)
+get_I32Vector4Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I32Vector4Array_type())
     {

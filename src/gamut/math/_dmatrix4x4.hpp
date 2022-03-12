@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.190913 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 17:38:09.652672 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX4X4_HPP
 #define GAMUT_MATH_DMATRIX4X4_HPP
@@ -1057,6 +1057,96 @@ static PyMemberDef DMatrix4x4_PyMemberDef[] = {
 
 
 
+    static DMatrix4x4 *
+    DMatrix4x4_rotate(DMatrix4x4 *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 2)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+            return 0;
+        }
+
+        double angle = (double)PyFloat_AsDouble(args[0]);
+        if (PyErr_Occurred()){ return 0; }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vector_cls = module_state->DVector3_PyTypeObject;
+        if (Py_TYPE(args[1]) != vector_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected DVector3, got %R", args[0]);
+            return 0;
+        }
+        DVector3 *vector = (DVector3 *)args[1];
+
+        auto matrix = glm::rotate(*self->glm, angle, *vector->glm);
+
+        auto cls = Py_TYPE(self);
+        auto *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(matrix);
+        return result;
+    }
+
+    static DMatrix4x4 *
+    DMatrix4x4_scale(DMatrix4x4 *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 1)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+            return 0;
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vector_cls = module_state->DVector3_PyTypeObject;
+        if (Py_TYPE(args[0]) != vector_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected DVector3, got %R", args[0]);
+            return 0;
+        }
+        DVector3 *vector = (DVector3 *)args[0];
+
+        auto matrix = glm::scale(*self->glm, *vector->glm);
+
+        auto cls = Py_TYPE(self);
+        auto *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(matrix);
+        return result;
+    }
+
+    static DMatrix4x4 *
+    DMatrix4x4_translate(DMatrix4x4 *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 1)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+            return 0;
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vector_cls = module_state->DVector3_PyTypeObject;
+        if (Py_TYPE(args[0]) != vector_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected DVector3, got %R", args[0]);
+            return 0;
+        }
+        DVector3 *vector = (DVector3 *)args[0];
+
+        auto matrix = glm::translate(*self->glm, *vector->glm);
+
+        auto cls = Py_TYPE(self);
+        auto *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(matrix);
+        return result;
+    }
+
+
+
+
 static DMatrix4x4 *
 DMatrix4x4_transpose(DMatrix4x4 *self, void*)
 {
@@ -1102,6 +1192,11 @@ DMatrix4x4_get_limits(DMatrix4x4 *self, void *)
 static PyMethodDef DMatrix4x4_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)DMatrix4x4_inverse, METH_NOARGS, 0},
+
+
+        {"rotate", (PyCFunction)DMatrix4x4_rotate, METH_FASTCALL, 0},
+        {"scale", (PyCFunction)DMatrix4x4_scale, METH_FASTCALL, 0},
+        {"translate", (PyCFunction)DMatrix4x4_translate, METH_FASTCALL, 0},
 
     {"transpose", (PyCFunction)DMatrix4x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix4x4_get_limits, METH_NOARGS | METH_STATIC, 0},
@@ -1468,7 +1563,7 @@ get_DMatrix4x4Array_type()
 
 
 static PyObject *
-create_DMatrix4x4(double *value)
+create_DMatrix4x4(const double *value)
 {
 
     auto cls = get_DMatrix4x4_type();
@@ -1480,7 +1575,7 @@ create_DMatrix4x4(double *value)
 
 
 static PyObject *
-create_DMatrix4x4Array(size_t length, double *value)
+create_DMatrix4x4Array(size_t length, const double *value)
 {
     auto cls = get_DMatrix4x4Array_type();
     auto result = (DMatrix4x4Array *)cls->tp_alloc(cls, 0);
@@ -1503,7 +1598,7 @@ create_DMatrix4x4Array(size_t length, double *value)
 
 
 static double *
-get_DMatrix4x4_value_ptr(PyObject *self)
+get_DMatrix4x4_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix4x4_type())
     {
@@ -1515,7 +1610,7 @@ get_DMatrix4x4_value_ptr(PyObject *self)
 
 
 static double *
-get_DMatrix4x4Array_value_ptr(PyObject *self)
+get_DMatrix4x4Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix4x4Array_type())
     {
@@ -1531,7 +1626,7 @@ get_DMatrix4x4Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_DMatrix4x4Array_length(PyObject *self)
+get_DMatrix4x4Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix4x4Array_type())
     {

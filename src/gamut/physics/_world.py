@@ -121,12 +121,12 @@ class WorldSimulation:
                     c[1],
                     tuple(
                         Contact(
-                            dvec3(cc[0]),
-                            dvec3(cc[1]),
-                            dvec3(cc[4]) * dvec3(-1),
-                            dvec3(cc[2]),
-                            dvec3(cc[3]),
-                            dvec3(cc[4]),
+                            cc[0],
+                            cc[1],
+                            cc[4] * Vector3(-1),
+                            cc[2],
+                            cc[3],
+                            cc[4],
                         )
                         for cc in c[2]
                     )

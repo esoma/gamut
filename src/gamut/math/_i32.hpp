@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.201916 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.665172 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I32_HPP
 #define GAMUT_MATH_I32_HPP
@@ -299,7 +299,7 @@ get_I32Array_type()
 
 
 static PyObject *
-create_I32Array(size_t length, int32_t *value)
+create_I32Array(size_t length, const int32_t *value)
 {
     auto cls = get_I32Array_type();
     auto result = (I32Array *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_I32Array(size_t length, int32_t *value)
 
 
 static int32_t *
-get_I32Array_value_ptr(PyObject *self)
+get_I32Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I32Array_type())
     {
@@ -338,7 +338,7 @@ get_I32Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_I32Array_length(PyObject *self)
+get_I32Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I32Array_type())
     {

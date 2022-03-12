@@ -1222,7 +1222,7 @@ get_{{ name }}Array_type()
 
 
 static PyObject *
-create_{{ name }}({{ c_type }} *value)
+create_{{ name }}(const {{ c_type }} *value)
 {
     auto cls = get_{{ name }}_type();
     auto result = ({{ name }} *)cls->tp_alloc(cls, 0);
@@ -1233,7 +1233,7 @@ create_{{ name }}({{ c_type }} *value)
 
 
 static PyObject *
-create_{{ name }}Array(size_t length, {{ c_type }} *value)
+create_{{ name }}Array(size_t length, const {{ c_type }} *value)
 {
     auto cls = get_{{ name }}Array_type();
     auto result = ({{ name }}Array *)cls->tp_alloc(cls, 0);
@@ -1256,7 +1256,7 @@ create_{{ name }}Array(size_t length, {{ c_type }} *value)
 
 
 static {{ c_type }} *
-get_{{ name }}_value_ptr(PyObject *self)
+get_{{ name }}_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_{{ name }}_type())
     {
@@ -1268,7 +1268,7 @@ get_{{ name }}_value_ptr(PyObject *self)
 
 
 static {{ c_type }} *
-get_{{ name }}Array_value_ptr(PyObject *self)
+get_{{ name }}Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_{{ name }}Array_type())
     {
@@ -1284,7 +1284,7 @@ get_{{ name }}Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_{{ name }}Array_length(PyObject *self)
+get_{{ name }}Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_{{ name }}Array_type())
     {

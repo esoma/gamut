@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.199914 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.663173 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_D_HPP
 #define GAMUT_MATH_D_HPP
@@ -299,7 +299,7 @@ get_DArray_type()
 
 
 static PyObject *
-create_DArray(size_t length, double *value)
+create_DArray(size_t length, const double *value)
 {
     auto cls = get_DArray_type();
     auto result = (DArray *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_DArray(size_t length, double *value)
 
 
 static double *
-get_DArray_value_ptr(PyObject *self)
+get_DArray_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DArray_type())
     {
@@ -338,7 +338,7 @@ get_DArray_value_ptr(PyObject *self)
 
 
 static size_t
-get_DArray_length(PyObject *self)
+get_DArray_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DArray_type())
     {

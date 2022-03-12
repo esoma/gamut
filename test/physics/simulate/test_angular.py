@@ -6,8 +6,6 @@ from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
 from math import isclose, pi
-# pyglm
-from glm import dmat4, rotate
 # pytest
 import pytest
 
@@ -33,7 +31,7 @@ def test_angular_velocity(angular_magnitude: Vector3) -> None:
     w.simulate(timedelta(seconds=1))
     assert all(
         all(isclose(rc, ec, abs_tol=1e-6) for rc, ec in zip(r, e))
-        for r, e in zip(b.transform, rotate(dmat4(1), pi, angular_magnitude))
+        for r, e in zip(b.transform, Matrix4(1).rotate(pi, angular_magnitude))
     )
 
 

@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.187913 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 17:38:09.649671 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X2_HPP
 #define GAMUT_MATH_FMATRIX4X2_HPP
@@ -824,6 +824,9 @@ static PyMemberDef FMatrix4x2_PyMemberDef[] = {
 
 
 
+
+
+
 static FMatrix2x4 *
 FMatrix4x2_transpose(FMatrix4x2 *self, void*)
 {
@@ -867,6 +870,7 @@ FMatrix4x2_get_limits(FMatrix4x2 *self, void *)
 
 
 static PyMethodDef FMatrix4x2_PyMethodDef[] = {
+
 
     {"transpose", (PyCFunction)FMatrix4x2_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)FMatrix4x2_get_limits, METH_NOARGS | METH_STATIC, 0},
@@ -1233,7 +1237,7 @@ get_FMatrix4x2Array_type()
 
 
 static PyObject *
-create_FMatrix4x2(float *value)
+create_FMatrix4x2(const float *value)
 {
 
     auto cls = get_FMatrix4x2_type();
@@ -1245,7 +1249,7 @@ create_FMatrix4x2(float *value)
 
 
 static PyObject *
-create_FMatrix4x2Array(size_t length, float *value)
+create_FMatrix4x2Array(size_t length, const float *value)
 {
     auto cls = get_FMatrix4x2Array_type();
     auto result = (FMatrix4x2Array *)cls->tp_alloc(cls, 0);
@@ -1268,7 +1272,7 @@ create_FMatrix4x2Array(size_t length, float *value)
 
 
 static float *
-get_FMatrix4x2_value_ptr(PyObject *self)
+get_FMatrix4x2_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FMatrix4x2_type())
     {
@@ -1280,7 +1284,7 @@ get_FMatrix4x2_value_ptr(PyObject *self)
 
 
 static float *
-get_FMatrix4x2Array_value_ptr(PyObject *self)
+get_FMatrix4x2Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FMatrix4x2Array_type())
     {
@@ -1296,7 +1300,7 @@ get_FMatrix4x2Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_FMatrix4x2Array_length(PyObject *self)
+get_FMatrix4x2Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FMatrix4x2Array_type())
     {

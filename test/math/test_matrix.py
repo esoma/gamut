@@ -24,7 +24,7 @@ from gamut.math import (DMatrix2, DMatrix2Array, DMatrix2x2, DMatrix2x2Array,
                         Matrix4x2Array, Matrix4x3, Matrix4x3Array, Matrix4x4,
                         Matrix4x4Array)
 # python
-from math import inf, isnan
+from math import inf, isclose, isnan, radians
 import struct
 from weakref import ref
 # pytest
@@ -780,6 +780,80 @@ class MatrixTest:
         ))
         assert isinstance(mat.transpose(), transpose_cls)
         assert mat.transpose() == t_mat
+
+    def test_rotate(self) -> None:
+        if self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls().rotate
+            return
+
+        with pytest.raises(TypeError):
+            self.cls(1).rotate()
+        with pytest.raises(TypeError):
+            self.cls(1).rotate(None)
+        with pytest.raises(TypeError):
+            self.cls(1).rotate(1, None)
+
+        axis_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        assert self.cls(1).rotate(0, axis_cls(1, 0, 0)) == self.cls(1)
+        result = self.cls(1).rotate(radians(90), axis_cls(1, 0, 0))
+        if self.cls.__name__[0] == 'F':
+            assert all(isclose(r, e, rel_tol=1e-06) for r, e in zip(
+                (v for c in result for v in c), [
+                1, 0, 0, 0,
+                0, -4.37114e-08, 1, 0,
+                0, -1, -4.37114e-08, 0,
+                0, 0, 0, 1,
+            ]))
+        else:
+            assert all(isclose(r, e, rel_tol=1e-06) for r, e in zip(
+                (v for c in result for v in c), [
+                1, 0, 0, 0,
+                0, 6.12323e-17, 1, 0,
+                0, -1, 6.12323e-17, 0,
+                0, 0, 0, 1,
+            ]))
+
+    def test_scale(self) -> None:
+        if self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls().scale
+            return
+
+        with pytest.raises(TypeError):
+            self.cls(1).scale()
+        with pytest.raises(TypeError):
+            self.cls(1).scale(None)
+
+        scale_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        assert self.cls(1).scale(scale_cls(1)) == self.cls(1)
+        assert self.cls(1).scale(scale_cls(1, 2, 3)) == self.cls(
+            1, 0, 0, 0,
+            0, 2, 0, 0,
+            0, 0, 3, 0,
+            0, 0, 0, 1,
+        )
+
+    def test_translate(self) -> None:
+        if self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls().translate
+            return
+
+        with pytest.raises(TypeError):
+            self.cls(1).translate()
+        with pytest.raises(TypeError):
+            self.cls(1).translate(None)
+
+        translate_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        assert self.cls(1).translate(translate_cls(0)) == self.cls(1)
+        assert self.cls(1).translate(translate_cls(1, 2, 3)) == self.cls(
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            1, 2, 3, 1,
+        )
+
 
 
 class TestFMatrix2x2(

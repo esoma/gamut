@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.202913 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.666170 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I64_HPP
 #define GAMUT_MATH_I64_HPP
@@ -299,7 +299,7 @@ get_I64Array_type()
 
 
 static PyObject *
-create_I64Array(size_t length, int64_t *value)
+create_I64Array(size_t length, const int64_t *value)
 {
     auto cls = get_I64Array_type();
     auto result = (I64Array *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_I64Array(size_t length, int64_t *value)
 
 
 static int64_t *
-get_I64Array_value_ptr(PyObject *self)
+get_I64Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I64Array_type())
     {
@@ -338,7 +338,7 @@ get_I64Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_I64Array_length(PyObject *self)
+get_I64Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I64Array_type())
     {

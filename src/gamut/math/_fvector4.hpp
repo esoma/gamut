@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.133413 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.590673 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_FVECTOR4_HPP
 #define GAMUT_MATH_FVECTOR4_HPP
@@ -1466,7 +1466,7 @@ get_FVector4Array_type()
 
 
 static PyObject *
-create_FVector4(float *value)
+create_FVector4(const float *value)
 {
     auto cls = get_FVector4_type();
     auto result = (FVector4 *)cls->tp_alloc(cls, 0);
@@ -1477,7 +1477,7 @@ create_FVector4(float *value)
 
 
 static PyObject *
-create_FVector4Array(size_t length, float *value)
+create_FVector4Array(size_t length, const float *value)
 {
     auto cls = get_FVector4Array_type();
     auto result = (FVector4Array *)cls->tp_alloc(cls, 0);
@@ -1500,7 +1500,7 @@ create_FVector4Array(size_t length, float *value)
 
 
 static float *
-get_FVector4_value_ptr(PyObject *self)
+get_FVector4_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FVector4_type())
     {
@@ -1512,7 +1512,7 @@ get_FVector4_value_ptr(PyObject *self)
 
 
 static float *
-get_FVector4Array_value_ptr(PyObject *self)
+get_FVector4Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FVector4Array_type())
     {
@@ -1528,7 +1528,7 @@ get_FVector4Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_FVector4Array_length(PyObject *self)
+get_FVector4Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FVector4Array_type())
     {

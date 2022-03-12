@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.122414 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.578671 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR3_HPP
 #define GAMUT_MATH_BVECTOR3_HPP
@@ -1172,7 +1172,7 @@ get_BVector3Array_type()
 
 
 static PyObject *
-create_BVector3(bool *value)
+create_BVector3(const bool *value)
 {
     auto cls = get_BVector3_type();
     auto result = (BVector3 *)cls->tp_alloc(cls, 0);
@@ -1183,7 +1183,7 @@ create_BVector3(bool *value)
 
 
 static PyObject *
-create_BVector3Array(size_t length, bool *value)
+create_BVector3Array(size_t length, const bool *value)
 {
     auto cls = get_BVector3Array_type();
     auto result = (BVector3Array *)cls->tp_alloc(cls, 0);
@@ -1206,7 +1206,7 @@ create_BVector3Array(size_t length, bool *value)
 
 
 static bool *
-get_BVector3_value_ptr(PyObject *self)
+get_BVector3_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_BVector3_type())
     {
@@ -1218,7 +1218,7 @@ get_BVector3_value_ptr(PyObject *self)
 
 
 static bool *
-get_BVector3Array_value_ptr(PyObject *self)
+get_BVector3Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_BVector3Array_type())
     {
@@ -1234,7 +1234,7 @@ get_BVector3Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_BVector3Array_length(PyObject *self)
+get_BVector3Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_BVector3Array_type())
     {

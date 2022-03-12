@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 14:15:28.183414 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 17:38:09.645671 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX3X3_HPP
 #define GAMUT_MATH_DMATRIX3X3_HPP
@@ -860,6 +860,9 @@ static PyMemberDef DMatrix3x3_PyMemberDef[] = {
 
 
 
+
+
+
 static DMatrix3x3 *
 DMatrix3x3_transpose(DMatrix3x3 *self, void*)
 {
@@ -905,6 +908,7 @@ DMatrix3x3_get_limits(DMatrix3x3 *self, void *)
 static PyMethodDef DMatrix3x3_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)DMatrix3x3_inverse, METH_NOARGS, 0},
+
 
     {"transpose", (PyCFunction)DMatrix3x3_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix3x3_get_limits, METH_NOARGS | METH_STATIC, 0},
@@ -1271,7 +1275,7 @@ get_DMatrix3x3Array_type()
 
 
 static PyObject *
-create_DMatrix3x3(double *value)
+create_DMatrix3x3(const double *value)
 {
 
     auto cls = get_DMatrix3x3_type();
@@ -1283,7 +1287,7 @@ create_DMatrix3x3(double *value)
 
 
 static PyObject *
-create_DMatrix3x3Array(size_t length, double *value)
+create_DMatrix3x3Array(size_t length, const double *value)
 {
     auto cls = get_DMatrix3x3Array_type();
     auto result = (DMatrix3x3Array *)cls->tp_alloc(cls, 0);
@@ -1306,7 +1310,7 @@ create_DMatrix3x3Array(size_t length, double *value)
 
 
 static double *
-get_DMatrix3x3_value_ptr(PyObject *self)
+get_DMatrix3x3_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix3x3_type())
     {
@@ -1318,7 +1322,7 @@ get_DMatrix3x3_value_ptr(PyObject *self)
 
 
 static double *
-get_DMatrix3x3Array_value_ptr(PyObject *self)
+get_DMatrix3x3Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix3x3Array_type())
     {
@@ -1334,7 +1338,7 @@ get_DMatrix3x3Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_DMatrix3x3Array_length(PyObject *self)
+get_DMatrix3x3Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix3x3Array_type())
     {
