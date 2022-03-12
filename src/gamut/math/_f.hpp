@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.663173 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 21:23:21.891680 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_F_HPP
 #define GAMUT_MATH_F_HPP
@@ -243,6 +243,22 @@ static PyMemberDef FArray_PyMemberDef[] = {
 };
 
 
+static PyObject *
+FArray_pointer(FArray *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_float_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->pod);
+}
+
+
+static PyGetSetDef FArray_PyGetSetDef[] = {
+    {"pointer", (getter)FArray_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot FArray_PyType_Slots [] = {
     {Py_tp_new, (void*)FArray__new__},
     {Py_tp_dealloc, (void*)FArray__dealloc__},
@@ -254,6 +270,7 @@ static PyType_Slot FArray_PyType_Slots [] = {
     {Py_nb_bool, (void*)FArray__bool__},
     {Py_bf_getbuffer, (void*)FArray_getbufferproc},
     {Py_bf_releasebuffer, (void*)FArray_releasebufferproc},
+    {Py_tp_getset, (void*)FArray_PyGetSetDef},
     {Py_tp_members, (void*)FArray_PyMemberDef},
     {0, 0},
 };

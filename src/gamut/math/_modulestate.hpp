@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.671170 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-12 21:23:21.898680 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP
@@ -12,6 +12,19 @@
 
 struct ModuleState
 {
+    PyObject *ctypes_c_bool_p;
+    PyObject *ctypes_c_int8_t_p;
+    PyObject *ctypes_c_uint8_t_p;
+    PyObject *ctypes_c_int16_t_p;
+    PyObject *ctypes_c_uint16_t_p;
+    PyObject *ctypes_c_int32_t_p;
+    PyObject *ctypes_c_uint32_t_p;
+    PyObject *ctypes_c_int64_t_p;
+    PyObject *ctypes_c_uint64_t_p;
+    PyObject *ctypes_c_int_p;
+    PyObject *ctypes_c_unsigned_int_p;
+    PyObject *ctypes_c_float_p;
+    PyObject *ctypes_c_double_p;
 
         PyTypeObject *BVector2_PyTypeObject;
         PyTypeObject *BVector2Array_PyTypeObject;
@@ -221,6 +234,19 @@ ModuleState_traverse(
     void *arg
 )
 {
+    Py_VISIT(self->ctypes_c_bool_p);
+    Py_VISIT(self->ctypes_c_int8_t_p);
+    Py_VISIT(self->ctypes_c_uint8_t_p);
+    Py_VISIT(self->ctypes_c_int16_t_p);
+    Py_VISIT(self->ctypes_c_uint16_t_p);
+    Py_VISIT(self->ctypes_c_int32_t_p);
+    Py_VISIT(self->ctypes_c_uint32_t_p);
+    Py_VISIT(self->ctypes_c_int64_t_p);
+    Py_VISIT(self->ctypes_c_uint64_t_p);
+    Py_VISIT(self->ctypes_c_int_p);
+    Py_VISIT(self->ctypes_c_unsigned_int_p);
+    Py_VISIT(self->ctypes_c_float_p);
+    Py_VISIT(self->ctypes_c_double_p);
 
         Py_VISIT(self->BVector2_PyTypeObject);
         Py_VISIT(self->BVector2Array_PyTypeObject);
@@ -427,6 +453,19 @@ ModuleState_traverse(
 static int
 ModuleState_clear(struct ModuleState *self)
 {
+    Py_CLEAR(self->ctypes_c_bool_p);
+    Py_CLEAR(self->ctypes_c_int8_t_p);
+    Py_CLEAR(self->ctypes_c_uint8_t_p);
+    Py_CLEAR(self->ctypes_c_int16_t_p);
+    Py_CLEAR(self->ctypes_c_uint16_t_p);
+    Py_CLEAR(self->ctypes_c_int32_t_p);
+    Py_CLEAR(self->ctypes_c_uint32_t_p);
+    Py_CLEAR(self->ctypes_c_int64_t_p);
+    Py_CLEAR(self->ctypes_c_uint64_t_p);
+    Py_CLEAR(self->ctypes_c_int_p);
+    Py_CLEAR(self->ctypes_c_unsigned_int_p);
+    Py_CLEAR(self->ctypes_c_float_p);
+    Py_CLEAR(self->ctypes_c_double_p);
 
         Py_CLEAR(self->BVector2_PyTypeObject);
         Py_CLEAR(self->BVector2Array_PyTypeObject);

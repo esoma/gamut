@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.594670 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 21:23:21.825679 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I32VECTOR4_HPP
 #define GAMUT_MATH_I32VECTOR4_HPP
@@ -669,6 +669,16 @@ I32Vector4_getbufferproc(I32Vector4 *self, Py_buffer *view, int flags)
 
 
 
+static PyObject *
+I32Vector4_pointer(I32Vector4 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_int32_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
 static PyGetSetDef I32Vector4_PyGetSetDef[] = {
     {"x", (getter)I32Vector4_Getter_0, 0, 0, 0},
     {"r", (getter)I32Vector4_Getter_0, 0, 0, 0},
@@ -691,6 +701,7 @@ static PyGetSetDef I32Vector4_PyGetSetDef[] = {
         {"q", (getter)I32Vector4_Getter_3, 0, 0, 0},
 
 
+    {"pointer", (getter)I32Vector4_pointer, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
@@ -1264,6 +1275,22 @@ static PyMemberDef I32Vector4Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+I32Vector4Array_pointer(I32Vector4Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_int32_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef I32Vector4Array_PyGetSetDef[] = {
+    {"pointer", (getter)I32Vector4Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot I32Vector4Array_PyType_Slots [] = {
     {Py_tp_new, (void*)I32Vector4Array__new__},
     {Py_tp_dealloc, (void*)I32Vector4Array__dealloc__},
@@ -1275,6 +1302,7 @@ static PyType_Slot I32Vector4Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)I32Vector4Array__bool__},
     {Py_bf_getbuffer, (void*)I32Vector4Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)I32Vector4Array_releasebufferproc},
+    {Py_tp_getset, (void*)I32Vector4Array_PyGetSetDef},
     {Py_tp_members, (void*)I32Vector4Array_PyMemberDef},
     {0, 0},
 };

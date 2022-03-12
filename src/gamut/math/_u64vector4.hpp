@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.598171 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 21:23:21.829180 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U64VECTOR4_HPP
 #define GAMUT_MATH_U64VECTOR4_HPP
@@ -644,6 +644,16 @@ U64Vector4_getbufferproc(U64Vector4 *self, Py_buffer *view, int flags)
 
 
 
+static PyObject *
+U64Vector4_pointer(U64Vector4 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_uint64_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
 static PyGetSetDef U64Vector4_PyGetSetDef[] = {
     {"x", (getter)U64Vector4_Getter_0, 0, 0, 0},
     {"r", (getter)U64Vector4_Getter_0, 0, 0, 0},
@@ -666,6 +676,7 @@ static PyGetSetDef U64Vector4_PyGetSetDef[] = {
         {"q", (getter)U64Vector4_Getter_3, 0, 0, 0},
 
 
+    {"pointer", (getter)U64Vector4_pointer, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
@@ -1237,6 +1248,22 @@ static PyMemberDef U64Vector4Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+U64Vector4Array_pointer(U64Vector4Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_uint64_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef U64Vector4Array_PyGetSetDef[] = {
+    {"pointer", (getter)U64Vector4Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot U64Vector4Array_PyType_Slots [] = {
     {Py_tp_new, (void*)U64Vector4Array__new__},
     {Py_tp_dealloc, (void*)U64Vector4Array__dealloc__},
@@ -1248,6 +1275,7 @@ static PyType_Slot U64Vector4Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)U64Vector4Array__bool__},
     {Py_bf_getbuffer, (void*)U64Vector4Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)U64Vector4Array_releasebufferproc},
+    {Py_tp_getset, (void*)U64Vector4Array_PyGetSetDef},
     {Py_tp_members, (void*)U64Vector4Array_PyMemberDef},
     {0, 0},
 };

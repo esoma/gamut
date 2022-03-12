@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.654672 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 21:23:21.882680 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X4_HPP
 #define GAMUT_MATH_FMATRIX4X4_HPP
@@ -1042,6 +1042,22 @@ static PyMemberDef FMatrix4x4_PyMemberDef[] = {
 };
 
 
+static PyObject *
+FMatrix4x4_pointer(FMatrix4x4 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_float_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef FMatrix4x4_PyGetSetDef[] = {
+    {"pointer", (getter)FMatrix4x4_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 
     static FMatrix4x4 *
     FMatrix4x4_inverse(FMatrix4x4 *self, void*)
@@ -1219,6 +1235,7 @@ static PyType_Slot FMatrix4x4_PyType_Slots [] = {
     {Py_nb_true_divide, (void*)FMatrix4x4__truediv__},
     {Py_nb_negative, (void*)FMatrix4x4__neg__},
     {Py_bf_getbuffer, (void*)FMatrix4x4_getbufferproc},
+    {Py_tp_getset, (void*)FMatrix4x4_PyGetSetDef},
     {Py_tp_members, (void*)FMatrix4x4_PyMemberDef},
     {Py_tp_methods, (void*)FMatrix4x4_PyMethodDef},
     {0, 0},
@@ -1498,6 +1515,22 @@ static PyMemberDef FMatrix4x4Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+FMatrix4x4Array_pointer(FMatrix4x4Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_float_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef FMatrix4x4Array_PyGetSetDef[] = {
+    {"pointer", (getter)FMatrix4x4Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot FMatrix4x4Array_PyType_Slots [] = {
     {Py_tp_new, (void*)FMatrix4x4Array__new__},
     {Py_tp_dealloc, (void*)FMatrix4x4Array__dealloc__},
@@ -1509,6 +1542,7 @@ static PyType_Slot FMatrix4x4Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)FMatrix4x4Array__bool__},
     {Py_bf_getbuffer, (void*)FMatrix4x4Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)FMatrix4x4Array_releasebufferproc},
+    {Py_tp_getset, (void*)FMatrix4x4Array_PyGetSetDef},
     {Py_tp_members, (void*)FMatrix4x4Array_PyMemberDef},
     {0, 0},
 };

@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.578671 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 21:23:21.810679 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR3_HPP
 #define GAMUT_MATH_BVECTOR3_HPP
@@ -536,6 +536,16 @@ BVector3_getbufferproc(BVector3 *self, Py_buffer *view, int flags)
 
 
 
+static PyObject *
+BVector3_pointer(BVector3 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_bool_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
 static PyGetSetDef BVector3_PyGetSetDef[] = {
     {"x", (getter)BVector3_Getter_0, 0, 0, 0},
     {"r", (getter)BVector3_Getter_0, 0, 0, 0},
@@ -554,6 +564,7 @@ static PyGetSetDef BVector3_PyGetSetDef[] = {
 
 
 
+    {"pointer", (getter)BVector3_pointer, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
@@ -1107,6 +1118,22 @@ static PyMemberDef BVector3Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+BVector3Array_pointer(BVector3Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_bool_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef BVector3Array_PyGetSetDef[] = {
+    {"pointer", (getter)BVector3Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot BVector3Array_PyType_Slots [] = {
     {Py_tp_new, (void*)BVector3Array__new__},
     {Py_tp_dealloc, (void*)BVector3Array__dealloc__},
@@ -1118,6 +1145,7 @@ static PyType_Slot BVector3Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)BVector3Array__bool__},
     {Py_bf_getbuffer, (void*)BVector3Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)BVector3Array_releasebufferproc},
+    {Py_tp_getset, (void*)BVector3Array_PyGetSetDef},
     {Py_tp_members, (void*)BVector3Array_PyMemberDef},
     {0, 0},
 };

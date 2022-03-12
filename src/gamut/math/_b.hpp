@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.662671 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 21:23:21.890680 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_B_HPP
 #define GAMUT_MATH_B_HPP
@@ -243,6 +243,22 @@ static PyMemberDef BArray_PyMemberDef[] = {
 };
 
 
+static PyObject *
+BArray_pointer(BArray *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_bool_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->pod);
+}
+
+
+static PyGetSetDef BArray_PyGetSetDef[] = {
+    {"pointer", (getter)BArray_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot BArray_PyType_Slots [] = {
     {Py_tp_new, (void*)BArray__new__},
     {Py_tp_dealloc, (void*)BArray__dealloc__},
@@ -254,6 +270,7 @@ static PyType_Slot BArray_PyType_Slots [] = {
     {Py_nb_bool, (void*)BArray__bool__},
     {Py_bf_getbuffer, (void*)BArray_getbufferproc},
     {Py_bf_releasebuffer, (void*)BArray_releasebufferproc},
+    {Py_tp_getset, (void*)BArray_PyGetSetDef},
     {Py_tp_members, (void*)BArray_PyMemberDef},
     {0, 0},
 };

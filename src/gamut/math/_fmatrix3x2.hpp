@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.644670 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 21:23:21.873679 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX3X2_HPP
 #define GAMUT_MATH_FMATRIX3X2_HPP
@@ -745,6 +745,22 @@ static PyMemberDef FMatrix3x2_PyMemberDef[] = {
 };
 
 
+static PyObject *
+FMatrix3x2_pointer(FMatrix3x2 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_float_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef FMatrix3x2_PyGetSetDef[] = {
+    {"pointer", (getter)FMatrix3x2_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 
 
 
@@ -818,6 +834,7 @@ static PyType_Slot FMatrix3x2_PyType_Slots [] = {
     {Py_nb_true_divide, (void*)FMatrix3x2__truediv__},
     {Py_nb_negative, (void*)FMatrix3x2__neg__},
     {Py_bf_getbuffer, (void*)FMatrix3x2_getbufferproc},
+    {Py_tp_getset, (void*)FMatrix3x2_PyGetSetDef},
     {Py_tp_members, (void*)FMatrix3x2_PyMemberDef},
     {Py_tp_methods, (void*)FMatrix3x2_PyMethodDef},
     {0, 0},
@@ -1097,6 +1114,22 @@ static PyMemberDef FMatrix3x2Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+FMatrix3x2Array_pointer(FMatrix3x2Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_float_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef FMatrix3x2Array_PyGetSetDef[] = {
+    {"pointer", (getter)FMatrix3x2Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot FMatrix3x2Array_PyType_Slots [] = {
     {Py_tp_new, (void*)FMatrix3x2Array__new__},
     {Py_tp_dealloc, (void*)FMatrix3x2Array__dealloc__},
@@ -1108,6 +1141,7 @@ static PyType_Slot FMatrix3x2Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)FMatrix3x2Array__bool__},
     {Py_bf_getbuffer, (void*)FMatrix3x2Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)FMatrix3x2Array_releasebufferproc},
+    {Py_tp_getset, (void*)FMatrix3x2Array_PyGetSetDef},
     {Py_tp_members, (void*)FMatrix3x2Array_PyMemberDef},
     {0, 0},
 };

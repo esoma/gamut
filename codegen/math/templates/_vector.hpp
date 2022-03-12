@@ -617,6 +617,16 @@ static int
 {% endif %}
 
 
+static PyObject *
+{{ name }}_pointer({{ name }} *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_{{ c_type.replace(' ', '_') }}_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
 static PyGetSetDef {{ name }}_PyGetSetDef[] = {
     {"x", (getter){{ name }}_Getter_0, 0, 0, 0},
     {"r", (getter){{ name }}_Getter_0, 0, 0, 0},
@@ -641,6 +651,7 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
     {% if c_type in ['float', 'double'] %}
         {"magnitude", (getter){{ name }}_magnitude, 0, 0, 0},
     {% endif %}
+    {"pointer", (getter){{ name }}_pointer, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
@@ -1157,6 +1168,22 @@ static PyMemberDef {{ name }}Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+{{ name }}Array_pointer({{ name }}Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_p = module_state->ctypes_c_{{ c_type.replace(' ', '_') }}_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
+}
+
+
+static PyGetSetDef {{ name }}Array_PyGetSetDef[] = {
+    {"pointer", (getter){{ name }}Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot {{ name }}Array_PyType_Slots [] = {
     {Py_tp_new, (void*){{ name }}Array__new__},
     {Py_tp_dealloc, (void*){{ name }}Array__dealloc__},
@@ -1168,6 +1195,7 @@ static PyType_Slot {{ name }}Array_PyType_Slots [] = {
     {Py_nb_bool, (void*){{ name }}Array__bool__},
     {Py_bf_getbuffer, (void*){{ name }}Array_getbufferproc},
     {Py_bf_releasebuffer, (void*){{ name }}Array_releasebufferproc},
+    {Py_tp_getset, (void*){{ name }}Array_PyGetSetDef},
     {Py_tp_members, (void*){{ name }}Array_PyMemberDef},
     {0, 0},
 };
