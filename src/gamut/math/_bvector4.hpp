@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.589171 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 19:37:09.775643 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR4_HPP
 #define GAMUT_MATH_BVECTOR4_HPP
@@ -582,6 +582,16 @@ BVector4_getbufferproc(BVector4 *self, Py_buffer *view, int flags)
 
 
 
+static PyObject *
+BVector4_pointer(BVector4 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+}
+
+
 static PyGetSetDef BVector4_PyGetSetDef[] = {
     {"x", (getter)BVector4_Getter_0, 0, 0, 0},
     {"r", (getter)BVector4_Getter_0, 0, 0, 0},
@@ -604,6 +614,7 @@ static PyGetSetDef BVector4_PyGetSetDef[] = {
         {"q", (getter)BVector4_Getter_3, 0, 0, 0},
 
 
+    {"pointer", (getter)BVector4_pointer, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
@@ -1175,6 +1186,22 @@ static PyMemberDef BVector4Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+BVector4Array_pointer(BVector4Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+}
+
+
+static PyGetSetDef BVector4Array_PyGetSetDef[] = {
+    {"pointer", (getter)BVector4Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot BVector4Array_PyType_Slots [] = {
     {Py_tp_new, (void*)BVector4Array__new__},
     {Py_tp_dealloc, (void*)BVector4Array__dealloc__},
@@ -1186,6 +1213,7 @@ static PyType_Slot BVector4Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)BVector4Array__bool__},
     {Py_bf_getbuffer, (void*)BVector4Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)BVector4Array_releasebufferproc},
+    {Py_tp_getset, (void*)BVector4Array_PyGetSetDef},
     {Py_tp_members, (void*)BVector4Array_PyMemberDef},
     {0, 0},
 };

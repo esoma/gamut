@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.664170 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 19:37:09.846143 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U8_HPP
 #define GAMUT_MATH_U8_HPP
@@ -243,6 +243,22 @@ static PyMemberDef U8Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+U8Array_pointer(U8Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->pod);
+}
+
+
+static PyGetSetDef U8Array_PyGetSetDef[] = {
+    {"pointer", (getter)U8Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot U8Array_PyType_Slots [] = {
     {Py_tp_new, (void*)U8Array__new__},
     {Py_tp_dealloc, (void*)U8Array__dealloc__},
@@ -254,6 +270,7 @@ static PyType_Slot U8Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)U8Array__bool__},
     {Py_bf_getbuffer, (void*)U8Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)U8Array_releasebufferproc},
+    {Py_tp_getset, (void*)U8Array_PyGetSetDef},
     {Py_tp_members, (void*)U8Array_PyMemberDef},
     {0, 0},
 };

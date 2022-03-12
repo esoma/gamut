@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.595171 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 19:37:09.781643 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U32VECTOR4_HPP
 #define GAMUT_MATH_U32VECTOR4_HPP
@@ -644,6 +644,16 @@ U32Vector4_getbufferproc(U32Vector4 *self, Py_buffer *view, int flags)
 
 
 
+static PyObject *
+U32Vector4_pointer(U32Vector4 *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+}
+
+
 static PyGetSetDef U32Vector4_PyGetSetDef[] = {
     {"x", (getter)U32Vector4_Getter_0, 0, 0, 0},
     {"r", (getter)U32Vector4_Getter_0, 0, 0, 0},
@@ -666,6 +676,7 @@ static PyGetSetDef U32Vector4_PyGetSetDef[] = {
         {"q", (getter)U32Vector4_Getter_3, 0, 0, 0},
 
 
+    {"pointer", (getter)U32Vector4_pointer, 0, 0, 0},
     {0, 0, 0, 0, 0}
 };
 
@@ -1237,6 +1248,22 @@ static PyMemberDef U32Vector4Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+U32Vector4Array_pointer(U32Vector4Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+}
+
+
+static PyGetSetDef U32Vector4Array_PyGetSetDef[] = {
+    {"pointer", (getter)U32Vector4Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot U32Vector4Array_PyType_Slots [] = {
     {Py_tp_new, (void*)U32Vector4Array__new__},
     {Py_tp_dealloc, (void*)U32Vector4Array__dealloc__},
@@ -1248,6 +1275,7 @@ static PyType_Slot U32Vector4Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)U32Vector4Array__bool__},
     {Py_bf_getbuffer, (void*)U32Vector4Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)U32Vector4Array_releasebufferproc},
+    {Py_tp_getset, (void*)U32Vector4Array_PyGetSetDef},
     {Py_tp_members, (void*)U32Vector4Array_PyMemberDef},
     {0, 0},
 };

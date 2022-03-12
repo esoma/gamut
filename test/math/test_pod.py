@@ -4,6 +4,7 @@ from gamut.math import (BArray, DArray, FArray, I8Array, I16Array, I32Array,
                         I64Array, IArray, U8Array, U16Array, U32Array,
                         U64Array, UArray)
 # python
+import ctypes
 from math import isclose as _isclose
 import struct
 from weakref import ref
@@ -189,6 +190,28 @@ class PodTest:
         assert memory_view.c_contiguous
         assert memory_view.f_contiguous
         assert memory_view.contiguous
+
+    def test_array_pointer(self) -> None:
+        array = self.array_cls(*range(5))
+        assert isinstance(array.pointer, ctypes.c_void_p)
+        real_type = {
+            '?': ctypes.c_bool,
+            'd': ctypes.c_double,
+            'f': ctypes.c_float,
+            '=b': ctypes.c_int8,
+            '=B': ctypes.c_uint8,
+            '=h': ctypes.c_int16,
+            '=H': ctypes.c_uint16,
+            '=i': ctypes.c_int32,
+            '=I': ctypes.c_uint32,
+            '=q': ctypes.c_int64,
+            '=Q': ctypes.c_uint64,
+            'i': ctypes.c_int,
+            'I': ctypes.c_uint,
+        }[self.struct_byte_order + self.struct_format]
+        cast_pointer = ctypes.cast(array.pointer, ctypes.POINTER(real_type))
+        for i in range(5):
+            cast_pointer[i] == self.type(i)
 
 
 class TestB(

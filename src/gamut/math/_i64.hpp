@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.666170 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 19:37:09.848642 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I64_HPP
 #define GAMUT_MATH_I64_HPP
@@ -243,6 +243,22 @@ static PyMemberDef I64Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+I64Array_pointer(I64Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->pod);
+}
+
+
+static PyGetSetDef I64Array_PyGetSetDef[] = {
+    {"pointer", (getter)I64Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot I64Array_PyType_Slots [] = {
     {Py_tp_new, (void*)I64Array__new__},
     {Py_tp_dealloc, (void*)I64Array__dealloc__},
@@ -254,6 +270,7 @@ static PyType_Slot I64Array_PyType_Slots [] = {
     {Py_nb_bool, (void*)I64Array__bool__},
     {Py_bf_getbuffer, (void*)I64Array_getbufferproc},
     {Py_bf_releasebuffer, (void*)I64Array_releasebufferproc},
+    {Py_tp_getset, (void*)I64Array_PyGetSetDef},
     {Py_tp_members, (void*)I64Array_PyMemberDef},
     {0, 0},
 };

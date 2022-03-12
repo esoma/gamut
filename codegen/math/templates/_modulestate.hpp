@@ -12,6 +12,7 @@
 
 struct ModuleState
 {
+    PyObject *ctypes_c_void_p;
     {% for type in types %}
         PyTypeObject *{{ type }}_PyTypeObject;
         PyTypeObject *{{ type }}Array_PyTypeObject;
@@ -29,6 +30,7 @@ ModuleState_traverse(
     void *arg
 )
 {
+    Py_VISIT(self->ctypes_c_void_p);
     {% for type in types %}
         Py_VISIT(self->{{ type }}_PyTypeObject);
         Py_VISIT(self->{{ type }}Array_PyTypeObject);
@@ -43,6 +45,7 @@ ModuleState_traverse(
 static int
 ModuleState_clear(struct ModuleState *self)
 {
+    Py_CLEAR(self->ctypes_c_void_p);
     {% for type in types %}
         Py_CLEAR(self->{{ type }}_PyTypeObject);
         Py_CLEAR(self->{{ type }}Array_PyTypeObject);

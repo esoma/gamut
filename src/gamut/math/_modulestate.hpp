@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.671170 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-12 19:37:09.852142 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP
@@ -12,6 +12,7 @@
 
 struct ModuleState
 {
+    PyObject *ctypes_c_void_p;
 
         PyTypeObject *BVector2_PyTypeObject;
         PyTypeObject *BVector2Array_PyTypeObject;
@@ -221,6 +222,7 @@ ModuleState_traverse(
     void *arg
 )
 {
+    Py_VISIT(self->ctypes_c_void_p);
 
         Py_VISIT(self->BVector2_PyTypeObject);
         Py_VISIT(self->BVector2Array_PyTypeObject);
@@ -427,6 +429,7 @@ ModuleState_traverse(
 static int
 ModuleState_clear(struct ModuleState *self)
 {
+    Py_CLEAR(self->ctypes_c_void_p);
 
         Py_CLEAR(self->BVector2_PyTypeObject);
         Py_CLEAR(self->BVector2Array_PyTypeObject);

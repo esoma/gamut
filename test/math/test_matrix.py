@@ -24,6 +24,7 @@ from gamut.math import (DMatrix2, DMatrix2Array, DMatrix2x2, DMatrix2x2Array,
                         Matrix4x2Array, Matrix4x3, Matrix4x3Array, Matrix4x4,
                         Matrix4x4Array)
 # python
+import ctypes
 from math import inf, isclose, isnan, radians
 import struct
 from weakref import ref
@@ -853,6 +854,34 @@ class MatrixTest:
             0, 0, 1, 0,
             1, 2, 3, 1,
         )
+
+    def test_pointer(self) -> None:
+        matrix = self.cls(*range(self.component_count))
+        assert isinstance(matrix.pointer, ctypes.c_void_p)
+        real_type = {
+            'd': ctypes.c_double,
+            'f': ctypes.c_float,
+        }[self.struct_format]
+        cast_pointer = ctypes.cast(matrix.pointer, ctypes.POINTER(real_type))
+        for i in range(self.component_count):
+            cast_pointer[i] == self.type(i)
+
+    def test_array_pointer(self) -> None:
+        array = self.array_cls(
+            self.cls(*range(self.component_count)),
+            self.cls(0),
+        )
+        assert isinstance(array.pointer, ctypes.c_void_p)
+        real_type = {
+            'd': ctypes.c_double,
+            'f': ctypes.c_float,
+        }[self.struct_format]
+        cast_pointer = ctypes.cast(array.pointer, ctypes.POINTER(real_type))
+        for i in (
+            *range(self.component_count),
+            *(0 for _ in range(self.component_count))
+        ):
+            cast_pointer[i] == self.type(i)
 
 
 

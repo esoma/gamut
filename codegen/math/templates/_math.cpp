@@ -79,6 +79,15 @@ PyInit__math()
     if (PyState_AddModule(module, &module_PyModuleDef) == -1){ goto error; }
     state = (ModuleState *)PyModule_GetState(module);
 
+    {
+        PyObject *ctypes = PyImport_ImportModule("ctypes");
+        if (!ctypes){ goto error; }
+
+        state->ctypes_c_void_p = PyObject_GetAttrString(ctypes, "c_void_p");
+        Py_DECREF(ctypes);
+        if (!state->ctypes_c_void_p){ goto error; }
+    }
+
     {% for type in vector_types %}
         {
             PyTypeObject *type = define_{{ type }}_type(module);

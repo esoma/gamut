@@ -1,5 +1,5 @@
 
-# generated 2022-03-12 17:38:09.706671 from codegen/math/templates/_math.pyi
+# generated 2022-03-12 19:37:09.885643 from codegen/math/templates/_math.pyi
 
 __all__ = [
 

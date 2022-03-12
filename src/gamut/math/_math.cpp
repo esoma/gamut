@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 17:38:09.676670 from codegen/math/templates/_math.cpp
+// generated 2022-03-12 19:37:09.857146 from codegen/math/templates/_math.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -212,6 +212,15 @@ PyInit__math()
     if (!module){ goto error; }
     if (PyState_AddModule(module, &module_PyModuleDef) == -1){ goto error; }
     state = (ModuleState *)PyModule_GetState(module);
+
+    {
+        PyObject *ctypes = PyImport_ImportModule("ctypes");
+        if (!ctypes){ goto error; }
+
+        state->ctypes_c_void_p = PyObject_GetAttrString(ctypes, "c_void_p");
+        Py_DECREF(ctypes);
+        if (!state->ctypes_c_void_p){ goto error; }
+    }
 
 
         {

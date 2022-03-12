@@ -567,6 +567,22 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
 };
 
 
+static PyObject *
+{{ name }}_pointer({{ name }} *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+}
+
+
+static PyGetSetDef {{ name }}_PyGetSetDef[] = {
+    {"pointer", (getter){{ name }}_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 {% if row_size == column_size %}
     static {{ name }} *
     {{ name }}_inverse({{ name }} *self, void*)
@@ -744,6 +760,7 @@ static PyType_Slot {{ name }}_PyType_Slots [] = {
     {Py_nb_true_divide, (void*){{ name }}__truediv__},
     {Py_nb_negative, (void*){{ name }}__neg__},
     {Py_bf_getbuffer, (void*){{ name }}_getbufferproc},
+    {Py_tp_getset, (void*){{ name }}_PyGetSetDef},
     {Py_tp_members, (void*){{ name }}_PyMemberDef},
     {Py_tp_methods, (void*){{ name }}_PyMethodDef},
     {0, 0},
@@ -1023,6 +1040,22 @@ static PyMemberDef {{ name }}Array_PyMemberDef[] = {
 };
 
 
+static PyObject *
+{{ name }}Array_pointer({{ name }}Array *self, void *)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto c_void_p = module_state->ctypes_c_void_p;
+    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+}
+
+
+static PyGetSetDef {{ name }}Array_PyGetSetDef[] = {
+    {"pointer", (getter){{ name }}Array_pointer, 0, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+
 static PyType_Slot {{ name }}Array_PyType_Slots [] = {
     {Py_tp_new, (void*){{ name }}Array__new__},
     {Py_tp_dealloc, (void*){{ name }}Array__dealloc__},
@@ -1034,6 +1067,7 @@ static PyType_Slot {{ name }}Array_PyType_Slots [] = {
     {Py_nb_bool, (void*){{ name }}Array__bool__},
     {Py_bf_getbuffer, (void*){{ name }}Array_getbufferproc},
     {Py_bf_releasebuffer, (void*){{ name }}Array_releasebufferproc},
+    {Py_tp_getset, (void*){{ name }}Array_PyGetSetDef},
     {Py_tp_members, (void*){{ name }}Array_PyMemberDef},
     {0, 0},
 };
