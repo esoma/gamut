@@ -126,10 +126,18 @@ math = Extension(
 )
 
 
+test_math_api = Extension(
+    'gamut.math._test_api',
+    include_dirs=['src/gamut/math'],
+    sources=['src/gamut/math/_test_api.c'],
+    language='c',
+)
+
+
 setup(
     cmdclass={
         "build_bullet": BuildBullet,
         "codegen_math": GenerateMathCode,
     },
-    ext_modules=[math, physics]
+    ext_modules=[math, physics, test_math_api]
 )

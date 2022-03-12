@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.760966 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:08:08.730891 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U32VECTOR2_HPP
 #define GAMUT_MATH_U32VECTOR2_HPP
@@ -1136,6 +1136,102 @@ define_U32Vector2Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_U32Vector2_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U32Vector2_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_U32Vector2Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U32Vector2Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_U32Vector2(uint32_t *value)
+{
+    auto cls = get_U32Vector2_type();
+    auto result = (U32Vector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U32Vector2Glm(*(U32Vector2Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_U32Vector2Array(size_t length, uint32_t *value)
+{
+    auto cls = get_U32Vector2Array_type();
+    auto result = (U32Vector2Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new U32Vector2Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((U32Vector2Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static uint32_t *
+get_U32Vector2_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U32Vector2_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected U32Vector2, got %R", self);
+        return 0;
+    }
+    return (uint32_t *)((U32Vector2 *)self)->glm;
+}
+
+
+static uint32_t *
+get_U32Vector2Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U32Vector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U32Vector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (uint32_t *)((U32Vector2Array *)self)->glm;
+}
+
+
+static size_t
+get_U32Vector2Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U32Vector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U32Vector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((U32Vector2Array *)self)->length;
 }
 
 #endif

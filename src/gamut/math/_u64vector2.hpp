@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.763966 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:08:08.733392 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U64VECTOR2_HPP
 #define GAMUT_MATH_U64VECTOR2_HPP
@@ -1136,6 +1136,102 @@ define_U64Vector2Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_U64Vector2_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U64Vector2_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_U64Vector2Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->U64Vector2Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_U64Vector2(uint64_t *value)
+{
+    auto cls = get_U64Vector2_type();
+    auto result = (U64Vector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new U64Vector2Glm(*(U64Vector2Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_U64Vector2Array(size_t length, uint64_t *value)
+{
+    auto cls = get_U64Vector2Array_type();
+    auto result = (U64Vector2Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new U64Vector2Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((U64Vector2Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static uint64_t *
+get_U64Vector2_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U64Vector2_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected U64Vector2, got %R", self);
+        return 0;
+    }
+    return (uint64_t *)((U64Vector2 *)self)->glm;
+}
+
+
+static uint64_t *
+get_U64Vector2Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U64Vector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U64Vector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (uint64_t *)((U64Vector2Array *)self)->glm;
+}
+
+
+static size_t
+get_U64Vector2Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_U64Vector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected U64Vector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((U64Vector2Array *)self)->length;
 }
 
 #endif

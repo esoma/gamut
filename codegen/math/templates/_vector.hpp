@@ -1202,4 +1202,100 @@ define_{{ name }}Array_type(PyObject *module)
     return type;
 }
 
+
+static PyTypeObject *
+get_{{ name }}_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->{{ name }}_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_{{ name }}Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->{{ name }}Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_{{ name }}({{ c_type }} *value)
+{
+    auto cls = get_{{ name }}_type();
+    auto result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(*({{ name }}Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_{{ name }}Array(size_t length, {{ c_type }} *value)
+{
+    auto cls = get_{{ name }}Array_type();
+    auto result = ({{ name }}Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new {{ name }}Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = (({{ name }}Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static {{ c_type }} *
+get_{{ name }}_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_{{ name }}_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected {{ name }}, got %R", self);
+        return 0;
+    }
+    return ({{ c_type }} *)(({{ name }} *)self)->glm;
+}
+
+
+static {{ c_type }} *
+get_{{ name }}Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_{{ name }}Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected {{ name }}Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ({{ c_type }} *)(({{ name }}Array *)self)->glm;
+}
+
+
+static size_t
+get_{{ name }}Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_{{ name }}Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected {{ name }}Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (({{ name }}Array *)self)->length;
+}
+
 #endif

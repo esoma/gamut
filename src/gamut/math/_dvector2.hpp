@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.756466 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:08:08.725892 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR2_HPP
 #define GAMUT_MATH_DVECTOR2_HPP
@@ -1292,6 +1292,102 @@ define_DVector2Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_DVector2_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->DVector2_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_DVector2Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->DVector2Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_DVector2(double *value)
+{
+    auto cls = get_DVector2_type();
+    auto result = (DVector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector2Glm(*(DVector2Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_DVector2Array(size_t length, double *value)
+{
+    auto cls = get_DVector2Array_type();
+    auto result = (DVector2Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new DVector2Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((DVector2Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static double *
+get_DVector2_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_DVector2_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected DVector2, got %R", self);
+        return 0;
+    }
+    return (double *)((DVector2 *)self)->glm;
+}
+
+
+static double *
+get_DVector2Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_DVector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected DVector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (double *)((DVector2Array *)self)->glm;
+}
+
+
+static size_t
+get_DVector2Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_DVector2Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected DVector2Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((DVector2Array *)self)->length;
 }
 
 #endif

@@ -21,8 +21,26 @@ def generate_math_files(build_dir: Path) -> None:
         vector_types + matrix_types,
         pod_types
     )
-    generate_math_file(build_dir, vector_types + matrix_types, pod_types)
+    generate_math_file(build_dir, vector_types, matrix_types, pod_types)
+    generate_api_file(build_dir, vector_types, matrix_types, pod_types)
     generate_typestubs(build_dir, vector_types, matrix_types, pod_types)
+    generate_test_api_file(build_dir, vector_types, matrix_types, pod_types)
+
+
+def generate_test_api_file(
+    build_dir: Path,
+    vector_types: Sequence[str],
+    matrix_types: Sequence[str],
+    pod_types: Sequence[str],
+) -> None:
+    template = get_template('_test_api.c')
+    with open(build_dir / f'_test_api.c', 'w') as f:
+        f.write(template.render(
+            vector_types=vector_types,
+            matrix_types=matrix_types,
+            pod_types=pod_types,
+            when=datetime.utcnow()
+        ))
 
 
 def generate_modulestate_file(
@@ -41,16 +59,35 @@ def generate_modulestate_file(
 
 def generate_math_file(
     build_dir: Path,
-    types: Sequence[str],
-    pod_types: Sequence[str]
+    vector_types: Sequence[str],
+    matrix_types: Sequence[str],
+    pod_types: Sequence[str],
 ) -> None:
     template = get_template('_math.cpp')
     with open(build_dir / f'_math.cpp', 'w') as f:
         f.write(template.render(
+            vector_types=vector_types,
+            matrix_types=matrix_types,
             pod_types=pod_types,
-            types=types,
             when=datetime.utcnow()
         ))
+
+
+def generate_api_file(
+    build_dir: Path,
+    vector_types: Sequence[str],
+    matrix_types: Sequence[str],
+    pod_types: Sequence[str],
+) -> None:
+    template = get_template('gamut-math-api.h')
+    with open(build_dir / f'gamut-math-api.h', 'w') as f:
+        f.write(template.render(
+            vector_types=vector_types,
+            matrix_types=matrix_types,
+            pod_types=pod_types,
+            when=datetime.utcnow()
+        ))
+
 
 def generate_typestubs(
     build_dir: Path,

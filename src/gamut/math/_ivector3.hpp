@@ -1,5 +1,5 @@
 
-// generated 2022-03-11 18:37:26.770966 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 02:08:08.740391 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_IVECTOR3_HPP
 #define GAMUT_MATH_IVECTOR3_HPP
@@ -1233,6 +1233,102 @@ define_IVector3Array_type(PyObject *module)
         return 0;
     }
     return type;
+}
+
+
+static PyTypeObject *
+get_IVector3_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->IVector3_PyTypeObject;
+}
+
+
+static PyTypeObject *
+get_IVector3Array_type()
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    return module_state->IVector3Array_PyTypeObject;
+}
+
+
+static PyObject *
+create_IVector3(int *value)
+{
+    auto cls = get_IVector3_type();
+    auto result = (IVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new IVector3Glm(*(IVector3Glm *)value);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+create_IVector3Array(size_t length, int *value)
+{
+    auto cls = get_IVector3Array_type();
+    auto result = (IVector3Array *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->length = length;
+    if (length > 0)
+    {
+        result->glm = new IVector3Glm[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            result->glm[i] = ((IVector3Glm *)value)[i];
+        }
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    return (PyObject *)result;
+}
+
+
+static int *
+get_IVector3_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_IVector3_type())
+    {
+        PyErr_Format(PyExc_TypeError, "expected IVector3, got %R", self);
+        return 0;
+    }
+    return (int *)((IVector3 *)self)->glm;
+}
+
+
+static int *
+get_IVector3Array_value_ptr(PyObject *self)
+{
+    if (Py_TYPE(self) != get_IVector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected IVector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return (int *)((IVector3Array *)self)->glm;
+}
+
+
+static size_t
+get_IVector3Array_length(PyObject *self)
+{
+    if (Py_TYPE(self) != get_IVector3Array_type())
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "expected IVector3Array, got %R",
+            self
+        );
+        return 0;
+    }
+    return ((IVector3Array *)self)->length;
 }
 
 #endif
