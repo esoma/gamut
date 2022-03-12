@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 19:37:09.757642 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 21:23:21.801679 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR2_HPP
 #define GAMUT_MATH_DVECTOR2_HPP
@@ -646,8 +646,8 @@ DVector2_pointer(DVector2 *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_double_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 
@@ -1265,8 +1265,8 @@ DVector2Array_pointer(DVector2Array *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_double_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 

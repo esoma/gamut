@@ -83,9 +83,48 @@ PyInit__math()
         PyObject *ctypes = PyImport_ImportModule("ctypes");
         if (!ctypes){ goto error; }
 
-        state->ctypes_c_void_p = PyObject_GetAttrString(ctypes, "c_void_p");
+        PyObject *ctypes_pointer = PyObject_GetAttrString(ctypes, "POINTER");
+        if (!ctypes_pointer)
+        {
+            Py_DECREF(ctypes);
+            goto error;
+        }
+
+        {% for c_type, ctypes_name in [
+            ('bool', 'bool'),
+            ('int8_t', 'int8'),
+            ('uint8_t', 'uint8'),
+            ('int16_t', 'int16'),
+            ('uint16_t', 'uint16'),
+            ('int32_t', 'int32'),
+            ('uint32_t', 'uint32'),
+            ('int64_t', 'int64'),
+            ('uint64_t', 'uint64'),
+            ('int', 'int'),
+            ('unsigned_int', 'uint'),
+            ('float', 'float'),
+            ('double', 'double'),
+        ] %}
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_{{ ctypes_name }}");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_{{ c_type }}_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_{{ c_type }}_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+        {% endfor %}
+
+        Py_DECREF(ctypes_pointer);
         Py_DECREF(ctypes);
-        if (!state->ctypes_c_void_p){ goto error; }
     }
 
     {% for type in vector_types %}

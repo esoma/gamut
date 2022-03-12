@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 19:37:09.866643 from codegen/math/templates/math.h
+// generated 2022-03-12 21:23:21.915181 from codegen/math/templates/math.h
 
 #ifndef GAMUT_MATH_API_HPP
 #define GAMUT_MATH_API_HPP

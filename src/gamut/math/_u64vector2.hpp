@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 19:37:09.765642 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 21:23:21.810180 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U64VECTOR2_HPP
 #define GAMUT_MATH_U64VECTOR2_HPP
@@ -549,8 +549,8 @@ U64Vector2_pointer(U64Vector2 *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_uint64_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 
@@ -1109,8 +1109,8 @@ U64Vector2Array_pointer(U64Vector2Array *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_uint64_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 
