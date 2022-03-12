@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.805139 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.662671 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_B_HPP
 #define GAMUT_MATH_B_HPP
@@ -299,7 +299,7 @@ get_BArray_type()
 
 
 static PyObject *
-create_BArray(size_t length, bool *value)
+create_BArray(size_t length, const bool *value)
 {
     auto cls = get_BArray_type();
     auto result = (BArray *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_BArray(size_t length, bool *value)
 
 
 static bool *
-get_BArray_value_ptr(PyObject *self)
+get_BArray_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_BArray_type())
     {
@@ -338,7 +338,7 @@ get_BArray_value_ptr(PyObject *self)
 
 
 static size_t
-get_BArray_length(PyObject *self)
+get_BArray_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_BArray_type())
     {

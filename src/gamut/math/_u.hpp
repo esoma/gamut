@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.808639 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.666170 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U_HPP
 #define GAMUT_MATH_U_HPP
@@ -299,7 +299,7 @@ get_UArray_type()
 
 
 static PyObject *
-create_UArray(size_t length, unsigned int *value)
+create_UArray(size_t length, const unsigned int *value)
 {
     auto cls = get_UArray_type();
     auto result = (UArray *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_UArray(size_t length, unsigned int *value)
 
 
 static unsigned int *
-get_UArray_value_ptr(PyObject *self)
+get_UArray_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_UArray_type())
     {
@@ -338,7 +338,7 @@ get_UArray_value_ptr(PyObject *self)
 
 
 static size_t
-get_UArray_length(PyObject *self)
+get_UArray_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_UArray_type())
     {

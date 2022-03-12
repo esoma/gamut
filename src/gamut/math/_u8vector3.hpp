@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.730641 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.581673 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U8VECTOR3_HPP
 #define GAMUT_MATH_U8VECTOR3_HPP
@@ -1230,7 +1230,7 @@ get_U8Vector3Array_type()
 
 
 static PyObject *
-create_U8Vector3(uint8_t *value)
+create_U8Vector3(const uint8_t *value)
 {
     auto cls = get_U8Vector3_type();
     auto result = (U8Vector3 *)cls->tp_alloc(cls, 0);
@@ -1241,7 +1241,7 @@ create_U8Vector3(uint8_t *value)
 
 
 static PyObject *
-create_U8Vector3Array(size_t length, uint8_t *value)
+create_U8Vector3Array(size_t length, const uint8_t *value)
 {
     auto cls = get_U8Vector3Array_type();
     auto result = (U8Vector3Array *)cls->tp_alloc(cls, 0);
@@ -1264,7 +1264,7 @@ create_U8Vector3Array(size_t length, uint8_t *value)
 
 
 static uint8_t *
-get_U8Vector3_value_ptr(PyObject *self)
+get_U8Vector3_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U8Vector3_type())
     {
@@ -1276,7 +1276,7 @@ get_U8Vector3_value_ptr(PyObject *self)
 
 
 static uint8_t *
-get_U8Vector3Array_value_ptr(PyObject *self)
+get_U8Vector3Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U8Vector3Array_type())
     {
@@ -1292,7 +1292,7 @@ get_U8Vector3Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_U8Vector3Array_length(PyObject *self)
+get_U8Vector3Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U8Vector3Array_type())
     {

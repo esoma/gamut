@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.826640 from codegen/math/templates/math.h
+// generated 2022-03-12 17:38:09.686171 from codegen/math/templates/math.h
 
 #ifndef GAMUT_MATH_API_HPP
 #define GAMUT_MATH_API_HPP
@@ -15,418 +15,418 @@ extern "C" {
 #endif
 
 typedef PyTypeObject *(*GamutMathApi_GetType)();
-typedef size_t (*GamutMathApi_GetArrayLength)(PyObject *);
+typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateBVector2)(bool *);
-    typedef PyObject *(*GamutMathApi_CreateBVector2Array)(size_t, bool *);
-    typedef bool *(*GamutMathApi_GetBVector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateBVector2)(const bool *);
+    typedef PyObject *(*GamutMathApi_CreateBVector2Array)(size_t, const bool *);
+    typedef bool *(*GamutMathApi_GetBVector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDVector2)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDVector2Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDVector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDVector2)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDVector2Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDVector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFVector2)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFVector2Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFVector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFVector2)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFVector2Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFVector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI8Vector2)(int8_t *);
-    typedef PyObject *(*GamutMathApi_CreateI8Vector2Array)(size_t, int8_t *);
-    typedef int8_t *(*GamutMathApi_GetI8Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector2)(const int8_t *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector2Array)(size_t, const int8_t *);
+    typedef int8_t *(*GamutMathApi_GetI8Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU8Vector2)(uint8_t *);
-    typedef PyObject *(*GamutMathApi_CreateU8Vector2Array)(size_t, uint8_t *);
-    typedef uint8_t *(*GamutMathApi_GetU8Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector2)(const uint8_t *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector2Array)(size_t, const uint8_t *);
+    typedef uint8_t *(*GamutMathApi_GetU8Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI16Vector2)(int16_t *);
-    typedef PyObject *(*GamutMathApi_CreateI16Vector2Array)(size_t, int16_t *);
-    typedef int16_t *(*GamutMathApi_GetI16Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector2)(const int16_t *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector2Array)(size_t, const int16_t *);
+    typedef int16_t *(*GamutMathApi_GetI16Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU16Vector2)(uint16_t *);
-    typedef PyObject *(*GamutMathApi_CreateU16Vector2Array)(size_t, uint16_t *);
-    typedef uint16_t *(*GamutMathApi_GetU16Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector2)(const uint16_t *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector2Array)(size_t, const uint16_t *);
+    typedef uint16_t *(*GamutMathApi_GetU16Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI32Vector2)(int32_t *);
-    typedef PyObject *(*GamutMathApi_CreateI32Vector2Array)(size_t, int32_t *);
-    typedef int32_t *(*GamutMathApi_GetI32Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector2)(const int32_t *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector2Array)(size_t, const int32_t *);
+    typedef int32_t *(*GamutMathApi_GetI32Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU32Vector2)(uint32_t *);
-    typedef PyObject *(*GamutMathApi_CreateU32Vector2Array)(size_t, uint32_t *);
-    typedef uint32_t *(*GamutMathApi_GetU32Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector2)(const uint32_t *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector2Array)(size_t, const uint32_t *);
+    typedef uint32_t *(*GamutMathApi_GetU32Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateIVector2)(int *);
-    typedef PyObject *(*GamutMathApi_CreateIVector2Array)(size_t, int *);
-    typedef int *(*GamutMathApi_GetIVector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateIVector2)(const int *);
+    typedef PyObject *(*GamutMathApi_CreateIVector2Array)(size_t, const int *);
+    typedef int *(*GamutMathApi_GetIVector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateUVector2)(unsigned int *);
-    typedef PyObject *(*GamutMathApi_CreateUVector2Array)(size_t, unsigned int *);
-    typedef unsigned int *(*GamutMathApi_GetUVector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateUVector2)(const unsigned int *);
+    typedef PyObject *(*GamutMathApi_CreateUVector2Array)(size_t, const unsigned int *);
+    typedef unsigned int *(*GamutMathApi_GetUVector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI64Vector2)(int64_t *);
-    typedef PyObject *(*GamutMathApi_CreateI64Vector2Array)(size_t, int64_t *);
-    typedef int64_t *(*GamutMathApi_GetI64Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector2)(const int64_t *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector2Array)(size_t, const int64_t *);
+    typedef int64_t *(*GamutMathApi_GetI64Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU64Vector2)(uint64_t *);
-    typedef PyObject *(*GamutMathApi_CreateU64Vector2Array)(size_t, uint64_t *);
-    typedef uint64_t *(*GamutMathApi_GetU64Vector2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector2)(const uint64_t *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector2Array)(size_t, const uint64_t *);
+    typedef uint64_t *(*GamutMathApi_GetU64Vector2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateBVector3)(bool *);
-    typedef PyObject *(*GamutMathApi_CreateBVector3Array)(size_t, bool *);
-    typedef bool *(*GamutMathApi_GetBVector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateBVector3)(const bool *);
+    typedef PyObject *(*GamutMathApi_CreateBVector3Array)(size_t, const bool *);
+    typedef bool *(*GamutMathApi_GetBVector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDVector3)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDVector3Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDVector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDVector3)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDVector3Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDVector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFVector3)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFVector3Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFVector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFVector3)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFVector3Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFVector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI8Vector3)(int8_t *);
-    typedef PyObject *(*GamutMathApi_CreateI8Vector3Array)(size_t, int8_t *);
-    typedef int8_t *(*GamutMathApi_GetI8Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector3)(const int8_t *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector3Array)(size_t, const int8_t *);
+    typedef int8_t *(*GamutMathApi_GetI8Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU8Vector3)(uint8_t *);
-    typedef PyObject *(*GamutMathApi_CreateU8Vector3Array)(size_t, uint8_t *);
-    typedef uint8_t *(*GamutMathApi_GetU8Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector3)(const uint8_t *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector3Array)(size_t, const uint8_t *);
+    typedef uint8_t *(*GamutMathApi_GetU8Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI16Vector3)(int16_t *);
-    typedef PyObject *(*GamutMathApi_CreateI16Vector3Array)(size_t, int16_t *);
-    typedef int16_t *(*GamutMathApi_GetI16Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector3)(const int16_t *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector3Array)(size_t, const int16_t *);
+    typedef int16_t *(*GamutMathApi_GetI16Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU16Vector3)(uint16_t *);
-    typedef PyObject *(*GamutMathApi_CreateU16Vector3Array)(size_t, uint16_t *);
-    typedef uint16_t *(*GamutMathApi_GetU16Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector3)(const uint16_t *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector3Array)(size_t, const uint16_t *);
+    typedef uint16_t *(*GamutMathApi_GetU16Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI32Vector3)(int32_t *);
-    typedef PyObject *(*GamutMathApi_CreateI32Vector3Array)(size_t, int32_t *);
-    typedef int32_t *(*GamutMathApi_GetI32Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector3)(const int32_t *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector3Array)(size_t, const int32_t *);
+    typedef int32_t *(*GamutMathApi_GetI32Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU32Vector3)(uint32_t *);
-    typedef PyObject *(*GamutMathApi_CreateU32Vector3Array)(size_t, uint32_t *);
-    typedef uint32_t *(*GamutMathApi_GetU32Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector3)(const uint32_t *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector3Array)(size_t, const uint32_t *);
+    typedef uint32_t *(*GamutMathApi_GetU32Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateIVector3)(int *);
-    typedef PyObject *(*GamutMathApi_CreateIVector3Array)(size_t, int *);
-    typedef int *(*GamutMathApi_GetIVector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateIVector3)(const int *);
+    typedef PyObject *(*GamutMathApi_CreateIVector3Array)(size_t, const int *);
+    typedef int *(*GamutMathApi_GetIVector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateUVector3)(unsigned int *);
-    typedef PyObject *(*GamutMathApi_CreateUVector3Array)(size_t, unsigned int *);
-    typedef unsigned int *(*GamutMathApi_GetUVector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateUVector3)(const unsigned int *);
+    typedef PyObject *(*GamutMathApi_CreateUVector3Array)(size_t, const unsigned int *);
+    typedef unsigned int *(*GamutMathApi_GetUVector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI64Vector3)(int64_t *);
-    typedef PyObject *(*GamutMathApi_CreateI64Vector3Array)(size_t, int64_t *);
-    typedef int64_t *(*GamutMathApi_GetI64Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector3)(const int64_t *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector3Array)(size_t, const int64_t *);
+    typedef int64_t *(*GamutMathApi_GetI64Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU64Vector3)(uint64_t *);
-    typedef PyObject *(*GamutMathApi_CreateU64Vector3Array)(size_t, uint64_t *);
-    typedef uint64_t *(*GamutMathApi_GetU64Vector3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector3)(const uint64_t *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector3Array)(size_t, const uint64_t *);
+    typedef uint64_t *(*GamutMathApi_GetU64Vector3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateBVector4)(bool *);
-    typedef PyObject *(*GamutMathApi_CreateBVector4Array)(size_t, bool *);
-    typedef bool *(*GamutMathApi_GetBVector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateBVector4)(const bool *);
+    typedef PyObject *(*GamutMathApi_CreateBVector4Array)(size_t, const bool *);
+    typedef bool *(*GamutMathApi_GetBVector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDVector4)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDVector4Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDVector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDVector4)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDVector4Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDVector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFVector4)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFVector4Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFVector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFVector4)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFVector4Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFVector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI8Vector4)(int8_t *);
-    typedef PyObject *(*GamutMathApi_CreateI8Vector4Array)(size_t, int8_t *);
-    typedef int8_t *(*GamutMathApi_GetI8Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector4)(const int8_t *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector4Array)(size_t, const int8_t *);
+    typedef int8_t *(*GamutMathApi_GetI8Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU8Vector4)(uint8_t *);
-    typedef PyObject *(*GamutMathApi_CreateU8Vector4Array)(size_t, uint8_t *);
-    typedef uint8_t *(*GamutMathApi_GetU8Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector4)(const uint8_t *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector4Array)(size_t, const uint8_t *);
+    typedef uint8_t *(*GamutMathApi_GetU8Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI16Vector4)(int16_t *);
-    typedef PyObject *(*GamutMathApi_CreateI16Vector4Array)(size_t, int16_t *);
-    typedef int16_t *(*GamutMathApi_GetI16Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector4)(const int16_t *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector4Array)(size_t, const int16_t *);
+    typedef int16_t *(*GamutMathApi_GetI16Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU16Vector4)(uint16_t *);
-    typedef PyObject *(*GamutMathApi_CreateU16Vector4Array)(size_t, uint16_t *);
-    typedef uint16_t *(*GamutMathApi_GetU16Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector4)(const uint16_t *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector4Array)(size_t, const uint16_t *);
+    typedef uint16_t *(*GamutMathApi_GetU16Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI32Vector4)(int32_t *);
-    typedef PyObject *(*GamutMathApi_CreateI32Vector4Array)(size_t, int32_t *);
-    typedef int32_t *(*GamutMathApi_GetI32Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector4)(const int32_t *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector4Array)(size_t, const int32_t *);
+    typedef int32_t *(*GamutMathApi_GetI32Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU32Vector4)(uint32_t *);
-    typedef PyObject *(*GamutMathApi_CreateU32Vector4Array)(size_t, uint32_t *);
-    typedef uint32_t *(*GamutMathApi_GetU32Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector4)(const uint32_t *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector4Array)(size_t, const uint32_t *);
+    typedef uint32_t *(*GamutMathApi_GetU32Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateIVector4)(int *);
-    typedef PyObject *(*GamutMathApi_CreateIVector4Array)(size_t, int *);
-    typedef int *(*GamutMathApi_GetIVector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateIVector4)(const int *);
+    typedef PyObject *(*GamutMathApi_CreateIVector4Array)(size_t, const int *);
+    typedef int *(*GamutMathApi_GetIVector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateUVector4)(unsigned int *);
-    typedef PyObject *(*GamutMathApi_CreateUVector4Array)(size_t, unsigned int *);
-    typedef unsigned int *(*GamutMathApi_GetUVector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateUVector4)(const unsigned int *);
+    typedef PyObject *(*GamutMathApi_CreateUVector4Array)(size_t, const unsigned int *);
+    typedef unsigned int *(*GamutMathApi_GetUVector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI64Vector4)(int64_t *);
-    typedef PyObject *(*GamutMathApi_CreateI64Vector4Array)(size_t, int64_t *);
-    typedef int64_t *(*GamutMathApi_GetI64Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector4)(const int64_t *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector4Array)(size_t, const int64_t *);
+    typedef int64_t *(*GamutMathApi_GetI64Vector4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU64Vector4)(uint64_t *);
-    typedef PyObject *(*GamutMathApi_CreateU64Vector4Array)(size_t, uint64_t *);
-    typedef uint64_t *(*GamutMathApi_GetU64Vector4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector4)(const uint64_t *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector4Array)(size_t, const uint64_t *);
+    typedef uint64_t *(*GamutMathApi_GetU64Vector4ValuePointer)(const PyObject *);
 
 
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix2x2)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix2x2Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix2x2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix2x2)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix2x2Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix2x2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix2x2)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix2x2Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix2x2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix2x2)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix2x2Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix2x2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix2x3)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix2x3Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix2x3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix2x3)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix2x3Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix2x3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix2x3)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix2x3Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix2x3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix2x3)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix2x3Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix2x3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix2x4)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix2x4Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix2x4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix2x4)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix2x4Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix2x4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix2x4)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix2x4Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix2x4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix2x4)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix2x4Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix2x4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix3x2)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix3x2Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix3x2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix3x2)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix3x2Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix3x2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix3x2)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix3x2Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix3x2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix3x2)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix3x2Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix3x2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix3x3)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix3x3Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix3x3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix3x3)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix3x3Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix3x3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix3x3)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix3x3Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix3x3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix3x3)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix3x3Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix3x3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix3x4)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix3x4Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix3x4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix3x4)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix3x4Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix3x4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix3x4)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix3x4Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix3x4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix3x4)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix3x4Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix3x4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix4x2)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix4x2Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix4x2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix4x2)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix4x2Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix4x2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix4x2)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix4x2Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix4x2ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix4x2)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix4x2Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix4x2ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix4x3)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix4x3Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix4x3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix4x3)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix4x3Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix4x3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix4x3)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix4x3Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix4x3ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix4x3)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix4x3Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix4x3ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDMatrix4x4)(double *);
-    typedef PyObject *(*GamutMathApi_CreateDMatrix4x4Array)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDMatrix4x4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix4x4)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDMatrix4x4Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDMatrix4x4ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFMatrix4x4)(float *);
-    typedef PyObject *(*GamutMathApi_CreateFMatrix4x4Array)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFMatrix4x4ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix4x4)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFMatrix4x4Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFMatrix4x4ValuePointer)(const PyObject *);
 
 
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateBArray)(size_t, bool *);
-    typedef bool *(*GamutMathApi_GetBValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateBArray)(size_t, const bool *);
+    typedef bool *(*GamutMathApi_GetBValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateDArray)(size_t, double *);
-    typedef double *(*GamutMathApi_GetDValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateDArray)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateFArray)(size_t, float *);
-    typedef float *(*GamutMathApi_GetFValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateFArray)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI8Array)(size_t, int8_t *);
-    typedef int8_t *(*GamutMathApi_GetI8ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI8Array)(size_t, const int8_t *);
+    typedef int8_t *(*GamutMathApi_GetI8ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU8Array)(size_t, uint8_t *);
-    typedef uint8_t *(*GamutMathApi_GetU8ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU8Array)(size_t, const uint8_t *);
+    typedef uint8_t *(*GamutMathApi_GetU8ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI16Array)(size_t, int16_t *);
-    typedef int16_t *(*GamutMathApi_GetI16ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI16Array)(size_t, const int16_t *);
+    typedef int16_t *(*GamutMathApi_GetI16ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU16Array)(size_t, uint16_t *);
-    typedef uint16_t *(*GamutMathApi_GetU16ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU16Array)(size_t, const uint16_t *);
+    typedef uint16_t *(*GamutMathApi_GetU16ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI32Array)(size_t, int32_t *);
-    typedef int32_t *(*GamutMathApi_GetI32ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI32Array)(size_t, const int32_t *);
+    typedef int32_t *(*GamutMathApi_GetI32ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU32Array)(size_t, uint32_t *);
-    typedef uint32_t *(*GamutMathApi_GetU32ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU32Array)(size_t, const uint32_t *);
+    typedef uint32_t *(*GamutMathApi_GetU32ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateIArray)(size_t, int *);
-    typedef int *(*GamutMathApi_GetIValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateIArray)(size_t, const int *);
+    typedef int *(*GamutMathApi_GetIValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateUArray)(size_t, unsigned int *);
-    typedef unsigned int *(*GamutMathApi_GetUValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateUArray)(size_t, const unsigned int *);
+    typedef unsigned int *(*GamutMathApi_GetUValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateI64Array)(size_t, int64_t *);
-    typedef int64_t *(*GamutMathApi_GetI64ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateI64Array)(size_t, const int64_t *);
+    typedef int64_t *(*GamutMathApi_GetI64ValuePointer)(const PyObject *);
 
 
 
-    typedef PyObject *(*GamutMathApi_CreateU64Array)(size_t, uint64_t *);
-    typedef uint64_t *(*GamutMathApi_GetU64ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_CreateU64Array)(size_t, const uint64_t *);
+    typedef uint64_t *(*GamutMathApi_GetU64ValuePointer)(const PyObject *);
 
 
 
@@ -962,7 +962,17 @@ struct GamutMathApi
 static struct GamutMathApi *
 GamutMathApi_Get()
 {
+    if (!PyImport_ImportModule("gamut.math._math")){ return 0; }
     return (struct GamutMathApi *)PyCapsule_Import("gamut.math._math._api", 0);
+}
+
+static void
+GamutMathApi_Release()
+{
+    PyObject *module = PyImport_ImportModule("gamut.math._math");
+    if (!module){ return; }
+    Py_DECREF(module);
+    Py_DECREF(module);
 }
 
 #ifdef __cplusplus

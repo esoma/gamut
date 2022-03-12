@@ -1,12 +1,11 @@
 
 # gamut
 from gamut.geometry import Sphere
+from gamut.math import Vector3
 from gamut.physics import Body, World
 # python
 from datetime import timedelta
 from typing import Any
-# pyglm
-from glm import dvec3, vec3
 # pytest
 import pytest
 
@@ -37,30 +36,21 @@ def test_repr() -> None:
 
 def test_default_gravity() -> None:
     w = World(timedelta(seconds=1))
-    assert isinstance(w.gravity, dvec3)
-    assert w.gravity == dvec3(0)
-
-
-def test_gravity_mutable() -> None:
-    w = World(timedelta(seconds=1))
-
-    gravity = w.gravity
-    assert gravity is not w.gravity
-    gravity += dvec3(1, 1, 1)
-    assert gravity != w.gravity
+    assert isinstance(w.gravity, Vector3)
+    assert w.gravity == Vector3(0)
 
 
 @pytest.mark.parametrize("gravity", [
-    (1, 2, 3),
-    vec3(4, 5, 6),
-    dvec3(7, 8, 9),
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(7, 8, 9),
 ])
-def test_gravity_change(gravity: Any) -> None:
+def test_gravity_change(gravity: Vector3) -> None:
     w = World(timedelta(seconds=1))
     w.gravity = gravity
-    assert w.gravity == dvec3(gravity)
+    assert w.gravity == gravity
     assert w.gravity is not gravity
-    assert isinstance(w.gravity, dvec3)
+    assert isinstance(w.gravity, Vector3)
 
 
 @pytest.mark.parametrize("gravity", [
@@ -74,14 +64,14 @@ def test_invalid_gravity(gravity: Any) -> None:
     w = World(timedelta(seconds=1))
     with pytest.raises(TypeError) as excinfo:
         w.gravity = gravity
-    assert str(excinfo.value) == 'gravity must be dvec3'
+    assert str(excinfo.value) == f'expected DVector3, got {gravity!r}'
 
 
 def test_bodies() -> None:
     w = World(timedelta(seconds=1))
     assert not w.bodies
 
-    b1 = Body(1, Sphere(vec3(0), 1), world=w)
+    b1 = Body(1, Sphere(Vector3(0), 1), world=w)
     assert len(w.bodies) == 1
     assert b1 in w.bodies
 

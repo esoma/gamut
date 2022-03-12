@@ -27,6 +27,10 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
         TEST(api->GamutMath{{ type }}Array_GetValuePointer != 0);
         TEST(api->GamutMath{{ type }}Array_GetLength != 0);
     {% endfor %}
+
+    GamutMathApi_Release();
+    TEST(!PyErr_Occurred());
+
     Py_RETURN_NONE;
 }
 
@@ -87,6 +91,9 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
         PyErr_Clear();
         Py_DECREF(Py_None);
 
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
         Py_RETURN_NONE;
     }
 
@@ -145,6 +152,9 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
         TEST(PyErr_Occurred());
         PyErr_Clear();
         Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
 
         Py_RETURN_NONE;
     }
@@ -211,6 +221,9 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
         PyErr_Clear();
         Py_DECREF(Py_None);
 
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
         Py_RETURN_NONE;
     }
 
@@ -269,6 +282,9 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
         TEST(PyErr_Occurred());
         PyErr_Clear();
         Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
 
         Py_RETURN_NONE;
     }
@@ -350,6 +366,9 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
         TEST(PyErr_Occurred());
         PyErr_Clear();
         Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
 
         Py_RETURN_NONE;
     }

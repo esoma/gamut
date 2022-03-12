@@ -66,6 +66,7 @@ class BuildBullet(Command):
         run([
             'cmake', 'vendor/bullet3',
             '-B', build_dir,
+            '-D', 'BUILD_BULLET3=OFF',
             '-D', 'BUILD_BULLET2_DEMOS=OFF',
             '-D', 'BUILD_BULLET_ROBOTICS_EXTRA=OFF',
             '-D', 'BUILD_BULLET_ROBOTICS_GUI_EXTRA=OFF',
@@ -98,7 +99,7 @@ class BuildBullet(Command):
 
 physics = Extension(
     'gamut.physics._physics',
-    include_dirs=['vendor/bullet3/src'],
+    include_dirs=['vendor/bullet3/src', 'include'],
     library_dirs=[
         'build/bullet3/lib/Release',
     ] if os.name == 'nt' else [

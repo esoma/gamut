@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.809140 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.666671 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U64_HPP
 #define GAMUT_MATH_U64_HPP
@@ -299,7 +299,7 @@ get_U64Array_type()
 
 
 static PyObject *
-create_U64Array(size_t length, uint64_t *value)
+create_U64Array(size_t length, const uint64_t *value)
 {
     auto cls = get_U64Array_type();
     auto result = (U64Array *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_U64Array(size_t length, uint64_t *value)
 
 
 static uint64_t *
-get_U64Array_value_ptr(PyObject *self)
+get_U64Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U64Array_type())
     {
@@ -338,7 +338,7 @@ get_U64Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_U64Array_length(PyObject *self)
+get_U64Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U64Array_type())
     {

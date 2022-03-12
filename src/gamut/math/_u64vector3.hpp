@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.736139 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.588170 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U64VECTOR3_HPP
 #define GAMUT_MATH_U64VECTOR3_HPP
@@ -1230,7 +1230,7 @@ get_U64Vector3Array_type()
 
 
 static PyObject *
-create_U64Vector3(uint64_t *value)
+create_U64Vector3(const uint64_t *value)
 {
     auto cls = get_U64Vector3_type();
     auto result = (U64Vector3 *)cls->tp_alloc(cls, 0);
@@ -1241,7 +1241,7 @@ create_U64Vector3(uint64_t *value)
 
 
 static PyObject *
-create_U64Vector3Array(size_t length, uint64_t *value)
+create_U64Vector3Array(size_t length, const uint64_t *value)
 {
     auto cls = get_U64Vector3Array_type();
     auto result = (U64Vector3Array *)cls->tp_alloc(cls, 0);
@@ -1264,7 +1264,7 @@ create_U64Vector3Array(size_t length, uint64_t *value)
 
 
 static uint64_t *
-get_U64Vector3_value_ptr(PyObject *self)
+get_U64Vector3_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U64Vector3_type())
     {
@@ -1276,7 +1276,7 @@ get_U64Vector3_value_ptr(PyObject *self)
 
 
 static uint64_t *
-get_U64Vector3Array_value_ptr(PyObject *self)
+get_U64Vector3Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U64Vector3Array_type())
     {
@@ -1292,7 +1292,7 @@ get_U64Vector3Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_U64Vector3Array_length(PyObject *self)
+get_U64Vector3Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U64Vector3Array_type())
     {

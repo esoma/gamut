@@ -7,13 +7,11 @@ __all__ = ['add_body_to_world', 'remove_body_from_world', 'World']
 from ._collision import Collision, Contact
 from ._physics import World as BaseWorld
 # gamut
-from gamut.glmhelp import dvec3_exact, F64Vector3
+from gamut.math import Vector3
 # python
 from datetime import timedelta
 from math import floor
 from typing import Any, TYPE_CHECKING
-# pyglm
-from glm import dvec3
 
 if TYPE_CHECKING:
     # gamut
@@ -64,16 +62,12 @@ class World:
         return list(self._bodies)
 
     @property
-    def gravity(self) -> dvec3:
-        return dvec3(self._imp.gravity)
+    def gravity(self) -> Vector3:
+        return self._imp.gravity
 
     @gravity.setter
-    def gravity(self, value: F64Vector3) -> None:
-        try:
-            value = dvec3_exact(value)
-        except TypeError:
-            raise TypeError('gravity must be dvec3')
-        self._imp.gravity = tuple(value)
+    def gravity(self, value: Vector3) -> None:
+        self._imp.gravity = value
 
     @property
     def time(self) -> timedelta:
@@ -127,12 +121,12 @@ class WorldSimulation:
                     c[1],
                     tuple(
                         Contact(
-                            dvec3(cc[0]),
-                            dvec3(cc[1]),
-                            dvec3(cc[4]) * dvec3(-1),
-                            dvec3(cc[2]),
-                            dvec3(cc[3]),
-                            dvec3(cc[4]),
+                            cc[0],
+                            cc[1],
+                            cc[4] * Vector3(-1),
+                            cc[2],
+                            cc[3],
+                            cc[4],
                         )
                         for cc in c[2]
                     )

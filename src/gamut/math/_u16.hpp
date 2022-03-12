@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.807142 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.664670 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U16_HPP
 #define GAMUT_MATH_U16_HPP
@@ -299,7 +299,7 @@ get_U16Array_type()
 
 
 static PyObject *
-create_U16Array(size_t length, uint16_t *value)
+create_U16Array(size_t length, const uint16_t *value)
 {
     auto cls = get_U16Array_type();
     auto result = (U16Array *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_U16Array(size_t length, uint16_t *value)
 
 
 static uint16_t *
-get_U16Array_value_ptr(PyObject *self)
+get_U16Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U16Array_type())
     {
@@ -338,7 +338,7 @@ get_U16Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_U16Array_length(PyObject *self)
+get_U16Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_U16Array_type())
     {

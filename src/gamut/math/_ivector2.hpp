@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.725142 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.575672 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_IVECTOR2_HPP
 #define GAMUT_MATH_IVECTOR2_HPP
@@ -1181,7 +1181,7 @@ get_IVector2Array_type()
 
 
 static PyObject *
-create_IVector2(int *value)
+create_IVector2(const int *value)
 {
     auto cls = get_IVector2_type();
     auto result = (IVector2 *)cls->tp_alloc(cls, 0);
@@ -1192,7 +1192,7 @@ create_IVector2(int *value)
 
 
 static PyObject *
-create_IVector2Array(size_t length, int *value)
+create_IVector2Array(size_t length, const int *value)
 {
     auto cls = get_IVector2Array_type();
     auto result = (IVector2Array *)cls->tp_alloc(cls, 0);
@@ -1215,7 +1215,7 @@ create_IVector2Array(size_t length, int *value)
 
 
 static int *
-get_IVector2_value_ptr(PyObject *self)
+get_IVector2_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_IVector2_type())
     {
@@ -1227,7 +1227,7 @@ get_IVector2_value_ptr(PyObject *self)
 
 
 static int *
-get_IVector2Array_value_ptr(PyObject *self)
+get_IVector2Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_IVector2Array_type())
     {
@@ -1243,7 +1243,7 @@ get_IVector2Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_IVector2Array_length(PyObject *self)
+get_IVector2Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_IVector2Array_type())
     {

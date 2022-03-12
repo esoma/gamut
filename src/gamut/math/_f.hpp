@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.806140 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 17:38:09.663173 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_F_HPP
 #define GAMUT_MATH_F_HPP
@@ -299,7 +299,7 @@ get_FArray_type()
 
 
 static PyObject *
-create_FArray(size_t length, float *value)
+create_FArray(size_t length, const float *value)
 {
     auto cls = get_FArray_type();
     auto result = (FArray *)cls->tp_alloc(cls, 0);
@@ -322,7 +322,7 @@ create_FArray(size_t length, float *value)
 
 
 static float *
-get_FArray_value_ptr(PyObject *self)
+get_FArray_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FArray_type())
     {
@@ -338,7 +338,7 @@ get_FArray_value_ptr(PyObject *self)
 
 
 static size_t
-get_FArray_length(PyObject *self)
+get_FArray_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FArray_type())
     {

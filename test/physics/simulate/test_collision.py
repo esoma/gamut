@@ -1,11 +1,10 @@
 
 # gamut
 from gamut.geometry import Plane, Sphere
+from gamut.math import Matrix4, Vector3
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
-# pyglm
-from glm import dmat4, dvec3, translate
 # pytest
 import pytest
 
@@ -15,10 +14,10 @@ import pytest
 def test_single_collision(ball_type: BodyType, floor_type: BodyType) -> None:
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(dvec3(0), 1), world=w, type=ball_type)
-    ball.transform = translate(dmat4(1), dvec3(0, 1, 0))
+    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=ball_type)
+    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
 
-    floor = Body(1, Plane(0, dvec3(0, 1, 0)), world=w, type=floor_type)
+    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=floor_type)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
@@ -32,19 +31,19 @@ def test_single_collision(ball_type: BodyType, floor_type: BodyType) -> None:
     contact = collision.contacts[0]
 
     if collision.body_a is ball:
-        assert contact.local_position_a == dvec3(0, -1, 0)
-        assert contact.world_position_a == dvec3(0, 0, 0)
-        assert contact.normal_a == dvec3(0, -1, 0)
-        assert contact.local_position_b == dvec3(0, 0, 0)
-        assert contact.world_position_b == dvec3(0, 0, 0)
-        assert contact.normal_b == dvec3(0, 1, 0)
+        assert contact.local_position_a == Vector3(0, -1, 0)
+        assert contact.world_position_a == Vector3(0, 0, 0)
+        assert contact.normal_a == Vector3(0, -1, 0)
+        assert contact.local_position_b == Vector3(0, 0, 0)
+        assert contact.world_position_b == Vector3(0, 0, 0)
+        assert contact.normal_b == Vector3(0, 1, 0)
     else:
-        assert contact.local_position_b == dvec3(0, -1, 0)
-        assert contact.world_position_b == dvec3(0, 0, 0)
-        assert contact.normal_b == dvec3(0, -1, 0)
-        assert contact.local_position_a == dvec3(0, 0, 0)
-        assert contact.world_position_a == dvec3(0, 0, 0)
-        assert contact.normal_a == dvec3(0, 1, 0)
+        assert contact.local_position_b == Vector3(0, -1, 0)
+        assert contact.world_position_b == Vector3(0, 0, 0)
+        assert contact.normal_b == Vector3(0, -1, 0)
+        assert contact.local_position_a == Vector3(0, 0, 0)
+        assert contact.world_position_a == Vector3(0, 0, 0)
+        assert contact.normal_a == Vector3(0, 1, 0)
 
     with pytest.raises(StopIteration):
         next(world_simulation)
@@ -57,13 +56,13 @@ def test_lots_of_collisions() -> None:
         for z in range(100):
             ball = Body(
                 1,
-                Sphere(dvec3(0), .25),
+                Sphere(Vector3(0), .25),
                 world=w,
                 type=BodyType.KINEMATIC
             )
-            ball.transform = translate(dmat4(1), dvec3(x, .25, z))
+            ball.transform = Matrix4(1).translate(Vector3(x, .25, z))
 
-    floor = Body(1, Plane(0, dvec3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
     assert len(collisions) == 10000
@@ -72,10 +71,10 @@ def test_lots_of_collisions() -> None:
 def test_no_collision_distance() -> None:
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(dvec3(0), 1), world=w)
-    ball.transform = translate(dmat4(1), dvec3(0, 1.1, 0))
+    ball = Body(1, Sphere(Vector3(0), 1), world=w)
+    ball.transform = Matrix4(1).translate(Vector3(0, 1.1, 0))
 
-    floor = Body(1, Plane(0, dvec3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
@@ -88,10 +87,10 @@ def test_no_collision_distance() -> None:
 def test_no_collision_both_static() -> None:
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(dvec3(0), 1), world=w, type=BodyType.STATIC)
-    ball.transform = translate(dmat4(1), dvec3(0, 1, 0))
+    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.STATIC)
+    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
 
-    floor = Body(1, Plane(0, dvec3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
@@ -107,10 +106,10 @@ def test_no_collision_mask(ball_group_shift: int) -> None:
 
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(dvec3(0), 1), world=w, groups=ball_group)
-    ball.transform = translate(dmat4(1), dvec3(0, 1, 0))
+    ball = Body(1, Sphere(Vector3(0), 1), world=w, groups=ball_group)
+    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
 
-    floor = Body(1, Plane(0, dvec3(0, 1, 0)), world=w, mask=~ball_group)
+    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, mask=~ball_group)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)

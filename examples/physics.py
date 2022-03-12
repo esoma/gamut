@@ -7,6 +7,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
                             execute_shader, FaceCull, PrimitiveMode, Shader,
                             WindowRenderTarget)
+from gamut.math import Matrix4, Vector3
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 from gamut.physics import Body, BodyType, World
@@ -16,8 +17,7 @@ import random
 from typing import Any
 # pyglm
 from glm import (array, cos, cross, inverse, lookAt, mat3, mat4, normalize,
-                 perspective, radians, scale, sin, translate, transpose, uint8,
-                 vec3)
+                 perspective, radians, scale, sin, transpose, uint8, vec3)
 
 
 class Draw(TimerExpired):
@@ -90,7 +90,7 @@ class App(Application):
         self.cube_index_buffer_view = BufferView(Buffer(cube_indices), uint8)
 
         self.world = World(timedelta(seconds=1 / 60.0))
-        self.world.gravity = vec3(0, -9.8, 0)
+        self.world.gravity = Vector3(0, -9.8, 0)
         plane = Body(
             1,
             Plane(0, vec3(0, 1, 0)),
@@ -102,9 +102,8 @@ class App(Application):
         self.bodies = []
         for _ in range(50):
             body = Body(1, cube, world=self.world)
-            body.transform = translate(
-                mat4(1),
-                vec3(
+            body.transform = Matrix4(1).translate(
+                Vector3(
                     random.uniform(-2, 2),
                     random.uniform(1, 3),
                     random.uniform(-2, 2)

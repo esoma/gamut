@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.792641 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 17:38:09.648172 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX3X4_HPP
 #define GAMUT_MATH_FMATRIX3X4_HPP
@@ -1330,7 +1330,7 @@ get_FMatrix3x4Array_type()
 
 
 static PyObject *
-create_FMatrix3x4(float *value)
+create_FMatrix3x4(const float *value)
 {
 
     auto cls = get_FMatrix3x4_type();
@@ -1342,7 +1342,7 @@ create_FMatrix3x4(float *value)
 
 
 static PyObject *
-create_FMatrix3x4Array(size_t length, float *value)
+create_FMatrix3x4Array(size_t length, const float *value)
 {
     auto cls = get_FMatrix3x4Array_type();
     auto result = (FMatrix3x4Array *)cls->tp_alloc(cls, 0);
@@ -1365,7 +1365,7 @@ create_FMatrix3x4Array(size_t length, float *value)
 
 
 static float *
-get_FMatrix3x4_value_ptr(PyObject *self)
+get_FMatrix3x4_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FMatrix3x4_type())
     {
@@ -1377,7 +1377,7 @@ get_FMatrix3x4_value_ptr(PyObject *self)
 
 
 static float *
-get_FMatrix3x4Array_value_ptr(PyObject *self)
+get_FMatrix3x4Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FMatrix3x4Array_type())
     {
@@ -1393,7 +1393,7 @@ get_FMatrix3x4Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_FMatrix3x4Array_length(PyObject *self)
+get_FMatrix3x4Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_FMatrix3x4Array_type())
     {

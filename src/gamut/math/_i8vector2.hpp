@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.721140 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.571170 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I8VECTOR2_HPP
 #define GAMUT_MATH_I8VECTOR2_HPP
@@ -1181,7 +1181,7 @@ get_I8Vector2Array_type()
 
 
 static PyObject *
-create_I8Vector2(int8_t *value)
+create_I8Vector2(const int8_t *value)
 {
     auto cls = get_I8Vector2_type();
     auto result = (I8Vector2 *)cls->tp_alloc(cls, 0);
@@ -1192,7 +1192,7 @@ create_I8Vector2(int8_t *value)
 
 
 static PyObject *
-create_I8Vector2Array(size_t length, int8_t *value)
+create_I8Vector2Array(size_t length, const int8_t *value)
 {
     auto cls = get_I8Vector2Array_type();
     auto result = (I8Vector2Array *)cls->tp_alloc(cls, 0);
@@ -1215,7 +1215,7 @@ create_I8Vector2Array(size_t length, int8_t *value)
 
 
 static int8_t *
-get_I8Vector2_value_ptr(PyObject *self)
+get_I8Vector2_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I8Vector2_type())
     {
@@ -1227,7 +1227,7 @@ get_I8Vector2_value_ptr(PyObject *self)
 
 
 static int8_t *
-get_I8Vector2Array_value_ptr(PyObject *self)
+get_I8Vector2Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I8Vector2Array_type())
     {
@@ -1243,7 +1243,7 @@ get_I8Vector2Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_I8Vector2Array_length(PyObject *self)
+get_I8Vector2Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_I8Vector2Array_type())
     {

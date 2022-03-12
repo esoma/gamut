@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.796639 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 17:38:09.652672 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX4X4_HPP
 #define GAMUT_MATH_DMATRIX4X4_HPP
@@ -1563,7 +1563,7 @@ get_DMatrix4x4Array_type()
 
 
 static PyObject *
-create_DMatrix4x4(double *value)
+create_DMatrix4x4(const double *value)
 {
 
     auto cls = get_DMatrix4x4_type();
@@ -1575,7 +1575,7 @@ create_DMatrix4x4(double *value)
 
 
 static PyObject *
-create_DMatrix4x4Array(size_t length, double *value)
+create_DMatrix4x4Array(size_t length, const double *value)
 {
     auto cls = get_DMatrix4x4Array_type();
     auto result = (DMatrix4x4Array *)cls->tp_alloc(cls, 0);
@@ -1598,7 +1598,7 @@ create_DMatrix4x4Array(size_t length, double *value)
 
 
 static double *
-get_DMatrix4x4_value_ptr(PyObject *self)
+get_DMatrix4x4_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix4x4_type())
     {
@@ -1610,7 +1610,7 @@ get_DMatrix4x4_value_ptr(PyObject *self)
 
 
 static double *
-get_DMatrix4x4Array_value_ptr(PyObject *self)
+get_DMatrix4x4Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix4x4Array_type())
     {
@@ -1626,7 +1626,7 @@ get_DMatrix4x4Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_DMatrix4x4Array_length(PyObject *self)
+get_DMatrix4x4Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DMatrix4x4Array_type())
     {

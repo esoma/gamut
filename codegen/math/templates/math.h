@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 typedef PyTypeObject *(*GamutMathApi_GetType)();
-typedef size_t (*GamutMathApi_GetArrayLength)(PyObject *);
+typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
 
 {% for type in vector_types %}
 {% with c_type={
@@ -33,9 +33,9 @@ typedef size_t (*GamutMathApi_GetArrayLength)(PyObject *);
     "U32": 'uint32_t',
     "U64": 'uint64_t',
 }[type[:type.find('V')]] %}
-    typedef PyObject *(*GamutMathApi_Create{{ type }})({{ c_type }} *);
-    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, {{ c_type }} *);
-    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_Create{{ type }})(const {{ c_type }} *);
+    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, const {{ c_type }} *);
+    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(const PyObject *);
 {% endwith %}
 {% endfor %}
 
@@ -55,9 +55,9 @@ typedef size_t (*GamutMathApi_GetArrayLength)(PyObject *);
     "U32": 'uint32_t',
     "U64": 'uint64_t',
 }[type[:type.find('M')]] %}
-    typedef PyObject *(*GamutMathApi_Create{{ type }})({{ c_type }} *);
-    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, {{ c_type }} *);
-    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_Create{{ type }})(const {{ c_type }} *);
+    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, const {{ c_type }} *);
+    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(const PyObject *);
 {% endwith %}
 {% endfor %}
 
@@ -77,8 +77,8 @@ typedef size_t (*GamutMathApi_GetArrayLength)(PyObject *);
     "U32": 'uint32_t',
     "U64": 'uint64_t',
 }[type] %}
-    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, {{ c_type }} *);
-    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(PyObject *);
+    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, const {{ c_type }} *);
+    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(const PyObject *);
 {% endwith %}
 {% endfor %}
 
@@ -114,7 +114,17 @@ struct GamutMathApi
 static struct GamutMathApi *
 GamutMathApi_Get()
 {
+    if (!PyImport_ImportModule("gamut.math._math")){ return 0; }
     return (struct GamutMathApi *)PyCapsule_Import("gamut.math._math._api", 0);
+}
+
+static void
+GamutMathApi_Release()
+{
+    PyObject *module = PyImport_ImportModule("gamut.math._math");
+    if (!module){ return; }
+    Py_DECREF(module);
+    Py_DECREF(module);
 }
 
 #ifdef __cplusplus

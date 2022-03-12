@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 15:44:01.728639 from codegen/math/templates/_vector.hpp
+// generated 2022-03-12 17:38:09.579671 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR3_HPP
 #define GAMUT_MATH_DVECTOR3_HPP
@@ -1416,7 +1416,7 @@ get_DVector3Array_type()
 
 
 static PyObject *
-create_DVector3(double *value)
+create_DVector3(const double *value)
 {
     auto cls = get_DVector3_type();
     auto result = (DVector3 *)cls->tp_alloc(cls, 0);
@@ -1427,7 +1427,7 @@ create_DVector3(double *value)
 
 
 static PyObject *
-create_DVector3Array(size_t length, double *value)
+create_DVector3Array(size_t length, const double *value)
 {
     auto cls = get_DVector3Array_type();
     auto result = (DVector3Array *)cls->tp_alloc(cls, 0);
@@ -1450,7 +1450,7 @@ create_DVector3Array(size_t length, double *value)
 
 
 static double *
-get_DVector3_value_ptr(PyObject *self)
+get_DVector3_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DVector3_type())
     {
@@ -1462,7 +1462,7 @@ get_DVector3_value_ptr(PyObject *self)
 
 
 static double *
-get_DVector3Array_value_ptr(PyObject *self)
+get_DVector3Array_value_ptr(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DVector3Array_type())
     {
@@ -1478,7 +1478,7 @@ get_DVector3Array_value_ptr(PyObject *self)
 
 
 static size_t
-get_DVector3Array_length(PyObject *self)
+get_DVector3Array_length(const PyObject *self)
 {
     if (Py_TYPE(self) != get_DVector3Array_type())
     {

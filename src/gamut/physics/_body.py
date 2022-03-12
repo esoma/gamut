@@ -10,14 +10,12 @@ from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
-from gamut.glmhelp import dmat4_exact, dvec3_exact, F64Matrix4x4, F64Vector3
+from gamut.math import Matrix4, Vector3
 # python
 from enum import auto, Enum
 import struct
 from typing import Any, Final, Union
 from weakref import ref, WeakKeyDictionary
-# pyglm
-from glm import dmat4, dvec3
 
 BodyShape = Union[
     Capsule,
@@ -69,9 +67,9 @@ class Body:
         )
         self.type = self._type
 
-        self._kinematic_angular_velocity = dvec3(0)
-        self._kinematic_linear_velocity = dvec3(0)
-        self._gravity: dvec3 | None = None
+        self._kinematic_angular_velocity = Vector3(0)
+        self._kinematic_linear_velocity = Vector3(0)
+        self._gravity: Vector3 | None = None
         self._groups = _verify_groups(groups)
         self._mask = _verify_mask(mask)
         self._world = None
@@ -118,23 +116,19 @@ class Body:
         self._imp.angular_sleep_threshold = value
 
     @property
-    def angular_velocity(self) -> dvec3:
+    def angular_velocity(self) -> Vector3:
         if self._type == BodyType.DYNAMIC:
-            return dvec3(self._imp.angular_velocity)
+            return self._imp.angular_velocity
         elif self._type == BodyType.KINEMATIC:
-            return dvec3(self._kinematic_angular_velocity)
+            return self._kinematic_angular_velocity
         else:
             assert self._type == BodyType.STATIC
-            return dvec3(0)
+            return Vector3(0)
 
     @angular_velocity.setter
-    def angular_velocity(self, value: F64Vector3) -> None:
-        try:
-            value = dvec3_exact(value)
-        except TypeError:
-            raise TypeError('angular velocity must be dvec3')
+    def angular_velocity(self, value: Vector3) -> None:
+        self._imp.angular_velocity = value
         self._kinematic_angular_velocity = value
-        self._imp.angular_velocity = tuple(value)
 
     @property
     def can_sleep(self) -> bool:
@@ -187,23 +181,19 @@ class Body:
         self._imp.linear_sleep_threshold = value
 
     @property
-    def linear_velocity(self) -> dvec3:
+    def linear_velocity(self) -> Vector3:
         if self._type == BodyType.DYNAMIC:
-            return dvec3(self._imp.linear_velocity)
+            return self._imp.linear_velocity
         elif self._type == BodyType.KINEMATIC:
-            return dvec3(self._kinematic_linear_velocity)
+            return self._kinematic_linear_velocity
         else:
             assert self._type == BodyType.STATIC
-            return dvec3(0)
+            return Vector3(0)
 
     @linear_velocity.setter
-    def linear_velocity(self, value: F64Vector3) -> None:
-        try:
-            value = dvec3_exact(value)
-        except TypeError:
-            raise TypeError('linear velocity must be dvec3')
+    def linear_velocity(self, value: Vector3) -> None:
+        self._imp.linear_velocity = value
         self._kinematic_linear_velocity = value
-        self._imp.linear_velocity = tuple(value)
 
     @property
     def friction(self) -> float:
@@ -218,26 +208,22 @@ class Body:
         self._imp.friction = value
 
     @property
-    def gravity(self) -> dvec3 | None:
+    def gravity(self) -> Vector3 | None:
         return self._gravity
 
     @gravity.setter
-    def gravity(self, value: F64Vector3 | None) -> None:
+    def gravity(self, value: Vector3 | None) -> None:
         is_explicit = value is not None
         if value is None:
             world = self.world
             if world:
-                value = tuple(world.gravity)
+                gravity = world.gravity
             else:
-                value = (0, 0, 0)
-            self._gravity = None
+                gravity = Vector3(0)
         else:
-            try:
-                self._gravity = dvec3_exact(value)
-            except (ValueError, TypeError):
-                raise TypeError('gravity must be None or dvec3')
-            value = tuple(self._gravity)
-        self._imp.set_gravity((is_explicit, value))
+            gravity = value
+        self._imp.set_gravity((is_explicit, gravity))
+        self._gravity = value
 
     @property
     def groups(self) -> int:
@@ -332,16 +318,12 @@ class Body:
         self._imp.spinning_friction = float(value)
 
     @property
-    def transform(self) -> dmat4:
-        return dmat4(self._imp.transform)
+    def transform(self) -> Matrix4:
+        return self._imp.transform
 
     @transform.setter
-    def transform(self, value: F64Matrix4x4) -> None:
-        try:
-            value = dmat4_exact(value)
-        except TypeError:
-            raise TypeError('transform must be dmat4')
-        self._imp.transform = tuple(value)
+    def transform(self, value: Matrix4) -> None:
+        self._imp.transform = value
 
     @property
     def type(self) -> BodyType:
