@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 19:37:09.846643 from codegen/math/templates/_pod.hpp
+// generated 2022-03-12 21:23:21.893180 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U16_HPP
 #define GAMUT_MATH_U16_HPP
@@ -248,8 +248,8 @@ U16Array_pointer(U16Array *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->pod);
+    auto c_p = module_state->ctypes_c_uint16_t_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->pod);
 }
 
 

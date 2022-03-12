@@ -572,8 +572,8 @@ static PyObject *
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_{{ c_type.replace(' ', '_') }}_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 
@@ -1045,8 +1045,8 @@ static PyObject *
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_{{ c_type.replace(' ', '_') }}_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 

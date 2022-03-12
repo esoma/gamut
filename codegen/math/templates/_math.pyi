@@ -8,6 +8,7 @@ __all__ = [
 ]
 
 # python
+import ctypes
 from typing import Any, final, overload, SupportsFloat, SupportsInt
 
 Number = SupportsFloat | SupportsInt
@@ -16,6 +17,21 @@ Number = SupportsFloat | SupportsInt
 {% with component_count=int(type[-1]) %}
 {% with component_type='float' if type.startswith('F') else ('bool' if type.startswith('B') else 'int') %}
 {% with is_unsigned=type.startswith('U') %}
+{% with ctypes_type={
+    "B": 'ctypes.c_bool',
+    "D": 'ctypes.c_double',
+    "F": 'ctypes.c_float',
+    "I8": 'ctypes.c_int8',
+    "U8": 'ctypes.c_uint8',
+    "I16": 'ctypes.c_int16',
+    "U16": 'ctypes.c_uint16',
+    "I32": 'ctypes.c_int32',
+    "U32": 'ctypes.c_uint32',
+    "I64": 'ctypes.c_int64',
+    "U64": 'ctypes.c_uint64',
+    "I": 'ctypes.c_int',
+    "U": 'ctypes.c_uint',
+}[type[:type.find('V')]] %}
 
 @final
 class {{ type }}:
@@ -136,6 +152,9 @@ class {{ type }}:
     @classmethod
     def get_limits(cls) -> tuple[{{ component_type }}, {{ component_type }}]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+
 
 @final
 class {{ type }}Array:
@@ -151,7 +170,11 @@ class {{ type }}Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
 
+
+{% endwith %}
 {% endwith %}
 {% endwith %}
 {% endwith %}
@@ -164,6 +187,10 @@ class {{ type }}Array:
 {% with component_count=row_size * column_size %}
 {% with column_type=type[0] + 'Vector' + str(column_size) %}
 {% with row_type=type[0] + 'Vector' + str(row_size) %}
+{% with ctypes_type={
+    "D": 'ctypes.c_double',
+    "F": 'ctypes.c_float',
+}[type[:type.find('M')]] %}
 
 @final
 class {{ type }}:
@@ -269,6 +296,9 @@ class {{ type }}:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+
 
 @final
 class {{ type }}Array:
@@ -284,6 +314,10 @@ class {{ type }}Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+
+{% endwith %}
 {% endwith %}
 {% endwith %}
 {% endwith %}
@@ -294,6 +328,21 @@ class {{ type }}Array:
 
 {% for type in pod_types %}
 {% with pod_type='float' if type.startswith('F') else ('bool' if type.startswith('B') else 'int') %}
+{% with ctypes_type={
+    "B": 'ctypes.c_bool',
+    "D": 'ctypes.c_double',
+    "F": 'ctypes.c_float',
+    "I8": 'ctypes.c_int8',
+    "U8": 'ctypes.c_uint8',
+    "I16": 'ctypes.c_int16',
+    "U16": 'ctypes.c_uint16',
+    "I32": 'ctypes.c_int32',
+    "U32": 'ctypes.c_uint32',
+    "I64": 'ctypes.c_int64',
+    "U64": 'ctypes.c_uint64',
+    "I": 'ctypes.c_int',
+    "U": 'ctypes.c_uint',
+}[type] %}
 
 @final
 class {{ type }}Array:
@@ -309,5 +358,9 @@ class {{ type }}Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+
+{% endwith %}
 {% endwith %}
 {% endfor %}

@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 19:37:09.825642 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-12 21:23:21.871180 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X4_HPP
 #define GAMUT_MATH_DMATRIX2X4_HPP
@@ -791,8 +791,8 @@ DMatrix2x4_pointer(DMatrix2x4 *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_double_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 
@@ -1160,8 +1160,8 @@ DMatrix2x4Array_pointer(DMatrix2x4Array *self, void *)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
-    auto c_void_p = module_state->ctypes_c_void_p;
-    return PyObject_CallFunction(c_void_p, "n", (Py_ssize_t)self->glm);
+    auto c_p = module_state->ctypes_c_double_p;
+    return PyObject_CallMethod(c_p, "from_address", "n", (Py_ssize_t)&self->glm);
 }
 
 

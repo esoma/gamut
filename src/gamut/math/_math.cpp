@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 19:37:09.857146 from codegen/math/templates/_math.cpp
+// generated 2022-03-12 21:23:21.905180 from codegen/math/templates/_math.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -217,9 +217,238 @@ PyInit__math()
         PyObject *ctypes = PyImport_ImportModule("ctypes");
         if (!ctypes){ goto error; }
 
-        state->ctypes_c_void_p = PyObject_GetAttrString(ctypes, "c_void_p");
+        PyObject *ctypes_pointer = PyObject_GetAttrString(ctypes, "POINTER");
+        if (!ctypes_pointer)
+        {
+            Py_DECREF(ctypes);
+            goto error;
+        }
+
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_bool");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_bool_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_bool_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_int8");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_int8_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_int8_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_uint8");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_uint8_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_uint8_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_int16");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_int16_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_int16_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_uint16");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_uint16_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_uint16_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_int32");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_int32_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_int32_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_uint32");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_uint32_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_uint32_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_int64");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_int64_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_int64_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_uint64");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_uint64_t_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_uint64_t_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_int");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_int_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_int_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_uint");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_unsigned_int_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_unsigned_int_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_float");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_float_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_float_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+        {
+            auto c_type = PyObject_GetAttrString(ctypes, "c_double");
+            if (!c_type)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+            state->ctypes_c_double_p = PyObject_CallFunction(ctypes_pointer, "O", c_type);
+            if (!state->ctypes_c_double_p)
+            {
+                Py_DECREF(ctypes_pointer);
+                Py_DECREF(ctypes);
+                goto error;
+            }
+        }
+
+
+        Py_DECREF(ctypes_pointer);
         Py_DECREF(ctypes);
-        if (!state->ctypes_c_void_p){ goto error; }
     }
 
 

@@ -192,8 +192,6 @@ class PodTest:
         assert memory_view.contiguous
 
     def test_array_pointer(self) -> None:
-        array = self.array_cls(*range(5))
-        assert isinstance(array.pointer, ctypes.c_void_p)
         real_type = {
             '?': ctypes.c_bool,
             'd': ctypes.c_double,
@@ -209,9 +207,10 @@ class PodTest:
             'i': ctypes.c_int,
             'I': ctypes.c_uint,
         }[self.struct_byte_order + self.struct_format]
-        cast_pointer = ctypes.cast(array.pointer, ctypes.POINTER(real_type))
+        array = self.array_cls(*range(5))
+        assert isinstance(array.pointer, ctypes.POINTER(real_type))
         for i in range(5):
-            cast_pointer[i] == self.type(i)
+            array.pointer[i] == self.type(i)
 
 
 class TestB(

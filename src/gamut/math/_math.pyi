@@ -1,5 +1,5 @@
 
-# generated 2022-03-12 19:37:09.885643 from codegen/math/templates/_math.pyi
+# generated 2022-03-12 21:23:21.939180 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -84,9 +84,11 @@ __all__ = [
 ]
 
 # python
+import ctypes
 from typing import Any, final, overload, SupportsFloat, SupportsInt
 
 Number = SupportsFloat | SupportsInt
+
 
 
 
@@ -368,6 +370,9 @@ class BVector2:
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
 
 @final
 class BVector2Array:
@@ -382,6 +387,11 @@ class BVector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+
 
 
 
@@ -676,6 +686,9 @@ class DVector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DVector2Array:
@@ -690,6 +703,11 @@ class DVector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -1012,6 +1030,9 @@ class FVector2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FVector2Array:
@@ -1026,6 +1047,11 @@ class FVector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -1320,6 +1346,9 @@ class I8Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
 
 @final
 class I8Vector2Array:
@@ -1334,6 +1363,11 @@ class I8Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+
 
 
 
@@ -1630,6 +1664,9 @@ class U8Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
 
 @final
 class U8Vector2Array:
@@ -1644,6 +1681,11 @@ class U8Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+
 
 
 
@@ -1938,6 +1980,9 @@ class I16Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
 
 @final
 class I16Vector2Array:
@@ -1952,6 +1997,11 @@ class I16Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+
 
 
 
@@ -2248,6 +2298,9 @@ class U16Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
 
 @final
 class U16Vector2Array:
@@ -2262,6 +2315,11 @@ class U16Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+
 
 
 
@@ -2556,6 +2614,9 @@ class I32Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
 
 @final
 class I32Vector2Array:
@@ -2570,6 +2631,11 @@ class I32Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+
 
 
 
@@ -2866,6 +2932,9 @@ class U32Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
 
 @final
 class U32Vector2Array:
@@ -2880,6 +2949,11 @@ class U32Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+
 
 
 
@@ -3174,6 +3248,9 @@ class IVector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
 
 @final
 class IVector2Array:
@@ -3188,6 +3265,11 @@ class IVector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+
 
 
 
@@ -3484,6 +3566,9 @@ class UVector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
 
 @final
 class UVector2Array:
@@ -3498,6 +3583,11 @@ class UVector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+
 
 
 
@@ -3792,6 +3882,9 @@ class I64Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
 
 @final
 class I64Vector2Array:
@@ -3806,6 +3899,11 @@ class I64Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+
 
 
 
@@ -4102,6 +4200,9 @@ class U64Vector2:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
 
 @final
 class U64Vector2Array:
@@ -4116,6 +4217,11 @@ class U64Vector2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+
 
 
 
@@ -4581,6 +4687,9 @@ class BVector3:
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
 
 @final
 class BVector3Array:
@@ -4595,6 +4704,11 @@ class BVector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+
 
 
 
@@ -5069,6 +5183,9 @@ class DVector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DVector3Array:
@@ -5083,6 +5200,11 @@ class DVector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -5585,6 +5707,9 @@ class FVector3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FVector3Array:
@@ -5599,6 +5724,11 @@ class FVector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -6073,6 +6203,9 @@ class I8Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
 
 @final
 class I8Vector3Array:
@@ -6087,6 +6220,11 @@ class I8Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+
 
 
 
@@ -6563,6 +6701,9 @@ class U8Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
 
 @final
 class U8Vector3Array:
@@ -6577,6 +6718,11 @@ class U8Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+
 
 
 
@@ -7051,6 +7197,9 @@ class I16Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
 
 @final
 class I16Vector3Array:
@@ -7065,6 +7214,11 @@ class I16Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+
 
 
 
@@ -7541,6 +7695,9 @@ class U16Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
 
 @final
 class U16Vector3Array:
@@ -7555,6 +7712,11 @@ class U16Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+
 
 
 
@@ -8029,6 +8191,9 @@ class I32Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
 
 @final
 class I32Vector3Array:
@@ -8043,6 +8208,11 @@ class I32Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+
 
 
 
@@ -8519,6 +8689,9 @@ class U32Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
 
 @final
 class U32Vector3Array:
@@ -8533,6 +8706,11 @@ class U32Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+
 
 
 
@@ -9007,6 +9185,9 @@ class IVector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
 
 @final
 class IVector3Array:
@@ -9021,6 +9202,11 @@ class IVector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+
 
 
 
@@ -9497,6 +9683,9 @@ class UVector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
 
 @final
 class UVector3Array:
@@ -9511,6 +9700,11 @@ class UVector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+
 
 
 
@@ -9985,6 +10179,9 @@ class I64Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
 
 @final
 class I64Vector3Array:
@@ -9999,6 +10196,11 @@ class I64Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+
 
 
 
@@ -10475,6 +10677,9 @@ class U64Vector3:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
 
 @final
 class U64Vector3Array:
@@ -10489,6 +10694,11 @@ class U64Vector3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+
 
 
 
@@ -11269,6 +11479,9 @@ class BVector4:
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
 
 @final
 class BVector4Array:
@@ -11283,6 +11496,11 @@ class BVector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+
 
 
 
@@ -12072,6 +12290,9 @@ class DVector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DVector4Array:
@@ -12086,6 +12307,11 @@ class DVector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -12903,6 +13129,9 @@ class FVector4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FVector4Array:
@@ -12917,6 +13146,11 @@ class FVector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -13706,6 +13940,9 @@ class I8Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
 
 @final
 class I8Vector4Array:
@@ -13720,6 +13957,11 @@ class I8Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+
 
 
 
@@ -14511,6 +14753,9 @@ class U8Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
 
 @final
 class U8Vector4Array:
@@ -14525,6 +14770,11 @@ class U8Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+
 
 
 
@@ -15314,6 +15564,9 @@ class I16Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
 
 @final
 class I16Vector4Array:
@@ -15328,6 +15581,11 @@ class I16Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+
 
 
 
@@ -16119,6 +16377,9 @@ class U16Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
 
 @final
 class U16Vector4Array:
@@ -16133,6 +16394,11 @@ class U16Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+
 
 
 
@@ -16922,6 +17188,9 @@ class I32Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
 
 @final
 class I32Vector4Array:
@@ -16936,6 +17205,11 @@ class I32Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+
 
 
 
@@ -17727,6 +18001,9 @@ class U32Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
 
 @final
 class U32Vector4Array:
@@ -17741,6 +18018,11 @@ class U32Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+
 
 
 
@@ -18530,6 +18812,9 @@ class IVector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
 
 @final
 class IVector4Array:
@@ -18544,6 +18829,11 @@ class IVector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+
 
 
 
@@ -19335,6 +19625,9 @@ class UVector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
 
 @final
 class UVector4Array:
@@ -19349,6 +19642,11 @@ class UVector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+
 
 
 
@@ -20138,6 +20436,9 @@ class I64Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
 
 @final
 class I64Vector4Array:
@@ -20152,6 +20453,11 @@ class I64Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+
 
 
 
@@ -20943,6 +21249,9 @@ class U64Vector4:
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
 
 @final
 class U64Vector4Array:
@@ -20957,6 +21266,11 @@ class U64Vector4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+
 
 
 
@@ -21094,6 +21408,9 @@ class DMatrix2x2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix2x2Array:
@@ -21108,6 +21425,11 @@ class DMatrix2x2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -21243,6 +21565,9 @@ class FMatrix2x2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix2x2Array:
@@ -21257,6 +21582,11 @@ class FMatrix2x2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -21384,6 +21714,9 @@ class DMatrix2x3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix2x3Array:
@@ -21398,6 +21731,11 @@ class DMatrix2x3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -21525,6 +21863,9 @@ class FMatrix2x3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix2x3Array:
@@ -21539,6 +21880,11 @@ class FMatrix2x3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -21670,6 +22016,9 @@ class DMatrix2x4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix2x4Array:
@@ -21684,6 +22033,11 @@ class DMatrix2x4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -21815,6 +22169,9 @@ class FMatrix2x4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix2x4Array:
@@ -21829,6 +22186,11 @@ class FMatrix2x4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -21958,6 +22320,9 @@ class DMatrix3x2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix3x2Array:
@@ -21972,6 +22337,11 @@ class DMatrix3x2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -22101,6 +22471,9 @@ class FMatrix3x2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix3x2Array:
@@ -22115,6 +22488,11 @@ class FMatrix3x2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -22262,6 +22640,9 @@ class DMatrix3x3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix3x3Array:
@@ -22276,6 +22657,11 @@ class DMatrix3x3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -22423,6 +22809,9 @@ class FMatrix3x3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix3x3Array:
@@ -22437,6 +22826,11 @@ class FMatrix3x3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -22578,6 +22972,9 @@ class DMatrix3x4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix3x4Array:
@@ -22592,6 +22989,11 @@ class DMatrix3x4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -22733,6 +23135,9 @@ class FMatrix3x4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix3x4Array:
@@ -22747,6 +23152,11 @@ class FMatrix3x4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -22882,6 +23292,9 @@ class DMatrix4x2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix4x2Array:
@@ -22896,6 +23309,11 @@ class DMatrix4x2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -23031,6 +23449,9 @@ class FMatrix4x2:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix4x2Array:
@@ -23045,6 +23466,11 @@ class FMatrix4x2Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -23188,6 +23614,9 @@ class DMatrix4x3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix4x3Array:
@@ -23202,6 +23631,11 @@ class DMatrix4x3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -23345,6 +23779,9 @@ class FMatrix4x3:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix4x3Array:
@@ -23359,6 +23796,11 @@ class FMatrix4x3Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -23526,6 +23968,9 @@ class DMatrix4x4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
 
 @final
 class DMatrix4x4Array:
@@ -23540,6 +23985,11 @@ class DMatrix4x4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -23707,6 +24157,9 @@ class FMatrix4x4:
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
 
 @final
 class FMatrix4x4Array:
@@ -23721,6 +24174,11 @@ class FMatrix4x4Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
 
 
 
@@ -23747,6 +24205,11 @@ class BArray:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+
+
 
 
 
@@ -23764,6 +24227,11 @@ class DArray:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
 
 
 
@@ -23783,6 +24251,11 @@ class FArray:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
+
 
 
 
@@ -23800,6 +24273,11 @@ class I8Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+
 
 
 
@@ -23819,6 +24297,11 @@ class U8Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+
+
 
 
 
@@ -23836,6 +24319,11 @@ class I16Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+
 
 
 
@@ -23855,6 +24343,11 @@ class U16Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+
+
 
 
 
@@ -23872,6 +24365,11 @@ class I32Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+
 
 
 
@@ -23891,6 +24389,11 @@ class U32Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+
+
 
 
 
@@ -23908,6 +24411,11 @@ class IArray:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+
 
 
 
@@ -23927,6 +24435,11 @@ class UArray:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+
+
 
 
 
@@ -23945,6 +24458,11 @@ class I64Array:
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
 
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+
+
 
 
 
@@ -23962,5 +24480,9 @@ class U64Array:
     def __eq__(self, other: Any) -> bool: ...
     def __neq__(self, other: Any) -> bool: ...
     def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
 
 

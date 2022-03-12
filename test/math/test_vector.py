@@ -1034,8 +1034,6 @@ class VectorTest:
         assert str(excinfo.value) == f'{1!r} is not {self.cls.__name__}'
 
     def test_pointer(self) -> None:
-        vector = self.cls(*range(self.component_count))
-        assert isinstance(vector.pointer, ctypes.c_void_p)
         real_type = {
             '?': ctypes.c_bool,
             'd': ctypes.c_double,
@@ -1051,37 +1049,37 @@ class VectorTest:
             'i': ctypes.c_int,
             'I': ctypes.c_uint,
         }[self.struct_byte_order + self.struct_format]
-        cast_pointer = ctypes.cast(vector.pointer, ctypes.POINTER(real_type))
+        vector = self.cls(*range(self.component_count))
+        assert isinstance(vector.pointer, ctypes.POINTER(real_type))
         for i in range(self.component_count):
-            cast_pointer[i] == self.type(i)
+            vector.pointer[i] == self.type(i)
 
     def test_array_pointer(self) -> None:
+        real_type = {
+            '?': ctypes.c_bool,
+            'd': ctypes.c_double,
+            'f': ctypes.c_float,
+            '=b': ctypes.c_int8,
+            '=B': ctypes.c_uint8,
+            '=h': ctypes.c_int16,
+            '=H': ctypes.c_uint16,
+            '=i': ctypes.c_int32,
+            '=I': ctypes.c_uint32,
+            '=q': ctypes.c_int64,
+            '=Q': ctypes.c_uint64,
+            'i': ctypes.c_int,
+            'I': ctypes.c_uint,
+        }[self.struct_byte_order + self.struct_format]
         array = self.array_cls(
             self.cls(*range(self.component_count)),
             self.cls(0),
         )
-        assert isinstance(array.pointer, ctypes.c_void_p)
-        real_type = {
-            '?': ctypes.c_bool,
-            'd': ctypes.c_double,
-            'f': ctypes.c_float,
-            '=b': ctypes.c_int8,
-            '=B': ctypes.c_uint8,
-            '=h': ctypes.c_int16,
-            '=H': ctypes.c_uint16,
-            '=i': ctypes.c_int32,
-            '=I': ctypes.c_uint32,
-            '=q': ctypes.c_int64,
-            '=Q': ctypes.c_uint64,
-            'i': ctypes.c_int,
-            'I': ctypes.c_uint,
-        }[self.struct_byte_order + self.struct_format]
-        cast_pointer = ctypes.cast(array.pointer, ctypes.POINTER(real_type))
+        assert isinstance(array.pointer, ctypes.POINTER(real_type))
         for i in (
             *range(self.component_count),
             *(0 for _ in range(self.component_count))
         ):
-            cast_pointer[i] == self.type(i)
+            array.pointer[i] == self.type(i)
 
 
 class TestBVector2(
