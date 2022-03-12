@@ -47,11 +47,13 @@ class Listener:
 
     def _update_position(self) -> None:
         assert active_listener is not None and active_listener() is self
-        alListenerfv(AL_POSITION, FVector3(*self._position).pointer)
+        f_position = FVector3(*self._position)
+        alListenerfv(AL_POSITION, f_position.pointer)
 
     def _update_velocity(self) -> None:
         assert active_listener is not None and active_listener() is self
-        alListenerfv(AL_VELOCITY, FVector3(*self._velocity).pointer)
+        f_velocity = FVector3(*self._velocity)
+        alListenerfv(AL_VELOCITY, f_velocity.pointer)
 
     def _update_orientation(self) -> None:
         assert active_listener is not None and active_listener() is self

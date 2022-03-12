@@ -237,7 +237,8 @@ class Speaker:
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in position'
             )
-        alSourcefv(self._al, AL_POSITION, FVector3(*self._position).pointer)
+        f_position = FVector3(*self._position)
+        alSourcefv(self._al, AL_POSITION, f_position.pointer)
 
     @property
     def velocity(self) -> Vector3:
@@ -256,7 +257,8 @@ class Speaker:
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in velocity'
             )
-        alSourcefv(self._al, AL_VELOCITY, FVector3(*self._velocity).pointer)
+        f_velocity = FVector3(*self._velocity)
+        alSourcefv(self._al, AL_VELOCITY, f_velocity.pointer)
 
     @property
     def min_gain(self) -> float:
@@ -359,7 +361,8 @@ class Speaker:
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in direction'
             )
-        alSourcefv(self._al, AL_DIRECTION, FVector3(*self._direction).pointer)
+        f_direction = FVector3(*self._direction)
+        alSourcefv(self._al, AL_DIRECTION, f_direction.pointer)
 
     @property
     def inner_cone_angle(self) -> float:
