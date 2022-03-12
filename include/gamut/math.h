@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 02:15:25.049788 from codegen/math/templates/math.h
+// generated 2022-03-12 14:15:28.220913 from codegen/math/templates/math.h
 
 #ifndef GAMUT_MATH_API_HPP
 #define GAMUT_MATH_API_HPP
@@ -962,7 +962,17 @@ struct GamutMathApi
 static struct GamutMathApi *
 GamutMathApi_Get()
 {
+    if (!PyImport_ImportModule("gamut.math._math")){ return 0; }
     return (struct GamutMathApi *)PyCapsule_Import("gamut.math._math._api", 0);
+}
+
+static void
+GamutMathApi_Release()
+{
+    PyObject *module = PyImport_ImportModule("gamut.math._math");
+    if (!module){ return; }
+    Py_DECREF(module);
+    Py_DECREF(module);
 }
 
 #ifdef __cplusplus

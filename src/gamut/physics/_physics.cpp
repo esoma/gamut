@@ -7,8 +7,16 @@
 #define BT_USE_DOUBLE_PRECISION
 #include "btBulletDynamicsCommon.h"
 #include <iostream>
+// gamut
+#include "gamut/math.h"
 
 #define ASSERT(x) if (!x){ std::cout << __FILE__ << ":" << __LINE__ << std::endl; exit(1); }
+
+
+struct ModuleState
+{
+    struct GamutMathApi *api;
+};
 
 
 struct World
@@ -37,6 +45,9 @@ struct Body
     btRigidBody *body;
     Shape *shape;
 };
+
+
+static ModuleState *get_module_state();
 
 
 // World
@@ -189,17 +200,19 @@ static PyMethodDef World_PyMethodDef[] = {
 static PyObject *
 World_Getter_gravity(World *self, void *)
 {
-    btVector3 gravity = self->world->getGravity();
-    return Py_BuildValue("ddd", gravity.x(), gravity.y(), gravity.z());
+    auto state = get_module_state();
+    auto gravity = self->world->getGravity();
+    return state->api->GamutMathDVector3_Create(gravity.m_floats);
 }
 
 
 int
 World_Setter_gravity(World *self, PyObject *value, void *)
 {
-    double x, y, z;
-    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
-    self->world->setGravity(btVector3(x, y, z));
+    auto state = get_module_state();
+    double *gravity = state->api->GamutMathDVector3_GetValuePointer(value);
+    if (!gravity){ return -1; }
+    self->world->setGravity(btVector3(gravity[0], gravity[1], gravity[2]));
     return 0;
 }
 
@@ -359,12 +372,17 @@ Body_set_disabled(Body *self, PyObject *)
 
 
 static PyObject *
-Body_set_gravity(Body *self, PyObject *value, void *)
+Body_set_gravity(Body *self, PyObject *args, void *)
 {
     bool is_explicit;
-    double x, y, z;
-    if (!PyArg_ParseTuple(value, "b(ddd)",
-        &is_explicit, &x, &y, &z)){ return 0; }
+    PyObject *value;
+    if (!PyArg_ParseTuple(args, "bO",
+        &is_explicit, &value)){ return 0; }
+
+    auto state = get_module_state();
+    double *gravity = state->api->GamutMathDVector3_GetValuePointer(value);
+    if (!gravity){ return 0; }
+
     if (is_explicit)
     {
         self->body->setFlags(BT_DISABLE_WORLD_GRAVITY);
@@ -373,7 +391,7 @@ Body_set_gravity(Body *self, PyObject *value, void *)
     {
         self->body->setFlags(0);
     }
-    self->body->setGravity(btVector3(x, y, z));
+    self->body->setGravity(btVector3(gravity[0], gravity[1], gravity[2]));
     Py_RETURN_NONE;
 }
 
@@ -527,17 +545,19 @@ Body_Setter_angular_sleep_threshold(Body *self, PyObject *value, void *)
 static PyObject *
 Body_Getter_angular_velocity(Body *self, void *)
 {
-    btVector3 v = self->body->getAngularVelocity();
-    return Py_BuildValue("ddd", v.x(), v.y(), v.z());
+    auto state = get_module_state();
+    auto velocity = self->body->getAngularVelocity();
+    return state->api->GamutMathDVector3_Create(velocity.m_floats);
 }
 
 
 int
 Body_Setter_angular_velocity(Body *self, PyObject *value, void *)
 {
-    double x, y, z;
-    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
-    self->body->setAngularVelocity(btVector3(x, y, z));
+    auto state = get_module_state();
+    double *velocity = state->api->GamutMathDVector3_GetValuePointer(value);
+    if (!velocity){ return -1; }
+    self->body->setAngularVelocity(btVector3(velocity[0], velocity[1], velocity[2]));
     return 0;
 }
 
@@ -609,17 +629,19 @@ Body_Setter_linear_sleep_threshold(Body *self, PyObject *value, void *)
 static PyObject *
 Body_Getter_linear_velocity(Body *self, void *)
 {
-    btVector3 v = self->body->getLinearVelocity();
-    return Py_BuildValue("ddd", v.x(), v.y(), v.z());
+    auto state = get_module_state();
+    auto velocity = self->body->getLinearVelocity();
+    return state->api->GamutMathDVector3_Create(velocity.m_floats);
 }
 
 
 int
 Body_Setter_linear_velocity(Body *self, PyObject *value, void *)
 {
-    double x, y, z;
-    if (!PyArg_ParseTuple(value, "ddd", &x, &y, &z)){ return -1; }
-    self->body->setLinearVelocity(btVector3(x, y, z));
+    auto state = get_module_state();
+    double *velocity = state->api->GamutMathDVector3_GetValuePointer(value);
+    if (!velocity){ return -1; }
+    self->body->setLinearVelocity(btVector3(velocity[0], velocity[1], velocity[2]));
     return 0;
 }
 
@@ -681,34 +703,23 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
 static PyObject *
 Body_Getter_transform(Body *self, void *)
 {
+    auto state = get_module_state();
     btScalar matrix[16];
     btTransform transform = self->body->getWorldTransform();
     transform.getOpenGLMatrix(matrix);
-    return Py_BuildValue(
-        "(dddd)(dddd)(dddd)(dddd)",
-        matrix[0], matrix[1], matrix[2], matrix[3],
-        matrix[4], matrix[5], matrix[6], matrix[7],
-        matrix[8], matrix[9], matrix[10], matrix[11],
-        matrix[12], matrix[13], matrix[14], matrix[15]
-    );
+    return state->api->GamutMathDMatrix4x4_Create(matrix);
 }
 
 
 int
 Body_Setter_transform(Body *self, PyObject *value, void *)
 {
-    btScalar matrix[16];
-    if (!PyArg_ParseTuple(
-        value, "(dddd)(dddd)(dddd)(dddd)",
-        &matrix[0], &matrix[1], &matrix[2], &matrix[3],
-        &matrix[4], &matrix[5], &matrix[6], &matrix[7],
-        &matrix[8], &matrix[9], &matrix[10], &matrix[11],
-        &matrix[12], &matrix[13], &matrix[14], &matrix[15]
-    )){ return -1; }
+    auto state = get_module_state();
+    double *matrix = state->api->GamutMathDMatrix4x4_GetValuePointer(value);
+    if (!matrix){ return -1; }
 
     btTransform transform;
     transform.setFromOpenGLMatrix(matrix);
-
     self->motion_state->setWorldTransform(transform);
     self->body->setWorldTransform(transform);
     return 0;
@@ -1306,30 +1317,67 @@ static PyMethodDef module_methods[] = {
 };
 
 
+static void
+module_free(void* self)
+{
+    GamutMathApi_Release();
+}
+
+
 static struct PyModuleDef module_PyModuleDef = {
     PyModuleDef_HEAD_INIT,
     "gamut.physics._physics",
     0,
-    0,
+    sizeof(struct ModuleState),
     module_methods,
     0,
     0,
-    0
+    0,
+    module_free
 };
 
 
 PyMODINIT_FUNC
 PyInit__physics()
 {
+    ModuleState *state = 0;
     PyObject *module = PyModule_Create(&module_PyModuleDef);
     if (!module){ goto error; }
+
+    if (PyState_AddModule(module, &module_PyModuleDef) == -1){ goto error; }
+    state = (ModuleState *)PyModule_GetState(module);
 
     if (!define_world_type(module)){ goto error; }
     if (!define_body_type(module)){ goto error; }
     if (!define_shape_type(module)){ goto error; }
+
+    state->api = GamutMathApi_Get();
+    if (!state->api){ goto error; }
 
     return module;
 error:
     Py_CLEAR(module);
     return 0;
 }
+
+
+static PyObject *
+get_module()
+{
+    PyObject *module = PyState_FindModule(&module_PyModuleDef);
+    if (!module)
+    {
+        return PyErr_Format(PyExc_RuntimeError, "physics module not ready");
+    }
+    return module;
+}
+
+
+static ModuleState *
+get_module_state()
+{
+    PyObject *module = get_module();
+    if (!module){ return 0; }
+    return (ModuleState *)PyModule_GetState(module);
+}
+

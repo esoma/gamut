@@ -2,12 +2,13 @@
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
+from gamut.math import Matrix4, Vector3
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
 from typing import Any
 # pyglm
-from glm import dmat4, dvec3, ivec3, mat4, vec3
+from glm import ivec3, vec3
 # pytest
 import pytest
 
@@ -102,13 +103,13 @@ def test_defaults() -> None:
     b = Body(1, Sphere(vec3(0), 1))
     assert b.angular_damping == 0
     assert b.angular_sleep_threshold == 1
-    assert b.angular_velocity == dvec3(0)
+    assert b.angular_velocity == Vector3(0)
     assert b.can_sleep
     assert b.is_enabled
     assert not b.is_sleeping
     assert b.linear_damping == 0
     assert b.linear_sleep_threshold == .8
-    assert b.linear_velocity == dvec3(0)
+    assert b.linear_velocity == Vector3(0)
     assert b.friction == 0
     assert b.gravity is None
     assert b.groups == Body.ALL_GROUPS
@@ -116,7 +117,7 @@ def test_defaults() -> None:
     assert b.restitution == 0
     assert b.rolling_friction == 0
     assert b.spinning_friction == 0
-    assert b.transform == dmat4(1)
+    assert b.transform == Matrix4(1)
     assert b.type == BodyType.DYNAMIC
     assert b.world is None
 
@@ -181,18 +182,19 @@ def test_invalid_angular_velocity_type(angular_velocity: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     with pytest.raises(TypeError) as excinfo:
         b.angular_velocity = angular_velocity
-    assert str(excinfo.value) == f'angular velocity must be dvec3'
+    assert str(excinfo.value) == f'expected DVector3, got {angular_velocity!r}'
 
 
 @pytest.mark.parametrize("angular_velocity", [
-    (1, 2, 3),
-    vec3(1, 2, 3),
-    dvec3(1, 2, 3),
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(7, 8, 9),
 ])
-def test_angular_velocity(angular_velocity: Any) -> None:
+def test_angular_velocity(angular_velocity: Vector3) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     b.angular_velocity = angular_velocity
-    assert b.angular_velocity == dvec3(angular_velocity)
+    assert b.angular_velocity == angular_velocity
+    assert isinstance(b.angular_velocity, Vector3)
 
 
 @pytest.mark.parametrize("can_sleep", [
@@ -291,18 +293,19 @@ def test_invalid_linear_velocity_type(linear_velocity: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     with pytest.raises(TypeError) as excinfo:
         b.linear_velocity = linear_velocity
-    assert str(excinfo.value) == f'linear velocity must be dvec3'
+    assert str(excinfo.value) == f'expected DVector3, got {linear_velocity!r}'
 
 
 @pytest.mark.parametrize("linear_velocity", [
-    (1, 2, 3),
-    vec3(1, 2, 3),
-    dvec3(1, 2, 3),
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(7, 8, 9),
 ])
 def test_linear_velocity(linear_velocity: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     b.linear_velocity = linear_velocity
-    assert b.linear_velocity == dvec3(linear_velocity)
+    assert b.linear_velocity == linear_velocity
+    assert isinstance(b.linear_velocity, Vector3)
 
 
 @pytest.mark.parametrize("friction", [None, 'abc', []])
@@ -325,36 +328,36 @@ def test_friction(friction: Any) -> None:
     (1, 2),
     (1, 2, 3, 4)
 ])
-def test_invalid_linear_velocity_type(gravity: Any) -> None:
+def test_invalid_gravity_type(gravity: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     with pytest.raises(TypeError) as excinfo:
         b.gravity = gravity
-    assert str(excinfo.value) == f'gravity must be None or dvec3'
+    assert str(excinfo.value) == f'expected DVector3, got {gravity!r}'
 
 
 @pytest.mark.parametrize("gravity", [
-    (1, 2, 3),
-    vec3(1, 2, 3),
-    dvec3(1, 2, 3),
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(7, 8, 9),
 ])
-def test_gravity_explicit(gravity: Any) -> None:
+def test_gravity_explicit(gravity: Vector3) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     b.gravity = gravity
-    assert b.gravity == dvec3(gravity)
-    assert isinstance(b.gravity, dvec3)
+    assert b.gravity == gravity
+    assert isinstance(b.gravity, Vector3)
 
 
 def test_gravity_inheritance(world: World) -> None:
     b = Body(1, Sphere(vec3(0), 1))
 
-    b.gravity = dvec3(0)
+    b.gravity = Vector3(0)
     b.gravity = None
     assert b.gravity is None
 
     b.world = world
     assert b.gravity is None
 
-    b.gravity = dvec3(0)
+    b.gravity = Vector3(0)
     b.gravity = None
     assert b.gravity is None
 
@@ -546,24 +549,23 @@ def test_invalid_transform_type(transform: Any) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     with pytest.raises(TypeError) as excinfo:
         b.transform = transform
-    assert str(excinfo.value) == f'transform must be dmat4'
+    assert str(excinfo.value) == f'expected DMatrix4x4, got {transform!r}'
 
 
 @pytest.mark.parametrize("transform", [
-    mat4(1),
-    dmat4(1),
-    (
-        (1, 2, 3, 0),
-        (5, 6, 7, 0),
-        (9, 10, 11, 0),
-        (13, 14, 15, 1),
+    Matrix4(1),
+    Matrix4(
+        1, 2, 3, 0,
+        5, 6, 7, 0,
+        9, 10, 11, 0,
+        13, 14, 15, 1
     ),
 ])
-def test_transform(transform: Any) -> None:
+def test_transform(transform: Matrix4) -> None:
     b = Body(1, Sphere(vec3(0), 1))
     b.transform = transform
-    assert b.transform == dmat4(transform)
-    assert isinstance(b.transform, dmat4)
+    assert b.transform == transform
+    assert isinstance(b.transform, Matrix4)
 
 
 @pytest.mark.parametrize("type", [None, 'abc', []])
