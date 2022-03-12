@@ -50,14 +50,13 @@ def test_activate_deactivate(loopback_al_context: AlContext) -> None:
 
 @pytest.mark.parametrize("position", [
     Vector3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_position(loopback_al_context: AlContext, position: Any) -> None:
     listener = Listener()
 
     listener.position = position
-    assert listener.position is not position
     assert isinstance(listener.position, Vector3)
     assert listener.position == position
 
@@ -70,14 +69,13 @@ def test_position(loopback_al_context: AlContext, position: Any) -> None:
 
 @pytest.mark.parametrize("velocity", [
     Vector3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_velocity(loopback_al_context: AlContext, velocity: Any) -> None:
     listener = Listener()
 
     listener.velocity = velocity
-    assert listener.velocity is not velocity
     assert isinstance(listener.velocity, Vector3)
     assert listener.velocity == velocity
 
@@ -90,14 +88,13 @@ def test_velocity(loopback_al_context: AlContext, velocity: Any) -> None:
 
 @pytest.mark.parametrize("direction", [
     Vector3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_direction(loopback_al_context: AlContext, direction: Any) -> None:
     listener = Listener()
 
     listener.direction = direction
-    assert listener.direction is not direction
     assert isinstance(listener.direction, Vector3)
     assert listener.direction == direction
 
@@ -110,14 +107,13 @@ def test_direction(loopback_al_context: AlContext, direction: Any) -> None:
 
 @pytest.mark.parametrize("up", [
     Vector3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_up(loopback_al_context: AlContext, up: Any) -> None:
     listener = Listener()
 
     listener.up = up
-    assert listener.up is not up
     assert isinstance(listener.up, Vector3)
     assert listener.up == up
 

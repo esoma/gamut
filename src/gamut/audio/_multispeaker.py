@@ -8,11 +8,9 @@ __all__ = ['MultiSpeaker']
 from ._source import Sample
 from ._speaker import Speaker, SpeakerState
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact
+from gamut.math import Vector3
 # python
 from math import pi
-# pyglm
-from glm import vec3
 
 
 class MultiSpeaker:
@@ -20,14 +18,14 @@ class MultiSpeaker:
     def __init__(
         self,
         *,
-        position: vec3 = vec3(0),
-        velocity: vec3 = vec3(0),
+        position: Vector3 = Vector3(0),
+        velocity: Vector3 = Vector3(0),
         min_gain: float = 0.0,
         gain: float = 1.0,
         max_gain: float = 1.0,
         is_relative: bool = False,
         pitch: float = 1.0,
-        direction: vec3 = vec3(0),
+        direction: Vector3 = Vector3(0),
         inner_cone_angle: float = 2 * pi,
         outer_cone_angle: float = 2 * pi,
         outer_cone_gain: float = 0.0,
@@ -82,22 +80,26 @@ class MultiSpeaker:
             speaker.stop()
 
     @property
-    def position(self) -> vec3:
-        return vec3(self._position)
+    def position(self) -> Vector3:
+        return self._position
 
     @position.setter
-    def position(self, value: F32Vector3) -> None:
-        self._position = vec3_exact(value)
+    def position(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._position = value
         for speaker in self._speakers:
             speaker.position = self._position
 
     @property
-    def velocity(self) -> vec3:
-        return vec3(self._velocity)
+    def velocity(self) -> Vector3:
+        return self._velocity
 
     @velocity.setter
-    def velocity(self, value: F32Vector3) -> None:
-        self._velocity = vec3_exact(value)
+    def velocity(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._velocity = value
         for speaker in self._speakers:
             speaker.velocity = self._velocity
 
@@ -152,12 +154,14 @@ class MultiSpeaker:
             speaker.pitch = self._pitch
 
     @property
-    def direction(self) -> vec3:
-        return vec3(self._direction)
+    def direction(self) -> Vector3:
+        return self._direction
 
     @direction.setter
-    def direction(self, value: F32Vector3) -> None:
-        self._direction = vec3_exact(value)
+    def direction(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._direction = value
         for speaker in self._speakers:
             speaker.direction = self._direction
 

@@ -85,7 +85,7 @@ class Listener:
         if current_listener is not self:
             return None
         active_listener = None
-        zero_vec3 = Vector3(0)
+        zero_vec3 = FVector3(0)
         alListenerfv(AL_POSITION, zero_vec3.pointer)
         alListenerfv(AL_VELOCITY, zero_vec3.pointer)
         alListenerfv(AL_ORIENTATION, (c_float * 6)(0, 0, -1, 0, 1, 0))
