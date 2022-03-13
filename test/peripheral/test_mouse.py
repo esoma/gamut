@@ -4,6 +4,7 @@ from ..application import TestApplication as Application
 from .test_peripheral import TestPeripheral
 # gamut
 from gamut import Window
+from gamut.math import IVector2
 from gamut.peripheral import (Mouse, MouseButton, MouseButtonPressed,
                               MouseButtonReleased, MouseConnected,
                               MouseDisconnected, MouseMoved,
@@ -149,14 +150,14 @@ def test_poll_motion_event(x: int, y: int, xrel: int, yrel: int) -> None:
             mouse = (await MouseConnected).mouse
             send_sdl_mouse_motion_event(window, x, y, xrel, yrel)
             moved_event = await mouse.Moved
-            assert mouse.position == (x, y)
+            assert mouse.position == IVector2(x, y)
             assert mouse.window is window
 
     app = TestApplication()
     app.run()
     assert isinstance(moved_event, MouseMoved)
-    assert moved_event.position == (x, y)
-    assert moved_event.delta == (xrel, yrel)
+    assert moved_event.position == IVector2(x, y)
+    assert moved_event.delta == IVector2(xrel, yrel)
     assert moved_event.window is window
 
 

@@ -7,6 +7,7 @@ from gamut.graphics import (BlendFactor, Buffer, BufferFrequency, BufferView,
                             BufferViewMap, clear_render_target, Color,
                             create_quad_position_array, execute_shader,
                             PrimitiveMode, Shader, WindowRenderTarget)
+from gamut.math import UVector2
 from gamut.peripheral import MouseButtonPressed, MouseConnected, MouseMoved
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
 # python
@@ -66,7 +67,7 @@ class Brick:
 
 class App(Application):
 
-    SCREEN_SIZE: Final = (800, 800)
+    SCREEN_SIZE: Final = UVector2(800, 800)
     MAX_BALLS_SPEED: Final = 750
 
     ball_transform: mat4

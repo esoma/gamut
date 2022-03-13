@@ -3,11 +3,10 @@
 from gamut import (Application, Window, WindowBufferSynchronization,
                    WindowClose, WindowHidden, WindowMoved, WindowResized,
                    WindowShown)
+from gamut.math import IVector2, UVector2
 # python
 import ctypes
 from typing import Any, Optional
-# pyglm
-import glm
 # pysdl2
 from sdl2 import (SDL_Event, SDL_GetWindowID, SDL_PushEvent, SDL_WINDOWEVENT,
                   SDL_WINDOWEVENT_CLOSE, SDL_WINDOWEVENT_MOVED)
@@ -35,7 +34,8 @@ def test_defaults() -> None:
     assert window.is_bordered is True
     assert window.is_fullscreen is False
     assert window.is_visible is False
-    assert window.size > (1, 1)
+    assert window.size.x >= 1
+    assert window.size.y >= 1
     assert window.title == ''
 
 
@@ -185,17 +185,18 @@ def test_recenter_in_app() -> None:
     app.run()
 
 
-@pytest.mark.parametrize("x", [0, 1, 100, 1000, .5, 62.1])
-@pytest.mark.parametrize("y", [0, 1, 100, 1000, .5, 62.1])
+@pytest.mark.parametrize("x", [0, 1, 100, 1000])
+@pytest.mark.parametrize("y", [0, 1, 100, 1000])
 def test_resize(x: int, y: int) -> None:
     window = Window()
-    window.resize((x, y))
-    assert window.size >= (1, 1)
+    window.resize(UVector2(x, y))
+    assert window.size.x >= 1
+    assert window.size.y >= 1
     assert len(window.size) == 2
     assert all(c.__class__ is int for c in window.size)
 
 
-@pytest.mark.parametrize("size", [(1,), (1, 2, 3), '123', None, '12'])
+@pytest.mark.parametrize("size", [(1,), (1, 2), '123', None, '12'])
 def test_resize_invalid_type(size: Any) -> None:
     window = Window()
     with pytest.raises(TypeError):
@@ -215,7 +216,7 @@ def test_resize_in_app() -> None:
     class TestApp(Application):
         async def main(self) -> None:
             window = Window()
-            window.resize((200, 200))
+            window.resize(UVector2(200, 200))
     app = TestApp()
     app.run()
 
@@ -299,7 +300,7 @@ def test_poll_moved_event() -> None:
     assert moved_event is not None
     assert isinstance(moved_event, WindowMoved)
     assert moved_event.window is window
-    assert isinstance(moved_event.position, glm.ivec2)
+    assert isinstance(moved_event.position, IVector2)
     assert len(moved_event.position) == 2
     assert all(c.__class__ is int for c in moved_event.position)
 
@@ -311,7 +312,7 @@ def test_poll_resized_event() -> None:
     class TestApp(Application):
         async def main(self) -> None:
             nonlocal resized_event
-            window.resize((234, 156))
+            window.resize(UVector2(234, 156))
             resized_event = await window.Resized
             window.close()
 
@@ -321,7 +322,7 @@ def test_poll_resized_event() -> None:
     assert resized_event is not None
     assert isinstance(resized_event, WindowResized)
     assert resized_event.window is window
-    assert isinstance(resized_event.size, glm.ivec2)
+    assert isinstance(resized_event.size, UVector2)
     assert all(c.__class__ is int for c in resized_event.size)
 
 

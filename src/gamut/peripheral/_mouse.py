@@ -24,11 +24,10 @@ from gamut._glcontext import release_gl_context, require_gl_context
 from gamut._sdl import (sdl_event_callback_map, SDL_MOUSE_KEY,
                         sdl_window_event_callback_map)
 from gamut._window import get_window_from_sdl_id, Window
+from gamut.math import IVector2
 # python
 from typing import Any, Optional, TYPE_CHECKING, Union
 from weakref import ref
-# pyglm
-from glm import ivec2
 # pysdl2
 from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
                   SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_FALSE,
@@ -85,8 +84,8 @@ class MouseDisconnected(MouseEvent, PeripheralDisconnected, peripheral=...):
 
 
 class MouseMoved(MouseEvent, peripheral=...):
-    position: Optional[ivec2]
-    delta: Optional[ivec2]
+    position: Optional[IVector2]
+    delta: Optional[IVector2]
     window: Optional[Window]
 
 
@@ -255,7 +254,7 @@ class Mouse(Peripheral):
             pass
         self.Button = Button
 
-        self._position: Optional[ivec2] = None
+        self._position: Optional[IVector2] = None
         self._window: Optional[Window] = None
 
     def __del__(self) -> None:
@@ -275,7 +274,7 @@ class Mouse(Peripheral):
             raise RuntimeError('relative mode is not supported')
 
     @property
-    def position(self) -> Optional[ivec2]:
+    def position(self) -> Optional[IVector2]:
         return self._position
 
     @property
@@ -320,8 +319,8 @@ def sdl_mouse_motion_event_callback(
         mouse = mice[SDL_MOUSE_KEY]
     except KeyError:
         return None
-    mouse._position = ivec2(sdl_event.motion.x, sdl_event.motion.y)
-    delta = ivec2(sdl_event.motion.xrel, sdl_event.motion.yrel)
+    mouse._position = IVector2(sdl_event.motion.x, sdl_event.motion.y)
+    delta = IVector2(sdl_event.motion.xrel, sdl_event.motion.yrel)
     mouse._window = window
     return mouse.Moved(mouse._position, delta, mouse._window)
 

@@ -5,6 +5,7 @@ from gamut.event import Bind
 from gamut.graphics import (BlendFactor, BufferViewMap, clear_render_target,
                             Color, execute_shader, PrimitiveMode, Shader,
                             WindowRenderTarget)
+from gamut.math import UVector2
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
@@ -28,7 +29,7 @@ class App(Application):
     async def main(self) -> None:
         self.window = Window()
         self.window.title = 'Gamut Text Example'
-        self.window.resize((800, 800))
+        self.window.resize(UVector2(800, 800))
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)
