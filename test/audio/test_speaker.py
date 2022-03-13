@@ -235,6 +235,22 @@ def test_position(
         assert speaker.position != position
 
 
+@pytest.mark.parametrize("source_type", [Sample, Stream])
+@pytest.mark.parametrize("position", [
+    (1, 2, 3),
+    None,
+    '123',
+])
+def test_position_invalid_type(
+    loopback_al_context: AlContext,
+    source_type: Union[type[Sample], type[Stream]],
+    position: Any
+) -> None:
+    with Speaker(create_source(source_type)) as speaker:
+        with pytest.raises(TypeError):
+            speaker.position = position
+
+
 def test_position_stereo(loopback_al_context: AlContext) -> None:
     source = Sample(2, 8, 44100, b'')
     with Speaker(source) as speaker:
@@ -264,6 +280,22 @@ def test_velocity(
 
         velocity += Vector3(1)
         assert speaker.velocity != velocity
+
+
+@pytest.mark.parametrize("source_type", [Sample, Stream])
+@pytest.mark.parametrize("velocity", [
+    (1, 2, 3),
+    None,
+    '123',
+])
+def test_velocity_invalid_type(
+    loopback_al_context: AlContext,
+    source_type: Union[type[Sample], type[Stream]],
+    velocity: Any
+) -> None:
+    with Speaker(create_source(source_type)) as speaker:
+        with pytest.raises(TypeError):
+            speaker.velocity = velocity
 
 
 def test_velocity_stereo(loopback_al_context: AlContext) -> None:
@@ -296,6 +328,21 @@ def test_direction(
         direction += Vector3(1)
         assert speaker.direction != direction
 
+
+@pytest.mark.parametrize("source_type", [Sample, Stream])
+@pytest.mark.parametrize("direction", [
+    (1, 2, 3),
+    None,
+    '123',
+])
+def test_direction_invalid_type(
+    loopback_al_context: AlContext,
+    source_type: Union[type[Sample], type[Stream]],
+    direction: Any
+) -> None:
+    with Speaker(create_source(source_type)) as speaker:
+        with pytest.raises(TypeError):
+            speaker.direction = direction
 
 def test_direction_stereo(loopback_al_context: AlContext) -> None:
     source = Sample(2, 8, 44100, b'')

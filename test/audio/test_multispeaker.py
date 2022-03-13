@@ -80,6 +80,16 @@ def test_position(
     assert all(s.position == multi_speaker.position for s in speakers)
 
 
+@pytest.mark.parametrize("position", [(1, 2, 3), '123', None])
+def test_position_invalid_type(
+    loopback_al_context: AlContext,
+    position: Any
+) -> None:
+    multi_speaker = MultiSpeaker()
+    with pytest.raises(TypeError):
+        multi_speaker.position = position
+
+
 @pytest.mark.parametrize("velocity", [Vector3(1, 2, 3), Vector3(-1, -2, -3)])
 def test_velocity(
     loopback_al_context: AlContext,
@@ -95,6 +105,16 @@ def test_velocity(
     assert all(s.velocity == multi_speaker.velocity for s in speakers)
 
 
+@pytest.mark.parametrize("velocity", [(1, 2, 3), '123', None])
+def test_velocity_invalid_type(
+    loopback_al_context: AlContext,
+    velocity: Any
+) -> None:
+    multi_speaker = MultiSpeaker()
+    with pytest.raises(TypeError):
+        multi_speaker.velocity = velocity
+
+
 @pytest.mark.parametrize("direction", [Vector3(1, 2, 3), Vector3(-1, -2, -3)])
 def test_direction(
     loopback_al_context: AlContext,
@@ -108,6 +128,16 @@ def test_direction(
     assert multi_speaker.direction == direction
     assert isinstance(multi_speaker.direction, Vector3)
     assert all(s.direction == multi_speaker.direction for s in speakers)
+
+
+@pytest.mark.parametrize("direction", [(1, 2, 3), '123', None])
+def test_direction_invalid_type(
+    loopback_al_context: AlContext,
+    direction: Any
+) -> None:
+    multi_speaker = MultiSpeaker()
+    with pytest.raises(TypeError):
+        multi_speaker.direction = direction
 
 
 @pytest.mark.parametrize("min_gain", [0, 0.0, .5, 1.0, 1])

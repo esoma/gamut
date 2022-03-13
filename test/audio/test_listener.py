@@ -67,6 +67,16 @@ def test_position(loopback_al_context: AlContext, position: Any) -> None:
     listener.position = position
 
 
+@pytest.mark.parametrize("position", [(1, 2, 3), None, '123'])
+def test_position_invalid_type(
+    loopback_al_context: AlContext,
+    position: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.position = position
+
+
 @pytest.mark.parametrize("velocity", [
     Vector3(1, 2, 3),
     Vector3(4, 5, 6),
@@ -84,6 +94,16 @@ def test_velocity(loopback_al_context: AlContext, velocity: Any) -> None:
 
     listener.activate()
     listener.velocity = velocity
+
+
+@pytest.mark.parametrize("velocity", [(1, 2, 3), None, '123'])
+def test_velocity_invalid_type(
+    loopback_al_context: AlContext,
+    velocity: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.velocity = velocity
 
 
 @pytest.mark.parametrize("direction", [
@@ -105,6 +125,16 @@ def test_direction(loopback_al_context: AlContext, direction: Any) -> None:
     listener.direction = direction
 
 
+@pytest.mark.parametrize("direction", [(1, 2, 3), None, '123'])
+def test_direction_invalid_type(
+    loopback_al_context: AlContext,
+    direction: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.direction = direction
+
+
 @pytest.mark.parametrize("up", [
     Vector3(1, 2, 3),
     Vector3(4, 5, 6),
@@ -122,6 +152,16 @@ def test_up(loopback_al_context: AlContext, up: Any) -> None:
 
     listener.activate()
     listener.up = up
+
+
+@pytest.mark.parametrize("up", [(1, 2, 3), None, '123'])
+def test_up_invalid_type(
+    loopback_al_context: AlContext,
+    up: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.up = up
 
 
 @pytest.mark.parametrize("gain", [-1.0, -0.000001, 1.000001, 2.0])
