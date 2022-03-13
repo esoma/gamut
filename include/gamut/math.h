@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.915181 from codegen/math/templates/math.h
+// generated 2022-03-13 14:05:23.383345 from codegen/math/templates/math.h
 
 #ifndef GAMUT_MATH_API_HPP
 #define GAMUT_MATH_API_HPP
@@ -360,6 +360,20 @@ typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
     typedef PyObject *(*GamutMathApi_CreateFMatrix4x4)(const float *);
     typedef PyObject *(*GamutMathApi_CreateFMatrix4x4Array)(size_t, const float *);
     typedef float *(*GamutMathApi_GetFMatrix4x4ValuePointer)(const PyObject *);
+
+
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateDQuaternion)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDQuaternionArray)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDQuaternionValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateFQuaternion)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFQuaternionArray)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFQuaternionValuePointer)(const PyObject *);
 
 
 
@@ -890,6 +904,23 @@ struct GamutMathApi
         GamutMathApi_GetFMatrix4x4ValuePointer GamutMathFMatrix4x4_GetValuePointer;
         GamutMathApi_GetFMatrix4x4ValuePointer GamutMathFMatrix4x4Array_GetValuePointer;
         GamutMathApi_GetArrayLength GamutMathFMatrix4x4Array_GetLength;
+
+
+        GamutMathApi_GetType GamutMathDQuaternion_GetType;
+        GamutMathApi_GetType GamutMathDQuaternionArray_GetType;
+        GamutMathApi_CreateDQuaternion GamutMathDQuaternion_Create;
+        GamutMathApi_CreateDQuaternionArray GamutMathDQuaternionArray_Create;
+        GamutMathApi_GetDQuaternionValuePointer GamutMathDQuaternion_GetValuePointer;
+        GamutMathApi_GetDQuaternionValuePointer GamutMathDQuaternionArray_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathDQuaternionArray_GetLength;
+
+        GamutMathApi_GetType GamutMathFQuaternion_GetType;
+        GamutMathApi_GetType GamutMathFQuaternionArray_GetType;
+        GamutMathApi_CreateFQuaternion GamutMathFQuaternion_Create;
+        GamutMathApi_CreateFQuaternionArray GamutMathFQuaternionArray_Create;
+        GamutMathApi_GetFQuaternionValuePointer GamutMathFQuaternion_GetValuePointer;
+        GamutMathApi_GetFQuaternionValuePointer GamutMathFQuaternionArray_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathFQuaternionArray_GetLength;
 
 
         GamutMathApi_GetType GamutMathBArray_GetType;

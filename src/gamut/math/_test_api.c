@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.983680 from codegen/math/templates/test_api.cpp
+// generated 2022-03-13 14:05:23.463346 from codegen/math/templates/test_api.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -13435,6 +13435,407 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
 
 
     static PyObject *
+    test_DQuaternion(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathDQuaternion_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            double components[4] = {
+
+                    0,
+
+                    1,
+
+                    2,
+
+                    3
+
+            };
+            PyObject *obj = api->GamutMathDQuaternion_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            double *value_ptr = api->GamutMathDQuaternion_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (double)0);
+
+                TEST(value_ptr[1] == (double)1);
+
+                TEST(value_ptr[2] == (double)2);
+
+                TEST(value_ptr[3] == (double)3);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        double *value_ptr = api->GamutMathDQuaternion_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_DQuaternionArray(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathDQuaternionArray_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        double components[40] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9,
+
+                10,
+
+                11,
+
+                12,
+
+                13,
+
+                14,
+
+                15,
+
+                16,
+
+                17,
+
+                18,
+
+                19,
+
+                20,
+
+                21,
+
+                22,
+
+                23,
+
+                24,
+
+                25,
+
+                26,
+
+                27,
+
+                28,
+
+                29,
+
+                30,
+
+                31,
+
+                32,
+
+                33,
+
+                34,
+
+                35,
+
+                36,
+
+                37,
+
+                38,
+
+                39
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathDQuaternionArray_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathDQuaternionArray_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            double *value_ptr = api->GamutMathDQuaternionArray_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 4; j++)
+            {
+                TEST(value_ptr[j] == (double)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathDQuaternionArray_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        double *value_ptr = api->GamutMathDQuaternionArray_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+    static PyObject *
+    test_FQuaternion(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathFQuaternion_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            float components[4] = {
+
+                    0,
+
+                    1,
+
+                    2,
+
+                    3
+
+            };
+            PyObject *obj = api->GamutMathFQuaternion_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            float *value_ptr = api->GamutMathFQuaternion_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (float)0);
+
+                TEST(value_ptr[1] == (float)1);
+
+                TEST(value_ptr[2] == (float)2);
+
+                TEST(value_ptr[3] == (float)3);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        float *value_ptr = api->GamutMathFQuaternion_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_FQuaternionArray(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathFQuaternionArray_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        float components[40] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9,
+
+                10,
+
+                11,
+
+                12,
+
+                13,
+
+                14,
+
+                15,
+
+                16,
+
+                17,
+
+                18,
+
+                19,
+
+                20,
+
+                21,
+
+                22,
+
+                23,
+
+                24,
+
+                25,
+
+                26,
+
+                27,
+
+                28,
+
+                29,
+
+                30,
+
+                31,
+
+                32,
+
+                33,
+
+                34,
+
+                35,
+
+                36,
+
+                37,
+
+                38,
+
+                39
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathFQuaternionArray_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathFQuaternionArray_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            float *value_ptr = api->GamutMathFQuaternionArray_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 4; j++)
+            {
+                TEST(value_ptr[j] == (float)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathFQuaternionArray_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        float *value_ptr = api->GamutMathFQuaternionArray_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+
+    static PyObject *
     test_BArray(PyObject *self, PyObject *args)
     {
         struct GamutMathApi *api = GamutMathApi_Get();
@@ -14675,6 +15076,13 @@ static PyMethodDef module_methods[] = {
 
         {"test_FMatrix4x4", test_FMatrix4x4, METH_NOARGS, 0},
         {"test_FMatrix4x4Array", test_FMatrix4x4Array, METH_NOARGS, 0},
+
+
+        {"test_DQuaternion", test_DQuaternion, METH_NOARGS, 0},
+        {"test_DQuaternionArray", test_DQuaternionArray, METH_NOARGS, 0},
+
+        {"test_FQuaternion", test_FQuaternion, METH_NOARGS, 0},
+        {"test_FQuaternionArray", test_FQuaternionArray, METH_NOARGS, 0},
 
 
         {"test_BArray", test_BArray, METH_NOARGS, 0},

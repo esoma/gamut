@@ -5,6 +5,7 @@ src/gamut/math/_math.pyi linguist-generated
 src/gamut/math/_modulestate.hpp linguist-generated
 src/gamut/math/_*matrix*.hpp linguist-generated
 src/gamut/math/_*vector*.hpp linguist-generated
+src/gamut/math/_*quaternion*.hpp linguist-generated
 src/gamut/math/_b.hpp linguist-generated
 src/gamut/math/_d.hpp linguist-generated
 src/gamut/math/_f.hpp linguist-generated

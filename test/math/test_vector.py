@@ -1,35 +1,36 @@
 
 # gamut
 from gamut.math import (BVector2, BVector2Array, BVector3, BVector3Array,
-                        BVector4, BVector4Array, DVector2, DVector2Array,
-                        DVector3, DVector3Array, DVector4, DVector4Array,
-                        FVector2, FVector2Array, FVector3, FVector3Array,
-                        FVector4, FVector4Array, I8Vector2, I8Vector2Array,
-                        I8Vector3, I8Vector3Array, I8Vector4, I8Vector4Array,
-                        I16Vector2, I16Vector2Array, I16Vector3,
-                        I16Vector3Array, I16Vector4, I16Vector4Array,
-                        I32Vector2, I32Vector2Array, I32Vector3,
-                        I32Vector3Array, I32Vector4, I32Vector4Array,
-                        I64Vector2, I64Vector2Array, I64Vector3,
-                        I64Vector3Array, I64Vector4, I64Vector4Array, IVector2,
-                        IVector2Array, IVector3, IVector3Array, IVector4,
-                        IVector4Array, U8Vector2, U8Vector2Array, U8Vector3,
-                        U8Vector3Array, U8Vector4, U8Vector4Array, U16Vector2,
-                        U16Vector2Array, U16Vector3, U16Vector3Array,
-                        U16Vector4, U16Vector4Array, U32Vector2,
-                        U32Vector2Array, U32Vector3, U32Vector3Array,
-                        U32Vector4, U32Vector4Array, U64Vector2,
-                        U64Vector2Array, U64Vector3, U64Vector3Array,
-                        U64Vector4, U64Vector4Array, UVector2, UVector2Array,
-                        UVector3, UVector3Array, UVector4, UVector4Array,
-                        Vector2, Vector2Array, Vector3, Vector3Array, Vector4,
+                        BVector4, BVector4Array, DQuaternion, DVector2,
+                        DVector2Array, DVector3, DVector3Array, DVector4,
+                        DVector4Array, FQuaternion, FVector2, FVector2Array,
+                        FVector3, FVector3Array, FVector4, FVector4Array,
+                        I8Vector2, I8Vector2Array, I8Vector3, I8Vector3Array,
+                        I8Vector4, I8Vector4Array, I16Vector2, I16Vector2Array,
+                        I16Vector3, I16Vector3Array, I16Vector4,
+                        I16Vector4Array, I32Vector2, I32Vector2Array,
+                        I32Vector3, I32Vector3Array, I32Vector4,
+                        I32Vector4Array, I64Vector2, I64Vector2Array,
+                        I64Vector3, I64Vector3Array, I64Vector4,
+                        I64Vector4Array, IVector2, IVector2Array, IVector3,
+                        IVector3Array, IVector4, IVector4Array, U8Vector2,
+                        U8Vector2Array, U8Vector3, U8Vector3Array, U8Vector4,
+                        U8Vector4Array, U16Vector2, U16Vector2Array,
+                        U16Vector3, U16Vector3Array, U16Vector4,
+                        U16Vector4Array, U32Vector2, U32Vector2Array,
+                        U32Vector3, U32Vector3Array, U32Vector4,
+                        U32Vector4Array, U64Vector2, U64Vector2Array,
+                        U64Vector3, U64Vector3Array, U64Vector4,
+                        U64Vector4Array, UVector2, UVector2Array, UVector3,
+                        UVector3Array, UVector4, UVector4Array, Vector2,
+                        Vector2Array, Vector3, Vector3Array, Vector4,
                         Vector4Array)
 # python
 import ctypes
 import itertools
 from math import inf
 from math import isclose as _isclose
-from math import isnan, sqrt
+from math import isnan, radians, sqrt
 import struct
 from typing import Final
 from weakref import ref
@@ -1080,6 +1081,22 @@ class VectorTest:
             *(0 for _ in range(self.component_count))
         ):
             array.pointer[i] == self.type(i)
+
+    def test_to_quaternion(self) -> None:
+        if self.type != float or self.component_count != 3:
+            with pytest.raises(AttributeError):
+                self.cls().to_quaternion
+            return
+
+        quaternion_cls = globals()[f'{self.cls.__name__[0]}Quaternion']
+        assert isinstance(self.cls(0).to_quaternion(), quaternion_cls)
+        assert self.cls(0).to_quaternion() == quaternion_cls(1)
+
+        rotation = self.cls(0, radians(90), 0).to_quaternion()
+        assert isclose(rotation.w, 0.7071067811865476)
+        assert isclose(rotation.x, 0)
+        assert isclose(rotation.y, 0.7071067811865476)
+        assert isclose(rotation.z, 0)
 
 
 class TestBVector2(

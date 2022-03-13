@@ -16,6 +16,7 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_quaterniontype.hpp"
 #include "_vectortype.hpp"
 #include "_type.hpp"
 
@@ -780,6 +781,19 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
             );
             return result;
         }
+
+        static {{ name[0] }}Quaternion *
+        {{ name }}_to_quaternion({{ name }} *self, void*)
+        {
+            auto module_state = get_module_state();
+            if (!module_state){ return 0; }
+            auto cls = module_state->{{ name[0] }}Quaternion_PyTypeObject;
+
+            auto result = ({{ name[0] }}Quaternion *)cls->tp_alloc(cls, 0);
+            if (!result){ return 0; }
+            result->glm = new {{ name[0] }}QuaternionGlm(*self->glm);
+            return result;
+        }
     {% endif %}
 
     static {{ name }} *
@@ -797,7 +811,6 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
         return result;
     }
 
-
     static PyObject *
     {{ name }}_distance({{ name }} *self, {{ name }} *other)
     {
@@ -810,6 +823,7 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
         auto result = glm::distance(*self->glm, *other->glm);
         return c_{{ c_type.replace(' ', '_') }}_to_pyobject(result);
     }
+
 {% endif %}
 
 
@@ -843,6 +857,7 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
     {% if c_type in ['float', 'double'] %}
         {% if component_count == 3 %}
             {"cross", (PyCFunction){{ name }}_cross, METH_O, 0},
+            {"to_quaternion", (PyCFunction){{ name }}_to_quaternion, METH_NOARGS, 0},
         {% endif %}
         {"normalize", (PyCFunction){{ name }}_normalize, METH_NOARGS, 0},
         {"distance", (PyCFunction){{ name }}_distance, METH_O, 0},

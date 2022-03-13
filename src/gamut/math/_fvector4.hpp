@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.821680 from codegen/math/templates/_vector.hpp
+// generated 2022-03-13 14:05:23.259346 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_FVECTOR4_HPP
 #define GAMUT_MATH_FVECTOR4_HPP
@@ -16,6 +16,7 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_quaterniontype.hpp"
 #include "_vectortype.hpp"
 #include "_type.hpp"
 
@@ -1043,7 +1044,6 @@ static PyMemberDef FVector4_PyMemberDef[] = {
         return result;
     }
 
-
     static PyObject *
     FVector4_distance(FVector4 *self, FVector4 *other)
     {
@@ -1056,6 +1056,7 @@ static PyMemberDef FVector4_PyMemberDef[] = {
         auto result = glm::distance(*self->glm, *other->glm);
         return c_float_to_pyobject(result);
     }
+
 
 
 
