@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.898680 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-13 03:41:58.934359 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP
@@ -196,6 +196,12 @@ struct ModuleState
 
         PyTypeObject *FMatrix4x4_PyTypeObject;
         PyTypeObject *FMatrix4x4Array_PyTypeObject;
+
+        PyTypeObject *DQuaternion_PyTypeObject;
+        PyTypeObject *DQuaternionArray_PyTypeObject;
+
+        PyTypeObject *FQuaternion_PyTypeObject;
+        PyTypeObject *FQuaternionArray_PyTypeObject;
 
 
         PyTypeObject *BArray_PyTypeObject;
@@ -419,6 +425,12 @@ ModuleState_traverse(
         Py_VISIT(self->FMatrix4x4_PyTypeObject);
         Py_VISIT(self->FMatrix4x4Array_PyTypeObject);
 
+        Py_VISIT(self->DQuaternion_PyTypeObject);
+        Py_VISIT(self->DQuaternionArray_PyTypeObject);
+
+        Py_VISIT(self->FQuaternion_PyTypeObject);
+        Py_VISIT(self->FQuaternionArray_PyTypeObject);
+
 
         Py_VISIT(self->BArray_PyTypeObject);
 
@@ -637,6 +649,12 @@ ModuleState_clear(struct ModuleState *self)
 
         Py_CLEAR(self->FMatrix4x4_PyTypeObject);
         Py_CLEAR(self->FMatrix4x4Array_PyTypeObject);
+
+        Py_CLEAR(self->DQuaternion_PyTypeObject);
+        Py_CLEAR(self->DQuaternionArray_PyTypeObject);
+
+        Py_CLEAR(self->FQuaternion_PyTypeObject);
+        Py_CLEAR(self->FQuaternionArray_PyTypeObject);
 
 
         Py_CLEAR(self->BArray_PyTypeObject);

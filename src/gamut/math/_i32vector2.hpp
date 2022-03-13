@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.806179 from codegen/math/templates/_vector.hpp
+// generated 2022-03-13 03:41:58.808858 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I32VECTOR2_HPP
 #define GAMUT_MATH_I32VECTOR2_HPP
@@ -16,6 +16,7 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_quaterniontype.hpp"
 #include "_vectortype.hpp"
 #include "_type.hpp"
 

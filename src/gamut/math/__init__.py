@@ -52,6 +52,9 @@ __all__ = [
     'I32Array', 'U32Array',
     'IArray', 'UArray',
     'I64Array', 'U64Array',
+    'FQuaternion', 'FQuaternionArray',
+    'DQuaternion', 'DQuaternionArray',
+    'Quaternion', 'QuaternionArray',
 ]
 
 # gamut
@@ -61,22 +64,23 @@ from ._math import (BArray, BVector2, BVector2Array, BVector3, BVector3Array,
                     DMatrix2x4Array, DMatrix3x2, DMatrix3x2Array, DMatrix3x3,
                     DMatrix3x3Array, DMatrix3x4, DMatrix3x4Array, DMatrix4x2,
                     DMatrix4x2Array, DMatrix4x3, DMatrix4x3Array, DMatrix4x4,
-                    DMatrix4x4Array, DVector2, DVector2Array, DVector3,
-                    DVector3Array, DVector4, DVector4Array, FArray, FMatrix2x2,
-                    FMatrix2x2Array, FMatrix2x3, FMatrix2x3Array, FMatrix2x4,
-                    FMatrix2x4Array, FMatrix3x2, FMatrix3x2Array, FMatrix3x3,
-                    FMatrix3x3Array, FMatrix3x4, FMatrix3x4Array, FMatrix4x2,
-                    FMatrix4x2Array, FMatrix4x3, FMatrix4x3Array, FMatrix4x4,
-                    FMatrix4x4Array, FVector2, FVector2Array, FVector3,
-                    FVector3Array, FVector4, FVector4Array, I8Array, I8Vector2,
-                    I8Vector2Array, I8Vector3, I8Vector3Array, I8Vector4,
-                    I8Vector4Array, I16Array, I16Vector2, I16Vector2Array,
-                    I16Vector3, I16Vector3Array, I16Vector4, I16Vector4Array,
-                    I32Array, I32Vector2, I32Vector2Array, I32Vector3,
-                    I32Vector3Array, I32Vector4, I32Vector4Array, I64Array,
-                    I64Vector2, I64Vector2Array, I64Vector3, I64Vector3Array,
-                    I64Vector4, I64Vector4Array, IArray, IVector2,
-                    IVector2Array, IVector3, IVector3Array, IVector4,
+                    DMatrix4x4Array, DQuaternion, DQuaternionArray, DVector2,
+                    DVector2Array, DVector3, DVector3Array, DVector4,
+                    DVector4Array, FArray, FMatrix2x2, FMatrix2x2Array,
+                    FMatrix2x3, FMatrix2x3Array, FMatrix2x4, FMatrix2x4Array,
+                    FMatrix3x2, FMatrix3x2Array, FMatrix3x3, FMatrix3x3Array,
+                    FMatrix3x4, FMatrix3x4Array, FMatrix4x2, FMatrix4x2Array,
+                    FMatrix4x3, FMatrix4x3Array, FMatrix4x4, FMatrix4x4Array,
+                    FQuaternion, FQuaternionArray, FVector2, FVector2Array,
+                    FVector3, FVector3Array, FVector4, FVector4Array, I8Array,
+                    I8Vector2, I8Vector2Array, I8Vector3, I8Vector3Array,
+                    I8Vector4, I8Vector4Array, I16Array, I16Vector2,
+                    I16Vector2Array, I16Vector3, I16Vector3Array, I16Vector4,
+                    I16Vector4Array, I32Array, I32Vector2, I32Vector2Array,
+                    I32Vector3, I32Vector3Array, I32Vector4, I32Vector4Array,
+                    I64Array, I64Vector2, I64Vector2Array, I64Vector3,
+                    I64Vector3Array, I64Vector4, I64Vector4Array, IArray,
+                    IVector2, IVector2Array, IVector3, IVector3Array, IVector4,
                     IVector4Array, U8Array, U8Vector2, U8Vector2Array,
                     U8Vector3, U8Vector3Array, U8Vector4, U8Vector4Array,
                     U16Array, U16Vector2, U16Vector2Array, U16Vector3,
@@ -122,3 +126,6 @@ Matrix3x4Array = DMatrix3x4Array
 Matrix4x2Array = DMatrix4x2Array
 Matrix4x3Array = DMatrix4x3Array
 Matrix4x4Array = Matrix4Array = DMatrix4Array = DMatrix4x4Array
+
+Quaternion = DQuaternion
+QuaternionArray = DQuaternionArray

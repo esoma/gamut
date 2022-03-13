@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.812179 from codegen/math/templates/_vector.hpp
+// generated 2022-03-13 03:41:58.814859 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_FVECTOR3_HPP
 #define GAMUT_MATH_FVECTOR3_HPP
@@ -16,6 +16,7 @@
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
+#include "_quaterniontype.hpp"
 #include "_vectortype.hpp"
 #include "_type.hpp"
 
@@ -971,6 +972,19 @@ static PyMemberDef FVector3_PyMemberDef[] = {
             return result;
         }
 
+        static FQuaternion *
+        FVector3_to_quaternion(FVector3 *self, void*)
+        {
+            auto module_state = get_module_state();
+            if (!module_state){ return 0; }
+            auto cls = module_state->FQuaternion_PyTypeObject;
+
+            auto result = (FQuaternion *)cls->tp_alloc(cls, 0);
+            if (!result){ return 0; }
+            result->glm = new FQuaternionGlm(*self->glm);
+            return result;
+        }
+
 
     static FVector3 *
     FVector3_normalize(FVector3 *self, void*)
@@ -991,7 +1005,6 @@ static PyMemberDef FVector3_PyMemberDef[] = {
         return result;
     }
 
-
     static PyObject *
     FVector3_distance(FVector3 *self, FVector3 *other)
     {
@@ -1004,6 +1017,7 @@ static PyMemberDef FVector3_PyMemberDef[] = {
         auto result = glm::distance(*self->glm, *other->glm);
         return c_float_to_pyobject(result);
     }
+
 
 
 
@@ -1037,6 +1051,7 @@ static PyMethodDef FVector3_PyMethodDef[] = {
 
 
             {"cross", (PyCFunction)FVector3_cross, METH_O, 0},
+            {"to_quaternion", (PyCFunction)FVector3_to_quaternion, METH_NOARGS, 0},
 
         {"normalize", (PyCFunction)FVector3_normalize, METH_NOARGS, 0},
         {"distance", (PyCFunction)FVector3_distance, METH_O, 0},

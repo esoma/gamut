@@ -4,6 +4,7 @@ __all__ = ['generate_math_files']
 # gamut
 from .matrix import generate_matrix_files
 from .pod import generate_pod_files
+from .quaternion import generate_quaternion_files
 from .template import get_template
 from .vector import generate_vector_files
 # python
@@ -15,22 +16,48 @@ from typing import Sequence
 def generate_math_files(build_dir: Path, include_dir: Path) -> None:
     vector_types = list(generate_vector_files(build_dir))
     matrix_types = list(generate_matrix_files(build_dir))
+    quaternion_types = list(generate_quaternion_files(build_dir))
     pod_types = list(generate_pod_files(build_dir))
     generate_modulestate_file(
         build_dir,
-        vector_types + matrix_types,
+        vector_types + matrix_types + quaternion_types,
         pod_types
     )
-    generate_math_file(build_dir, vector_types, matrix_types, pod_types)
-    generate_api_file(include_dir, vector_types, matrix_types, pod_types)
-    generate_typestubs(build_dir, vector_types, matrix_types, pod_types)
-    generate_test_api_file(build_dir, vector_types, matrix_types, pod_types)
+    generate_math_file(
+        build_dir,
+        vector_types,
+        matrix_types,
+        quaternion_types,
+        pod_types
+    )
+    generate_api_file(
+        include_dir,
+        vector_types,
+        matrix_types,
+        quaternion_types,
+        pod_types
+    )
+    generate_typestubs(
+        build_dir,
+        vector_types,
+        matrix_types,
+        quaternion_types,
+        pod_types
+    )
+    generate_test_api_file(
+        build_dir,
+        vector_types,
+        matrix_types,
+        quaternion_types,
+        pod_types
+    )
 
 
 def generate_test_api_file(
     build_dir: Path,
     vector_types: Sequence[str],
     matrix_types: Sequence[str],
+    quaternion_types: Sequence[str],
     pod_types: Sequence[str],
 ) -> None:
     template = get_template('_test_api.c')
@@ -38,6 +65,7 @@ def generate_test_api_file(
         f.write(template.render(
             vector_types=vector_types,
             matrix_types=matrix_types,
+            quaternion_types=quaternion_types,
             pod_types=pod_types,
             when=datetime.utcnow()
         ))
@@ -61,6 +89,7 @@ def generate_math_file(
     build_dir: Path,
     vector_types: Sequence[str],
     matrix_types: Sequence[str],
+    quaternion_types: Sequence[str],
     pod_types: Sequence[str],
 ) -> None:
     template = get_template('_math.cpp')
@@ -68,6 +97,7 @@ def generate_math_file(
         f.write(template.render(
             vector_types=vector_types,
             matrix_types=matrix_types,
+            quaternion_types=quaternion_types,
             pod_types=pod_types,
             when=datetime.utcnow()
         ))
@@ -77,6 +107,7 @@ def generate_api_file(
     include_dir: Path,
     vector_types: Sequence[str],
     matrix_types: Sequence[str],
+    quaternion_types: Sequence[str],
     pod_types: Sequence[str],
 ) -> None:
     template = get_template('math.h')
@@ -84,6 +115,7 @@ def generate_api_file(
         f.write(template.render(
             vector_types=vector_types,
             matrix_types=matrix_types,
+            quaternion_types=quaternion_types,
             pod_types=pod_types,
             when=datetime.utcnow()
         ))
@@ -93,6 +125,7 @@ def generate_typestubs(
     build_dir: Path,
     vector_types: Sequence[str],
     matrix_types: Sequence[str],
+    quaternion_types: Sequence[str],
     pod_types: Sequence[str],
 ) -> None:
     template = get_template('_math.pyi')
@@ -100,6 +133,7 @@ def generate_typestubs(
         f.write(template.render(
             vector_types=vector_types,
             matrix_types=matrix_types,
+            quaternion_types=quaternion_types,
             pod_types=pod_types,
             when=datetime.utcnow()
         ))

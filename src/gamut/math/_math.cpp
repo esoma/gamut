@@ -1,5 +1,5 @@
 
-// generated 2022-03-12 21:23:21.905180 from codegen/math/templates/_math.cpp
+// generated 2022-03-13 03:41:58.942858 from codegen/math/templates/_math.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -122,6 +122,11 @@
     #include "_dmatrix4x4.hpp"
 
     #include "_fmatrix4x4.hpp"
+
+
+    #include "_dquaternion.hpp"
+
+    #include "_fquaternion.hpp"
 
 
     #include "_b.hpp"
@@ -1592,6 +1597,47 @@ PyInit__math()
         api->GamutMathFMatrix4x4_GetValuePointer = get_FMatrix4x4_value_ptr;
         api->GamutMathFMatrix4x4Array_GetValuePointer = get_FMatrix4x4Array_value_ptr;
         api->GamutMathFMatrix4x4Array_GetLength = get_FMatrix4x4Array_length;
+
+
+        {
+            PyTypeObject *type = define_DQuaternion_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->DQuaternion_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_DQuaternionArray_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->DQuaternionArray_PyTypeObject = type;
+        }
+        api->GamutMathDQuaternion_GetType = get_DQuaternion_type;
+        api->GamutMathDQuaternionArray_GetType = get_DQuaternionArray_type;
+        api->GamutMathDQuaternion_Create = create_DQuaternion;
+        api->GamutMathDQuaternionArray_Create = create_DQuaternionArray;
+        api->GamutMathDQuaternion_GetValuePointer = get_DQuaternion_value_ptr;
+        api->GamutMathDQuaternionArray_GetValuePointer = get_DQuaternionArray_value_ptr;
+        api->GamutMathDQuaternionArray_GetLength = get_DQuaternionArray_length;
+
+        {
+            PyTypeObject *type = define_FQuaternion_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->FQuaternion_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_FQuaternionArray_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->FQuaternionArray_PyTypeObject = type;
+        }
+        api->GamutMathFQuaternion_GetType = get_FQuaternion_type;
+        api->GamutMathFQuaternionArray_GetType = get_FQuaternionArray_type;
+        api->GamutMathFQuaternion_Create = create_FQuaternion;
+        api->GamutMathFQuaternionArray_Create = create_FQuaternionArray;
+        api->GamutMathFQuaternion_GetValuePointer = get_FQuaternion_value_ptr;
+        api->GamutMathFQuaternionArray_GetValuePointer = get_FQuaternionArray_value_ptr;
+        api->GamutMathFQuaternionArray_GetLength = get_FQuaternionArray_length;
 
 
         {

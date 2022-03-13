@@ -13,6 +13,9 @@
 {% for type in matrix_types %}
     #include "_{{ type.lower() }}.hpp"
 {% endfor %}
+{% for type in quaternion_types %}
+    #include "_{{ type.lower() }}.hpp"
+{% endfor %}
 {% for type in pod_types %}
     #include "_{{ type.lower() }}.hpp"
 {% endfor %}
@@ -149,6 +152,27 @@ PyInit__math()
         api->GamutMath{{ type }}Array_GetLength = get_{{ type }}Array_length;
     {% endfor %}
     {% for type in matrix_types %}
+        {
+            PyTypeObject *type = define_{{ type }}_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->{{ type }}_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_{{ type }}Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->{{ type }}Array_PyTypeObject = type;
+        }
+        api->GamutMath{{ type }}_GetType = get_{{ type }}_type;
+        api->GamutMath{{ type }}Array_GetType = get_{{ type }}Array_type;
+        api->GamutMath{{ type }}_Create = create_{{ type }};
+        api->GamutMath{{ type }}Array_Create = create_{{ type }}Array;
+        api->GamutMath{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
+        api->GamutMath{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
+        api->GamutMath{{ type }}Array_GetLength = get_{{ type }}Array_length;
+    {% endfor %}
+    {% for type in quaternion_types %}
         {
             PyTypeObject *type = define_{{ type }}_type(module);
             if (!type){ goto error; }
