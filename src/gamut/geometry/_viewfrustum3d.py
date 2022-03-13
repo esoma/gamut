@@ -52,7 +52,6 @@ class ViewFrustum3d:
     def from_view_projection_transform(self, transform: Matrix4) -> Plane:
         if not isinstance(transform, Matrix4):
             raise TypeError('transform must be Matrix4')
-        m = transform
         r = [transform.get_row(i) for i in range(4)]
         return ViewFrustum3d(
             # near
