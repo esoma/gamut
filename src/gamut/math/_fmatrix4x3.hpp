@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 14:05:23.322346 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-13 19:38:42.282772 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X3_HPP
 #define GAMUT_MATH_FMATRIX4X3_HPP
@@ -816,6 +816,8 @@ FMatrix4x3__matmul__(PyObject *left, PyObject *right)
 
 
 
+
+
         {
             auto row_cls = module_state->FVector4_PyTypeObject;
             auto column_cls = module_state->FVector3_PyTypeObject;
@@ -832,6 +834,8 @@ FMatrix4x3__matmul__(PyObject *left, PyObject *right)
     }
     else
     {
+
+
         auto row_cls = module_state->FVector4_PyTypeObject;
         auto column_cls = module_state->FVector3_PyTypeObject;
         if (Py_TYPE(left) == column_cls)
@@ -952,6 +956,34 @@ static PyGetSetDef FMatrix4x3_PyGetSetDef[] = {
 
 
 
+static FVector4 *
+FMatrix4x3_get_row(FMatrix4x3 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 1)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+        return 0;
+    }
+
+    auto index = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (index < 0 || index > 2)
+    {
+        PyErr_Format(PyExc_IndexError, "index out of range");
+        return 0;
+    }
+
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto row_cls = module_state->FVector4_PyTypeObject;
+
+    auto *result = (FVector4 *)row_cls->tp_alloc(row_cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FVector4Glm(glm::row(*self->glm, index));
+    return result;
+}
+
+
 
 static FMatrix3x4 *
 FMatrix4x3_transpose(FMatrix4x3 *self, void*)
@@ -998,6 +1030,7 @@ FMatrix4x3_get_limits(FMatrix4x3 *self, void *)
 static PyMethodDef FMatrix4x3_PyMethodDef[] = {
 
 
+    {"get_row", (PyCFunction)FMatrix4x3_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)FMatrix4x3_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)FMatrix4x3_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}

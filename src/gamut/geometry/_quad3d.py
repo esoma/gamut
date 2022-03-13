@@ -6,27 +6,19 @@ __all__ = ['Quad3d']
 # gamut
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact
-# pyglm
-from glm import mat4, vec3
+from gamut.math import Matrix4, Vector3, Vector3Array
 
 
 class Quad3d:
 
     def __init__(
         self,
-        point_0: F32Vector3,
-        point_1: F32Vector3,
-        point_2: F32Vector3,
-        point_3: F32Vector3
+        point_0: Vector3,
+        point_1: Vector3,
+        point_2: Vector3,
+        point_3: Vector3
     ):
-        try:
-            self._points = tuple(
-                vec3_exact(p)
-                for p in (point_0, point_1, point_2, point_3)
-            )
-        except TypeError:
-            raise TypeError('each point must be vec3')
+        self._points = Vector3Array(point_0, point_1, point_2, point_3)
 
     def __eq__(self, other: Quad3d) -> bool:
         if not isinstance(other, Quad3d):
@@ -46,15 +38,15 @@ class Quad3d:
             ')>'
         )
 
-    def __rmul__(self, transform: mat4) -> Quad3d:
-        if not isinstance(transform, mat4):
+    def __rmatmul__(self, transform: Matrix4) -> Quad3d:
+        if not isinstance(transform, Matrix4):
             return NotImplemented
 
-        return Quad3d(*(transform * p for p in self._points))
+        return Quad3d(*(transform @ p for p in self._points))
 
     @property
-    def points(self) -> tuple[vec3, vec3, vec3, vec3]:
-        return tuple(vec3(p) for p in self._points)
+    def points(self) -> Vector3Array:
+        return self._points
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:

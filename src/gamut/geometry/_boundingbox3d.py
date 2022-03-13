@@ -7,17 +7,16 @@ __all__ = ['BoundingBox3d']
 from ._sphere import Sphere
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
-from gamut.math import Matrix4, Vector3, Vector4
+from gamut.math import Matrix4, Vector3, Vector3Array
 
 
 class BoundingBox3d:
 
-    def __init__(self, *points: F32Vector3):
+    def __init__(self, points: Vector3Array):
+        if not isinstance(points, Vector3Array):
+            raise TypeError('points must be Vector3Array')
         if not points:
             raise ValueError('must have at least 1 point')
-
-        if not all(isinstance(p, Vector3) for p in points):
-            raise TypeError('each point must be Vector3')
 
         if len(points) > 1:
             self._min = Vector3(
@@ -45,14 +44,13 @@ class BoundingBox3d:
             f'max=({self._max.x}, {self._max.y}, {self._max.z})>'
         )
 
-    def __rmul__(self, transform: Matrix4) -> BoundingBox3d:
+    def __rmatmul__(self, transform: Matrix4) -> BoundingBox3d:
         if not isinstance(transform, Matrix4):
             return NotImplemented
 
-        return BoundingBox3d(*(
-            (transform @ Vector4(*c, 1)).xyz
-            for c in self.corners
-        ))
+        return BoundingBox3d(Vector3Array(*(
+            transform @ c for c in self.corners
+        )))
 
     def _squared_distance_to_point(self, point: Vector3) -> float:
         result = 0.0

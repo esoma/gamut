@@ -4,39 +4,31 @@ from __future__ import annotations
 __all__ = ['Mesh']
 
 # gamut
-from gamut.glmhelp import dvec3_exact, F64Vector3, I32Vector3, ivec3_exact
-# python
-from copy import deepcopy
-from typing import Iterable
-# pyglm
-from glm import array, dmat4, dvec3, ivec3, mat4
+from gamut.math import IVector3Array, Matrix4, Vector3Array
 
 
 class Mesh:
 
     def __init__(
         self,
-        vertices: Iterable[F64Vector3],
-        triangle_indices: Iterable[I32Vector3]
+        vertices: Vector3Array,
+        triangle_indices: IVector3Array
     ):
-        try:
-            self._vertices = array(*(dvec3_exact(v) for v in vertices))
-        except TypeError as ex:
-            if str(ex) == 'cannot create an empty array':
-                raise ValueError('must have at least 1 vertex')
-            raise TypeError('each vertex must be dvec3')
-        try:
-            self._triangle_indices = array(*(
-                ivec3_exact(t) for t in triangle_indices
-            ))
-        except TypeError as ex:
-            if str(ex) == 'cannot create an empty array':
-                raise ValueError('must have at least 1 triangle')
-            raise TypeError('each triangle must be ivec3')
+        if not isinstance(vertices, Vector3Array):
+            raise TypeError('vertices must be Vector3Array')
+        if not vertices:
+            raise ValueError('must have at least 1 vertex')
+        self._vertices = vertices
+
+        if not isinstance(triangle_indices, IVector3Array):
+            raise TypeError('indices must be IVector3Array')
+        if not triangle_indices:
+            raise ValueError('must have at least 1 triangle')
+        self._triangle_indices = triangle_indices
         for triangle in self._triangle_indices:
-            if (triangle.x < 0 or triangle.x >= len(self._vertices) or
-                triangle.y < 0 or triangle.y >= len(self._vertices) or
-                triangle.z < 0 or triangle.z >= len(self._vertices)):
+            if (triangle.x < 0 or triangle.x >= len(vertices) or
+                triangle.y < 0 or triangle.y >= len(vertices) or
+                triangle.z < 0 or triangle.z >= len(vertices)):
                 raise ValueError(
                     'triangle indices must be between 0 and the number of '
                     'vertices'
@@ -56,21 +48,19 @@ class Mesh:
     def __repr__(self) -> str:
         return f'<gamut.geometry.Mesh>'
 
-    def __rmul__(self, transform: mat4 | dmat4) -> Mesh:
-        if isinstance(transform, mat4):
-            transform = dmat4(transform)
-        elif not isinstance(transform, dmat4):
+    def __rmatmul__(self, transform: Matrix4) -> Mesh:
+        if not isinstance(transform, Matrix4):
             return NotImplemented
 
         return Mesh(
-            (transform * p for p in self._vertices),
+            Vector3Array(*(transform @ p for p in self._vertices)),
             self._triangle_indices
         )
 
     @property
-    def vertices(self) -> 'array[dvec3]':
-        return deepcopy(self._vertices)
+    def vertices(self) -> Vector3Array:
+        return self._vertices
 
     @property
-    def triangle_indices(self) -> 'array[ivec3]':
-        return deepcopy(self._triangle_indices)
+    def triangle_indices(self) -> IVector3Array:
+        return self._triangle_indices

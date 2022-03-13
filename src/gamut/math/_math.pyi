@@ -1,5 +1,5 @@
 
-# generated 2022-03-13 14:05:23.409346 from codegen/math/templates/_math.pyi
+# generated 2022-03-13 19:38:42.370272 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -21375,8 +21375,10 @@ class DMatrix2x2:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector2) -> DVector2: ...
+
 
     def __rmatmul__(self, other: DVector2) -> DVector2: ...
 
@@ -21407,6 +21409,8 @@ class DMatrix2x2:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector2: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -21532,8 +21536,10 @@ class FMatrix2x2:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector2) -> FVector2: ...
+
 
     def __rmatmul__(self, other: FVector2) -> FVector2: ...
 
@@ -21564,6 +21570,8 @@ class FMatrix2x2:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector2: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -21693,8 +21701,10 @@ class DMatrix2x3:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector2) -> DVector3: ...
+
 
     def __rmatmul__(self, other: DVector3) -> DVector2: ...
 
@@ -21713,6 +21723,8 @@ class DMatrix2x3:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector2: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -21842,8 +21854,10 @@ class FMatrix2x3:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector2) -> FVector3: ...
+
 
     def __rmatmul__(self, other: FVector3) -> FVector2: ...
 
@@ -21862,6 +21876,8 @@ class FMatrix2x3:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector2: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -21995,8 +22011,10 @@ class DMatrix2x4:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector2) -> DVector4: ...
+
 
     def __rmatmul__(self, other: DVector4) -> DVector2: ...
 
@@ -22015,6 +22033,8 @@ class DMatrix2x4:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector2: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -22148,8 +22168,10 @@ class FMatrix2x4:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector2) -> FVector4: ...
+
 
     def __rmatmul__(self, other: FVector4) -> FVector2: ...
 
@@ -22168,6 +22190,8 @@ class FMatrix2x4:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector2: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -22299,8 +22323,10 @@ class DMatrix3x2:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector3) -> DVector2: ...
+
 
     def __rmatmul__(self, other: DVector2) -> DVector3: ...
 
@@ -22319,6 +22345,8 @@ class DMatrix3x2:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector3: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -22450,8 +22478,10 @@ class FMatrix3x2:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector3) -> FVector2: ...
+
 
     def __rmatmul__(self, other: FVector2) -> FVector3: ...
 
@@ -22470,6 +22500,8 @@ class FMatrix3x2:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector3: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -22607,8 +22639,10 @@ class DMatrix3x3:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector3) -> DVector3: ...
+
 
     def __rmatmul__(self, other: DVector3) -> DVector3: ...
 
@@ -22639,6 +22673,8 @@ class DMatrix3x3:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector3: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -22776,8 +22812,10 @@ class FMatrix3x3:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector3) -> FVector3: ...
+
 
     def __rmatmul__(self, other: FVector3) -> FVector3: ...
 
@@ -22808,6 +22846,8 @@ class FMatrix3x3:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector3: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -22951,8 +22991,10 @@ class DMatrix3x4:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector3) -> DVector4: ...
+
 
     def __rmatmul__(self, other: DVector4) -> DVector3: ...
 
@@ -22971,6 +23013,8 @@ class DMatrix3x4:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector3: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -23114,8 +23158,10 @@ class FMatrix3x4:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector3) -> FVector4: ...
+
 
     def __rmatmul__(self, other: FVector4) -> FVector3: ...
 
@@ -23134,6 +23180,8 @@ class FMatrix3x4:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector3: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -23271,8 +23319,10 @@ class DMatrix4x2:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector4) -> DVector2: ...
+
 
     def __rmatmul__(self, other: DVector2) -> DVector4: ...
 
@@ -23291,6 +23341,8 @@ class DMatrix4x2:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector4: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -23428,8 +23480,10 @@ class FMatrix4x2:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector4) -> FVector2: ...
+
 
     def __rmatmul__(self, other: FVector2) -> FVector4: ...
 
@@ -23448,6 +23502,8 @@ class FMatrix4x2:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector4: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -23593,8 +23649,10 @@ class DMatrix4x3:
 
 
 
+
     @overload
     def __matmul__(self, other: DVector4) -> DVector3: ...
+
 
     def __rmatmul__(self, other: DVector3) -> DVector4: ...
 
@@ -23613,6 +23671,8 @@ class DMatrix4x3:
 
 
 
+
+    def get_row(self, index: int, /) -> DVector4: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -23758,8 +23818,10 @@ class FMatrix4x3:
 
 
 
+
     @overload
     def __matmul__(self, other: FVector4) -> FVector3: ...
+
 
     def __rmatmul__(self, other: FVector3) -> FVector4: ...
 
@@ -23778,6 +23840,8 @@ class FMatrix4x3:
 
 
 
+
+    def get_row(self, index: int, /) -> FVector4: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -23931,8 +23995,17 @@ class DMatrix4x4:
 
 
 
+
+    @overload
+    def __matmul__(self, other: DVector3) -> DVector3: ...
+
     @overload
     def __matmul__(self, other: DVector4) -> DVector4: ...
+
+
+    @overload
+    def __rmatmul__(self, other: DVector3) -> DVector3: ...
+    @overload
 
     def __rmatmul__(self, other: DVector4) -> DVector4: ...
 
@@ -23966,7 +24039,11 @@ class DMatrix4x4:
     def rotate(self, angle: float, axis: DVector3, /) -> DMatrix4x4: ...
     def scale(self, scaling: DVector3, /) -> DMatrix4x4: ...
     def translate(self, translation: DVector3, /) -> DMatrix4x4: ...
+    @classmethod
+    def perspective(cls, fov: float, aspect_ratio: float, near: float, far: float, /) -> DMatrix4x4: ...
 
+
+    def get_row(self, index: int, /) -> DVector4: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
@@ -24120,8 +24197,17 @@ class FMatrix4x4:
 
 
 
+
+    @overload
+    def __matmul__(self, other: FVector3) -> FVector3: ...
+
     @overload
     def __matmul__(self, other: FVector4) -> FVector4: ...
+
+
+    @overload
+    def __rmatmul__(self, other: FVector3) -> FVector3: ...
+    @overload
 
     def __rmatmul__(self, other: FVector4) -> FVector4: ...
 
@@ -24155,7 +24241,11 @@ class FMatrix4x4:
     def rotate(self, angle: float, axis: FVector3, /) -> FMatrix4x4: ...
     def scale(self, scaling: FVector3, /) -> FMatrix4x4: ...
     def translate(self, translation: FVector3, /) -> FMatrix4x4: ...
+    @classmethod
+    def perspective(cls, fov: float, aspect_ratio: float, near: float, far: float, /) -> FMatrix4x4: ...
 
+
+    def get_row(self, index: int, /) -> FVector4: ...
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...

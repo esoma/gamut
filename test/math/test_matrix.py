@@ -25,11 +25,17 @@ from gamut.math import (DMatrix2, DMatrix2Array, DMatrix2x2, DMatrix2x2Array,
                         Matrix4x4Array)
 # python
 import ctypes
-from math import inf, isclose, isnan, radians
+from math import inf
+from math import isclose as _isclose
+from math import isnan, radians
 import struct
 from weakref import ref
 # pytest
 import pytest
+
+
+def isclose(a, b):
+    return _isclose(a, b, rel_tol=1e-06)
 
 
 def test_alias():
@@ -612,6 +618,20 @@ class MatrixTest:
             for r in range(self.row_size)
         ))
 
+        if self.row_size == 4 and self.column_size == 4:
+            vec3_class = globals()[f'{self.cls.__name__[0]}Vector3']
+            mat = self.cls(*range(self.component_count))
+            vec = vec3_class(*range(3))
+            assert mat @ vec == vec3_class(*[
+                sum(c * mat[i][r] for i, c in enumerate((*vec, 1)))
+                for r in range(self.column_size)
+            ][:3])
+            vec = vec3_class(*range(3))
+            assert vec @ mat == vec3_class(*[
+                sum(c * mat[r][i] for i, c in enumerate((*vec, 1)))
+                for r in range(self.row_size)
+            ][:3])
+
         matrix = self.cls()
         with pytest.raises(TypeError):
             matrix @ 1
@@ -799,7 +819,7 @@ class MatrixTest:
         assert self.cls(1).rotate(0, axis_cls(1, 0, 0)) == self.cls(1)
         result = self.cls(1).rotate(radians(90), axis_cls(1, 0, 0))
         if self.cls.__name__[0] == 'F':
-            assert all(isclose(r, e, rel_tol=1e-06) for r, e in zip(
+            assert all(isclose(r, e) for r, e in zip(
                 (v for c in result for v in c), [
                 1, 0, 0, 0,
                 0, -4.37114e-08, 1, 0,
@@ -807,7 +827,7 @@ class MatrixTest:
                 0, 0, 0, 1,
             ]))
         else:
-            assert all(isclose(r, e, rel_tol=1e-06) for r, e in zip(
+            assert all(isclose(r, e) for r, e in zip(
                 (v for c in result for v in c), [
                 1, 0, 0, 0,
                 0, 6.12323e-17, 1, 0,
@@ -881,6 +901,67 @@ class MatrixTest:
         ):
             array.pointer[i] == self.type(i)
 
+    def test_get_row(self) -> None:
+        matrix = self.cls(*range(self.component_count))
+        for i in range(self.column_size):
+            row = matrix.get_row(i)
+            assert isinstance(row, self.row_cls)
+            assert row == self.row_cls(*(
+                matrix[r][i]
+                for r in range(self.row_size)
+            ))
+
+        with pytest.raises(IndexError):
+            matrix.get_row(-1)
+        with pytest.raises(IndexError):
+            matrix.get_row(self.column_size)
+        with pytest.raises(TypeError):
+            matrix.get_row(None)
+
+
+    def test_perspective(self) -> None:
+        if self.type != float or self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls.perspective
+            return
+
+        with pytest.raises(TypeError):
+            self.cls.perspective()
+        with pytest.raises(TypeError):
+            self.cls.perspective(1)
+        with pytest.raises(TypeError):
+            self.cls.perspective(1, 2)
+        with pytest.raises(TypeError):
+            self.cls.perspective(1, 2, 3)
+        with pytest.raises(TypeError):
+            self.cls.perspective(1, 2, 3, 4, 5)
+        with pytest.raises(TypeError):
+            self.cls.perspective(None, 2, 3, 4)
+        with pytest.raises(TypeError):
+            self.cls.perspective(1, None, 3, 4)
+        with pytest.raises(TypeError):
+            self.cls.perspective(1, 2, None, 4)
+        with pytest.raises(TypeError):
+            self.cls.perspective(1, 2, 3, None)
+
+        perspective = self.cls.perspective(0.78, .5, .1, 100)
+        assert isinstance(perspective, self.cls)
+        assert isclose(perspective[0][0], 4.865530014038086)
+        assert isclose(perspective[0][1], 0)
+        assert isclose(perspective[0][2], 0)
+        assert isclose(perspective[0][3], 0)
+        assert isclose(perspective[1][0], 0)
+        assert isclose(perspective[1][1], 2.432765007019043)
+        assert isclose(perspective[1][2], 0)
+        assert isclose(perspective[1][3], 0)
+        assert isclose(perspective[2][0], 0)
+        assert isclose(perspective[2][1], 0)
+        assert isclose(perspective[2][2], -1.0020020008087158)
+        assert isclose(perspective[2][3], -1)
+        assert isclose(perspective[3][0], 0)
+        assert isclose(perspective[3][1], 0)
+        assert isclose(perspective[3][2], -0.20020020008087158)
+        assert isclose(perspective[3][3], 0)
 
 
 class TestFMatrix2x2(

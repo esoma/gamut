@@ -16,8 +16,9 @@ from datetime import timedelta
 import random
 from typing import Any
 # pyglm
-from glm import (array, cos, cross, inverse, lookAt, mat3, mat4, normalize,
-                 perspective, radians, scale, sin, transpose, uint8, vec3)
+from glm import (array, cos, cross, dvec3, inverse, lookAt, mat3, mat4,
+                 normalize, perspective, radians, scale, sin, transpose, uint8,
+                 vec3)
 
 
 class Draw(TimerExpired):
@@ -81,11 +82,11 @@ class App(Application):
             uint8
         )
 
-        cube = RectangularCuboid(vec3(0), vec3(1))
+        cube = RectangularCuboid(Vector3(0), Vector3(1))
         cube_positions, cube_normals, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
-            "pos": BufferView(Buffer(cube_positions.to_bytes()), vec3),
-            "norm": BufferView(Buffer(cube_normals.to_bytes()), vec3),
+            "pos": BufferView(Buffer(cube_positions), dvec3),
+            "norm": BufferView(Buffer(cube_normals), dvec3),
         })
         self.cube_index_buffer_view = BufferView(Buffer(cube_indices), uint8)
 
@@ -93,7 +94,7 @@ class App(Application):
         self.world.gravity = Vector3(0, -9.8, 0)
         plane = Body(
             1,
-            Plane(0, vec3(0, 1, 0)),
+            Plane(0, Vector3(0, 1, 0)),
             world=self.world,
             type=BodyType.STATIC
         )

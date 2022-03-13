@@ -6,18 +6,15 @@ __all__ = ['Sphere']
 # gamut
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact
-# pyglm
-from glm import length, mat4, vec3
+from gamut.math import Matrix4, Vector3
 
 
 class Sphere:
 
-    def __init__(self, center: F32Vector3, radius: float):
-        try:
-            self._center = vec3_exact(center)
-        except TypeError:
-            raise TypeError('center must be vec3')
+    def __init__(self, center: Vector3, radius: float):
+        if not isinstance(center, Vector3):
+            raise TypeError('center must be Vector3')
+        self._center = center
 
         try:
             self._radius = abs(float(radius))
@@ -42,35 +39,33 @@ class Sphere:
             f'radius={self._radius}>'
         )
 
-    def __rmul__(self, transform: mat4) -> Sphere:
-        if not isinstance(transform, mat4):
+    def __rmatmul__(self, transform: Matrix4) -> Sphere:
+        if not isinstance(transform, Matrix4):
             return NotImplemented
 
-        max_scale = max(vec3(*(length(c.xyz) for c in (
+        max_scale = max(Vector3(*(c.xyz.magnitude for c in (
             transform[0],
             transform[1],
             transform[2],
         ))))
         return Sphere(
-            transform * self._center,
+            transform @ self._center,
             self._radius * max_scale,
         )
 
     @property
-    def center(self) -> vec3:
-        return vec3(self._center)
+    def center(self) -> Vector3:
+        return self._center
 
     @property
     def radius(self) -> float:
         return self._radius
 
-    def contains_point(self, point: F32Vector3) -> bool:
-        try:
-            p = vec3_exact(point)
-        except TypeError:
-            raise TypeError('point must be vec3')
+    def contains_point(self, point: Vector3) -> bool:
+        if not isinstance(point, Vector3):
+            raise TypeError('point must be Vector3')
 
-        return length(self._center - p) <= self._radius
+        return (self._center - point).magnitude <= self._radius
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:

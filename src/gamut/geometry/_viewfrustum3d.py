@@ -6,9 +6,7 @@ __all__ = ['ViewFrustum3d']
 # gamut
 from ._plane import Plane
 # gamut
-from gamut.glmhelp import mat4_exact
-# pyglm
-from glm import row
+from gamut.math import Matrix4
 
 
 class ViewFrustum3d:
@@ -51,42 +49,41 @@ class ViewFrustum3d:
         )
 
     @classmethod
-    def from_view_projection_transform(self, transform: F32Matrix4x4) -> Plane:
-        try:
-            m = mat4_exact(transform)
-        except TypeError:
-            raise TypeError('transform must be mat4')
-
+    def from_view_projection_transform(self, transform: Matrix4) -> Plane:
+        if not isinstance(transform, Matrix4):
+            raise TypeError('transform must be Matrix4')
+        m = transform
+        r = [transform.get_row(i) for i in range(4)]
         return ViewFrustum3d(
             # near
             Plane(
-                row(m, 3).w + row(m, 2).w,
-                row(m, 3).xyz + row(m, 2).xyz,
+                r[3].w + r[2].w,
+                r[3].xyz + r[2].xyz,
             ),
             # far
             Plane(
-                row(m, 3).w - row(m, 2).w,
-                row(m, 3).xyz - row(m, 2).xyz,
+                r[3].w - r[2].w,
+                r[3].xyz - r[2].xyz,
             ),
             # left
             Plane(
-                row(m, 3).w + row(m, 0).w,
-                row(m, 3).xyz + row(m, 0).xyz,
+                r[3].w + r[0].w,
+                r[3].xyz + r[0].xyz,
             ),
             # right
             Plane(
-                row(m, 3).w - row(m, 0).w,
-                row(m, 3).xyz - row(m, 0).xyz,
+                r[3].w - r[0].w,
+                r[3].xyz - r[0].xyz,
             ),
             # bottom
             Plane(
-                row(m, 3).w + row(m, 1).w,
-                row(m, 3).xyz + row(m, 1).xyz,
+                r[3].w + r[1].w,
+                r[3].xyz + r[1].xyz,
             ),
             # top
             Plane(
-                row(m, 3).w - row(m, 1).w,
-                row(m, 3).xyz - row(m, 1).xyz,
+                r[3].w - r[1].w,
+                r[3].xyz - r[1].xyz,
             ),
         )
 
@@ -106,8 +103,11 @@ class ViewFrustum3d:
             f'top_plane={self._top_plane}>'
         )
 
-    def __rmul__(self, transform: mat4) -> Plane:
-        return ViewFrustum3d(*(transform * p for p in self._planes))
+    def __rmatmul__(self, transform: Matrix4) -> Plane:
+        if not isinstance(transform, Matrix4):
+            return NotImplemented
+
+        return ViewFrustum3d(*(transform @ p for p in self._planes))
 
     @property
     def near_plane(self) -> Plane:
