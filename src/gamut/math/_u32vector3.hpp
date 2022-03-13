@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 03:41:58.819358 from codegen/math/templates/_vector.hpp
+// generated 2022-03-13 14:05:23.254346 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U32VECTOR3_HPP
 #define GAMUT_MATH_U32VECTOR3_HPP

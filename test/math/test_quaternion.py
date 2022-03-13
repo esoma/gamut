@@ -1,11 +1,11 @@
 
 # gamut
-from gamut.math import (DQuaternion, DQuaternionArray, DVector3, DVector4,
+from gamut.math import (DMatrix3x3, DMatrix4x4, DQuaternion, DQuaternionArray,
+                        DVector3, DVector4, FMatrix3x3, FMatrix4x4,
                         FQuaternion, FQuaternionArray, FVector3, FVector4,
                         Quaternion, QuaternionArray)
 # python
 import ctypes
-import itertools
 from math import inf
 from math import isclose as _isclose
 from math import isnan, radians, sqrt
@@ -25,7 +25,7 @@ def test_alias():
     assert QuaternionArray is DQuaternionArray
 
 
-class VectorTest:
+class QuaternionTest:
 
     POSITION_ATTRIBUTES: Final = ('x', 'y', 'z', 'w')
     COLOR_ATTRIBUTES: Final = ('r', 'g', 'b', 'a')
@@ -478,259 +478,68 @@ class VectorTest:
         with pytest.raises(TypeError):
             object() @ quat
 
-    '''
     def test_divide(self) -> None:
-        if self.type == bool:
-            with pytest.raises(TypeError):
-                self.cls() / self.cls()
-            return
+        assert self.cls(-1) / -1 == self.cls(1)
+        assert self.cls(1) / 1 == self.cls(1)
+        zero_div = self.cls(1) / 0
+        assert zero_div.w == inf
+        assert isnan(zero_div.x)
+        assert isnan(zero_div.y)
+        assert isnan(zero_div.z)
 
-        if not self.unsigned:
-            assert self.cls(-1) / self.cls(-2) == self.cls(self.type(.5))
-            assert self.cls(-1) / -2 == self.cls(self.type(.5))
-            assert -1 / self.cls(-2) == self.cls(self.type(.5))
-            assert self.cls(1) / self.cls(-2) == self.cls(self.type(-.5))
-            assert self.cls(1) / -2 == self.cls(self.type(-.5))
-            assert 1 / self.cls(-2) == self.cls(self.type(-.5))
+        quat = self.cls(*range(4))
+        assert quat / 2 == self.cls(*(i / 2 for i in range(4)))
 
-        assert self.cls(1) / self.cls(2) == self.cls(self.type(.5))
-        assert self.cls(1) / 2 == self.cls(self.type(.5))
-        assert 1 / self.cls(2) == self.cls(self.type(.5))
-
-        if self.type == float:
-            assert self.cls(1) / 0 == self.cls(inf)
-            assert 1 / self.cls(0) == self.cls(inf)
-            assert self.cls(1) / self.cls(0) == self.cls(inf)
-        else:
-            with pytest.raises(ZeroDivisionError):
-                assert self.cls(1) / 0
-            with pytest.raises(ZeroDivisionError):
-                assert 1 / self.cls(0)
-            with pytest.raises(ZeroDivisionError):
-                assert self.cls(1) / self.cls(0)
-
-        vector = self.cls(*range(1, self.component_count + 1))
-        assert vector / vector == self.cls(*(
-            self.type(i / i) for i in range(1, self.component_count + 1)
-        ))
-        assert vector / 2 == self.cls(*(
-            self.type(i / 2) for i in range(1, self.component_count + 1)
-        ))
-        assert 2 / vector == self.cls(*(
-            self.type(2 / i) for i in range(1, self.component_count + 1)
-        ))
-
-        i_vec = vector
-        i_vec /= vector
-        assert i_vec is not vector
-        assert vector == self.cls(*range(1, self.component_count + 1))
-        assert i_vec == self.cls(*(
-            self.type(i / i) for i in range(1, self.component_count + 1)
-        ))
-
-        i_vec = vector
-        i_vec /= 2
-        assert i_vec is not vector
-        assert vector == self.cls(*range(1, self.component_count + 1))
-        assert i_vec == self.cls(*(
-            self.type(i / 2) for i in range(1, self.component_count + 1)
-        ))
+        i_quat = quat
+        i_quat /= 2
+        assert i_quat is not quat
+        assert quat == self.cls(*range(4))
+        assert i_quat == self.cls(*(i / 2 for i in range(4)))
 
         with pytest.raises(TypeError):
-            vector / None
+            quat / quat
         with pytest.raises(TypeError):
-            None / vector
+            quat - None
         with pytest.raises(TypeError):
-            vector / '123'
+            None - quat
         with pytest.raises(TypeError):
-            '123' / vector
+            quat - '123'
         with pytest.raises(TypeError):
-            vector / object()
+            '123' - quat
         with pytest.raises(TypeError):
-            object() / vector
-
-
-    def test_modulus(self) -> None:
-        if self.type != float:
-            with pytest.raises(TypeError):
-                self.cls() % self.cls()
-            return
-
-        assert self.cls(-3) % self.cls(-2) == self.cls(-1)
-        assert self.cls(-3) % -2 == self.cls(-1)
-        assert -3 % self.cls(-2) == self.cls(-1)
-        assert self.cls(3) % self.cls(-2) == self.cls(-1)
-        assert self.cls(3) % -2 == self.cls(-1)
-        assert 3 % self.cls(-2) == self.cls(-1)
-        assert self.cls(3) % self.cls(2) == self.cls(1)
-        assert self.cls(3) % 2 == self.cls(1)
-        assert 3 % self.cls(2) == self.cls(1)
-
-        assert all(isnan(c) for c in self.cls(1) % 0)
-        assert all(isnan(c) for c in self.cls(1) % self.cls(0))
-
-        vector = self.cls(*range(1, self.component_count + 1))
-        assert vector % vector == self.cls(*(
-            i % i for i in range(1, self.component_count + 1)
-        ))
-        assert vector % 2 == self.cls(*(
-            i % 2 for i in range(1, self.component_count + 1)
-        ))
-        assert 2 % vector == self.cls(*(
-            2 % i for i in range(1, self.component_count + 1)
-        ))
-
-        i_vec = vector
-        i_vec %= vector
-        assert i_vec is not vector
-        assert vector == self.cls(*range(1, self.component_count + 1))
-        assert i_vec == self.cls(*(
-            i % i for i in range(1, self.component_count + 1)
-        ))
-
-        i_vec = vector
-        i_vec %= 2
-        assert i_vec is not vector
-        assert vector == self.cls(*range(1, self.component_count + 1))
-        assert i_vec == self.cls(*(
-            i % 2 for i in range(1, self.component_count + 1)
-        ))
-
+            quat - object()
         with pytest.raises(TypeError):
-            vector % None
-        with pytest.raises(TypeError):
-            None % vector
-        with pytest.raises(TypeError):
-            vector % '123'
-        with pytest.raises(TypeError):
-            '123' % vector
-        with pytest.raises(TypeError):
-            vector % object()
-        with pytest.raises(TypeError):
-            object() % vector
-
-
-    def test_power(self) -> None:
-        if self.type != float:
-            with pytest.raises(TypeError):
-                self.cls() ** self.cls()
-            return
-
-        assert self.cls(-3) ** self.cls(-2) == self.cls(3 ** -2)
-        assert self.cls(-3) ** -2 == self.cls(3 ** -2)
-        assert (-3) ** self.cls(-2) == self.cls(3 ** -2)
-        assert self.cls(3) ** self.cls(-2) == self.cls(3 ** -2)
-        assert self.cls(3) ** -2 == self.cls(3 ** -2)
-        assert 3 ** self.cls(-2) == self.cls(3 ** -2)
-        assert self.cls(3) ** self.cls(2) == self.cls(9)
-        assert self.cls(3) ** 2 == self.cls(9)
-        assert 3 ** self.cls(2) == self.cls(9)
-
-        assert self.cls(5) ** 0 == self.cls(1)
-        assert 5 ** self.cls(0) == self.cls(1)
-        assert self.cls(5) ** self.cls(0) == self.cls(1)
-
-        vector = self.cls(*range(1, self.component_count + 1))
-        assert vector ** vector == self.cls(*(
-            i ** i for i in range(1, self.component_count + 1)
-        ))
-        assert vector ** 2 == self.cls(*(
-            i ** 2 for i in range(1, self.component_count + 1)
-        ))
-        assert 2 ** vector == self.cls(*(
-            2 ** i for i in range(1, self.component_count + 1)
-        ))
-
-        i_vec = vector
-        i_vec **= vector
-        assert i_vec is not vector
-        assert vector == self.cls(*range(1, self.component_count + 1))
-        assert i_vec == self.cls(*(
-            i ** i for i in range(1, self.component_count + 1)
-        ))
-
-        i_vec = vector
-        i_vec **= 2
-        assert i_vec is not vector
-        assert vector == self.cls(*range(1, self.component_count + 1))
-        assert i_vec == self.cls(*(
-            i ** 2 for i in range(1, self.component_count + 1)
-        ))
-
-        with pytest.raises(TypeError):
-            vector ** None
-        with pytest.raises(TypeError):
-            vector ** '123'
-        with pytest.raises(TypeError):
-            vector ** object()
-        with pytest.raises(TypeError):
-            None ** vector
-        with pytest.raises(TypeError):
-            '123' ** vector
-        with pytest.raises(TypeError):
-            object() ** vector
+            object() - quat
 
     def test_negative(self) -> None:
-        if self.unsigned:
-            with pytest.raises(TypeError):
-                -self.cls(0)
-            return
-
         assert -self.cls(0) == self.cls(-0)
         assert -self.cls(1) == self.cls(-1)
         assert -self.cls(-1) == self.cls(1)
 
-        vector = self.cls(*range(self.component_count))
-        assert -vector == self.cls(*(
-            -i for i in range(self.component_count)
-        ))
-
-    def test_abs(self) -> None:
-        assert abs(self.cls(0)) == self.cls(0)
-        assert abs(self.cls(1)) == self.cls(1)
-        if not self.unsigned:
-            assert abs(self.cls(-1)) == self.cls(1)
-
-        vector = self.cls(*range(self.component_count))
-        assert abs(vector) == self.cls(*(range(self.component_count)))
-        if not self.unsigned:
-            assert abs(-vector) == self.cls(*(range(self.component_count)))
+        quat = self.cls(*range(4))
+        assert -quat == self.cls(*(-i for i in range(4)))
 
     def test_bool(self) -> None:
         assert self.cls(1)
-        if not self.unsigned:
-            assert self.cls(-1)
-        assert not self.cls(0)
-
-        for i in range(self.component_count):
-            components = [1] * self.component_count
-            components[i] = 0
-            assert not self.cls(*components)
+        assert self.cls(-1)
+        assert self.cls(0)
 
     def test_array_bool(self) -> None:
         assert not self.array_cls()
         assert self.array_cls(self.cls())
 
     def test_buffer(self) -> None:
-        assert bytes(self.cls(*range(self.component_count))) == struct.pack(
-            self.struct_byte_order + (
-                self.struct_format * self.component_count
-            ),
-            *range(self.component_count)
+        assert bytes(self.cls(*range(4))) == struct.pack(
+            self.struct_format * 4,
+            *range(4)
         )
         memory_view = memoryview(self.cls(0))
         assert memory_view.readonly
-        assert memory_view.format == (
-            self.struct_byte_order + self.struct_format
-        )
-        assert memory_view.itemsize == struct.calcsize(
-            self.struct_byte_order + self.struct_format
-        )
+        assert memory_view.format == self.struct_format
+        assert memory_view.itemsize == struct.calcsize(self.struct_format)
         assert memory_view.ndim == 1
-        assert memory_view.shape == (self.component_count,)
-        assert memory_view.strides == (struct.calcsize(
-            self.struct_byte_order + self.struct_format
-        ),)
+        assert memory_view.shape == (4,)
+        assert memory_view.strides == (struct.calcsize(self.struct_format),)
         assert memory_view.suboffsets == tuple()
         assert memory_view.c_contiguous
         assert memory_view.f_contiguous
@@ -740,32 +549,25 @@ class VectorTest:
         assert bytes(self.array_cls()) == b''
 
         array = self.array_cls(
-            self.cls(1),
-            self.cls(*range(self.component_count)),
+            self.cls(1, 1, 1, 1),
+            self.cls(*range(4)),
             self.cls(0),
         )
         assert bytes(array) == struct.pack(
-            self.struct_byte_order + (
-                self.struct_format * 3 * self.component_count
-            ),
-            *(1 for _ in range(self.component_count)),
-            *range(self.component_count),
-            *(0 for _ in range(self.component_count)),
+            self.struct_format * 3 * 4,
+            *(1 for _ in range(4)),
+            *range(4),
+            *(0 for _ in range(4)),
         )
         memory_view = memoryview(array)
         assert memory_view.readonly
-        assert memory_view.format == (
-            self.struct_byte_order + self.struct_format
-        )
-        assert memory_view.itemsize == struct.calcsize(
-            self.struct_byte_order + self.struct_format
-        )
+        assert memory_view.format == self.struct_format
+        assert memory_view.itemsize == struct.calcsize(self.struct_format)
         assert memory_view.ndim == 2
-        assert memory_view.shape == (3, self.component_count)
+        assert memory_view.shape == (3, 4)
         assert memory_view.strides == (
-            struct.calcsize(self.struct_byte_order + self.struct_format) *
-            self.component_count,
-            struct.calcsize(self.struct_byte_order + self.struct_format),
+            struct.calcsize(self.struct_format) * 4,
+            struct.calcsize(self.struct_format),
         )
         assert memory_view.suboffsets == tuple()
         assert memory_view.c_contiguous
@@ -773,17 +575,13 @@ class VectorTest:
         assert memory_view.contiguous
 
     def test_cross(self) -> None:
-        if self.component_count != 3 or self.type != float:
-            with pytest.raises(AttributeError):
-                self.cls().cross(self.cls())
-            return
-
-        assert self.cls(1).cross(self.cls(1)) == self.cls(0)
-        assert self.cls(0).cross(self.cls(1)) == self.cls(0)
-        assert self.cls(1).cross(self.cls(0)) == self.cls(0)
-        assert self.cls(1).cross(self.cls(-1)) == self.cls(0)
-        assert self.cls(1, 2, 3).cross(self.cls(4, 5, 6)) == (
-            self.cls(-3, 6, -3)
+        vector3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        result = self.cls(1, 2, 3, 4).cross(self.cls(5, 6, 7, 8))
+        assert result == self.cls(
+            1 * 5 - (vector3_cls(2, 3, 4) @ vector3_cls(6, 7, 8)),
+            *(1 * vector3_cls(6, 7, 8) + 5 * vector3_cls(2, 3, 4) + (
+                vector3_cls(2, 3, 4).cross(vector3_cls(6, 7, 8))
+            ))
         )
 
         with pytest.raises(TypeError) as excinfo:
@@ -794,142 +592,133 @@ class VectorTest:
         assert str(excinfo.value) == f'{1!r} is not {self.cls.__name__}'
 
     def test_magnitude(self) -> None:
-        if self.type != float:
-            with pytest.raises(AttributeError):
-                self.cls().magnitude
-            return
-
         assert isclose(
-            self.cls(-1).magnitude,
-            sqrt(sum(1 ** 2 for _ in range(self.component_count)))
+            self.cls(-1, -1, -1, -1).magnitude,
+            sqrt(sum(1 ** 2 for _ in range(4)))
         )
         assert isclose(
-            self.cls(1).magnitude,
-            sqrt(sum(1 ** 2 for _ in range(self.component_count)))
+            self.cls(1, 1, 1, 1).magnitude,
+            sqrt(sum(1 ** 2 for _ in range(4)))
         )
         assert isclose(
-            self.cls(-2).magnitude,
-            sqrt(sum(2 ** 2 for _ in range(self.component_count)))
+            self.cls(-2, -2, -2, -2).magnitude,
+            sqrt(sum(2 ** 2 for _ in range(4)))
         )
         assert isclose(
-            self.cls(2).magnitude,
-            sqrt(sum(2 ** 2 for _ in range(self.component_count)))
+            self.cls(2, 2, 2, 2).magnitude,
+            sqrt(sum(2 ** 2 for _ in range(4)))
         )
         assert isclose(
-            self.cls(*range(self.component_count)).magnitude,
-            sqrt(sum(i ** 2 for i in range(self.component_count)))
+            self.cls(*range(4)).magnitude,
+            sqrt(sum(i ** 2 for i in range(4)))
         )
 
         with pytest.raises(AttributeError):
             self.cls().magnitude = 1
 
     def test_normalize(self) -> None:
-        if self.type != float:
-            with pytest.raises(AttributeError):
-                self.cls().normalize()
-            return
+        assert self.cls(0).normalize() == self.cls(1)
 
-        assert all(isnan(c) for c in self.cls(0).normalize())
+        quat = self.cls(1)
+        assert quat.normalize() == quat / quat.magnitude
+        quat = self.cls(-1)
+        assert quat.normalize() == quat / quat.magnitude
 
-        vector = self.cls(1)
-        assert vector.normalize() == vector / vector.magnitude
-        vector = self.cls(-1)
-        assert vector.normalize() == vector / vector.magnitude
-
-        vector = self.cls(*range(self.component_count))
-        assert vector.normalize() == vector / vector.magnitude
-
-
-    def test_distance(self) -> None:
-        if self.type != float:
-            with pytest.raises(AttributeError):
-                self.cls().distance(self.cls())
-            return
-
-        assert self.cls(-1).distance(self.cls(-1)) == 0
-        assert self.cls(0).distance(self.cls(0)) == 0
-        assert self.cls(1).distance(self.cls(1)) == 0
-
-        assert isclose(
-            self.cls(0).distance(self.cls(1)),
-            sqrt(sum((0 - 1) ** 2 for _ in range(self.component_count)))
-        )
-
-        vector_a = self.cls(*range(self.component_count))
-        vector_b = self.cls(*(-i for i in range(self.component_count)))
-        assert isclose(
-            vector_a.distance(vector_b),
-            sqrt(sum((a - b) ** 2 for a, b in zip(vector_a, vector_b)))
-        )
-
-        with pytest.raises(TypeError) as excinfo:
-            self.cls(0).distance(None)
-        assert str(excinfo.value) == f'{None!r} is not {self.cls.__name__}'
-        with pytest.raises(TypeError) as excinfo:
-            self.cls(0).distance(1)
-        assert str(excinfo.value) == f'{1!r} is not {self.cls.__name__}'
+        quat = self.cls(*range(4))
+        assert quat.normalize() == quat / quat.magnitude
 
     def test_pointer(self) -> None:
         real_type = {
-            '?': ctypes.c_bool,
             'd': ctypes.c_double,
             'f': ctypes.c_float,
-            '=b': ctypes.c_int8,
-            '=B': ctypes.c_uint8,
-            '=h': ctypes.c_int16,
-            '=H': ctypes.c_uint16,
-            '=i': ctypes.c_int32,
-            '=I': ctypes.c_uint32,
-            '=q': ctypes.c_int64,
-            '=Q': ctypes.c_uint64,
-            'i': ctypes.c_int,
-            'I': ctypes.c_uint,
-        }[self.struct_byte_order + self.struct_format]
-        vector = self.cls(*range(self.component_count))
-        assert isinstance(vector.pointer, ctypes.POINTER(real_type))
-        for i in range(self.component_count):
-            vector.pointer[i] == self.type(i)
+        }[self.struct_format]
+        quat = self.cls(*range(4))
+        assert isinstance(quat.pointer, ctypes.POINTER(real_type))
+        for i in range(4):
+            quat.pointer[i] == i
 
     def test_array_pointer(self) -> None:
         real_type = {
-            '?': ctypes.c_bool,
             'd': ctypes.c_double,
             'f': ctypes.c_float,
-            '=b': ctypes.c_int8,
-            '=B': ctypes.c_uint8,
-            '=h': ctypes.c_int16,
-            '=H': ctypes.c_uint16,
-            '=i': ctypes.c_int32,
-            '=I': ctypes.c_uint32,
-            '=q': ctypes.c_int64,
-            '=Q': ctypes.c_uint64,
-            'i': ctypes.c_int,
-            'I': ctypes.c_uint,
-        }[self.struct_byte_order + self.struct_format]
+        }[self.struct_format]
         array = self.array_cls(
-            self.cls(*range(self.component_count)),
+            self.cls(*range(4)),
             self.cls(0),
         )
         assert isinstance(array.pointer, ctypes.POINTER(real_type))
         for i in (
-            *range(self.component_count),
-            *(0 for _ in range(self.component_count))
+            *range(4),
+            *(0 for _ in range(4))
         ):
-            array.pointer[i] == self.type(i)
-    '''
+            array.pointer[i] == i
+
+    def test_inverse(self) -> None:
+        assert self.cls(1).inverse() == self.cls(1, -0, -0, -0)
+
+    def test_rotate(self) -> None:
+        vector3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        rotation = self.cls(1).rotate(radians(90), vector3_cls(0, 1, 0))
+        assert isclose(rotation.w, 0.7071067690849304)
+        assert isclose(rotation.x, 0)
+        assert isclose(rotation.y, 0.7071067690849304)
+        assert isclose(rotation.z, 0)
+
+    def test_to_matrix3(self) -> None:
+        vector3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        matrix3_cls = globals()[f'{self.cls.__name__[0]}Matrix3x3']
+        assert isinstance(self.cls(1).to_matrix3(), matrix3_cls)
+        assert self.cls(1).to_matrix3() == matrix3_cls(1)
+
+        rot_quat = self.cls(1).rotate(radians(90), vector3_cls(0, 1, 0))
+        rot_mat = rot_quat.to_matrix3()
+        assert isclose(rot_mat[0].x, 0)
+        assert isclose(rot_mat[0].y, 0)
+        assert isclose(rot_mat[0].z, -1)
+        assert isclose(rot_mat[1].x, 0)
+        assert isclose(rot_mat[1].y, 1)
+        assert isclose(rot_mat[1].z, 0)
+        assert isclose(rot_mat[2].x, 1)
+        assert isclose(rot_mat[2].y, 0)
+        assert isclose(rot_mat[2].z, 0)
+
+    def test_to_matrix4(self) -> None:
+        vector3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+        matrix4_cls = globals()[f'{self.cls.__name__[0]}Matrix4x4']
+        assert isinstance(self.cls(1).to_matrix4(), matrix4_cls)
+        assert self.cls(1).to_matrix4() == matrix4_cls(1)
+
+        rot_quat = self.cls(1).rotate(radians(90), vector3_cls(0, 1, 0))
+        rot_mat = rot_quat.to_matrix4()
+        assert isclose(rot_mat[0].x, 0)
+        assert isclose(rot_mat[0].y, 0)
+        assert isclose(rot_mat[0].z, -1)
+        assert isclose(rot_mat[0].w, 0)
+        assert isclose(rot_mat[1].x, 0)
+        assert isclose(rot_mat[1].y, 1)
+        assert isclose(rot_mat[1].z, 0)
+        assert isclose(rot_mat[1].w, 0)
+        assert isclose(rot_mat[2].x, 1)
+        assert isclose(rot_mat[2].y, 0)
+        assert isclose(rot_mat[2].z, 0)
+        assert isclose(rot_mat[2].w, 0)
+        assert isclose(rot_mat[3].x, 0)
+        assert isclose(rot_mat[3].y, 0)
+        assert isclose(rot_mat[3].z, 0)
+        assert isclose(rot_mat[3].w, 1)
+
 
 class TestFQuaternion(
-    VectorTest,
+    QuaternionTest,
     cls=FQuaternion,
     struct_format='f'
 ):
     pass
 
 
-class TestDVector2(
-    VectorTest,
+class TestDQuaternion2(
+    QuaternionTest,
     cls=DQuaternion,
     struct_format='d'
 ):
     pass
-
