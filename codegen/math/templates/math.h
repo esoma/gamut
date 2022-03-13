@@ -41,20 +41,20 @@ typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
 
 {% for type in matrix_types %}
 {% with c_type={
-    "B": 'bool',
     "F": 'float',
     "D": 'double',
-    "I": 'int',
-    "I8": 'int8_t',
-    "I16": 'int16_t',
-    "I32": 'int32_t',
-    "I64": 'int64_t',
-    "U": 'unsigned int',
-    "U8": 'uint8_t',
-    "U16": 'uint16_t',
-    "U32": 'uint32_t',
-    "U64": 'uint64_t',
 }[type[:type.find('M')]] %}
+    typedef PyObject *(*GamutMathApi_Create{{ type }})(const {{ c_type }} *);
+    typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, const {{ c_type }} *);
+    typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(const PyObject *);
+{% endwith %}
+{% endfor %}
+
+{% for type in quaternion_types %}
+{% with c_type={
+    "F": 'float',
+    "D": 'double',
+}[type[:type.find('Q')]] %}
     typedef PyObject *(*GamutMathApi_Create{{ type }})(const {{ c_type }} *);
     typedef PyObject *(*GamutMathApi_Create{{ type }}Array)(size_t, const {{ c_type }} *);
     typedef {{ c_type }} *(*GamutMathApi_Get{{ type }}ValuePointer)(const PyObject *);
@@ -95,6 +95,15 @@ struct GamutMathApi
         GamutMathApi_GetArrayLength GamutMath{{ type }}Array_GetLength;
     {% endfor %}
     {% for type in matrix_types %}
+        GamutMathApi_GetType GamutMath{{ type }}_GetType;
+        GamutMathApi_GetType GamutMath{{ type }}Array_GetType;
+        GamutMathApi_Create{{ type }} GamutMath{{ type }}_Create;
+        GamutMathApi_Create{{ type }}Array GamutMath{{ type }}Array_Create;
+        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}_GetValuePointer;
+        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMath{{ type }}Array_GetLength;
+    {% endfor %}
+    {% for type in quaternion_types %}
         GamutMathApi_GetType GamutMath{{ type }}_GetType;
         GamutMathApi_GetType GamutMath{{ type }}Array_GetType;
         GamutMathApi_Create{{ type }} GamutMath{{ type }}_Create;
