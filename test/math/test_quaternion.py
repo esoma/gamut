@@ -499,17 +499,17 @@ class QuaternionTest:
         with pytest.raises(TypeError):
             quat / quat
         with pytest.raises(TypeError):
-            quat - None
+            quat / None
         with pytest.raises(TypeError):
-            None - quat
+            None / quat
         with pytest.raises(TypeError):
-            quat - '123'
+            quat / '123'
         with pytest.raises(TypeError):
-            '123' - quat
+            '123' / quat
         with pytest.raises(TypeError):
-            quat - object()
+            quat / object()
         with pytest.raises(TypeError):
-            object() - quat
+            object() / quat
 
     def test_negative(self) -> None:
         assert -self.cls(0) == self.cls(-0)
@@ -658,6 +658,16 @@ class QuaternionTest:
 
     def test_rotate(self) -> None:
         vector3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+
+        with pytest.raises(TypeError):
+            self.cls(1).rotate(radians(90))
+        with pytest.raises(TypeError):
+            self.cls(1).rotate(radians(90), vector3_cls(), None)
+        with pytest.raises(TypeError):
+            self.cls(1).rotate(None, vector3_cls())
+        with pytest.raises(TypeError):
+            self.cls(1).rotate(1, None)
+
         rotation = self.cls(1).rotate(radians(90), vector3_cls(0, 1, 0))
         assert isclose(rotation.w, 0.7071067690849304)
         assert isclose(rotation.x, 0)
