@@ -6,14 +6,11 @@ __all__ = ['Listener']
 # gamut
 from ._alcontext import release_al_context, require_al_context
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact
+from gamut.math import FVector3, Vector3
 # python
 from ctypes import c_float
 from typing import Optional
 from weakref import ref
-# pyglm
-from glm import value_ptr as glm_value_ptr
-from glm import vec3
 # pyopenal
 from openal.al import (AL_GAIN, AL_ORIENTATION, AL_POSITION, AL_VELOCITY,
                        alListenerf, alListenerfv)
@@ -26,11 +23,11 @@ class Listener:
     def __init__(
         self,
         *,
-        position: F32Vector3 = vec3(0),
-        velocity: F32Vector3 = vec3(0),
+        position: Vector3 = Vector3(0),
+        velocity: Vector3 = Vector3(0),
         gain: float = 1.0,
-        direction: F32Vector3 = vec3(0, 0, -1),
-        up: F32Vector3 = vec3(0, 1, 0),
+        direction: Vector3 = Vector3(0, 0, -1),
+        up: Vector3 = Vector3(0, 1, 0),
     ):
         self._al_context = require_al_context()
 
@@ -38,10 +35,10 @@ class Listener:
         if gain < 0.0 or gain > 1.0:
             raise ValueError('gain must be between 0.0 and 1.0')
 
-        self._position = vec3_exact(position)
-        self._velocity = vec3_exact(velocity)
-        self._direction = vec3_exact(direction)
-        self._up = vec3_exact(up)
+        self.position = position
+        self.velocity = velocity
+        self.direction = direction
+        self.up = up
         self._gain = gain
 
     def __del__(self) -> None:
@@ -50,11 +47,13 @@ class Listener:
 
     def _update_position(self) -> None:
         assert active_listener is not None and active_listener() is self
-        alListenerfv(AL_POSITION, glm_value_ptr(self._position))
+        f_position = FVector3(*self._position)
+        alListenerfv(AL_POSITION, f_position.pointer)
 
     def _update_velocity(self) -> None:
         assert active_listener is not None and active_listener() is self
-        alListenerfv(AL_VELOCITY, glm_value_ptr(self._velocity))
+        f_velocity = FVector3(*self._velocity)
+        alListenerfv(AL_VELOCITY, f_velocity.pointer)
 
     def _update_orientation(self) -> None:
         assert active_listener is not None and active_listener() is self
@@ -88,9 +87,9 @@ class Listener:
         if current_listener is not self:
             return None
         active_listener = None
-        zero_vec3 = vec3(0)
-        alListenerfv(AL_POSITION, glm_value_ptr(zero_vec3))
-        alListenerfv(AL_VELOCITY, glm_value_ptr(zero_vec3))
+        zero_vec3 = FVector3(0)
+        alListenerfv(AL_POSITION, zero_vec3.pointer)
+        alListenerfv(AL_VELOCITY, zero_vec3.pointer)
         alListenerfv(AL_ORIENTATION, (c_float * 6)(0, 0, -1, 0, 1, 0))
         alListenerf(AL_GAIN, 1.0)
 
@@ -101,42 +100,50 @@ class Listener:
         return active_listener()
 
     @property
-    def position(self) -> vec3:
-        return vec3(self._position)
+    def position(self) -> Vector3:
+        return self._position
 
     @position.setter
-    def position(self, value: F32Vector3) -> None:
-        self._position = vec3_exact(value)
+    def position(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._position = value
         if self.get_active() is self:
             self._update_position()
 
     @property
-    def velocity(self) -> vec3:
-        return vec3(self._velocity)
+    def velocity(self) -> Vector3:
+        return self._velocity
 
     @velocity.setter
-    def velocity(self, value: F32Vector3) -> None:
-        self._velocity = vec3_exact(value)
+    def velocity(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._velocity = value
         if self.get_active() is self:
             self._update_velocity()
 
     @property
-    def direction(self) -> vec3:
-        return vec3(self._direction)
+    def direction(self) -> Vector3:
+        return self._direction
 
     @direction.setter
-    def direction(self, value: F32Vector3) -> None:
-        self._direction = vec3_exact(value)
+    def direction(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._direction = value
         if self.get_active() is self:
             self._update_orientation()
 
     @property
-    def up(self) -> vec3:
-        return vec3(self._up)
+    def up(self) -> Vector3:
+        return self._up
 
     @up.setter
-    def up(self, value: F32Vector3) -> None:
-        self._up = vec3_exact(value)
+    def up(self, value: Vector3) -> None:
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._up = value
         if self.get_active() is self:
             self._update_orientation()
 

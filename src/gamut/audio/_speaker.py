@@ -10,7 +10,7 @@ from ._source import (consume_stream_buffer, get_sample_al_buffer,
                       release_sample_al_buffer, return_stream_buffer, Sample,
                       Stream)
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact
+from gamut.math import FVector3, Vector3
 # python
 from ctypes import c_int, c_uint
 from ctypes import pointer as c_pointer
@@ -23,9 +23,6 @@ import time
 from typing import Any, Final, Optional, Union
 from warnings import warn
 from weakref import ref
-# pyglm
-from glm import value_ptr as glm_value_ptr
-from glm import vec3
 # pyopenal
 from openal.al import (AL_BUFFER, AL_BUFFERS_PROCESSED, AL_BUFFERS_QUEUED,
                        AL_CONE_INNER_ANGLE, AL_CONE_OUTER_ANGLE,
@@ -59,15 +56,15 @@ class Speaker:
         self,
         source: Union[Sample, Stream],
         *,
-        position: F32Vector3 = vec3(0),
-        velocity: F32Vector3 = vec3(0),
+        position: Vector3 = Vector3(0),
+        velocity: Vector3 = Vector3(0),
         min_gain: float = 0.0,
         gain: float = 1.0,
         max_gain: float = 1.0,
         is_relative: bool = False,
         loop: bool = False,
         pitch: float = 1.0,
-        direction: F32Vector3 = vec3(0),
+        direction: Vector3 = Vector3(0),
         inner_cone_angle: float = 2 * pi,
         outer_cone_angle: float = 2 * pi,
         outer_cone_gain: float = 0.0,
@@ -224,38 +221,44 @@ class Speaker:
         return AL_STATE_TO_SPEAKER_STATE[al_state.value]
 
     @property
-    def position(self) -> vec3:
+    def position(self) -> Vector3:
         self._ensure_open()
-        return vec3(self._position)
+        return self._position
 
     @position.setter
-    def position(self, value: F32Vector3) -> None:
+    def position(self, value: Vector3) -> None:
         self._ensure_open()
-        self._position = vec3_exact(value)
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._position = value
         assert self._source is not None
-        if self._source.channels != 1 and self._position != vec3(0):
+        if self._source.channels != 1 and self._position != Vector3(0):
             warn(
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in position'
             )
-        alSourcefv(self._al, AL_POSITION, glm_value_ptr(self._position))
+        f_position = FVector3(*self._position)
+        alSourcefv(self._al, AL_POSITION, f_position.pointer)
 
     @property
-    def velocity(self) -> vec3:
+    def velocity(self) -> Vector3:
         self._ensure_open()
-        return vec3(self._velocity)
+        return self._velocity
 
     @velocity.setter
-    def velocity(self, value: F32Vector3) -> None:
+    def velocity(self, value: Vector3) -> None:
         self._ensure_open()
-        self._velocity = vec3_exact(value)
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._velocity = value
         assert self._source is not None
-        if self._source.channels != 1 and self._velocity != vec3(0):
+        if self._source.channels != 1 and self._velocity != Vector3(0):
             warn(
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in velocity'
             )
-        alSourcefv(self._al, AL_VELOCITY, glm_value_ptr(self._velocity))
+        f_velocity = FVector3(*self._velocity)
+        alSourcefv(self._al, AL_VELOCITY, f_velocity.pointer)
 
     @property
     def min_gain(self) -> float:
@@ -342,21 +345,24 @@ class Speaker:
         alSourcef(self._al, AL_PITCH, self._pitch)
 
     @property
-    def direction(self) -> vec3:
+    def direction(self) -> Vector3:
         self._ensure_open()
-        return vec3(self._direction)
+        return self._direction
 
     @direction.setter
-    def direction(self, value: F32Vector3) -> None:
+    def direction(self, value: Vector3) -> None:
         self._ensure_open()
-        self._direction = vec3_exact(value)
+        if not isinstance(value, Vector3):
+            raise TypeError(f'expected Vector3, got {value!r}')
+        self._direction = value
         assert self._source is not None
-        if self._source.channels != 1 and self._direction != vec3(0):
+        if self._source.channels != 1 and self._direction != Vector3(0):
             warn(
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in direction'
             )
-        alSourcefv(self._al, AL_DIRECTION, glm_value_ptr(self._direction))
+        f_direction = FVector3(*self._direction)
+        alSourcefv(self._al, AL_DIRECTION, f_direction.pointer)
 
     @property
     def inner_cone_angle(self) -> float:
@@ -376,7 +382,7 @@ class Speaker:
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in inner cone angle'
             )
-        if self._direction == vec3(0) and self._inner_cone_angle != 2 * pi:
+        if self._direction == Vector3(0) and self._inner_cone_angle != 2 * pi:
             warn(
                 f'{self._source} has no direction, it will be unaffected by '
                 f'changes in inner cone angle'
@@ -405,7 +411,7 @@ class Speaker:
                 f'{self._source} has more than 1 channel, it will be '
                 f'unaffected by changes in outer cone angle'
             )
-        if self._direction == vec3(0) and self._outer_cone_angle != 2 * pi:
+        if self._direction == Vector3(0) and self._outer_cone_angle != 2 * pi:
             warn(
                 f'{self._source} has no direction, it will be unaffected by '
                 f'changes in outer cone angle'

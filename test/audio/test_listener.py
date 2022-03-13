@@ -2,27 +2,26 @@
 # gamut
 from gamut.audio import Listener
 from gamut.audio._alcontext import AlContext
+from gamut.math import Vector3
 # python
 import gc
 from typing import Any
-# pyglm
-import glm
 # pytest
 import pytest
 
 
 def test_initialize_defaults(loopback_al_context: AlContext) -> None:
     listener = Listener()
-    assert isinstance(listener.position, glm.vec3)
-    assert listener.position == glm.vec3(0, 0, 0)
-    assert isinstance(listener.velocity, glm.vec3)
-    assert listener.velocity == glm.vec3(0, 0, 0)
+    assert isinstance(listener.position, Vector3)
+    assert listener.position == Vector3(0, 0, 0)
+    assert isinstance(listener.velocity, Vector3)
+    assert listener.velocity == Vector3(0, 0, 0)
     assert isinstance(listener.gain, float)
     assert listener.gain == 1.0
-    assert isinstance(listener.direction, glm.vec3)
-    assert listener.direction == glm.vec3(0, 0, -1)
-    assert isinstance(listener.up, glm.vec3)
-    assert listener.up == glm.vec3(0, 1, 0)
+    assert isinstance(listener.direction, Vector3)
+    assert listener.direction == Vector3(0, 0, -1)
+    assert isinstance(listener.up, Vector3)
+    assert listener.up == Vector3(0, 1, 0)
 
 
 def test_activate_deactivate(loopback_al_context: AlContext) -> None:
@@ -50,83 +49,119 @@ def test_activate_deactivate(loopback_al_context: AlContext) -> None:
 
 
 @pytest.mark.parametrize("position", [
-    glm.vec3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_position(loopback_al_context: AlContext, position: Any) -> None:
     listener = Listener()
 
     listener.position = position
-    assert listener.position is not position
-    assert isinstance(listener.position, glm.vec3)
+    assert isinstance(listener.position, Vector3)
     assert listener.position == position
 
-    position += glm.vec3(1)
+    position += Vector3(1)
     assert listener.position != position
 
     listener.activate()
     listener.position = position
 
 
+@pytest.mark.parametrize("position", [(1, 2, 3), None, '123'])
+def test_position_invalid_type(
+    loopback_al_context: AlContext,
+    position: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.position = position
+
+
 @pytest.mark.parametrize("velocity", [
-    glm.vec3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_velocity(loopback_al_context: AlContext, velocity: Any) -> None:
     listener = Listener()
 
     listener.velocity = velocity
-    assert listener.velocity is not velocity
-    assert isinstance(listener.velocity, glm.vec3)
+    assert isinstance(listener.velocity, Vector3)
     assert listener.velocity == velocity
 
-    velocity += glm.vec3(1)
+    velocity += Vector3(1)
     assert listener.velocity != velocity
 
     listener.activate()
     listener.velocity = velocity
 
 
+@pytest.mark.parametrize("velocity", [(1, 2, 3), None, '123'])
+def test_velocity_invalid_type(
+    loopback_al_context: AlContext,
+    velocity: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.velocity = velocity
+
+
 @pytest.mark.parametrize("direction", [
-    glm.vec3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_direction(loopback_al_context: AlContext, direction: Any) -> None:
     listener = Listener()
 
     listener.direction = direction
-    assert listener.direction is not direction
-    assert isinstance(listener.direction, glm.vec3)
+    assert isinstance(listener.direction, Vector3)
     assert listener.direction == direction
 
-    direction += glm.vec3(1)
+    direction += Vector3(1)
     assert listener.direction != direction
 
     listener.activate()
     listener.direction = direction
 
 
+@pytest.mark.parametrize("direction", [(1, 2, 3), None, '123'])
+def test_direction_invalid_type(
+    loopback_al_context: AlContext,
+    direction: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.direction = direction
+
+
 @pytest.mark.parametrize("up", [
-    glm.vec3(1, 2, 3),
-    (1, 2, 3),
-    [1, 2, 3]
+    Vector3(1, 2, 3),
+    Vector3(4, 5, 6),
+    Vector3(-1, -2, -3),
 ])
 def test_up(loopback_al_context: AlContext, up: Any) -> None:
     listener = Listener()
 
     listener.up = up
-    assert listener.up is not up
-    assert isinstance(listener.up, glm.vec3)
+    assert isinstance(listener.up, Vector3)
     assert listener.up == up
 
-    up += glm.vec3(1)
+    up += Vector3(1)
     assert listener.up != up
 
     listener.activate()
     listener.up = up
+
+
+@pytest.mark.parametrize("up", [(1, 2, 3), None, '123'])
+def test_up_invalid_type(
+    loopback_al_context: AlContext,
+    up: Any
+) -> None:
+    listener = Listener()
+    with pytest.raises(TypeError):
+        listener.up = up
 
 
 @pytest.mark.parametrize("gain", [-1.0, -0.000001, 1.000001, 2.0])

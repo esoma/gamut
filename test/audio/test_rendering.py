@@ -4,10 +4,9 @@ from .util import assert_tone, generate_sin_sample
 # gamut
 from gamut.audio import Listener, Speaker
 from gamut.audio._alcontext import AlContext
+from gamut.math import Vector3
 # python
 from typing import Final
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -101,7 +100,7 @@ def test_speaker_position_left(
     frequency: int
 ) -> None:
     speaker = Speaker(generate_sin_sample(frequency))
-    speaker.position = glm.vec3(-1, 0, 0)
+    speaker.position = Vector3(-1, 0, 0)
     speaker.play()
     assert_tone(loopback_al_context, 1024, (frequency, 0), None)
 
@@ -112,7 +111,7 @@ def test_speaker_position_right(
     frequency: int
 ) -> None:
     speaker = Speaker(generate_sin_sample(frequency))
-    speaker.position = glm.vec3(1, 0, 0)
+    speaker.position = Vector3(1, 0, 0)
     speaker.play()
     assert_tone(loopback_al_context, 1024, (0, frequency), None)
 
@@ -122,7 +121,7 @@ def test_listener_position_left(
     loopback_al_context: AlContext,
     frequency: int
 ) -> None:
-    listener = Listener(position=glm.vec3(-1, 0, 0))
+    listener = Listener(position=Vector3(-1, 0, 0))
     listener.activate()
     speaker = Speaker(generate_sin_sample(frequency))
     speaker.play()
@@ -131,39 +130,39 @@ def test_listener_position_left(
 
 @pytest.mark.parametrize("frequency", TEST_FREQUENCIES)
 @pytest.mark.parametrize("listener_position", [
-    glm.vec3(0, 0, 0),
-    glm.vec3(10, -10, 10),
-    glm.vec3(-100, 0, 0),
+    Vector3(0, 0, 0),
+    Vector3(10, -10, 10),
+    Vector3(-100, 0, 0),
 ])
 def test_speaker_relative_position_left(
     loopback_al_context: AlContext,
     frequency: int,
-    listener_position: glm.vec3
+    listener_position: Vector3
 ) -> None:
     listener = Listener(position=listener_position)
     listener.activate()
     speaker = Speaker(generate_sin_sample(frequency))
     speaker.is_relative = True
-    speaker.position = glm.vec3(-1, 0, 0)
+    speaker.position = Vector3(-1, 0, 0)
     speaker.play()
     assert_tone(loopback_al_context, 1024, (frequency, 0), None)
 
 
 @pytest.mark.parametrize("frequency", TEST_FREQUENCIES)
 @pytest.mark.parametrize("listener_position", [
-    glm.vec3(0, 0, 0),
-    glm.vec3(10, -10, 10),
-    glm.vec3(-100, 0, 0),
+    Vector3(0, 0, 0),
+    Vector3(10, -10, 10),
+    Vector3(-100, 0, 0),
 ])
 def test_speaker_relative_position_right(
     loopback_al_context: AlContext,
     frequency: int,
-    listener_position: glm.vec3
+    listener_position: Vector3
 ) -> None:
     listener = Listener(position=listener_position)
     listener.activate()
     speaker = Speaker(generate_sin_sample(frequency))
     speaker.is_relative = True
-    speaker.position = glm.vec3(1, 0, 0)
+    speaker.position = Vector3(1, 0, 0)
     speaker.play()
     assert_tone(loopback_al_context, 1024, (0, frequency), None)

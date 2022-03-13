@@ -2,11 +2,10 @@
 # gamut
 from gamut.audio import MultiSpeaker, Sample, SpeakerState
 from gamut.audio._alcontext import AlContext
+from gamut.math import Vector3
 # python
 from math import pi
 from typing import Any, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -18,10 +17,10 @@ def sample() -> Sample:
 
 def test_initialize_defaults(loopback_al_context: AlContext) -> None:
     speaker = MultiSpeaker()
-    assert isinstance(speaker.position, glm.vec3)
-    assert speaker.position == glm.vec3(0, 0, 0)
-    assert isinstance(speaker.velocity, glm.vec3)
-    assert speaker.velocity == glm.vec3(0, 0, 0)
+    assert isinstance(speaker.position, Vector3)
+    assert speaker.position == Vector3(0, 0, 0)
+    assert isinstance(speaker.velocity, Vector3)
+    assert speaker.velocity == Vector3(0, 0, 0)
     assert isinstance(speaker.min_gain, float)
     assert speaker.min_gain == 0.0
     assert isinstance(speaker.gain, float)
@@ -32,8 +31,8 @@ def test_initialize_defaults(loopback_al_context: AlContext) -> None:
     assert not speaker.is_relative
     assert isinstance(speaker.pitch, float)
     assert speaker.pitch == 1.0
-    assert isinstance(speaker.direction, glm.vec3)
-    assert speaker.direction == glm.vec3(0, 0, 0)
+    assert isinstance(speaker.direction, Vector3)
+    assert speaker.direction == Vector3(0, 0, 0)
     assert isinstance(speaker.inner_cone_angle, float)
     assert speaker.inner_cone_angle == 2 * pi
     assert isinstance(speaker.outer_cone_angle, float)
@@ -66,55 +65,79 @@ def test_play_reuse(loopback_al_context: AlContext, sample: Sample) -> None:
     assert speaker_3 is not speaker_1
 
 
-@pytest.mark.parametrize("position", [glm.vec3(1, 2, 3), (1, 2, 3)])
+@pytest.mark.parametrize("position", [Vector3(1, 2, 3), Vector3(-1, -2, -3)])
 def test_position(
     loopback_al_context: AlContext,
     sample: Sample,
-    position: Union[glm.vec3, tuple[int, int, int]]
+    position: Union[Vector3, tuple[int, int, int]]
 ) -> None:
     multi_speaker = MultiSpeaker()
     speakers = [multi_speaker.play(sample) for _ in range(10)]
     assert all(s.position == multi_speaker.position for s in speakers)
     multi_speaker.position = position
     assert multi_speaker.position == position
-    assert multi_speaker.position is not position
-    assert isinstance(multi_speaker.position, glm.vec3)
+    assert isinstance(multi_speaker.position, Vector3)
     assert all(s.position == multi_speaker.position for s in speakers)
-    assert all(s.position is not multi_speaker.position for s in speakers)
 
 
-@pytest.mark.parametrize("velocity", [glm.vec3(1, 2, 3), (1, 2, 3)])
+@pytest.mark.parametrize("position", [(1, 2, 3), '123', None])
+def test_position_invalid_type(
+    loopback_al_context: AlContext,
+    position: Any
+) -> None:
+    multi_speaker = MultiSpeaker()
+    with pytest.raises(TypeError):
+        multi_speaker.position = position
+
+
+@pytest.mark.parametrize("velocity", [Vector3(1, 2, 3), Vector3(-1, -2, -3)])
 def test_velocity(
     loopback_al_context: AlContext,
     sample: Sample,
-    velocity: Union[glm.vec3, tuple[int, int, int]]
+    velocity: Union[Vector3, tuple[int, int, int]]
 ) -> None:
     multi_speaker = MultiSpeaker()
     speakers = [multi_speaker.play(sample) for _ in range(10)]
     assert all(s.velocity == multi_speaker.velocity for s in speakers)
     multi_speaker.velocity = velocity
     assert multi_speaker.velocity == velocity
-    assert multi_speaker.velocity is not velocity
-    assert isinstance(multi_speaker.velocity, glm.vec3)
+    assert isinstance(multi_speaker.velocity, Vector3)
     assert all(s.velocity == multi_speaker.velocity for s in speakers)
-    assert all(s.velocity is not multi_speaker.velocity for s in speakers)
 
 
-@pytest.mark.parametrize("direction", [glm.vec3(1, 2, 3), (1, 2, 3)])
+@pytest.mark.parametrize("velocity", [(1, 2, 3), '123', None])
+def test_velocity_invalid_type(
+    loopback_al_context: AlContext,
+    velocity: Any
+) -> None:
+    multi_speaker = MultiSpeaker()
+    with pytest.raises(TypeError):
+        multi_speaker.velocity = velocity
+
+
+@pytest.mark.parametrize("direction", [Vector3(1, 2, 3), Vector3(-1, -2, -3)])
 def test_direction(
     loopback_al_context: AlContext,
     sample: Sample,
-    direction: Union[glm.vec3, tuple[int, int, int]]
+    direction: Union[Vector3, tuple[int, int, int]]
 ) -> None:
     multi_speaker = MultiSpeaker()
     speakers = [multi_speaker.play(sample) for _ in range(10)]
     assert all(s.direction == multi_speaker.direction for s in speakers)
     multi_speaker.direction = direction
     assert multi_speaker.direction == direction
-    assert multi_speaker.direction is not direction
-    assert isinstance(multi_speaker.direction, glm.vec3)
+    assert isinstance(multi_speaker.direction, Vector3)
     assert all(s.direction == multi_speaker.direction for s in speakers)
-    assert all(s.direction is not multi_speaker.direction for s in speakers)
+
+
+@pytest.mark.parametrize("direction", [(1, 2, 3), '123', None])
+def test_direction_invalid_type(
+    loopback_al_context: AlContext,
+    direction: Any
+) -> None:
+    multi_speaker = MultiSpeaker()
+    with pytest.raises(TypeError):
+        multi_speaker.direction = direction
 
 
 @pytest.mark.parametrize("min_gain", [0, 0.0, .5, 1.0, 1])
