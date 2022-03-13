@@ -4,25 +4,22 @@ from __future__ import annotations
 __all__ = ['Cone']
 
 # gamut
-from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
-# pyglm
-from glm import quat, vec3
+from gamut.math import Quaternion, Vector3
 
 
 class Cone:
 
     def __init__(
         self,
-        center: F32Vector3,
+        center: Vector3,
         radius: float,
         height: float,
         *,
-        rotation: F32Quaternion | None = None
+        rotation: Quaternion | None = None
     ):
-        try:
-            self._center = vec3_exact(center)
-        except TypeError:
-            raise TypeError('center must be vec3')
+        if not isinstance(center, Vector3):
+            raise TypeError('center must be Vector3')
+        self._center = center
 
         try:
             self._radius = abs(float(radius))
@@ -35,12 +32,11 @@ class Cone:
             raise TypeError('height must be float')
 
         if rotation is None:
-            self._rotation = quat()
+            self._rotation = Quaternion(1)
         else:
-            try:
-                self._rotation = quat_exact(rotation)
-            except TypeError:
-                raise TypeError('rotation must be quat')
+            if not isinstance(rotation, Quaternion):
+                raise TypeError('rotation must be Quaternion')
+            self._rotation = rotation
 
     def __hash__(self) -> int:
         return id(self)
@@ -65,8 +61,8 @@ class Cone:
         )
 
     @property
-    def center(self) -> vec3:
-        return vec3(self._center)
+    def center(self) -> Vector3:
+        return self._center
 
     @property
     def height(self) -> float:
@@ -77,5 +73,5 @@ class Cone:
         return self._radius
 
     @property
-    def rotation(self) -> quat:
-        return quat(self._rotation)
+    def rotation(self) -> Quaternion:
+        return self._rotation

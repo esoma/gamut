@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 14:05:23.323346 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-13 19:51:13.959279 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX4X4_HPP
 #define GAMUT_MATH_DMATRIX4X4_HPP
@@ -892,6 +892,24 @@ DMatrix4x4__matmul__(PyObject *left, PyObject *right)
 
 
 
+
+        {
+            auto vector3_cls = module_state->DVector3_PyTypeObject;
+            if (Py_TYPE(right) == vector3_cls)
+            {
+                auto result = (DVector3 *)vector3_cls->tp_alloc(vector3_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DVector3Glm(
+                    (*((DMatrix4x4 *)left)->glm) * DVector4Glm(
+                        *((DVector3 *)right)->glm,
+                        1
+                    )
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
         {
             auto row_cls = module_state->DVector4_PyTypeObject;
             auto column_cls = module_state->DVector4_PyTypeObject;
@@ -908,6 +926,24 @@ DMatrix4x4__matmul__(PyObject *left, PyObject *right)
     }
     else
     {
+
+        {
+            auto vector3_cls = module_state->DVector3_PyTypeObject;
+            if (Py_TYPE(left) == vector3_cls)
+            {
+                auto result = (DVector3 *)vector3_cls->tp_alloc(vector3_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new DVector3Glm(
+                     DVector4Glm(
+                        *((DVector3 *)left)->glm,
+                        1
+                    ) * (*((DMatrix4x4 *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+
+
         auto row_cls = module_state->DVector4_PyTypeObject;
         auto column_cls = module_state->DVector4_PyTypeObject;
         if (Py_TYPE(left) == column_cls)
@@ -1160,6 +1196,58 @@ static PyGetSetDef DMatrix4x4_PyGetSetDef[] = {
         return result;
     }
 
+    static DMatrix4x4 *
+    DMatrix4x4_perspective(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 4)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 4 argument, got %zi", nargs);
+            return 0;
+        }
+
+        double fov = PyFloat_AsDouble(args[0]);
+        if (PyErr_Occurred()){ return 0; }
+        double aspect = PyFloat_AsDouble(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+        double near = PyFloat_AsDouble(args[2]);
+        if (PyErr_Occurred()){ return 0; }
+        double far = PyFloat_AsDouble(args[3]);
+        if (PyErr_Occurred()){ return 0; }
+
+        auto *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(glm::perspective(fov, aspect, near, far));
+        return result;
+    }
+
+
+
+static DVector4 *
+DMatrix4x4_get_row(DMatrix4x4 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 1)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+        return 0;
+    }
+
+    auto index = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (index < 0 || index > 3)
+    {
+        PyErr_Format(PyExc_IndexError, "index out of range");
+        return 0;
+    }
+
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto row_cls = module_state->DVector4_PyTypeObject;
+
+    auto *result = (DVector4 *)row_cls->tp_alloc(row_cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector4Glm(glm::row(*self->glm, index));
+    return result;
+}
 
 
 
@@ -1213,7 +1301,9 @@ static PyMethodDef DMatrix4x4_PyMethodDef[] = {
         {"rotate", (PyCFunction)DMatrix4x4_rotate, METH_FASTCALL, 0},
         {"scale", (PyCFunction)DMatrix4x4_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction)DMatrix4x4_translate, METH_FASTCALL, 0},
+        {"perspective", (PyCFunction)DMatrix4x4_perspective, METH_CLASS | METH_FASTCALL, 0},
 
+    {"get_row", (PyCFunction)DMatrix4x4_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)DMatrix4x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix4x4_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}

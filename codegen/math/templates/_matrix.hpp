@@ -389,7 +389,7 @@ static PyObject *
 
 
 static PyObject *
-{{ name}}__matmul__(PyObject *left, PyObject *right)
+{{ name }}__matmul__(PyObject *left, PyObject *right)
 {
     auto module_state = get_module_state();
     if (!module_state){ return 0; }
@@ -417,6 +417,24 @@ static PyObject *
         {% endwith %}
         {% endfor %}
 
+        {% if row_size == 4 and column_size == 4 %}
+        {
+            auto vector3_cls = module_state->{{ name[0] }}Vector3_PyTypeObject;
+            if (Py_TYPE(right) == vector3_cls)
+            {
+                auto result = ({{ name[0] }}Vector3 *)vector3_cls->tp_alloc(vector3_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new {{ name[0] }}Vector3Glm(
+                    (*(({{ name }} *)left)->glm) * {{ name[0] }}Vector4Glm(
+                        *(({{ name[0] }}Vector3 *)right)->glm,
+                        1
+                    )
+                );
+                return (PyObject *)result;
+            }
+        }
+        {% endif %}
+
         {
             auto row_cls = module_state->{{ row_type }}_PyTypeObject;
             auto column_cls = module_state->{{ column_type }}_PyTypeObject;
@@ -433,6 +451,24 @@ static PyObject *
     }
     else
     {
+        {% if row_size == 4 and column_size == 4 %}
+        {
+            auto vector3_cls = module_state->{{ name[0] }}Vector3_PyTypeObject;
+            if (Py_TYPE(left) == vector3_cls)
+            {
+                auto result = ({{ name[0] }}Vector3 *)vector3_cls->tp_alloc(vector3_cls, 0);
+                if (!result){ return 0; }
+                result->glm = new {{ name[0] }}Vector3Glm(
+                     {{ name[0] }}Vector4Glm(
+                        *(({{ name[0] }}Vector3 *)left)->glm,
+                        1
+                    ) * (*(({{ name }} *)right)->glm)
+                );
+                return (PyObject *)result;
+            }
+        }
+        {% endif %}
+
         auto row_cls = module_state->{{ row_type }}_PyTypeObject;
         auto column_cls = module_state->{{ column_type }}_PyTypeObject;
         if (Py_TYPE(left) == column_cls)
@@ -684,7 +720,59 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
         result->glm = new {{ name }}Glm(matrix);
         return result;
     }
+
+    static {{ name }} *
+    {{ name }}_perspective(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 4)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 4 argument, got %zi", nargs);
+            return 0;
+        }
+
+        double fov = PyFloat_AsDouble(args[0]);
+        if (PyErr_Occurred()){ return 0; }
+        double aspect = PyFloat_AsDouble(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+        double near = PyFloat_AsDouble(args[2]);
+        if (PyErr_Occurred()){ return 0; }
+        double far = PyFloat_AsDouble(args[3]);
+        if (PyErr_Occurred()){ return 0; }
+
+        auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(glm::perspective(fov, aspect, near, far));
+        return result;
+    }
 {% endif %}
+
+
+static {{ row_type }} *
+{{ name }}_get_row({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 1)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+        return 0;
+    }
+
+    auto index = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (index < 0 || index > {{ column_size - 1 }})
+    {
+        PyErr_Format(PyExc_IndexError, "index out of range");
+        return 0;
+    }
+
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto row_cls = module_state->{{ row_type }}_PyTypeObject;
+
+    auto *result = ({{ row_type }} *)row_cls->tp_alloc(row_cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ row_type }}Glm(glm::row(*self->glm, index));
+    return result;
+}
 
 
 {% with transpose_name=(('D' if c_type == 'double' else 'F') + 'Matrix' + str(column_size) + 'x' + str(row_size)) %}
@@ -738,7 +826,9 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
         {"rotate", (PyCFunction){{ name }}_rotate, METH_FASTCALL, 0},
         {"scale", (PyCFunction){{ name }}_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction){{ name }}_translate, METH_FASTCALL, 0},
+        {"perspective", (PyCFunction){{ name }}_perspective, METH_CLASS | METH_FASTCALL, 0},
     {% endif %}
+    {"get_row", (PyCFunction){{ name }}_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction){{ name }}_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}

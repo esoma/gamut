@@ -4,24 +4,22 @@ from __future__ import annotations
 __all__ = ['Plane']
 
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact, vec4
-# pyglm
-from glm import dot, inverse, length, mat4, transpose, vec3
+from gamut.math import Matrix4, Vector3, Vector4
 
 
 class Plane:
 
-    def __init__(self, distance: float, normal: F32Vector3):
+    def __init__(self, distance: float, normal: Vector3):
         try:
             self._distance = float(distance)
         except (TypeError, ValueError):
             raise TypeError('distance must be float')
-        try:
-            self._normal = vec3_exact(normal)
-        except TypeError:
-            raise TypeError('normal must be vec3')
 
-        magnitude = length(self._normal)
+        if not isinstance(normal, Vector3):
+            raise TypeError('normal must be Vector3')
+        self._normal = normal
+
+        magnitude = normal.magnitude
         try:
             self._distance /= magnitude
             self._normal /= magnitude
@@ -45,11 +43,14 @@ class Plane:
             self._distance == other._distance
         )
 
-    def __rmul__(self, transform: mat4) -> Plane:
-        if not isinstance(transform, mat4):
+    def __rmatmul__(self, transform: Matrix4) -> Plane:
+        if not isinstance(transform, Matrix4):
             return NotImplemented
 
-        p = transpose(inverse(transform)) * vec4(self._normal, self._distance)
+        p = transform.inverse().transpose() @ Vector4(
+            *self._normal,
+            self._distance
+        )
         return Plane(p.w, p.xyz)
 
     @property
@@ -57,12 +58,10 @@ class Plane:
         return self._distance
 
     @property
-    def normal(self) -> vec3:
-        return vec3(self._normal)
+    def normal(self) -> Vector3:
+        return self._normal
 
-    def distance_to_point(self, point: F32Vector3) -> float:
-        try:
-            p = vec3_exact(point)
-        except TypeError:
-            raise TypeError('point must be vec3')
-        return dot(self._normal, p) + self._distance
+    def distance_to_point(self, point: Vector3) -> float:
+        if not isinstance(point, Vector3):
+            raise TypeError('point must be Vector3')
+        return self._normal @ point + self._distance

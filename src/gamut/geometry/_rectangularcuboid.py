@@ -4,37 +4,32 @@ from __future__ import annotations
 __all__ = ['RectangularCuboid']
 
 # gamut
-from gamut.glmhelp import F32Quaternion, F32Vector3, quat_exact, vec3_exact
-# pyglm
-from glm import array, quat, uint8, vec3
+from gamut.math import Quaternion, U8Array, Vector3, Vector3Array
 
 
 class RectangularCuboid:
 
     def __init__(
         self,
-        center: F32Vector3,
-        dimensions: F32Vector3,
+        center: Vector3,
+        dimensions: Vector3,
         *,
-        rotation: F32Quaternion | None = None
+        rotation: Quaternion | None = None
     ):
-        try:
-            self._center = vec3_exact(center)
-        except TypeError:
-            raise TypeError('center must be vec3')
+        if not isinstance(center, Vector3):
+            raise TypeError('center must be Vector3')
+        self._center = center
 
-        try:
-            self._dimensions = abs(vec3_exact(dimensions))
-        except TypeError:
-            raise TypeError('dimensions must be vec3')
+        if not isinstance(dimensions, Vector3):
+            raise TypeError('dimensions must be Vector3')
+        self._dimensions = dimensions
 
         if rotation is None:
-            self._rotation = quat()
+            self._rotation = Quaternion(1)
         else:
-            try:
-                self._rotation = quat_exact(rotation)
-            except TypeError:
-                raise TypeError('rotation must be quat')
+            if not isinstance(rotation, Quaternion):
+                raise TypeError('rotation must be Quaternion')
+            self._rotation = rotation
 
     def __hash__(self) -> int:
         return id(self)
@@ -59,66 +54,72 @@ class RectangularCuboid:
         )
 
     @property
-    def center(self) -> vec3:
-        return vec3(self._center)
+    def center(self) -> Vector3:
+        return self._center
 
     @property
-    def dimensions(self) -> vec3:
-        return vec3(self._dimensions)
+    def dimensions(self) -> Vector3:
+        return self._dimensions
 
     @property
-    def rotation(self) -> quat:
-        return quat(self._rotation)
+    def rotation(self) -> Quaternion:
+        return self._rotation
 
-    def render(self) -> tuple['array[vec3]', 'array[vec3]', 'array[uint8]']:
+    def render(self) -> tuple[Vector3Array, Vector3Array, U8Array]:
         half_dimensions = self._dimensions * .5
-        positions = array(
+        positions = Vector3Array(
             # top
-            self._center + half_dimensions * vec3(1, 1, 1),
-            self._center + half_dimensions * vec3(1, 1, -1),
-            self._center + half_dimensions * vec3(-1, 1, -1),
-            self._center + half_dimensions * vec3(-1, 1, 1),
+            self._center + half_dimensions * Vector3(1, 1, 1),
+            self._center + half_dimensions * Vector3(1, 1, -1),
+            self._center + half_dimensions * Vector3(-1, 1, -1),
+            self._center + half_dimensions * Vector3(-1, 1, 1),
             # bottom
-            self._center + half_dimensions * vec3(-1, -1, -1),
-            self._center + half_dimensions * vec3(1, -1, -1),
-            self._center + half_dimensions * vec3(1, -1, 1),
-            self._center + half_dimensions * vec3(-1, -1, 1),
+            self._center + half_dimensions * Vector3(-1, -1, -1),
+            self._center + half_dimensions * Vector3(1, -1, -1),
+            self._center + half_dimensions * Vector3(1, -1, 1),
+            self._center + half_dimensions * Vector3(-1, -1, 1),
             # right
-            self._center + half_dimensions * vec3(1, -1, 1),
-            self._center + half_dimensions * vec3(1, -1, -1),
-            self._center + half_dimensions * vec3(1, 1, -1),
-            self._center + half_dimensions * vec3(1, 1, 1),
+            self._center + half_dimensions * Vector3(1, -1, 1),
+            self._center + half_dimensions * Vector3(1, -1, -1),
+            self._center + half_dimensions * Vector3(1, 1, -1),
+            self._center + half_dimensions * Vector3(1, 1, 1),
             # left
-            self._center + half_dimensions * vec3(-1, 1, -1),
-            self._center + half_dimensions * vec3(-1, -1, -1),
-            self._center + half_dimensions * vec3(-1, -1, 1),
-            self._center + half_dimensions * vec3(-1, 1, 1),
+            self._center + half_dimensions * Vector3(-1, 1, -1),
+            self._center + half_dimensions * Vector3(-1, -1, -1),
+            self._center + half_dimensions * Vector3(-1, -1, 1),
+            self._center + half_dimensions * Vector3(-1, 1, 1),
             # front
-            self._center + half_dimensions * vec3(1, -1, 1),
-            self._center + half_dimensions * vec3(1, 1, 1),
-            self._center + half_dimensions * vec3(-1, 1, 1),
-            self._center + half_dimensions * vec3(-1, -1, 1),
+            self._center + half_dimensions * Vector3(1, -1, 1),
+            self._center + half_dimensions * Vector3(1, 1, 1),
+            self._center + half_dimensions * Vector3(-1, 1, 1),
+            self._center + half_dimensions * Vector3(-1, -1, 1),
             # back
-            self._center + half_dimensions * vec3(1, 1, -1),
-            self._center + half_dimensions * vec3(1, -1, -1),
-            self._center + half_dimensions * vec3(-1, -1, -1),
-            self._center + half_dimensions * vec3(-1, 1, -1),
+            self._center + half_dimensions * Vector3(1, 1, -1),
+            self._center + half_dimensions * Vector3(1, -1, -1),
+            self._center + half_dimensions * Vector3(-1, -1, -1),
+            self._center + half_dimensions * Vector3(-1, 1, -1),
         )
-        normals = array(
+        normals = Vector3Array(
             # top
-            vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0),
+            Vector3(0, 1, 0), Vector3(0, 1, 0),
+            Vector3(0, 1, 0), Vector3(0, 1, 0),
             # bottom
-            vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0),
+            Vector3(0, -1, 0), Vector3(0, -1, 0),
+            Vector3(0, -1, 0), Vector3(0, -1, 0),
             # right
-            vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0),
+            Vector3(1, 0, 0), Vector3(1, 0, 0),
+            Vector3(1, 0, 0), Vector3(1, 0, 0),
             # left
-            vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0),
+            Vector3(-1, 0, 0), Vector3(-1, 0, 0),
+            Vector3(-1, 0, 0), Vector3(-1, 0, 0),
             # front
-            vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
+            Vector3(0, 0, 1), Vector3(0, 0, 1),
+            Vector3(0, 0, 1), Vector3(0, 0, 1),
             # back
-            vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1),
+            Vector3(0, 0, -1), Vector3(0, 0, -1),
+            Vector3(0, 0, -1), Vector3(0, 0, -1),
         )
-        indices = array.from_numbers(uint8,
+        indices = U8Array(
             # top
             0, 1, 2, 2, 3, 0,
             # bottom

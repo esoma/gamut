@@ -12,6 +12,7 @@ from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
 from gamut.math import Matrix4, Vector3
 # python
+import ctypes
 from enum import auto, Enum
 import struct
 from typing import Any, Final, Union
@@ -490,9 +491,11 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
             shape_data.append(
                 shape_imp.add_mesh((
                     len(vertices),
-                    vertices.address,
+                    ctypes.cast(vertices.pointer, ctypes.c_void_p).value,
                     len(triangle_indices),
-                    triangle_indices.address
+                    ctypes.cast(
+                        triangle_indices.pointer, ctypes.c_void_p
+                    ).value,
                 ))
             )
         else:

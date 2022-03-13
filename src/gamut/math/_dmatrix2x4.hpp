@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 14:05:23.312847 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-13 19:51:13.948780 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X4_HPP
 #define GAMUT_MATH_DMATRIX2X4_HPP
@@ -672,6 +672,8 @@ DMatrix2x4__matmul__(PyObject *left, PyObject *right)
 
 
 
+
+
         {
             auto row_cls = module_state->DVector2_PyTypeObject;
             auto column_cls = module_state->DVector4_PyTypeObject;
@@ -688,6 +690,8 @@ DMatrix2x4__matmul__(PyObject *left, PyObject *right)
     }
     else
     {
+
+
         auto row_cls = module_state->DVector2_PyTypeObject;
         auto column_cls = module_state->DVector4_PyTypeObject;
         if (Py_TYPE(left) == column_cls)
@@ -808,6 +812,34 @@ static PyGetSetDef DMatrix2x4_PyGetSetDef[] = {
 
 
 
+static DVector2 *
+DMatrix2x4_get_row(DMatrix2x4 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 1)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 1 argument, got %zi", nargs);
+        return 0;
+    }
+
+    auto index = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (index < 0 || index > 3)
+    {
+        PyErr_Format(PyExc_IndexError, "index out of range");
+        return 0;
+    }
+
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto row_cls = module_state->DVector2_PyTypeObject;
+
+    auto *result = (DVector2 *)row_cls->tp_alloc(row_cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector2Glm(glm::row(*self->glm, index));
+    return result;
+}
+
+
 
 static DMatrix4x2 *
 DMatrix2x4_transpose(DMatrix2x4 *self, void*)
@@ -854,6 +886,7 @@ DMatrix2x4_get_limits(DMatrix2x4 *self, void *)
 static PyMethodDef DMatrix2x4_PyMethodDef[] = {
 
 
+    {"get_row", (PyCFunction)DMatrix2x4_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)DMatrix2x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix2x4_get_limits, METH_NOARGS | METH_STATIC, 0},
     {0, 0, 0, 0}
