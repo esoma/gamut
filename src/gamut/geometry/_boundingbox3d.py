@@ -7,9 +7,7 @@ __all__ = ['BoundingBox3d']
 from ._sphere import Sphere
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
-from gamut.glmhelp import F32Vector3, vec3_exact
-# pyglm
-from glm import mat4, vec3
+from gamut.math import Matrix4, Vector3, Vector4
 
 
 class BoundingBox3d:
@@ -17,24 +15,23 @@ class BoundingBox3d:
     def __init__(self, *points: F32Vector3):
         if not points:
             raise ValueError('must have at least 1 point')
-        try:
-            vectors = tuple(vec3_exact(p) for p in points)
-        except TypeError:
-            raise TypeError('each point must be vec3')
 
-        if len(vectors) > 1:
-            self._min = vec3(
-                min(*(v.x for v in vectors)),
-                min(*(v.y for v in vectors)),
-                min(*(v.z for v in vectors)),
+        if not all(isinstance(p, Vector3) for p in points):
+            raise TypeError('each point must be Vector3')
+
+        if len(points) > 1:
+            self._min = Vector3(
+                min(*(v.x for v in points)),
+                min(*(v.y for v in points)),
+                min(*(v.z for v in points)),
             )
-            self._max = vec3(
-                max(*(v.x for v in vectors)),
-                max(*(v.y for v in vectors)),
-                max(*(v.z for v in vectors)),
+            self._max = Vector3(
+                max(*(v.x for v in points)),
+                max(*(v.y for v in points)),
+                max(*(v.z for v in points)),
             )
         else:
-            self._min = self._max = vectors[0]
+            self._min = self._max = points[0]
 
     def __eq__(self, other: BoundingBox3d) -> bool:
         if not isinstance(other, BoundingBox3d):
@@ -48,13 +45,16 @@ class BoundingBox3d:
             f'max=({self._max.x}, {self._max.y}, {self._max.z})>'
         )
 
-    def __rmul__(self, transform: mat4) -> BoundingBox3d:
-        if not isinstance(transform, mat4):
+    def __rmul__(self, transform: Matrix4) -> BoundingBox3d:
+        if not isinstance(transform, Matrix4):
             return NotImplemented
 
-        return BoundingBox3d(*(transform * c for c in self.corners))
+        return BoundingBox3d(*(
+            (transform @ Vector4(*c, 1)).xyz
+            for c in self.corners
+        ))
 
-    def _squared_distance_to_point(self, point: vec3) -> float:
+    def _squared_distance_to_point(self, point: Vector3) -> float:
         result = 0.0
         for i in range(3):
             c = point[i]
@@ -65,32 +65,38 @@ class BoundingBox3d:
         return result
 
     @property
-    def center(self) -> vec3:
+    def center(self) -> Vector3:
         return (self._min + self._max) * .5
 
     @property
-    def min(self) -> vec3:
-        return vec3(self._min)
+    def min(self) -> Vector3:
+        return self._min
 
     @property
-    def max(self) -> vec3:
-        return vec3(self._max)
+    def max(self) -> Vector3:
+        return self._max
 
     @property
-    def corners(self) -> tuple[vec3, vec3, vec3, vec3, vec3, vec3, vec3, vec3]:
+    def corners(self) -> tuple[
+        Vector3, Vector3,
+        Vector3, Vector3,
+        Vector3, Vector3,
+        ector3, Vector3
+    ]:
         return tuple(
-            vec3(x, y, z)
+            Vector3(x, y, z)
             for x in (self._min.x, self._max.x)
             for y in (self._min.y, self._max.y)
             for z in (self._min.z, self._max.z)
         )
 
-    def contains_point(self, point: F32Vector3) -> bool:
-        try:
-            p = vec3_exact(point)
-        except TypeError:
-            raise TypeError('point must be vec3')
-        return all(p >= self._min) and all(p <= self._max)
+    def contains_point(self, point: Vector3) -> bool:
+        if not isinstance(point, Vector3):
+            raise TypeError('point must be Vector3')
+        return (
+            all(p >= m for p, m in zip(point, self._min)) and
+            all(p <= m for p, m in zip(point, self._max))
+        )
 
     def intersects_sphere(self, sphere: Sphere) -> bool:
         return (
