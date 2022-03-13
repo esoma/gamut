@@ -2,7 +2,7 @@
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
-from gamut.math import IVector3, Matrix4, Vector3
+from gamut.math import IVector3, IVector3Array, Matrix4, Vector3, Vector3Array
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -502,10 +502,10 @@ def test_invalid_shape(shape: Any) -> None:
     Cone(Vector3(0), 1, 1),
     Capsule(Vector3(0), 1, 1),
     RectangularCuboid(Vector3(0), Vector3(1)),
-    ConvexHull(Vector3(0), Vector3(-1), Vector3(1)),
+    ConvexHull(Vector3Array(Vector3(0), Vector3(-1), Vector3(1))),
     Mesh(
-        [Vector3(0), Vector3(1), Vector3(2)],
-        [IVector3(0), IVector3(1), IVector3(2)]
+        Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+        IVector3Array(IVector3(0), IVector3(1), IVector3(2))
     ),
     Composite3d(),
     Composite3d(
@@ -515,10 +515,10 @@ def test_invalid_shape(shape: Any) -> None:
         Cone(Vector3(0), 1, 1),
         Capsule(Vector3(0), 1, 1),
         RectangularCuboid(Vector3(0), Vector3(1)),
-        ConvexHull(Vector3(0), Vector3(-1), Vector3(1)),
+        ConvexHull(Vector3Array(Vector3(0), Vector3(-1), Vector3(1))),
         Mesh(
-            [Vector3(0), Vector3(1), Vector3(2)],
-            [IVector3(0), IVector3(1), IVector3(2)]
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            IVector3Array(IVector3(0), IVector3(1), IVector3(2))
         ),
     )
 ])
