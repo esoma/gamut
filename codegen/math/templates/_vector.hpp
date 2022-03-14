@@ -54,18 +54,20 @@ static PyObject *
             {% endfor %}
             break;
         }
-        case {{ component_count }}:
-        {
-            {% for i in range(component_count) %}
+        {% if component_count != 1 %}
+            case {{ component_count }}:
             {
-                auto arg = PyTuple_GET_ITEM(args, {{ i }});
-                c_{{ i }} = pyobject_to_c_{{ c_type.replace(' ', '_') }}(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
+                {% for i in range(component_count) %}
+                {
+                    auto arg = PyTuple_GET_ITEM(args, {{ i }});
+                    c_{{ i }} = pyobject_to_c_{{ c_type.replace(' ', '_') }}(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+                {% endfor %}
+                break;
             }
-            {% endfor %}
-            break;
-        }
+        {% endif %}
         default:
         {
             PyErr_Format(
@@ -581,7 +583,7 @@ static int
         view->obj = 0;
         return -1;
     }
-    view->buf = glm::value_ptr(*self->glm);
+    view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof({{ c_type }}) * {{ component_count }};
     view->readonly = 1;

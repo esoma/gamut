@@ -1,7 +1,33 @@
 
-# generated 2022-03-13 19:51:14.044778 from codegen/math/templates/_math.pyi
+# generated 2022-03-14 18:08:34.897035 from codegen/math/templates/_math.pyi
 
 __all__ = [
+
+    'BVector1',
+
+    'DVector1',
+
+    'FVector1',
+
+    'I8Vector1',
+
+    'U8Vector1',
+
+    'I16Vector1',
+
+    'U16Vector1',
+
+    'I32Vector1',
+
+    'U32Vector1',
+
+    'IVector1',
+
+    'UVector1',
+
+    'I64Vector1',
+
+    'U64Vector1',
 
     'BVector2',
 
@@ -88,6 +114,2544 @@ import ctypes
 from typing import Any, final, overload, SupportsFloat, SupportsInt
 
 Number = SupportsFloat | SupportsInt
+
+
+
+
+
+
+
+@final
+class BVector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> bool: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: BVector1) -> BVector1: ...
+    @overload
+    def __add__(self, other: Number) -> BVector1: ...
+    @overload
+    def __radd__(self, other: BVector1) -> BVector1: ...
+    @overload
+    def __radd__(self, other: Number) -> BVector1: ...
+
+    @overload
+    def __sub__(self, other: BVector1) -> BVector1: ...
+    @overload
+    def __sub__(self, other: Number) -> BVector1: ...
+    @overload
+    def __rsub__(self, other: BVector1) -> BVector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> BVector1: ...
+
+    @overload
+    def __mul__(self, other: BVector1) -> BVector1: ...
+    @overload
+    def __mul__(self, other: Number) -> BVector1: ...
+    @overload
+    def __rmul__(self, other: BVector1) -> BVector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> BVector1: ...
+
+
+
+
+
+
+
+    def __abs__(self) -> BVector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> bool: ...
+
+
+
+    @property
+    def xx(self) -> BVector2: ...
+
+
+
+    @property
+    def xxx(self) -> BVector3: ...
+
+
+
+    @property
+    def xxxx(self) -> BVector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> bool: ...
+
+
+
+    @property
+    def rr(self) -> BVector2: ...
+
+
+
+    @property
+    def rrr(self) -> BVector3: ...
+
+
+
+    @property
+    def rrrr(self) -> BVector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> bool: ...
+
+
+
+    @property
+    def ss(self) -> BVector2: ...
+
+
+
+    @property
+    def sss(self) -> BVector3: ...
+
+
+
+    @property
+    def ssss(self) -> BVector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> bool: ...
+
+
+
+    @property
+    def uu(self) -> BVector2: ...
+
+
+
+    @property
+    def uuu(self) -> BVector3: ...
+
+
+
+    @property
+    def uuuu(self) -> BVector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[bool, bool]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+
+@final
+class BVector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: BVector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> BVector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class DVector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __add__(self, other: Number) -> DVector1: ...
+    @overload
+    def __radd__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __radd__(self, other: Number) -> DVector1: ...
+
+    @overload
+    def __sub__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __sub__(self, other: Number) -> DVector1: ...
+    @overload
+    def __rsub__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> DVector1: ...
+
+    @overload
+    def __mul__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __mul__(self, other: Number) -> DVector1: ...
+    @overload
+    def __rmul__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> DVector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> DVector1: ...
+    @overload
+    def __rtruediv__(self, other: DVector1) -> DVector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> DVector1: ...
+
+
+
+
+    def __abs__(self) -> DVector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> DVector2: ...
+
+
+
+    @property
+    def xxx(self) -> DVector3: ...
+
+
+
+    @property
+    def xxxx(self) -> DVector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> DVector2: ...
+
+
+
+    @property
+    def rrr(self) -> DVector3: ...
+
+
+
+    @property
+    def rrrr(self) -> DVector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> DVector2: ...
+
+
+
+    @property
+    def sss(self) -> DVector3: ...
+
+
+
+    @property
+    def ssss(self) -> DVector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> DVector2: ...
+
+
+
+    @property
+    def uuu(self) -> DVector3: ...
+
+
+
+    @property
+    def uuuu(self) -> DVector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
+@final
+class DVector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: DVector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> DVector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class FVector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> float: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __add__(self, other: Number) -> FVector1: ...
+    @overload
+    def __radd__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __radd__(self, other: Number) -> FVector1: ...
+
+    @overload
+    def __sub__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __sub__(self, other: Number) -> FVector1: ...
+    @overload
+    def __rsub__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> FVector1: ...
+
+    @overload
+    def __mul__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __mul__(self, other: Number) -> FVector1: ...
+    @overload
+    def __rmul__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> FVector1: ...
+
+
+    def __matmul__(self, other: FVector1) -> float: ...
+    def __rmatmul__(self, other: FVector1) -> float: ...
+
+    @overload
+    def __mod__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __mod__(self, other: Number) -> FVector1: ...
+    @overload
+    def __rmod__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __rmod__(self, other: Number) -> FVector1: ...
+
+    @overload
+    def __pow__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __pow__(self, other: Number) -> FVector1: ...
+    @overload
+    def __rpow__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __rpow__(self, other: Number) -> FVector1: ...
+
+
+
+    @overload
+    def __truediv__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> FVector1: ...
+    @overload
+    def __rtruediv__(self, other: FVector1) -> FVector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> FVector1: ...
+
+
+
+
+    def __abs__(self) -> FVector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> float: ...
+
+
+
+    @property
+    def xx(self) -> FVector2: ...
+
+
+
+    @property
+    def xxx(self) -> FVector3: ...
+
+
+
+    @property
+    def xxxx(self) -> FVector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> float: ...
+
+
+
+    @property
+    def rr(self) -> FVector2: ...
+
+
+
+    @property
+    def rrr(self) -> FVector3: ...
+
+
+
+    @property
+    def rrrr(self) -> FVector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> float: ...
+
+
+
+    @property
+    def ss(self) -> FVector2: ...
+
+
+
+    @property
+    def sss(self) -> FVector3: ...
+
+
+
+    @property
+    def ssss(self) -> FVector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> float: ...
+
+
+
+    @property
+    def uu(self) -> FVector2: ...
+
+
+
+    @property
+    def uuu(self) -> FVector3: ...
+
+
+
+    @property
+    def uuuu(self) -> FVector4: ...
+
+
+
+
+
+    @property
+    def magnitude(self) -> float: ...
+
+
+    def normalize(self) -> FVector1: ...
+    def distance(self, other: FVector1, /) -> float: ...
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[float, float]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
+@final
+class FVector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: FVector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> FVector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class I8Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> I8Vector1: ...
+    @overload
+    def __radd__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> I8Vector1: ...
+
+    @overload
+    def __sub__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> I8Vector1: ...
+    @overload
+    def __rsub__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> I8Vector1: ...
+
+    @overload
+    def __mul__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> I8Vector1: ...
+    @overload
+    def __rmul__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> I8Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> I8Vector1: ...
+    @overload
+    def __rtruediv__(self, other: I8Vector1) -> I8Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> I8Vector1: ...
+
+
+
+
+    def __abs__(self) -> I8Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> I8Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> I8Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> I8Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> I8Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> I8Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> I8Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> I8Vector2: ...
+
+
+
+    @property
+    def sss(self) -> I8Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> I8Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> I8Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> I8Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> I8Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+
+@final
+class I8Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: I8Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> I8Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class U8Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> U8Vector1: ...
+    @overload
+    def __radd__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> U8Vector1: ...
+
+    @overload
+    def __sub__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> U8Vector1: ...
+    @overload
+    def __rsub__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> U8Vector1: ...
+
+    @overload
+    def __mul__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> U8Vector1: ...
+    @overload
+    def __rmul__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> U8Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> U8Vector1: ...
+    @overload
+    def __rtruediv__(self, other: U8Vector1) -> U8Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> U8Vector1: ...
+
+
+
+    def __neg__(self) -> U8Vector1: ...
+
+
+    def __abs__(self) -> U8Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> U8Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> U8Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> U8Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> U8Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> U8Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> U8Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> U8Vector2: ...
+
+
+
+    @property
+    def sss(self) -> U8Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> U8Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> U8Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> U8Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> U8Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+
+@final
+class U8Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: U8Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> U8Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class I16Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> I16Vector1: ...
+    @overload
+    def __radd__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> I16Vector1: ...
+
+    @overload
+    def __sub__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> I16Vector1: ...
+    @overload
+    def __rsub__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> I16Vector1: ...
+
+    @overload
+    def __mul__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> I16Vector1: ...
+    @overload
+    def __rmul__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> I16Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> I16Vector1: ...
+    @overload
+    def __rtruediv__(self, other: I16Vector1) -> I16Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> I16Vector1: ...
+
+
+
+
+    def __abs__(self) -> I16Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> I16Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> I16Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> I16Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> I16Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> I16Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> I16Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> I16Vector2: ...
+
+
+
+    @property
+    def sss(self) -> I16Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> I16Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> I16Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> I16Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> I16Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+
+@final
+class I16Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: I16Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> I16Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class U16Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> U16Vector1: ...
+    @overload
+    def __radd__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> U16Vector1: ...
+
+    @overload
+    def __sub__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> U16Vector1: ...
+    @overload
+    def __rsub__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> U16Vector1: ...
+
+    @overload
+    def __mul__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> U16Vector1: ...
+    @overload
+    def __rmul__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> U16Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> U16Vector1: ...
+    @overload
+    def __rtruediv__(self, other: U16Vector1) -> U16Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> U16Vector1: ...
+
+
+
+    def __neg__(self) -> U16Vector1: ...
+
+
+    def __abs__(self) -> U16Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> U16Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> U16Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> U16Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> U16Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> U16Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> U16Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> U16Vector2: ...
+
+
+
+    @property
+    def sss(self) -> U16Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> U16Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> U16Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> U16Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> U16Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+
+@final
+class U16Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: U16Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> U16Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class I32Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> I32Vector1: ...
+    @overload
+    def __radd__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> I32Vector1: ...
+
+    @overload
+    def __sub__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> I32Vector1: ...
+    @overload
+    def __rsub__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> I32Vector1: ...
+
+    @overload
+    def __mul__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> I32Vector1: ...
+    @overload
+    def __rmul__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> I32Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> I32Vector1: ...
+    @overload
+    def __rtruediv__(self, other: I32Vector1) -> I32Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> I32Vector1: ...
+
+
+
+
+    def __abs__(self) -> I32Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> I32Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> I32Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> I32Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> I32Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> I32Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> I32Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> I32Vector2: ...
+
+
+
+    @property
+    def sss(self) -> I32Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> I32Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> I32Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> I32Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> I32Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+
+@final
+class I32Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: I32Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> I32Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class U32Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> U32Vector1: ...
+    @overload
+    def __radd__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> U32Vector1: ...
+
+    @overload
+    def __sub__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> U32Vector1: ...
+    @overload
+    def __rsub__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> U32Vector1: ...
+
+    @overload
+    def __mul__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> U32Vector1: ...
+    @overload
+    def __rmul__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> U32Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> U32Vector1: ...
+    @overload
+    def __rtruediv__(self, other: U32Vector1) -> U32Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> U32Vector1: ...
+
+
+
+    def __neg__(self) -> U32Vector1: ...
+
+
+    def __abs__(self) -> U32Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> U32Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> U32Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> U32Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> U32Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> U32Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> U32Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> U32Vector2: ...
+
+
+
+    @property
+    def sss(self) -> U32Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> U32Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> U32Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> U32Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> U32Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+
+@final
+class U32Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: U32Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> U32Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class IVector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __add__(self, other: Number) -> IVector1: ...
+    @overload
+    def __radd__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __radd__(self, other: Number) -> IVector1: ...
+
+    @overload
+    def __sub__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __sub__(self, other: Number) -> IVector1: ...
+    @overload
+    def __rsub__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> IVector1: ...
+
+    @overload
+    def __mul__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __mul__(self, other: Number) -> IVector1: ...
+    @overload
+    def __rmul__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> IVector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> IVector1: ...
+    @overload
+    def __rtruediv__(self, other: IVector1) -> IVector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> IVector1: ...
+
+
+
+
+    def __abs__(self) -> IVector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> IVector2: ...
+
+
+
+    @property
+    def xxx(self) -> IVector3: ...
+
+
+
+    @property
+    def xxxx(self) -> IVector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> IVector2: ...
+
+
+
+    @property
+    def rrr(self) -> IVector3: ...
+
+
+
+    @property
+    def rrrr(self) -> IVector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> IVector2: ...
+
+
+
+    @property
+    def sss(self) -> IVector3: ...
+
+
+
+    @property
+    def ssss(self) -> IVector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> IVector2: ...
+
+
+
+    @property
+    def uuu(self) -> IVector3: ...
+
+
+
+    @property
+    def uuuu(self) -> IVector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+
+@final
+class IVector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: IVector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> IVector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class UVector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __add__(self, other: Number) -> UVector1: ...
+    @overload
+    def __radd__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __radd__(self, other: Number) -> UVector1: ...
+
+    @overload
+    def __sub__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __sub__(self, other: Number) -> UVector1: ...
+    @overload
+    def __rsub__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> UVector1: ...
+
+    @overload
+    def __mul__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __mul__(self, other: Number) -> UVector1: ...
+    @overload
+    def __rmul__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> UVector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> UVector1: ...
+    @overload
+    def __rtruediv__(self, other: UVector1) -> UVector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> UVector1: ...
+
+
+
+    def __neg__(self) -> UVector1: ...
+
+
+    def __abs__(self) -> UVector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> UVector2: ...
+
+
+
+    @property
+    def xxx(self) -> UVector3: ...
+
+
+
+    @property
+    def xxxx(self) -> UVector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> UVector2: ...
+
+
+
+    @property
+    def rrr(self) -> UVector3: ...
+
+
+
+    @property
+    def rrrr(self) -> UVector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> UVector2: ...
+
+
+
+    @property
+    def sss(self) -> UVector3: ...
+
+
+
+    @property
+    def ssss(self) -> UVector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> UVector2: ...
+
+
+
+    @property
+    def uuu(self) -> UVector3: ...
+
+
+
+    @property
+    def uuuu(self) -> UVector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+
+@final
+class UVector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: UVector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> UVector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class I64Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> I64Vector1: ...
+    @overload
+    def __radd__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> I64Vector1: ...
+
+    @overload
+    def __sub__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> I64Vector1: ...
+    @overload
+    def __rsub__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> I64Vector1: ...
+
+    @overload
+    def __mul__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> I64Vector1: ...
+    @overload
+    def __rmul__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> I64Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> I64Vector1: ...
+    @overload
+    def __rtruediv__(self, other: I64Vector1) -> I64Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> I64Vector1: ...
+
+
+
+
+    def __abs__(self) -> I64Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> I64Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> I64Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> I64Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> I64Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> I64Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> I64Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> I64Vector2: ...
+
+
+
+    @property
+    def sss(self) -> I64Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> I64Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> I64Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> I64Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> I64Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+
+@final
+class I64Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: I64Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> I64Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+
+
+
+
+
+
+
+
+
+
+
+@final
+class U64Vector1:
+
+    __slots__ = ['__weakref__']
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, all: Number, /): ...
+
+
+
+
+
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> int: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+
+    @overload
+    def __add__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __add__(self, other: Number) -> U64Vector1: ...
+    @overload
+    def __radd__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __radd__(self, other: Number) -> U64Vector1: ...
+
+    @overload
+    def __sub__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __sub__(self, other: Number) -> U64Vector1: ...
+    @overload
+    def __rsub__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __rsub__(self, other: Number) -> U64Vector1: ...
+
+    @overload
+    def __mul__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __mul__(self, other: Number) -> U64Vector1: ...
+    @overload
+    def __rmul__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __rmul__(self, other: Number) -> U64Vector1: ...
+
+
+
+
+    @overload
+    def __truediv__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __truediv__(self, other: Number) -> U64Vector1: ...
+    @overload
+    def __rtruediv__(self, other: U64Vector1) -> U64Vector1: ...
+    @overload
+    def __rtruediv__(self, other: Number) -> U64Vector1: ...
+
+
+
+    def __neg__(self) -> U64Vector1: ...
+
+
+    def __abs__(self) -> U64Vector1: ...
+    def __bool__(self) -> bool: ...
+
+
+
+
+    @property
+    def x(self) -> int: ...
+
+
+
+    @property
+    def xx(self) -> U64Vector2: ...
+
+
+
+    @property
+    def xxx(self) -> U64Vector3: ...
+
+
+
+    @property
+    def xxxx(self) -> U64Vector4: ...
+
+
+
+
+
+    @property
+    def r(self) -> int: ...
+
+
+
+    @property
+    def rr(self) -> U64Vector2: ...
+
+
+
+    @property
+    def rrr(self) -> U64Vector3: ...
+
+
+
+    @property
+    def rrrr(self) -> U64Vector4: ...
+
+
+
+
+
+    @property
+    def s(self) -> int: ...
+
+
+
+    @property
+    def ss(self) -> U64Vector2: ...
+
+
+
+    @property
+    def sss(self) -> U64Vector3: ...
+
+
+
+    @property
+    def ssss(self) -> U64Vector4: ...
+
+
+
+
+
+    @property
+    def u(self) -> int: ...
+
+
+
+    @property
+    def uu(self) -> U64Vector2: ...
+
+
+
+    @property
+    def uuu(self) -> U64Vector3: ...
+
+
+
+    @property
+    def uuuu(self) -> U64Vector4: ...
+
+
+
+
+
+
+    @classmethod
+    def get_limits(cls) -> tuple[int, int]: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+
+@final
+class U64Vector1Array:
+
+    __slots__ = ['__weakref__']
+
+    def __init__(self, *vectors: U64Vector1): ...
+    def __hash__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __len__(self) -> int: ...
+    def __getitem__(self) -> U64Vector1: ...
+    def __eq__(self, other: Any) -> bool: ...
+    def __neq__(self, other: Any) -> bool: ...
+    def __bool__(self) -> bool: ...
+
+    @property
+    def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+
+
+
+
 
 
 

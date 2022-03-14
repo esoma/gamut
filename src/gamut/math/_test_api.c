@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:14.098278 from codegen/math/templates/test_api.cpp
+// generated 2022-03-14 18:08:34.951535 from codegen/math/templates/test_api.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -16,6 +16,136 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
     struct GamutMathApi *api = GamutMathApi_Get();
     if (!api){ return 0; }
     TEST(!PyErr_Occurred());
+
+
+            TEST(api->GamutMathBVector1_GetType != 0);
+            TEST(api->GamutMathBVector1_Create != 0);
+            TEST(api->GamutMathBVector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathBVector1Array_Create != 0);
+        TEST(api->GamutMathBVector1Array_GetType != 0);
+        TEST(api->GamutMathBVector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathBVector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathDVector1_GetType != 0);
+            TEST(api->GamutMathDVector1_Create != 0);
+            TEST(api->GamutMathDVector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathDVector1Array_Create != 0);
+        TEST(api->GamutMathDVector1Array_GetType != 0);
+        TEST(api->GamutMathDVector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathDVector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathFVector1_GetType != 0);
+            TEST(api->GamutMathFVector1_Create != 0);
+            TEST(api->GamutMathFVector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathFVector1Array_Create != 0);
+        TEST(api->GamutMathFVector1Array_GetType != 0);
+        TEST(api->GamutMathFVector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathFVector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathI8Vector1_GetType != 0);
+            TEST(api->GamutMathI8Vector1_Create != 0);
+            TEST(api->GamutMathI8Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathI8Vector1Array_Create != 0);
+        TEST(api->GamutMathI8Vector1Array_GetType != 0);
+        TEST(api->GamutMathI8Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathI8Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathU8Vector1_GetType != 0);
+            TEST(api->GamutMathU8Vector1_Create != 0);
+            TEST(api->GamutMathU8Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathU8Vector1Array_Create != 0);
+        TEST(api->GamutMathU8Vector1Array_GetType != 0);
+        TEST(api->GamutMathU8Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathU8Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathI16Vector1_GetType != 0);
+            TEST(api->GamutMathI16Vector1_Create != 0);
+            TEST(api->GamutMathI16Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathI16Vector1Array_Create != 0);
+        TEST(api->GamutMathI16Vector1Array_GetType != 0);
+        TEST(api->GamutMathI16Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathI16Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathU16Vector1_GetType != 0);
+            TEST(api->GamutMathU16Vector1_Create != 0);
+            TEST(api->GamutMathU16Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathU16Vector1Array_Create != 0);
+        TEST(api->GamutMathU16Vector1Array_GetType != 0);
+        TEST(api->GamutMathU16Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathU16Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathI32Vector1_GetType != 0);
+            TEST(api->GamutMathI32Vector1_Create != 0);
+            TEST(api->GamutMathI32Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathI32Vector1Array_Create != 0);
+        TEST(api->GamutMathI32Vector1Array_GetType != 0);
+        TEST(api->GamutMathI32Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathI32Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathU32Vector1_GetType != 0);
+            TEST(api->GamutMathU32Vector1_Create != 0);
+            TEST(api->GamutMathU32Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathU32Vector1Array_Create != 0);
+        TEST(api->GamutMathU32Vector1Array_GetType != 0);
+        TEST(api->GamutMathU32Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathU32Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathIVector1_GetType != 0);
+            TEST(api->GamutMathIVector1_Create != 0);
+            TEST(api->GamutMathIVector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathIVector1Array_Create != 0);
+        TEST(api->GamutMathIVector1Array_GetType != 0);
+        TEST(api->GamutMathIVector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathIVector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathUVector1_GetType != 0);
+            TEST(api->GamutMathUVector1_Create != 0);
+            TEST(api->GamutMathUVector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathUVector1Array_Create != 0);
+        TEST(api->GamutMathUVector1Array_GetType != 0);
+        TEST(api->GamutMathUVector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathUVector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathI64Vector1_GetType != 0);
+            TEST(api->GamutMathI64Vector1_Create != 0);
+            TEST(api->GamutMathI64Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathI64Vector1Array_Create != 0);
+        TEST(api->GamutMathI64Vector1Array_GetType != 0);
+        TEST(api->GamutMathI64Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathI64Vector1Array_GetLength != 0);
+
+
+            TEST(api->GamutMathU64Vector1_GetType != 0);
+            TEST(api->GamutMathU64Vector1_Create != 0);
+            TEST(api->GamutMathU64Vector1_GetValuePointer != 0);
+
+        TEST(api->GamutMathU64Vector1Array_Create != 0);
+        TEST(api->GamutMathU64Vector1Array_GetType != 0);
+        TEST(api->GamutMathU64Vector1Array_GetValuePointer != 0);
+        TEST(api->GamutMathU64Vector1Array_GetLength != 0);
 
 
             TEST(api->GamutMathBVector2_GetType != 0);
@@ -671,6 +801,1683 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
 
     Py_RETURN_NONE;
 }
+
+
+
+
+
+    static PyObject *
+    test_BVector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathBVector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            bool components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathBVector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            bool *value_ptr = api->GamutMathBVector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (bool)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        bool *value_ptr = api->GamutMathBVector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_BVector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathBVector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        bool components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathBVector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathBVector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            bool *value_ptr = api->GamutMathBVector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (bool)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathBVector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        bool *value_ptr = api->GamutMathBVector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_DVector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathDVector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            double components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathDVector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            double *value_ptr = api->GamutMathDVector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (double)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        double *value_ptr = api->GamutMathDVector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_DVector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathDVector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        double components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathDVector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathDVector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            double *value_ptr = api->GamutMathDVector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (double)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathDVector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        double *value_ptr = api->GamutMathDVector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_FVector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathFVector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            float components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathFVector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            float *value_ptr = api->GamutMathFVector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (float)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        float *value_ptr = api->GamutMathFVector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_FVector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathFVector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        float components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathFVector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathFVector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            float *value_ptr = api->GamutMathFVector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (float)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathFVector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        float *value_ptr = api->GamutMathFVector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_I8Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI8Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            int8_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathI8Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            int8_t *value_ptr = api->GamutMathI8Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (int8_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        int8_t *value_ptr = api->GamutMathI8Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_I8Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI8Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        int8_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathI8Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathI8Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            int8_t *value_ptr = api->GamutMathI8Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (int8_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathI8Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        int8_t *value_ptr = api->GamutMathI8Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_U8Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU8Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            uint8_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathU8Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            uint8_t *value_ptr = api->GamutMathU8Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (uint8_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        uint8_t *value_ptr = api->GamutMathU8Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_U8Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU8Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        uint8_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathU8Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathU8Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            uint8_t *value_ptr = api->GamutMathU8Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (uint8_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathU8Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        uint8_t *value_ptr = api->GamutMathU8Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_I16Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI16Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            int16_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathI16Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            int16_t *value_ptr = api->GamutMathI16Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (int16_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        int16_t *value_ptr = api->GamutMathI16Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_I16Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI16Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        int16_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathI16Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathI16Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            int16_t *value_ptr = api->GamutMathI16Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (int16_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathI16Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        int16_t *value_ptr = api->GamutMathI16Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_U16Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU16Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            uint16_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathU16Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            uint16_t *value_ptr = api->GamutMathU16Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (uint16_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        uint16_t *value_ptr = api->GamutMathU16Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_U16Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU16Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        uint16_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathU16Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathU16Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            uint16_t *value_ptr = api->GamutMathU16Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (uint16_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathU16Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        uint16_t *value_ptr = api->GamutMathU16Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_I32Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI32Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            int32_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathI32Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            int32_t *value_ptr = api->GamutMathI32Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (int32_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        int32_t *value_ptr = api->GamutMathI32Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_I32Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI32Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        int32_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathI32Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathI32Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            int32_t *value_ptr = api->GamutMathI32Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (int32_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathI32Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        int32_t *value_ptr = api->GamutMathI32Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_U32Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU32Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            uint32_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathU32Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            uint32_t *value_ptr = api->GamutMathU32Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (uint32_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        uint32_t *value_ptr = api->GamutMathU32Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_U32Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU32Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        uint32_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathU32Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathU32Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            uint32_t *value_ptr = api->GamutMathU32Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (uint32_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathU32Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        uint32_t *value_ptr = api->GamutMathU32Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_IVector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathIVector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            int components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathIVector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            int *value_ptr = api->GamutMathIVector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (int)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        int *value_ptr = api->GamutMathIVector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_IVector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathIVector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        int components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathIVector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathIVector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            int *value_ptr = api->GamutMathIVector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (int)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathIVector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        int *value_ptr = api->GamutMathIVector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_UVector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathUVector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            unsigned int components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathUVector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            unsigned int *value_ptr = api->GamutMathUVector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (unsigned int)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        unsigned int *value_ptr = api->GamutMathUVector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_UVector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathUVector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        unsigned int components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathUVector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathUVector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            unsigned int *value_ptr = api->GamutMathUVector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (unsigned int)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathUVector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        unsigned int *value_ptr = api->GamutMathUVector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_I64Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI64Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            int64_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathI64Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            int64_t *value_ptr = api->GamutMathI64Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (int64_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        int64_t *value_ptr = api->GamutMathI64Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_I64Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathI64Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        int64_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathI64Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathI64Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            int64_t *value_ptr = api->GamutMathI64Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (int64_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathI64Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        int64_t *value_ptr = api->GamutMathI64Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+
+
+
+
+    static PyObject *
+    test_U64Vector1(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU64Vector1_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        {
+            uint64_t components[1] = {
+
+                    0
+
+            };
+            PyObject *obj = api->GamutMathU64Vector1_Create(components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            uint64_t *value_ptr = api->GamutMathU64Vector1_GetValuePointer(obj);
+            TEST(value_ptr != 0);
+            TEST(!PyErr_Occurred());
+
+                TEST(value_ptr[0] == (uint64_t)0);
+
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        uint64_t *value_ptr = api->GamutMathU64Vector1_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
+
+    static PyObject *
+    test_U64Vector1Array(PyObject *self, PyObject *args)
+    {
+        struct GamutMathApi *api = GamutMathApi_Get();
+        if (!api){ return 0; }
+        TEST(!PyErr_Occurred());
+
+        PyTypeObject *type = api->GamutMathU64Vector1Array_GetType();
+        TEST(type != 0);
+        TEST(!PyErr_Occurred());
+
+        uint64_t components[10] = {
+
+                0,
+
+                1,
+
+                2,
+
+                3,
+
+                4,
+
+                5,
+
+                6,
+
+                7,
+
+                8,
+
+                9
+
+        };
+        for (size_t i = 0; i < 10; i++)
+        {
+            PyObject *obj = api->GamutMathU64Vector1Array_Create(i, components);
+            TEST(obj != 0);
+            TEST(!PyErr_Occurred());
+            TEST(Py_TYPE(obj) == type);
+
+            size_t length = api->GamutMathU64Vector1Array_GetLength(obj);
+            TEST(length == i);
+            TEST(!PyErr_Occurred());
+
+            uint64_t *value_ptr = api->GamutMathU64Vector1Array_GetValuePointer(obj);
+            if (i == 0)
+            {
+                TEST(value_ptr == 0);
+            }
+            else
+            {
+                TEST(value_ptr != 0);
+            }
+            TEST(!PyErr_Occurred());
+            for (size_t j = 0; j < i * 1; j++)
+            {
+                TEST(value_ptr[j] == (uint64_t)j);
+            }
+
+            Py_DECREF(obj);
+        }
+
+        Py_INCREF(Py_None);
+        size_t length = api->GamutMathU64Vector1Array_GetLength(Py_None);
+        TEST(length == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        uint64_t *value_ptr = api->GamutMathU64Vector1Array_GetValuePointer(Py_None);
+        TEST(value_ptr == 0);
+        TEST(PyErr_Occurred());
+        PyErr_Clear();
+        Py_DECREF(Py_None);
+
+        GamutMathApi_Release();
+        TEST(!PyErr_Occurred());
+
+        Py_RETURN_NONE;
+    }
 
 
 
@@ -14904,6 +16711,45 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
 
 static PyMethodDef module_methods[] = {
     {"test_GamutMathApi_Get", test_GamutMathApi_Get, METH_NOARGS, 0},
+
+        {"test_BVector1", test_BVector1, METH_NOARGS, 0},
+        {"test_BVector1Array", test_BVector1Array, METH_NOARGS, 0},
+
+        {"test_DVector1", test_DVector1, METH_NOARGS, 0},
+        {"test_DVector1Array", test_DVector1Array, METH_NOARGS, 0},
+
+        {"test_FVector1", test_FVector1, METH_NOARGS, 0},
+        {"test_FVector1Array", test_FVector1Array, METH_NOARGS, 0},
+
+        {"test_I8Vector1", test_I8Vector1, METH_NOARGS, 0},
+        {"test_I8Vector1Array", test_I8Vector1Array, METH_NOARGS, 0},
+
+        {"test_U8Vector1", test_U8Vector1, METH_NOARGS, 0},
+        {"test_U8Vector1Array", test_U8Vector1Array, METH_NOARGS, 0},
+
+        {"test_I16Vector1", test_I16Vector1, METH_NOARGS, 0},
+        {"test_I16Vector1Array", test_I16Vector1Array, METH_NOARGS, 0},
+
+        {"test_U16Vector1", test_U16Vector1, METH_NOARGS, 0},
+        {"test_U16Vector1Array", test_U16Vector1Array, METH_NOARGS, 0},
+
+        {"test_I32Vector1", test_I32Vector1, METH_NOARGS, 0},
+        {"test_I32Vector1Array", test_I32Vector1Array, METH_NOARGS, 0},
+
+        {"test_U32Vector1", test_U32Vector1, METH_NOARGS, 0},
+        {"test_U32Vector1Array", test_U32Vector1Array, METH_NOARGS, 0},
+
+        {"test_IVector1", test_IVector1, METH_NOARGS, 0},
+        {"test_IVector1Array", test_IVector1Array, METH_NOARGS, 0},
+
+        {"test_UVector1", test_UVector1, METH_NOARGS, 0},
+        {"test_UVector1Array", test_UVector1Array, METH_NOARGS, 0},
+
+        {"test_I64Vector1", test_I64Vector1, METH_NOARGS, 0},
+        {"test_I64Vector1Array", test_I64Vector1Array, METH_NOARGS, 0},
+
+        {"test_U64Vector1", test_U64Vector1, METH_NOARGS, 0},
+        {"test_U64Vector1Array", test_U64Vector1Array, METH_NOARGS, 0},
 
         {"test_BVector2", test_BVector2, METH_NOARGS, 0},
         {"test_BVector2Array", test_BVector2Array, METH_NOARGS, 0},

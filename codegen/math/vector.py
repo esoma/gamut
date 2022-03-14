@@ -12,7 +12,7 @@ from typing import Generator, Sequence
 def generate_vector_files(build_dir: Path) -> Generator[str, None, None]:
     types: list[tuple[str, int, str]] = []
     b = build_dir
-    for i in range(2, 5):
+    for i in range(1, 5):
         types.append(generate_vector_file(b,
             'bool', i, f'BVector{i}', '?'))
         types.append(generate_vector_file(b,
