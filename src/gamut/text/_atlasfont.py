@@ -11,8 +11,7 @@ from ._font import Font
 from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
                             create_quad_uv_array, Pack2d, PrimitiveMode,
                             Texture2d, TextureComponents)
-from gamut.math import (FMatrix4, FVector3, FVector4, FVector4Array, IVector2,
-                        Vector2)
+from gamut.math import FMatrix4, FVector3, FVector4Array, IVector2, Vector2
 # python
 from typing import Final, Iterable, Optional, Union
 from weakref import ref
@@ -170,10 +169,9 @@ class AtlasFont(Font):
                 PrimitiveMode.TRIANGLE,
                 left=0, bottom=0,
             )
-            glyph_position = FVector4Array(
-                *(transform @ FVector4(*p) for p in glyph_position)
+            pos += FVector4Array(
+                *(transform @ p for p in glyph_position)
             )
-            pos += bytes(glyph_position)
             # generate the vertex uvs
             top_left_uv, bottom_right_uv = atlas_glyph.uv
             uvs += create_quad_uv_array(
@@ -182,7 +180,7 @@ class AtlasFont(Font):
                 right=bottom_right_uv.x,
                 bottom=bottom_right_uv.y,
                 top=top_left_uv.y
-            ).to_bytes()
+            )
 
         return {
             texture: (

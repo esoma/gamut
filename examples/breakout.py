@@ -218,7 +218,7 @@ class App(Application):
                 right=brick.bottom_right.x,
                 top=brick.top_left.y,
                 bottom=brick.bottom_right.y
-            ).to_bytes()
+            )
         self.bricks_color_buffer = Buffer(
             glm_array(
                 [brick.color for brick in self.bricks for _ in range(6)]
@@ -244,7 +244,7 @@ class App(Application):
                     self.ball_primitive_mode,
                     left=self.ball_size.x / -2.0, right=self.ball_size.x / 2.0,
                     bottom=self.ball_size.y / -2.0, top=self.ball_size.y / 2.0,
-                ).to_bytes()
+                )
             ), vec4)
         })
         # setup the paddle
@@ -261,7 +261,7 @@ class App(Application):
                     self.paddle_primitive_mode,
                     left=0, right=self.paddle_size.x,
                     bottom=0, top=self.paddle_size.y,
-                ).to_bytes()
+                )
             ), vec4)
         })
         self.update_paddle_transform(self.SCREEN_SIZE[0] / 2.0)
