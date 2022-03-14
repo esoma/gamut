@@ -351,7 +351,6 @@ sdl_window_event_callback_map[SDL_WINDOWEVENT_MOVED] = (
 )
 
 
-
 def sdl_window_event_resized_callback(
     sdl_event: Any,
     mice: dict[Any, Mouse],

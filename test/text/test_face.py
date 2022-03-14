@@ -1,14 +1,13 @@
 
 
 # gamut
+from gamut.math import IVector2, Vector2
 from gamut.text import (BreakChunk, Face, FontSize, PositionedGlyph,
                         RenderedGlyphFormat)
 # python
 import os
 from pathlib import Path
 from typing import Any, Final, Generator, Optional, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -79,10 +78,10 @@ def test_request_point_size_no_dimensions(file: str) -> None:
 ])
 @pytest.mark.parametrize("dpi", [
     None,
-    (72, 72),
-    (144, 72),
-    (72, 144),
-    (144, 144),
+    IVector2(72, 72),
+    IVector2(144, 72),
+    IVector2(72, 144),
+    IVector2(144, 144),
 ])
 def test_request_point_size(
     file: str,
@@ -99,7 +98,7 @@ def test_request_point_size(
         kwargs["dpi"] = dpi
     else:
         dpi = (72, 72)
-    expected_nominal_size = (
+    expected_nominal_size = IVector2(
         int((height if width is None else width) * (dpi[0] / 72.0)),
         int((width if height is None else height) * (dpi[1] / 72.0)),
     )
@@ -109,9 +108,9 @@ def test_request_point_size(
     assert size.face is face
 
     nominal_size = size.nominal_size
-    assert isinstance(nominal_size, glm.ivec2)
+    assert isinstance(nominal_size, IVector2)
     assert nominal_size == expected_nominal_size
-    nominal_size += (1, 1)
+    nominal_size += IVector2(1, 1)
     assert size.nominal_size is not nominal_size
     assert size.nominal_size != nominal_size
 
@@ -140,7 +139,7 @@ def test_request_pixel_size(
         kwargs["width"] = width
     if height is not None:
         kwargs["height"] = height
-    expected_nominal_size = (
+    expected_nominal_size = IVector2(
         height if width is None else width,
         width if height is None else height,
     )
@@ -150,9 +149,9 @@ def test_request_pixel_size(
     assert size.face is face
 
     nominal_size = size.nominal_size
-    assert isinstance(nominal_size, glm.ivec2)
+    assert isinstance(nominal_size, IVector2)
     assert nominal_size == expected_nominal_size
-    nominal_size += (1, 1)
+    nominal_size += IVector2(1, 1)
     assert size.nominal_size is not nominal_size
     assert size.nominal_size != nominal_size
 
@@ -184,7 +183,7 @@ def test_layout_text_no_wrap(max_line_size: Optional[int]) -> None:
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, glm.vec2)
+        assert isinstance(glyph.position, Vector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 11
@@ -235,7 +234,7 @@ def test_layout_text_wrap(
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, glm.vec2)
+        assert isinstance(glyph.position, Vector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
@@ -272,7 +271,7 @@ def test_layout_text_wrap_force(
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, glm.vec2)
+        assert isinstance(glyph.position, Vector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
@@ -284,11 +283,11 @@ def test_layout_text_wrap_force(
 
 @pytest.mark.parametrize("character", 'aZ')
 @pytest.mark.parametrize("glyph_index", [0, 100])
-@pytest.mark.parametrize("position", [glm.vec2(1, 0), glm.vec2(0, 1)])
+@pytest.mark.parametrize("position", [Vector2(1, 0), Vector2(0, 1)])
 def test_positioned_glyph_repr(
     character: str,
     glyph_index: int,
-    position: glm.vec2,
+    position: Vector2,
 ) -> None:
     pg = PositionedGlyph(character, glyph_index, position)
     assert repr(pg) == (
@@ -362,18 +361,16 @@ def test_render_glyph(
         )
     )
 
-    assert isinstance(rendered_glyph.size, glm.ivec2)
+    assert isinstance(rendered_glyph.size, IVector2)
     assert rendered_glyph.size.x > 0
     assert rendered_glyph.size.y > 0
     rendered_glyph_size = rendered_glyph.size
-    assert rendered_glyph.size is not rendered_glyph_size
-    rendered_glyph_size += (1, 1)
+    rendered_glyph_size += IVector2(1, 1)
     assert rendered_glyph.size != rendered_glyph_size
 
-    assert isinstance(rendered_glyph.bearing, glm.ivec2)
+    assert isinstance(rendered_glyph.bearing, IVector2)
     rendered_glyph_bearing = rendered_glyph.bearing
-    assert rendered_glyph.bearing is not rendered_glyph_bearing
-    rendered_glyph_bearing += (1, 1)
+    rendered_glyph_bearing += IVector2(1, 1)
     assert rendered_glyph.bearing != rendered_glyph_bearing
 
     assert rendered_glyph.format is format

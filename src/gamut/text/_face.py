@@ -12,7 +12,7 @@ __all__ = [
 # gamut
 from ._break import break_never, BreakMethod
 # gamut
-from gamut.glmhelp import I32Vector2, ivec2_exact
+from gamut.math import IVector2, Vector2
 # python
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -24,8 +24,6 @@ from freetype import (FT_ENCODING_UNICODE, FT_Exception, FT_RENDER_MODE_LCD,
                       FT_RENDER_MODE_LCD_V, FT_RENDER_MODE_LIGHT,
                       FT_RENDER_MODE_SDF)
 from freetype import Face as FtFace
-# pyglm
-from glm import ivec2, vec2
 # uharfbuzz
 from uharfbuzz import Buffer as HbBuffer
 from uharfbuzz import Face as HbFace
@@ -74,11 +72,12 @@ class Face:
         self,
         width: Optional[float] = None,
         height: Optional[float] = None,
-        dpi: I32Vector2 = (72, 72),
+        dpi: IVector2 = IVector2(72, 72),
     ) -> FontSize:
         if width is None and height is None:
             raise TypeError('width or height must be specified')
-        dpi = ivec2_exact(dpi)
+        if not isinstance(dpi, IVector2):
+            raise TypeError('dpi must be IVector2')
         return PointFontSize(
             self,
             0 if width is None else (width * 64),
@@ -147,8 +146,8 @@ class Face:
             ))
         return RenderedGlyph(
             data,
-            ivec2(width, height),
-            ivec2(ft_glyph.bitmap_left, -ft_glyph.bitmap_top),
+            IVector2(width, height),
+            IVector2(ft_glyph.bitmap_left, -ft_glyph.bitmap_top),
             format,
         )
 
@@ -179,7 +178,7 @@ class Face:
                 chunk_glyphs.append(PositionedGlyph(
                     c,
                     info.codepoint,
-                    vec2(
+                    Vector2(
                         pen_position_x + (pos.x_offset / 64.0),
                         pen_position_y + (pos.y_offset / 64.0),
                     ),
@@ -191,7 +190,7 @@ class Face:
                     pen_position_x = 0.0
                 else:
                     for chunk_glyph in chunk_glyphs:
-                        chunk_glyph.position = vec2(
+                        chunk_glyph.position = Vector2(
                             chunk_glyph.position[0] - chunk_pen_position_x,
                             chunk_glyph.position[1] + size._line_size[1]
                         )
@@ -221,7 +220,7 @@ class PositionedGlyph:
         self,
         character: str,
         glyph_index: int,
-        position: vec2,
+        position: Vector2,
     ):
         self.character = character
         self.glyph_index = glyph_index
@@ -239,8 +238,8 @@ class RenderedGlyph:
     def __init__(
         self,
         data: bytes,
-        size: ivec2,
-        bearing: ivec2,
+        size: IVector2,
+        bearing: IVector2,
         format: RenderedGlyphFormat
     ):
         self._data = data
@@ -253,12 +252,12 @@ class RenderedGlyph:
         return self._data
 
     @property
-    def size(self) -> ivec2:
-        return ivec2(self._size)
+    def size(self) -> IVector2:
+        return self._size
 
     @property
-    def bearing(self) -> ivec2:
-        return ivec2(self._bearing)
+    def bearing(self) -> IVector2:
+        return self._bearing
 
     @property
     def format(self) -> RenderedGlyphFormat:
@@ -270,7 +269,7 @@ class FontSize(ABC):
     def __init__(self, face: Face):
         self._face = face
         self._use()
-        self._nominal_size = (
+        self._nominal_size = IVector2(
             self._face._ft_face.size.x_ppem,
             self._face._ft_face.size.y_ppem,
         )
@@ -302,8 +301,8 @@ class FontSize(ABC):
         return self._face
 
     @property
-    def nominal_size(self) -> ivec2:
-        return ivec2(self._nominal_size)
+    def nominal_size(self) -> IVector2:
+        return self._nominal_size
 
 
 class PointFontSize(FontSize):
@@ -313,7 +312,7 @@ class PointFontSize(FontSize):
         face: Face,
         width: Optional[float],
         height: Optional[float],
-        dpi: ivec2
+        dpi: IVector2
     ):
         self._args = (width, height, dpi.x, dpi.y)
         super().__init__(face)
