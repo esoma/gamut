@@ -6,16 +6,15 @@ from ._texture2d import Texture2d
 from ._texture import (MipmapSelection, TextureComponents, TextureFilter,
                        TextureWrap)
 # gamut
-from gamut.glmhelp import F32Vector4
+from gamut.math import FVector4, IVector2
 # python
+from ctypes import c_uint8
 from pathlib import Path
 from typing import BinaryIO, Final, Union
 # pillow
 from PIL import Image as PilImage
 from PIL import ImageMath as PilImageMath
 from PIL import UnidentifiedImageError as PilUnidentifiedImageError
-# pyglm
-from glm import ivec2, uint8, vec4
 
 PIL_MODE_TO_TEXTURE_COMPONENTS: Final = {
     'L': TextureComponents.R,
@@ -97,13 +96,13 @@ class Image:
             TextureWrap.REPEAT,
             TextureWrap.REPEAT
         ),
-        wrap_color: F32Vector4 = vec4(0, 0, 0, 0)
+        wrap_color: FVector4 = FVector4(0)
     ) -> Texture2d:
         self._ensure_open()
         return Texture2d(
             self.size,
             PIL_MODE_TO_TEXTURE_COMPONENTS[self._pil.mode],
-            uint8,
+            c_uint8,
             self.to_bytes(),
             mipmap_selection=mipmap_selection,
             minify_filter=minify_filter,
@@ -127,9 +126,9 @@ class Image:
         return self._pil is not None
 
     @property
-    def size(self) -> ivec2:
+    def size(self) -> IVector2:
         self._ensure_open()
         size: tuple[int, int] = self._pil.size
         assert isinstance(size, tuple)
         assert len(size) == 2
-        return ivec2(*size)
+        return IVector2(*size)
