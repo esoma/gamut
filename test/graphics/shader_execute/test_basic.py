@@ -8,6 +8,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
+from gamut.math import UVector2
 # python
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -35,7 +36,7 @@ def create_render_target(
     elif cls is WindowRenderTarget:
         window = Window()
         window.is_bordered = False
-        window.resize((10, 10))
+        window.resize(UVector2(10, 10))
         return WindowRenderTarget(window)
     raise NotImplementedError()
 
