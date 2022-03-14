@@ -23,12 +23,12 @@ def test_window_render_target() -> None:
     window = Window()
     render_target = WindowRenderTarget(window)
     assert render_target.window is window
-    assert render_target.size == window.size
+    assert render_target.size == tuple(window.size)
     assert render_target.is_open
 
     render_target.close()
     assert render_target.window is window
-    assert render_target.size == window.size
+    assert render_target.size == tuple(window.size)
     assert not render_target.is_open
 
     window.close()

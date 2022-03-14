@@ -5,6 +5,7 @@ from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, execute_shader,
                             PrimitiveMode, Shader, WindowRenderTarget)
+from gamut.math import UVector2
 # python
 from datetime import timedelta
 # pyglm
@@ -20,7 +21,7 @@ class App(Application):
     async def main(self) -> None:
         self.window = Window()
         self.window.title = 'Gamut Triangle Example'
-        self.window.resize((400, 400))
+        self.window.resize(UVector2(400, 400))
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)

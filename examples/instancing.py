@@ -6,6 +6,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
                             execute_shader, FaceCull, Image, PrimitiveMode,
                             Shader, WindowRenderTarget)
+from gamut.math import UVector2
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 # python
@@ -33,7 +34,7 @@ class App(Application):
     async def main(self) -> None:
         self.window = Window()
         self.window.title = 'Gamut Instancing Example'
-        self.window.resize((800, 800))
+        self.window.resize(UVector2(800, 800))
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)
