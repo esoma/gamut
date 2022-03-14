@@ -1,6 +1,7 @@
 
 # gamut
 from gamut.graphics import BufferView, Texture2d
+from gamut.math import IVector2, Vector2
 from gamut.text import AtlasFont, AtlasGlyph, Face, RenderedGlyphFormat
 # python
 import gc
@@ -30,8 +31,8 @@ def test_init(file: str, format: RenderedGlyphFormat) -> None:
     assert font.face is face
     assert font.size is size
     assert font.format is format
-    assert isinstance(font.texture_size, glm.ivec2)
-    assert font.texture_size == (512, 512)
+    assert isinstance(font.texture_size, IVector2)
+    assert font.texture_size == IVector2(512, 512)
     assert isinstance(font.textures, tuple)
     assert len(font.textures) == 0
 
@@ -63,30 +64,27 @@ def test_get(file: str, character: str, format: RenderedGlyphFormat) -> None:
     assert atlas_glyph.texture is font.textures[0]
 
     atlas_glyph_bearing = atlas_glyph.bearing
-    assert isinstance(atlas_glyph.bearing, glm.ivec2)
-    assert atlas_glyph.bearing is not atlas_glyph_bearing
-    atlas_glyph_bearing += (1, 1)
+    assert isinstance(atlas_glyph.bearing, IVector2)
+    atlas_glyph_bearing += IVector2(1, 1)
     assert atlas_glyph.bearing != atlas_glyph_bearing
 
     atlas_glyph_position = atlas_glyph.position
-    assert isinstance(atlas_glyph.position, glm.ivec2)
-    assert atlas_glyph.position is not atlas_glyph_position
-    atlas_glyph_position += (1, 1)
+    assert isinstance(atlas_glyph.position, IVector2)
+    atlas_glyph_position += IVector2(1, 1)
     assert atlas_glyph.position != atlas_glyph_position
 
     atlas_glyph_size = atlas_glyph.size
-    assert isinstance(atlas_glyph.size, glm.ivec2)
-    assert atlas_glyph.size is not atlas_glyph_size
-    atlas_glyph_size += (1, 1)
+    assert isinstance(atlas_glyph.size, IVector2)
+    atlas_glyph_size += IVector2(1, 1)
     assert atlas_glyph.size != atlas_glyph_size
 
     uv_top_left, uv_bottom_right = atlas_glyph.uv
-    assert isinstance(uv_top_left, glm.vec2)
-    assert isinstance(uv_bottom_right, glm.vec2)
+    assert isinstance(uv_top_left, Vector2)
+    assert isinstance(uv_bottom_right, Vector2)
     assert atlas_glyph.uv[0] is not uv_top_left
     assert atlas_glyph.uv[1] is not uv_bottom_right
-    uv_top_left += (1, 1)
-    uv_bottom_right += (1, 1)
+    uv_top_left += Vector2(1, 1)
+    uv_bottom_right += Vector2(1, 1)
     assert atlas_glyph.uv[0] != uv_top_left
     assert atlas_glyph.uv[1] != uv_bottom_right
 
@@ -117,13 +115,13 @@ def test_orphaned_atlas_glyph(file: str) -> None:
 
 @pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("texture_size", [
-    glm.ivec2(16, 16),
-    glm.ivec2(128, 128),
-    glm.ivec2(256, 256),
+    IVector2(16, 16),
+    IVector2(128, 128),
+    IVector2(256, 256),
 ])
 def test_buffer_positioned_glyphs(
     file: str,
-    texture_size: glm.ivec2
+    texture_size: IVector2
 ) -> None:
     face = Face(file)
     size = face.request_pixel_size(height=12)
@@ -150,13 +148,13 @@ def test_buffer_positioned_glyphs(
 
 @pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("texture_size", [
-    glm.ivec2(16, 16),
-    glm.ivec2(128, 128),
-    glm.ivec2(256, 256),
+    IVector2(16, 16),
+    IVector2(128, 128),
+    IVector2(256, 256),
 ])
 def test_buffer_text(
     file: str,
-    texture_size: glm.ivec2
+    texture_size: IVector2
 ) -> None:
     face = Face(file)
     size = face.request_pixel_size(height=12)

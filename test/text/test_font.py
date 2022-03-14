@@ -1,13 +1,12 @@
 
 # gamut
+from gamut.math import IVector2, Vector2
 from gamut.text import (BreakChunk, Face, Font, PositionedGlyph,
                         RenderedGlyphFormat)
 # python
 import os
 from pathlib import Path
 from typing import Any, Final, Generator, Optional, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -96,7 +95,7 @@ def test_layout_text_no_wrap(max_line_size: Optional[int]) -> None:
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, glm.vec2)
+        assert isinstance(glyph.position, Vector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 11
@@ -148,7 +147,7 @@ def test_layout_text_wrap(
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, glm.vec2)
+        assert isinstance(glyph.position, Vector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
@@ -186,7 +185,7 @@ def test_layout_text_wrap_force(
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, glm.vec2)
+        assert isinstance(glyph.position, Vector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
@@ -256,18 +255,16 @@ def test_render_glyph(
         )
     )
 
-    assert isinstance(rendered_glyph.size, glm.ivec2)
+    assert isinstance(rendered_glyph.size, IVector2)
     assert rendered_glyph.size.x > 0
     assert rendered_glyph.size.y > 0
     rendered_glyph_size = rendered_glyph.size
-    assert rendered_glyph.size is not rendered_glyph_size
-    rendered_glyph_size += (1, 1)
+    rendered_glyph_size += IVector2(1, 1)
     assert rendered_glyph.size != rendered_glyph_size
 
-    assert isinstance(rendered_glyph.bearing, glm.ivec2)
+    assert isinstance(rendered_glyph.bearing, IVector2)
     rendered_glyph_bearing = rendered_glyph.bearing
-    assert rendered_glyph.bearing is not rendered_glyph_bearing
-    rendered_glyph_bearing += (1, 1)
+    rendered_glyph_bearing += IVector2(1, 1)
     assert rendered_glyph.bearing != rendered_glyph_bearing
 
     assert rendered_glyph.format is format
