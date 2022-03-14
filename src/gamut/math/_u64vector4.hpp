@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:13.903278 from codegen/math/templates/_vector.hpp
+// generated 2022-03-14 18:08:34.755035 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U64VECTOR4_HPP
 #define GAMUT_MATH_U64VECTOR4_HPP
@@ -66,39 +66,41 @@ U64Vector4__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
             break;
         }
-        case 4:
-        {
 
+            case 4:
             {
-                auto arg = PyTuple_GET_ITEM(args, 0);
-                c_0 = pyobject_to_c_uint64_t(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
+
+                {
+                    auto arg = PyTuple_GET_ITEM(args, 0);
+                    c_0 = pyobject_to_c_uint64_t(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+
+                {
+                    auto arg = PyTuple_GET_ITEM(args, 1);
+                    c_1 = pyobject_to_c_uint64_t(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+
+                {
+                    auto arg = PyTuple_GET_ITEM(args, 2);
+                    c_2 = pyobject_to_c_uint64_t(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+
+                {
+                    auto arg = PyTuple_GET_ITEM(args, 3);
+                    c_3 = pyobject_to_c_uint64_t(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+
+                break;
             }
 
-            {
-                auto arg = PyTuple_GET_ITEM(args, 1);
-                c_1 = pyobject_to_c_uint64_t(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
-            }
-
-            {
-                auto arg = PyTuple_GET_ITEM(args, 2);
-                c_2 = pyobject_to_c_uint64_t(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
-            }
-
-            {
-                auto arg = PyTuple_GET_ITEM(args, 3);
-                c_3 = pyobject_to_c_uint64_t(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
-            }
-
-            break;
-        }
         default:
         {
             PyErr_Format(
@@ -594,7 +596,7 @@ U64Vector4_getbufferproc(U64Vector4 *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
-    view->buf = glm::value_ptr(*self->glm);
+    view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(uint64_t) * 4;
     view->readonly = 1;

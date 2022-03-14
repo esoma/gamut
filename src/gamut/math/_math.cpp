@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:14.007778 from codegen/math/templates/_math.cpp
+// generated 2022-03-14 18:08:34.859535 from codegen/math/templates/_math.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN
@@ -7,6 +7,32 @@
 #include <structmember.h>
 
 #include "_modulestate.hpp"
+
+    #include "_bvector1.hpp"
+
+    #include "_dvector1.hpp"
+
+    #include "_fvector1.hpp"
+
+    #include "_i8vector1.hpp"
+
+    #include "_u8vector1.hpp"
+
+    #include "_i16vector1.hpp"
+
+    #include "_u16vector1.hpp"
+
+    #include "_i32vector1.hpp"
+
+    #include "_u32vector1.hpp"
+
+    #include "_ivector1.hpp"
+
+    #include "_uvector1.hpp"
+
+    #include "_i64vector1.hpp"
+
+    #include "_u64vector1.hpp"
 
     #include "_bvector2.hpp"
 
@@ -456,6 +482,266 @@ PyInit__math()
         Py_DECREF(ctypes);
     }
 
+
+        {
+            PyTypeObject *type = define_BVector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->BVector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_BVector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->BVector1Array_PyTypeObject = type;
+        }
+        api->GamutMathBVector1_GetType = get_BVector1_type;
+        api->GamutMathBVector1Array_GetType = get_BVector1Array_type;
+        api->GamutMathBVector1_Create = create_BVector1;
+        api->GamutMathBVector1Array_Create = create_BVector1Array;
+        api->GamutMathBVector1_GetValuePointer = get_BVector1_value_ptr;
+        api->GamutMathBVector1Array_GetValuePointer = get_BVector1Array_value_ptr;
+        api->GamutMathBVector1Array_GetLength = get_BVector1Array_length;
+
+        {
+            PyTypeObject *type = define_DVector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->DVector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_DVector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->DVector1Array_PyTypeObject = type;
+        }
+        api->GamutMathDVector1_GetType = get_DVector1_type;
+        api->GamutMathDVector1Array_GetType = get_DVector1Array_type;
+        api->GamutMathDVector1_Create = create_DVector1;
+        api->GamutMathDVector1Array_Create = create_DVector1Array;
+        api->GamutMathDVector1_GetValuePointer = get_DVector1_value_ptr;
+        api->GamutMathDVector1Array_GetValuePointer = get_DVector1Array_value_ptr;
+        api->GamutMathDVector1Array_GetLength = get_DVector1Array_length;
+
+        {
+            PyTypeObject *type = define_FVector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->FVector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_FVector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->FVector1Array_PyTypeObject = type;
+        }
+        api->GamutMathFVector1_GetType = get_FVector1_type;
+        api->GamutMathFVector1Array_GetType = get_FVector1Array_type;
+        api->GamutMathFVector1_Create = create_FVector1;
+        api->GamutMathFVector1Array_Create = create_FVector1Array;
+        api->GamutMathFVector1_GetValuePointer = get_FVector1_value_ptr;
+        api->GamutMathFVector1Array_GetValuePointer = get_FVector1Array_value_ptr;
+        api->GamutMathFVector1Array_GetLength = get_FVector1Array_length;
+
+        {
+            PyTypeObject *type = define_I8Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I8Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_I8Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I8Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathI8Vector1_GetType = get_I8Vector1_type;
+        api->GamutMathI8Vector1Array_GetType = get_I8Vector1Array_type;
+        api->GamutMathI8Vector1_Create = create_I8Vector1;
+        api->GamutMathI8Vector1Array_Create = create_I8Vector1Array;
+        api->GamutMathI8Vector1_GetValuePointer = get_I8Vector1_value_ptr;
+        api->GamutMathI8Vector1Array_GetValuePointer = get_I8Vector1Array_value_ptr;
+        api->GamutMathI8Vector1Array_GetLength = get_I8Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_U8Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U8Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_U8Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U8Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathU8Vector1_GetType = get_U8Vector1_type;
+        api->GamutMathU8Vector1Array_GetType = get_U8Vector1Array_type;
+        api->GamutMathU8Vector1_Create = create_U8Vector1;
+        api->GamutMathU8Vector1Array_Create = create_U8Vector1Array;
+        api->GamutMathU8Vector1_GetValuePointer = get_U8Vector1_value_ptr;
+        api->GamutMathU8Vector1Array_GetValuePointer = get_U8Vector1Array_value_ptr;
+        api->GamutMathU8Vector1Array_GetLength = get_U8Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_I16Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I16Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_I16Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I16Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathI16Vector1_GetType = get_I16Vector1_type;
+        api->GamutMathI16Vector1Array_GetType = get_I16Vector1Array_type;
+        api->GamutMathI16Vector1_Create = create_I16Vector1;
+        api->GamutMathI16Vector1Array_Create = create_I16Vector1Array;
+        api->GamutMathI16Vector1_GetValuePointer = get_I16Vector1_value_ptr;
+        api->GamutMathI16Vector1Array_GetValuePointer = get_I16Vector1Array_value_ptr;
+        api->GamutMathI16Vector1Array_GetLength = get_I16Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_U16Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U16Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_U16Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U16Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathU16Vector1_GetType = get_U16Vector1_type;
+        api->GamutMathU16Vector1Array_GetType = get_U16Vector1Array_type;
+        api->GamutMathU16Vector1_Create = create_U16Vector1;
+        api->GamutMathU16Vector1Array_Create = create_U16Vector1Array;
+        api->GamutMathU16Vector1_GetValuePointer = get_U16Vector1_value_ptr;
+        api->GamutMathU16Vector1Array_GetValuePointer = get_U16Vector1Array_value_ptr;
+        api->GamutMathU16Vector1Array_GetLength = get_U16Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_I32Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I32Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_I32Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I32Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathI32Vector1_GetType = get_I32Vector1_type;
+        api->GamutMathI32Vector1Array_GetType = get_I32Vector1Array_type;
+        api->GamutMathI32Vector1_Create = create_I32Vector1;
+        api->GamutMathI32Vector1Array_Create = create_I32Vector1Array;
+        api->GamutMathI32Vector1_GetValuePointer = get_I32Vector1_value_ptr;
+        api->GamutMathI32Vector1Array_GetValuePointer = get_I32Vector1Array_value_ptr;
+        api->GamutMathI32Vector1Array_GetLength = get_I32Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_U32Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U32Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_U32Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U32Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathU32Vector1_GetType = get_U32Vector1_type;
+        api->GamutMathU32Vector1Array_GetType = get_U32Vector1Array_type;
+        api->GamutMathU32Vector1_Create = create_U32Vector1;
+        api->GamutMathU32Vector1Array_Create = create_U32Vector1Array;
+        api->GamutMathU32Vector1_GetValuePointer = get_U32Vector1_value_ptr;
+        api->GamutMathU32Vector1Array_GetValuePointer = get_U32Vector1Array_value_ptr;
+        api->GamutMathU32Vector1Array_GetLength = get_U32Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_IVector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->IVector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_IVector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->IVector1Array_PyTypeObject = type;
+        }
+        api->GamutMathIVector1_GetType = get_IVector1_type;
+        api->GamutMathIVector1Array_GetType = get_IVector1Array_type;
+        api->GamutMathIVector1_Create = create_IVector1;
+        api->GamutMathIVector1Array_Create = create_IVector1Array;
+        api->GamutMathIVector1_GetValuePointer = get_IVector1_value_ptr;
+        api->GamutMathIVector1Array_GetValuePointer = get_IVector1Array_value_ptr;
+        api->GamutMathIVector1Array_GetLength = get_IVector1Array_length;
+
+        {
+            PyTypeObject *type = define_UVector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->UVector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_UVector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->UVector1Array_PyTypeObject = type;
+        }
+        api->GamutMathUVector1_GetType = get_UVector1_type;
+        api->GamutMathUVector1Array_GetType = get_UVector1Array_type;
+        api->GamutMathUVector1_Create = create_UVector1;
+        api->GamutMathUVector1Array_Create = create_UVector1Array;
+        api->GamutMathUVector1_GetValuePointer = get_UVector1_value_ptr;
+        api->GamutMathUVector1Array_GetValuePointer = get_UVector1Array_value_ptr;
+        api->GamutMathUVector1Array_GetLength = get_UVector1Array_length;
+
+        {
+            PyTypeObject *type = define_I64Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I64Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_I64Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->I64Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathI64Vector1_GetType = get_I64Vector1_type;
+        api->GamutMathI64Vector1Array_GetType = get_I64Vector1Array_type;
+        api->GamutMathI64Vector1_Create = create_I64Vector1;
+        api->GamutMathI64Vector1Array_Create = create_I64Vector1Array;
+        api->GamutMathI64Vector1_GetValuePointer = get_I64Vector1_value_ptr;
+        api->GamutMathI64Vector1Array_GetValuePointer = get_I64Vector1Array_value_ptr;
+        api->GamutMathI64Vector1Array_GetLength = get_I64Vector1Array_length;
+
+        {
+            PyTypeObject *type = define_U64Vector1_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U64Vector1_PyTypeObject = type;
+        }
+        {
+            PyTypeObject *type = define_U64Vector1Array_type(module);
+            if (!type){ goto error; }
+            Py_INCREF(type);
+            state->U64Vector1Array_PyTypeObject = type;
+        }
+        api->GamutMathU64Vector1_GetType = get_U64Vector1_type;
+        api->GamutMathU64Vector1Array_GetType = get_U64Vector1Array_type;
+        api->GamutMathU64Vector1_Create = create_U64Vector1;
+        api->GamutMathU64Vector1Array_Create = create_U64Vector1Array;
+        api->GamutMathU64Vector1_GetValuePointer = get_U64Vector1_value_ptr;
+        api->GamutMathU64Vector1Array_GetValuePointer = get_U64Vector1Array_value_ptr;
+        api->GamutMathU64Vector1Array_GetLength = get_U64Vector1Array_length;
 
         {
             PyTypeObject *type = define_BVector2_type(module);

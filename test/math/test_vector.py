@@ -1,30 +1,37 @@
 
 # gamut
-from gamut.math import (BVector2, BVector2Array, BVector3, BVector3Array,
-                        BVector4, BVector4Array, DQuaternion, DVector2,
+from gamut.math import (BVector1, BVector1Array, BVector2, BVector2Array,
+                        BVector3, BVector3Array, BVector4, BVector4Array,
+                        DQuaternion, DVector1, DVector1Array, DVector2,
                         DVector2Array, DVector3, DVector3Array, DVector4,
-                        DVector4Array, FQuaternion, FVector2, FVector2Array,
-                        FVector3, FVector3Array, FVector4, FVector4Array,
+                        DVector4Array, FQuaternion, FVector1, FVector1Array,
+                        FVector2, FVector2Array, FVector3, FVector3Array,
+                        FVector4, FVector4Array, I8Vector1, I8Vector1Array,
                         I8Vector2, I8Vector2Array, I8Vector3, I8Vector3Array,
-                        I8Vector4, I8Vector4Array, I16Vector2, I16Vector2Array,
-                        I16Vector3, I16Vector3Array, I16Vector4,
-                        I16Vector4Array, I32Vector2, I32Vector2Array,
-                        I32Vector3, I32Vector3Array, I32Vector4,
-                        I32Vector4Array, I64Vector2, I64Vector2Array,
+                        I8Vector4, I8Vector4Array, I16Vector1, I16Vector1Array,
+                        I16Vector2, I16Vector2Array, I16Vector3,
+                        I16Vector3Array, I16Vector4, I16Vector4Array,
+                        I32Vector1, I32Vector1Array, I32Vector2,
+                        I32Vector2Array, I32Vector3, I32Vector3Array,
+                        I32Vector4, I32Vector4Array, I64Vector1,
+                        I64Vector1Array, I64Vector2, I64Vector2Array,
                         I64Vector3, I64Vector3Array, I64Vector4,
-                        I64Vector4Array, IVector2, IVector2Array, IVector3,
-                        IVector3Array, IVector4, IVector4Array, U8Vector2,
+                        I64Vector4Array, IVector1, IVector1Array, IVector2,
+                        IVector2Array, IVector3, IVector3Array, IVector4,
+                        IVector4Array, U8Vector1, U8Vector1Array, U8Vector2,
                         U8Vector2Array, U8Vector3, U8Vector3Array, U8Vector4,
-                        U8Vector4Array, U16Vector2, U16Vector2Array,
-                        U16Vector3, U16Vector3Array, U16Vector4,
-                        U16Vector4Array, U32Vector2, U32Vector2Array,
-                        U32Vector3, U32Vector3Array, U32Vector4,
-                        U32Vector4Array, U64Vector2, U64Vector2Array,
+                        U8Vector4Array, U16Vector1, U16Vector1Array,
+                        U16Vector2, U16Vector2Array, U16Vector3,
+                        U16Vector3Array, U16Vector4, U16Vector4Array,
+                        U32Vector1, U32Vector1Array, U32Vector2,
+                        U32Vector2Array, U32Vector3, U32Vector3Array,
+                        U32Vector4, U32Vector4Array, U64Vector1,
+                        U64Vector1Array, U64Vector2, U64Vector2Array,
                         U64Vector3, U64Vector3Array, U64Vector4,
-                        U64Vector4Array, UVector2, UVector2Array, UVector3,
-                        UVector3Array, UVector4, UVector4Array, Vector2,
-                        Vector2Array, Vector3, Vector3Array, Vector4,
-                        Vector4Array)
+                        U64Vector4Array, UVector1, UVector1Array, UVector2,
+                        UVector2Array, UVector3, UVector3Array, UVector4,
+                        UVector4Array, Vector2, Vector2Array, Vector3,
+                        Vector3Array, Vector4, Vector4Array)
 # python
 import ctypes
 import itertools
@@ -39,7 +46,7 @@ import pytest
 
 
 def isclose(a, b):
-    return _isclose(a, b, rel_tol=1e-07)
+    return _isclose(a, b, rel_tol=1e-06)
 
 
 def test_alias():
@@ -273,7 +280,7 @@ class VectorTest:
         if self.type != bool and not self.unsigned:
             assert hash(self.cls(1)) != hash(self.cls(-1))
         assert hash(self.cls(0)) != hash(
-            self.cls(*range(self.component_count))
+            self.cls(*range(1, self.component_count + 1))
         )
 
     def test_array_hash(self) -> None:
@@ -934,7 +941,10 @@ class VectorTest:
         )
         assert memory_view.suboffsets == tuple()
         assert memory_view.c_contiguous
-        assert not memory_view.f_contiguous
+        if self.component_count == 1:
+            assert memory_view.f_contiguous
+        else:
+            assert not memory_view.f_contiguous
         assert memory_view.contiguous
 
     def test_cross(self) -> None:
@@ -1001,8 +1011,11 @@ class VectorTest:
         vector = self.cls(-1)
         assert vector.normalize() == vector / vector.magnitude
 
-        vector = self.cls(*range(self.component_count))
-        assert vector.normalize() == vector / vector.magnitude
+        vector = self.cls(*range(1, self.component_count + 1))
+        normalized_vector = vector.normalize()
+        expected_vector = vector / vector.magnitude
+        for i in range(self.component_count):
+            assert isclose(normalized_vector[i], expected_vector[i])
 
 
     def test_distance(self) -> None:
@@ -1097,6 +1110,149 @@ class VectorTest:
         assert isclose(rotation.x, 0)
         assert isclose(rotation.y, 0.7071067811865476)
         assert isclose(rotation.z, 0)
+
+
+class TestBVector1(
+    VectorTest,
+    cls=BVector1,
+    component_count=1,
+    type=bool,
+    struct_format='?'
+):
+    pass
+
+
+class TestDVector1(
+    VectorTest,
+    cls=DVector1,
+    component_count=1,
+    type=float,
+    struct_format='d'
+):
+    pass
+
+
+class TestFVector1(
+    VectorTest,
+    cls=FVector1,
+    component_count=1,
+    type=float,
+    struct_format='f'
+):
+    pass
+
+
+class TestI8Vector1(
+    VectorTest,
+    cls=I8Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='b'
+):
+    pass
+
+
+class TestU8Vector1(
+    VectorTest,
+    cls=U8Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='B',
+    unsigned=True
+):
+    pass
+
+
+class TestI16Vector1(
+    VectorTest,
+    cls=I16Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='h'
+):
+    pass
+
+
+class TestU16Vector1(
+    VectorTest,
+    cls=U16Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='H',
+    unsigned=True
+):
+    pass
+
+
+class TestI32Vector1(
+    VectorTest,
+    cls=I32Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='i'
+):
+    pass
+
+
+class TestU32Vector1(
+    VectorTest,
+    cls=U32Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestIVector1(
+    VectorTest,
+    cls=IVector1,
+    component_count=1,
+    type=int,
+    struct_format='i'
+):
+    pass
+
+
+class TestUVector1(
+    VectorTest,
+    cls=UVector1,
+    component_count=1,
+    type=int,
+    struct_format='I',
+    unsigned=True
+):
+    pass
+
+
+class TestI64Vector1(
+    VectorTest,
+    cls=I64Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='q'
+):
+    pass
+
+
+class TestU64Vector1(
+    VectorTest,
+    cls=U64Vector1,
+    component_count=1,
+    type=int,
+    struct_byte_order='=',
+    struct_format='Q',
+    unsigned=True
+):
+    pass
 
 
 class TestBVector2(

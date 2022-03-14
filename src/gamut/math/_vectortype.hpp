@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:13.905280 from codegen/math/templates/_vectortype.hpp
+// generated 2022-03-14 18:08:34.757035 from codegen/math/templates/_vectortype.hpp
 
 #ifndef GAMUT_MATH_VECTORTYPE_HPP
 #define GAMUT_MATH_VECTORTYPE_HPP
@@ -10,6 +10,305 @@
 // glm
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
+
+
+typedef glm::vec<1, bool, glm::defaultp> BVector1Glm;
+
+struct BVector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    BVector1Glm *glm;
+};
+
+static BVector1 *
+create_BVector1_from_glm(const BVector1Glm& glm);
+
+
+struct BVector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    BVector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, double, glm::defaultp> DVector1Glm;
+
+struct DVector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    DVector1Glm *glm;
+};
+
+static DVector1 *
+create_DVector1_from_glm(const DVector1Glm& glm);
+
+
+struct DVector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    DVector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, float, glm::defaultp> FVector1Glm;
+
+struct FVector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    FVector1Glm *glm;
+};
+
+static FVector1 *
+create_FVector1_from_glm(const FVector1Glm& glm);
+
+
+struct FVector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    FVector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, int8_t, glm::defaultp> I8Vector1Glm;
+
+struct I8Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    I8Vector1Glm *glm;
+};
+
+static I8Vector1 *
+create_I8Vector1_from_glm(const I8Vector1Glm& glm);
+
+
+struct I8Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I8Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, uint8_t, glm::defaultp> U8Vector1Glm;
+
+struct U8Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    U8Vector1Glm *glm;
+};
+
+static U8Vector1 *
+create_U8Vector1_from_glm(const U8Vector1Glm& glm);
+
+
+struct U8Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U8Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, int16_t, glm::defaultp> I16Vector1Glm;
+
+struct I16Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    I16Vector1Glm *glm;
+};
+
+static I16Vector1 *
+create_I16Vector1_from_glm(const I16Vector1Glm& glm);
+
+
+struct I16Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I16Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, uint16_t, glm::defaultp> U16Vector1Glm;
+
+struct U16Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    U16Vector1Glm *glm;
+};
+
+static U16Vector1 *
+create_U16Vector1_from_glm(const U16Vector1Glm& glm);
+
+
+struct U16Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U16Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, int32_t, glm::defaultp> I32Vector1Glm;
+
+struct I32Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    I32Vector1Glm *glm;
+};
+
+static I32Vector1 *
+create_I32Vector1_from_glm(const I32Vector1Glm& glm);
+
+
+struct I32Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I32Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, uint32_t, glm::defaultp> U32Vector1Glm;
+
+struct U32Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    U32Vector1Glm *glm;
+};
+
+static U32Vector1 *
+create_U32Vector1_from_glm(const U32Vector1Glm& glm);
+
+
+struct U32Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U32Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, int, glm::defaultp> IVector1Glm;
+
+struct IVector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    IVector1Glm *glm;
+};
+
+static IVector1 *
+create_IVector1_from_glm(const IVector1Glm& glm);
+
+
+struct IVector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    IVector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, unsigned int, glm::defaultp> UVector1Glm;
+
+struct UVector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    UVector1Glm *glm;
+};
+
+static UVector1 *
+create_UVector1_from_glm(const UVector1Glm& glm);
+
+
+struct UVector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    UVector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, int64_t, glm::defaultp> I64Vector1Glm;
+
+struct I64Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    I64Vector1Glm *glm;
+};
+
+static I64Vector1 *
+create_I64Vector1_from_glm(const I64Vector1Glm& glm);
+
+
+struct I64Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    I64Vector1Glm *glm;
+};
+
+
+
+typedef glm::vec<1, uint64_t, glm::defaultp> U64Vector1Glm;
+
+struct U64Vector1
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    U64Vector1Glm *glm;
+};
+
+static U64Vector1 *
+create_U64Vector1_from_glm(const U64Vector1Glm& glm);
+
+
+struct U64Vector1Array
+{
+    PyObject_HEAD
+    PyObject *weakreflist;
+    size_t length;
+    U64Vector1Glm *glm;
+};
 
 
 
