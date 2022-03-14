@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:14.000278 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-14 18:08:34.851534 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP
@@ -25,6 +25,45 @@ struct ModuleState
     PyObject *ctypes_c_unsigned_int_p;
     PyObject *ctypes_c_float_p;
     PyObject *ctypes_c_double_p;
+
+        PyTypeObject *BVector1_PyTypeObject;
+        PyTypeObject *BVector1Array_PyTypeObject;
+
+        PyTypeObject *DVector1_PyTypeObject;
+        PyTypeObject *DVector1Array_PyTypeObject;
+
+        PyTypeObject *FVector1_PyTypeObject;
+        PyTypeObject *FVector1Array_PyTypeObject;
+
+        PyTypeObject *I8Vector1_PyTypeObject;
+        PyTypeObject *I8Vector1Array_PyTypeObject;
+
+        PyTypeObject *U8Vector1_PyTypeObject;
+        PyTypeObject *U8Vector1Array_PyTypeObject;
+
+        PyTypeObject *I16Vector1_PyTypeObject;
+        PyTypeObject *I16Vector1Array_PyTypeObject;
+
+        PyTypeObject *U16Vector1_PyTypeObject;
+        PyTypeObject *U16Vector1Array_PyTypeObject;
+
+        PyTypeObject *I32Vector1_PyTypeObject;
+        PyTypeObject *I32Vector1Array_PyTypeObject;
+
+        PyTypeObject *U32Vector1_PyTypeObject;
+        PyTypeObject *U32Vector1Array_PyTypeObject;
+
+        PyTypeObject *IVector1_PyTypeObject;
+        PyTypeObject *IVector1Array_PyTypeObject;
+
+        PyTypeObject *UVector1_PyTypeObject;
+        PyTypeObject *UVector1Array_PyTypeObject;
+
+        PyTypeObject *I64Vector1_PyTypeObject;
+        PyTypeObject *I64Vector1Array_PyTypeObject;
+
+        PyTypeObject *U64Vector1_PyTypeObject;
+        PyTypeObject *U64Vector1Array_PyTypeObject;
 
         PyTypeObject *BVector2_PyTypeObject;
         PyTypeObject *BVector2Array_PyTypeObject;
@@ -254,6 +293,45 @@ ModuleState_traverse(
     Py_VISIT(self->ctypes_c_float_p);
     Py_VISIT(self->ctypes_c_double_p);
 
+        Py_VISIT(self->BVector1_PyTypeObject);
+        Py_VISIT(self->BVector1Array_PyTypeObject);
+
+        Py_VISIT(self->DVector1_PyTypeObject);
+        Py_VISIT(self->DVector1Array_PyTypeObject);
+
+        Py_VISIT(self->FVector1_PyTypeObject);
+        Py_VISIT(self->FVector1Array_PyTypeObject);
+
+        Py_VISIT(self->I8Vector1_PyTypeObject);
+        Py_VISIT(self->I8Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->U8Vector1_PyTypeObject);
+        Py_VISIT(self->U8Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->I16Vector1_PyTypeObject);
+        Py_VISIT(self->I16Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->U16Vector1_PyTypeObject);
+        Py_VISIT(self->U16Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->I32Vector1_PyTypeObject);
+        Py_VISIT(self->I32Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->U32Vector1_PyTypeObject);
+        Py_VISIT(self->U32Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->IVector1_PyTypeObject);
+        Py_VISIT(self->IVector1Array_PyTypeObject);
+
+        Py_VISIT(self->UVector1_PyTypeObject);
+        Py_VISIT(self->UVector1Array_PyTypeObject);
+
+        Py_VISIT(self->I64Vector1_PyTypeObject);
+        Py_VISIT(self->I64Vector1Array_PyTypeObject);
+
+        Py_VISIT(self->U64Vector1_PyTypeObject);
+        Py_VISIT(self->U64Vector1Array_PyTypeObject);
+
         Py_VISIT(self->BVector2_PyTypeObject);
         Py_VISIT(self->BVector2Array_PyTypeObject);
 
@@ -478,6 +556,45 @@ ModuleState_clear(struct ModuleState *self)
     Py_CLEAR(self->ctypes_c_unsigned_int_p);
     Py_CLEAR(self->ctypes_c_float_p);
     Py_CLEAR(self->ctypes_c_double_p);
+
+        Py_CLEAR(self->BVector1_PyTypeObject);
+        Py_CLEAR(self->BVector1Array_PyTypeObject);
+
+        Py_CLEAR(self->DVector1_PyTypeObject);
+        Py_CLEAR(self->DVector1Array_PyTypeObject);
+
+        Py_CLEAR(self->FVector1_PyTypeObject);
+        Py_CLEAR(self->FVector1Array_PyTypeObject);
+
+        Py_CLEAR(self->I8Vector1_PyTypeObject);
+        Py_CLEAR(self->I8Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->U8Vector1_PyTypeObject);
+        Py_CLEAR(self->U8Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->I16Vector1_PyTypeObject);
+        Py_CLEAR(self->I16Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->U16Vector1_PyTypeObject);
+        Py_CLEAR(self->U16Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->I32Vector1_PyTypeObject);
+        Py_CLEAR(self->I32Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->U32Vector1_PyTypeObject);
+        Py_CLEAR(self->U32Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->IVector1_PyTypeObject);
+        Py_CLEAR(self->IVector1Array_PyTypeObject);
+
+        Py_CLEAR(self->UVector1_PyTypeObject);
+        Py_CLEAR(self->UVector1Array_PyTypeObject);
+
+        Py_CLEAR(self->I64Vector1_PyTypeObject);
+        Py_CLEAR(self->I64Vector1Array_PyTypeObject);
+
+        Py_CLEAR(self->U64Vector1_PyTypeObject);
+        Py_CLEAR(self->U64Vector1Array_PyTypeObject);
 
         Py_CLEAR(self->BVector2_PyTypeObject);
         Py_CLEAR(self->BVector2Array_PyTypeObject);

@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:14.017778 from codegen/math/templates/math.h
+// generated 2022-03-14 18:08:34.869535 from codegen/math/templates/math.h
 
 #ifndef GAMUT_MATH_API_HPP
 #define GAMUT_MATH_API_HPP
@@ -16,6 +16,84 @@ extern "C" {
 
 typedef PyTypeObject *(*GamutMathApi_GetType)();
 typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateBVector1)(const bool *);
+    typedef PyObject *(*GamutMathApi_CreateBVector1Array)(size_t, const bool *);
+    typedef bool *(*GamutMathApi_GetBVector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateDVector1)(const double *);
+    typedef PyObject *(*GamutMathApi_CreateDVector1Array)(size_t, const double *);
+    typedef double *(*GamutMathApi_GetDVector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateFVector1)(const float *);
+    typedef PyObject *(*GamutMathApi_CreateFVector1Array)(size_t, const float *);
+    typedef float *(*GamutMathApi_GetFVector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateI8Vector1)(const int8_t *);
+    typedef PyObject *(*GamutMathApi_CreateI8Vector1Array)(size_t, const int8_t *);
+    typedef int8_t *(*GamutMathApi_GetI8Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateU8Vector1)(const uint8_t *);
+    typedef PyObject *(*GamutMathApi_CreateU8Vector1Array)(size_t, const uint8_t *);
+    typedef uint8_t *(*GamutMathApi_GetU8Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateI16Vector1)(const int16_t *);
+    typedef PyObject *(*GamutMathApi_CreateI16Vector1Array)(size_t, const int16_t *);
+    typedef int16_t *(*GamutMathApi_GetI16Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateU16Vector1)(const uint16_t *);
+    typedef PyObject *(*GamutMathApi_CreateU16Vector1Array)(size_t, const uint16_t *);
+    typedef uint16_t *(*GamutMathApi_GetU16Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateI32Vector1)(const int32_t *);
+    typedef PyObject *(*GamutMathApi_CreateI32Vector1Array)(size_t, const int32_t *);
+    typedef int32_t *(*GamutMathApi_GetI32Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateU32Vector1)(const uint32_t *);
+    typedef PyObject *(*GamutMathApi_CreateU32Vector1Array)(size_t, const uint32_t *);
+    typedef uint32_t *(*GamutMathApi_GetU32Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateIVector1)(const int *);
+    typedef PyObject *(*GamutMathApi_CreateIVector1Array)(size_t, const int *);
+    typedef int *(*GamutMathApi_GetIVector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateUVector1)(const unsigned int *);
+    typedef PyObject *(*GamutMathApi_CreateUVector1Array)(size_t, const unsigned int *);
+    typedef unsigned int *(*GamutMathApi_GetUVector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateI64Vector1)(const int64_t *);
+    typedef PyObject *(*GamutMathApi_CreateI64Vector1Array)(size_t, const int64_t *);
+    typedef int64_t *(*GamutMathApi_GetI64Vector1ValuePointer)(const PyObject *);
+
+
+
+    typedef PyObject *(*GamutMathApi_CreateU64Vector1)(const uint64_t *);
+    typedef PyObject *(*GamutMathApi_CreateU64Vector1Array)(size_t, const uint64_t *);
+    typedef uint64_t *(*GamutMathApi_GetU64Vector1ValuePointer)(const PyObject *);
 
 
 
@@ -447,6 +525,110 @@ typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
 
 struct GamutMathApi
 {
+
+        GamutMathApi_GetType GamutMathBVector1_GetType;
+        GamutMathApi_GetType GamutMathBVector1Array_GetType;
+        GamutMathApi_CreateBVector1 GamutMathBVector1_Create;
+        GamutMathApi_CreateBVector1Array GamutMathBVector1Array_Create;
+        GamutMathApi_GetBVector1ValuePointer GamutMathBVector1_GetValuePointer;
+        GamutMathApi_GetBVector1ValuePointer GamutMathBVector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathBVector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathDVector1_GetType;
+        GamutMathApi_GetType GamutMathDVector1Array_GetType;
+        GamutMathApi_CreateDVector1 GamutMathDVector1_Create;
+        GamutMathApi_CreateDVector1Array GamutMathDVector1Array_Create;
+        GamutMathApi_GetDVector1ValuePointer GamutMathDVector1_GetValuePointer;
+        GamutMathApi_GetDVector1ValuePointer GamutMathDVector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathDVector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathFVector1_GetType;
+        GamutMathApi_GetType GamutMathFVector1Array_GetType;
+        GamutMathApi_CreateFVector1 GamutMathFVector1_Create;
+        GamutMathApi_CreateFVector1Array GamutMathFVector1Array_Create;
+        GamutMathApi_GetFVector1ValuePointer GamutMathFVector1_GetValuePointer;
+        GamutMathApi_GetFVector1ValuePointer GamutMathFVector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathFVector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathI8Vector1_GetType;
+        GamutMathApi_GetType GamutMathI8Vector1Array_GetType;
+        GamutMathApi_CreateI8Vector1 GamutMathI8Vector1_Create;
+        GamutMathApi_CreateI8Vector1Array GamutMathI8Vector1Array_Create;
+        GamutMathApi_GetI8Vector1ValuePointer GamutMathI8Vector1_GetValuePointer;
+        GamutMathApi_GetI8Vector1ValuePointer GamutMathI8Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathI8Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathU8Vector1_GetType;
+        GamutMathApi_GetType GamutMathU8Vector1Array_GetType;
+        GamutMathApi_CreateU8Vector1 GamutMathU8Vector1_Create;
+        GamutMathApi_CreateU8Vector1Array GamutMathU8Vector1Array_Create;
+        GamutMathApi_GetU8Vector1ValuePointer GamutMathU8Vector1_GetValuePointer;
+        GamutMathApi_GetU8Vector1ValuePointer GamutMathU8Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathU8Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathI16Vector1_GetType;
+        GamutMathApi_GetType GamutMathI16Vector1Array_GetType;
+        GamutMathApi_CreateI16Vector1 GamutMathI16Vector1_Create;
+        GamutMathApi_CreateI16Vector1Array GamutMathI16Vector1Array_Create;
+        GamutMathApi_GetI16Vector1ValuePointer GamutMathI16Vector1_GetValuePointer;
+        GamutMathApi_GetI16Vector1ValuePointer GamutMathI16Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathI16Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathU16Vector1_GetType;
+        GamutMathApi_GetType GamutMathU16Vector1Array_GetType;
+        GamutMathApi_CreateU16Vector1 GamutMathU16Vector1_Create;
+        GamutMathApi_CreateU16Vector1Array GamutMathU16Vector1Array_Create;
+        GamutMathApi_GetU16Vector1ValuePointer GamutMathU16Vector1_GetValuePointer;
+        GamutMathApi_GetU16Vector1ValuePointer GamutMathU16Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathU16Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathI32Vector1_GetType;
+        GamutMathApi_GetType GamutMathI32Vector1Array_GetType;
+        GamutMathApi_CreateI32Vector1 GamutMathI32Vector1_Create;
+        GamutMathApi_CreateI32Vector1Array GamutMathI32Vector1Array_Create;
+        GamutMathApi_GetI32Vector1ValuePointer GamutMathI32Vector1_GetValuePointer;
+        GamutMathApi_GetI32Vector1ValuePointer GamutMathI32Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathI32Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathU32Vector1_GetType;
+        GamutMathApi_GetType GamutMathU32Vector1Array_GetType;
+        GamutMathApi_CreateU32Vector1 GamutMathU32Vector1_Create;
+        GamutMathApi_CreateU32Vector1Array GamutMathU32Vector1Array_Create;
+        GamutMathApi_GetU32Vector1ValuePointer GamutMathU32Vector1_GetValuePointer;
+        GamutMathApi_GetU32Vector1ValuePointer GamutMathU32Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathU32Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathIVector1_GetType;
+        GamutMathApi_GetType GamutMathIVector1Array_GetType;
+        GamutMathApi_CreateIVector1 GamutMathIVector1_Create;
+        GamutMathApi_CreateIVector1Array GamutMathIVector1Array_Create;
+        GamutMathApi_GetIVector1ValuePointer GamutMathIVector1_GetValuePointer;
+        GamutMathApi_GetIVector1ValuePointer GamutMathIVector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathIVector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathUVector1_GetType;
+        GamutMathApi_GetType GamutMathUVector1Array_GetType;
+        GamutMathApi_CreateUVector1 GamutMathUVector1_Create;
+        GamutMathApi_CreateUVector1Array GamutMathUVector1Array_Create;
+        GamutMathApi_GetUVector1ValuePointer GamutMathUVector1_GetValuePointer;
+        GamutMathApi_GetUVector1ValuePointer GamutMathUVector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathUVector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathI64Vector1_GetType;
+        GamutMathApi_GetType GamutMathI64Vector1Array_GetType;
+        GamutMathApi_CreateI64Vector1 GamutMathI64Vector1_Create;
+        GamutMathApi_CreateI64Vector1Array GamutMathI64Vector1Array_Create;
+        GamutMathApi_GetI64Vector1ValuePointer GamutMathI64Vector1_GetValuePointer;
+        GamutMathApi_GetI64Vector1ValuePointer GamutMathI64Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathI64Vector1Array_GetLength;
+
+        GamutMathApi_GetType GamutMathU64Vector1_GetType;
+        GamutMathApi_GetType GamutMathU64Vector1Array_GetType;
+        GamutMathApi_CreateU64Vector1 GamutMathU64Vector1_Create;
+        GamutMathApi_CreateU64Vector1Array GamutMathU64Vector1Array_Create;
+        GamutMathApi_GetU64Vector1ValuePointer GamutMathU64Vector1_GetValuePointer;
+        GamutMathApi_GetU64Vector1ValuePointer GamutMathU64Vector1Array_GetValuePointer;
+        GamutMathApi_GetArrayLength GamutMathU64Vector1Array_GetLength;
 
         GamutMathApi_GetType GamutMathBVector2_GetType;
         GamutMathApi_GetType GamutMathBVector2Array_GetType;

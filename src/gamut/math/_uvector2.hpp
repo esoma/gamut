@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:13.882279 from codegen/math/templates/_vector.hpp
+// generated 2022-03-14 18:08:34.734535 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_UVECTOR2_HPP
 #define GAMUT_MATH_UVECTOR2_HPP
@@ -58,25 +58,27 @@ UVector2__new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 
             break;
         }
-        case 2:
-        {
 
+            case 2:
             {
-                auto arg = PyTuple_GET_ITEM(args, 0);
-                c_0 = pyobject_to_c_unsigned_int(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
+
+                {
+                    auto arg = PyTuple_GET_ITEM(args, 0);
+                    c_0 = pyobject_to_c_unsigned_int(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+
+                {
+                    auto arg = PyTuple_GET_ITEM(args, 1);
+                    c_1 = pyobject_to_c_unsigned_int(arg);
+                    auto error_occurred = PyErr_Occurred();
+                    if (error_occurred){ return 0; }
+                }
+
+                break;
             }
 
-            {
-                auto arg = PyTuple_GET_ITEM(args, 1);
-                c_1 = pyobject_to_c_unsigned_int(arg);
-                auto error_occurred = PyErr_Occurred();
-                if (error_occurred){ return 0; }
-            }
-
-            break;
-        }
         default:
         {
             PyErr_Format(
@@ -508,7 +510,7 @@ UVector2_getbufferproc(UVector2 *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
-    view->buf = glm::value_ptr(*self->glm);
+    view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(unsigned int) * 2;
     view->readonly = 1;

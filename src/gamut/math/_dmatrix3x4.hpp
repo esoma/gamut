@@ -1,5 +1,5 @@
 
-// generated 2022-03-13 19:51:13.953781 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-14 18:08:34.804534 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX3X4_HPP
 #define GAMUT_MATH_DMATRIX3X4_HPP
