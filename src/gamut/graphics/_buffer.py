@@ -14,8 +14,10 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut.glmhelp import uvec2_exact
+from gamut.math import U64Vector2
+import gamut.math
 # python
+import ctypes
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
 from ctypes import cast as c_cast
@@ -79,14 +81,14 @@ FREQUENCY_NATURE_TO_GL_ACCESS: Final = {
 
 
 GLM_POD_TO_STRUCT_NAME: Final[dict[Any, str]] = {
-    glm.float32: 'f',
-    glm.double: 'd',
-    glm.int8: 'b',
-    glm.uint8: 'B',
-    glm.int16: 'h',
-    glm.uint16: 'H',
-    glm.int32: 'i',
-    glm.uint32: 'I',
+    ctypes.c_float: '=f',
+    ctypes.c_double: '=d',
+    ctypes.c_int8: '=b',
+    ctypes.c_uint8: '=B',
+    ctypes.c_int16: '=h',
+    ctypes.c_uint8: '=H',
+    ctypes.c_int32: '=i',
+    ctypes.c_uint32: '=I',
 }
 
 
@@ -252,7 +254,7 @@ class Buffer:
         self,
         data: _bytes = b'\x00',
         *,
-        range: Optional[U32Vector2] = None
+        range: U64Vector2 | None = None
     ) -> None:
         # check data
         try:
@@ -263,10 +265,9 @@ class Buffer:
             raise TypeError('data must be a single byte')
         # check range
         if range is not None:
-            try:
-                start, end = uvec2_exact(range)
-            except TypeError:
-                raise TypeError('range must be a uvec2')
+            if not isinstance(range, U64Vector2):
+                raise TypeError('range must be U64Vector2')
+            start, end = range
             assert start >= 0
             assert end >= 0
             if start > self._length or end > self._length:
@@ -308,22 +309,22 @@ class Buffer:
 
 
 BVT = TypeVar('BVT',
-    glm.float32, glm.double,
-    glm.int8, glm.uint8,
-    glm.int16, glm.uint16,
-    glm.int32, glm.uint32,
-    glm.vec2, glm.dvec2, glm.ivec2, glm.uvec2,
-    glm.vec3, glm.dvec3, glm.ivec3, glm.uvec3,
-    glm.vec4, glm.dvec4, glm.ivec4, glm.uvec4,
-    glm.mat2x2, glm.dmat2x2, glm.imat2x2, glm.umat2x2,
-    glm.mat2x3, glm.dmat2x3, glm.imat2x3, glm.umat2x3,
-    glm.mat2x4, glm.dmat2x4, glm.imat2x4, glm.umat2x4,
-    glm.mat3x2, glm.dmat3x2, glm.imat3x2, glm.umat3x2,
-    glm.mat3x3, glm.dmat3x3, glm.imat3x3, glm.umat3x3,
-    glm.mat3x4, glm.dmat3x4, glm.imat3x4, glm.umat3x4,
-    glm.mat4x2, glm.dmat4x2, glm.imat4x2, glm.umat4x2,
-    glm.mat4x3, glm.dmat4x3, glm.imat4x3, glm.umat4x3,
-    glm.mat4x4, glm.dmat4x4, glm.imat4x4, glm.umat4x4,
+    ctypes.c_float, ctypes.c_double,
+    ctypes.c_int8, ctypes.c_uint8,
+    ctypes.c_int16, ctypes.c_uint16,
+    ctypes.c_int32, ctypes.c_uint32,
+    glm.Vector2, glm.dVector2, glm.iVector2, glm.uVector2,
+    glm.Vector3, glm.dVector3, glm.iVector3, glm.uVector3,
+    glm.Vector4, glm.dVector4, glm.iVector4, glm.uVector4,
+    glm.Mat2x2, glm.dMat2x2, glm.iMat2x2, glm.uMat2x2,
+    glm.Mat2x3, glm.dMat2x3, glm.iMat2x3, glm.uMat2x3,
+    glm.Mat2x4, glm.dMat2x4, glm.iMat2x4, glm.uMat2x4,
+    glm.Mat3x2, glm.dMat3x2, glm.iMat3x2, glm.uMat3x2,
+    glm.Mat3x3, glm.dMat3x3, glm.iMat3x3, glm.uMat3x3,
+    glm.Mat3x4, glm.dMat3x4, glm.iMat3x4, glm.uMat3x4,
+    glm.Mat4x2, glm.dMat4x2, glm.iMat4x2, glm.uMat4x2,
+    glm.Mat4x3, glm.dMat4x3, glm.iMat4x3, glm.uMat4x3,
+    glm.Mat4x4, glm.dMat4x4, glm.iMat4x4, glm.uMat4x4,
 )
 
 
