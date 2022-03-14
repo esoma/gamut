@@ -3,10 +3,10 @@ from __future__ import annotations
 # gamut
 from .test_texture import TextureTest
 # gamut
-from gamut.glmhelp import F32Vector4, I32Vector1, I32Vector2, I32Vector3
 from gamut.graphics import (MipmapSelection, Texture2d, Texture2dArray,
                             TextureComponents, TextureDataType, TextureFilter,
                             TextureWrap)
+from gamut.math import FVector4, IVector1, IVector2, IVector3
 # python
 from typing import Any, cast
 
@@ -19,7 +19,7 @@ class TestTexture2d(TextureTest):
     @classmethod
     def create_texture(
         cls,
-        size: I32Vector1 | I32Vector2 | I32Vector3,
+        size: IVector1 | IVector2 | IVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -32,7 +32,7 @@ class TestTexture2d(TextureTest):
               tuple[TextureWrap, TextureWrap] |
               tuple[TextureWrap, TextureWrap, TextureWrap] |
               None = None,
-        wrap_color: F32Vector4 | None = None
+        wrap_color: FVector4 | None = None
     ) -> Texture2d:
         return Texture2d(
             cast(Any, size),
@@ -56,7 +56,7 @@ class TestTexture2dArray(TextureTest):
     @classmethod
     def create_texture(
         cls,
-        size: I32Vector1 | I32Vector2 | I32Vector3,
+        size: IVector1 | IVector2 | IVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -69,7 +69,7 @@ class TestTexture2dArray(TextureTest):
               tuple[TextureWrap, TextureWrap] |
               tuple[TextureWrap, TextureWrap, TextureWrap] |
               None = None,
-        wrap_color: F32Vector4 | None = None
+        wrap_color: FVector4 | None = None
     ) -> Texture2dArray:
         return Texture2dArray(
             cast(Any, size),

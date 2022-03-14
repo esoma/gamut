@@ -12,13 +12,11 @@ from ._texture import (get_texture_gl_target, GL_TEXTURE_CUBE_MAP_TARGETS,
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from ctypes import POINTER as c_pointer
-from ctypes import c_byte, c_void_p
+from ctypes import c_byte, c_uint32, c_void_p
 from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof
 from math import prod
 from typing import Any
-# pyglm
-from glm import uint32
 # pyopengl
 from OpenGL.GL import (GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, GL_STREAM_READ,
                        GL_UNSIGNED_INT_24_8, glBindBuffer, glBindTexture,
@@ -47,9 +45,9 @@ class TextureView:
             )))
             raise TypeError(f'data_type must be {data_types}')
         if texture.components == TextureComponents.DS:
-            if data_type != uint32:
+            if data_type != c_uint32:
                 raise ValueError(
-                    f'data_type must be {uint32} when '
+                    f'data_type must be {c_uint32} when '
                     f'components is {TextureComponents.DS}'
                 )
             gl_data_type = GL_UNSIGNED_INT_24_8

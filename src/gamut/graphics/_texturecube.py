@@ -8,9 +8,7 @@ from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureType,
                        TextureWrap)
 # gamut
-from gamut.glmhelp import F32Vector4, I32Vector2
-# pyglm
-from glm import ivec2
+from gamut.math import FVector4, IVector2
 
 
 class TextureCube(Texture):
@@ -27,7 +25,7 @@ class TextureCube(Texture):
         minify_filter: TextureFilter | None = None,
         magnify_filter: TextureFilter | None = None,
         wrap: tuple[TextureWrap, TextureWrap, TextureWrap] | None = None,
-        wrap_color: F32Vector4 | None = None
+        wrap_color: FVector4 | None = None
     ):
         super().__init__(
             TextureType.NORMAL_CUBE,
@@ -44,9 +42,9 @@ class TextureCube(Texture):
         )
 
     @property
-    def size(self) -> ivec2:
+    def size(self) -> IVector2:
         size = super().size
-        assert isinstance(size, ivec2)
+        assert isinstance(size, IVector2)
         return size
 
 

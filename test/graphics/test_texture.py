@@ -5,20 +5,19 @@ __all__ = ['TextureTest']
 
 # gamut
 from gamut import Application
-from gamut.glmhelp import F32Vector4, I32Vector1, I32Vector2, I32Vector3
 from gamut.graphics import (Buffer, MipmapSelection, Texture,
                             TextureComponents, TextureDataType, TextureFilter,
                             TextureType, TextureView, TextureWrap)
 from gamut.graphics._texture import (TEXTURE_DATA_TYPES,
                                      TEXTURE_DATA_TYPES_SORTED)
+from gamut.math import IVector1, IVector2, IVector3
 # python
+import ctypes
 from ctypes import sizeof as c_sizeof
 from math import prod
 import struct
 import threading
 from typing import Any, Final
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -33,24 +32,24 @@ TEXTURE_COMPONENTS_COUNT: Final = {
 
 
 TEXTURE_DATA_TYPE_MAX: Final = {
-    glm.uint8: 255,
-    glm.int8: 127,
-    glm.uint16: 65535,
-    glm.int16: 32767,
-    glm.uint32: 4294967295,
-    glm.int32: 2147483647,
-    glm.float32: 1.0,
+    ctypes.c_uint8: 255,
+    ctypes.c_int8: 127,
+    ctypes.c_uint16: 65535,
+    ctypes.c_int16: 32767,
+    ctypes.c_uint32: 4294967295,
+    ctypes.c_int32: 2147483647,
+    ctypes.c_float: 1.0,
 }
 
 
 TEXTURE_DATA_TYPE_STRUCT: Final = {
-    glm.uint8: 'B',
-    glm.int8: 'b',
-    glm.uint16: 'H',
-    glm.int16: 'h',
-    glm.uint32: 'I',
-    glm.int32: 'i',
-    glm.float32: 'f',
+    ctypes.c_uint8: 'B',
+    ctypes.c_int8: 'b',
+    ctypes.c_uint16: 'H',
+    ctypes.c_int16: 'h',
+    ctypes.c_uint32: 'I',
+    ctypes.c_int32: 'i',
+    ctypes.c_float: 'f',
 }
 
 
@@ -63,7 +62,7 @@ class TextureTest:
     @classmethod
     def create_texture(
         cls,
-        size: I32Vector1 | I32Vector2 | I32Vector3,
+        size: IVector1 | IVector2 | IVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -81,40 +80,69 @@ class TextureTest:
         raise NotImplementedError()
 
     @pytest.fixture
-    def size(self) -> Any:
-        return [1 for _ in range(self.size_length)]
+    def size_type(self) -> Any:
+        return {
+            1: IVector1,
+            2: IVector2,
+            3: IVector3
+        }[self.size_length]
+
+    @pytest.fixture
+    def size(self, size_type) -> Any:
+        return size_type(*(1 for _ in range(self.size_length)))
 
     @pytest.mark.parametrize("size", [None, 0, '1', '12', '123'])
-    def test_size_invalid(self, size: Any) -> None:
+    def test_size_invalid(self, size: Any, size_type: Any) -> None:
         with pytest.raises(TypeError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, b'')
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, b'')
         assert str(excinfo.value) == (
-            f'size must be a sequence of {self.size_length} integers'
+            f'size must be {size_type.__name__}'
         )
 
     @pytest.mark.parametrize("width", [-100, -1, 0])
-    def test_width_out_of_range(self, width: int, size: Any) -> None:
+    def test_width_out_of_range(
+        self,
+        width: int,
+        size: Any,
+        size_type: Any
+    ) -> None:
+        size = list(size)
         size[0] = width
+        size = size_type(*size)
         with pytest.raises(ValueError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, b'')
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, b'')
         assert str(excinfo.value) == 'width must be > 0'
 
     @pytest.mark.parametrize("height", [-100, -1, 0])
-    def test_height_out_of_range(self, height: int, size: Any) -> None:
+    def test_height_out_of_range(
+        self,
+        height: int,
+        size: Any,
+        size_type: Any
+    ) -> None:
         if self.size_length < 2:
             pytest.skip('texture has no height')
+        size = list(size)
         size[1] = height
+        size = size_type(*size)
         with pytest.raises(ValueError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, b'')
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, b'')
         assert str(excinfo.value) == 'height must be > 0'
 
     @pytest.mark.parametrize("depth", [-100, -1, 0])
-    def test_depth_out_of_range(self, depth: int, size: Any) -> None:
+    def test_depth_out_of_range(
+        self,
+        depth: int,
+        size: Any,
+        size_type: Any
+    ) -> None:
         if self.size_length < 3:
             pytest.skip('texture has no depth')
+        size = list(size)
         size[2] = depth
+        size = size_type(*size)
         with pytest.raises(ValueError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, b'')
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, b'')
         assert str(excinfo.value) == 'depth must be > 0'
 
     @pytest.mark.parametrize("data_type", [None, object(), 'test', 1.0, 1])
@@ -127,7 +155,7 @@ class TextureTest:
     @pytest.mark.parametrize("data", [None, object(), 1.0])
     def test_invalid_data(self, data: Any, size: Any) -> None:
         with pytest.raises(TypeError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, data)
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, data)
         assert str(excinfo.value) == (
             f'cannot convert {type(data).__name__!r} object to bytes'
         )
@@ -136,14 +164,14 @@ class TextureTest:
         expected_data_length = prod(size)
         data = b'\x00' * (expected_data_length - 1) * self.data_multiplier
         with pytest.raises(ValueError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, data)
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, data)
         assert str(excinfo.value) == 'too much or not enough data'
 
     def test_too_much_data(self, size: Any) -> None:
         expected_data_length = prod(size)
         data = b'\x00' * (expected_data_length + 1) * self.data_multiplier
         with pytest.raises(ValueError) as excinfo:
-            self.create_texture(size, TextureComponents.R, glm.int8, data)
+            self.create_texture(size, TextureComponents.R, ctypes.c_int8, data)
         assert str(excinfo.value) == 'too much or not enough data'
 
     @pytest.mark.parametrize("components", [
@@ -176,7 +204,7 @@ class TextureTest:
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             self.create_texture(
-                size, TextureComponents.R, glm.int8,
+                size, TextureComponents.R, ctypes.c_int8,
                 b'\x00' * self.data_multiplier,
                 mipmap_selection=mipmap_selection
             )
@@ -192,7 +220,7 @@ class TextureTest:
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             self.create_texture(
-                size, TextureComponents.R, glm.int8,
+                size, TextureComponents.R, ctypes.c_int8,
                 b'\x00' * self.data_multiplier,
                 minify_filter=minify_filter
             )
@@ -208,7 +236,7 @@ class TextureTest:
     ) -> None:
         with pytest.raises(TypeError) as excinfo:
             self.create_texture(
-                size, TextureComponents.R, glm.int8,
+                size, TextureComponents.R, ctypes.c_int8,
                 b'\x00' * self.data_multiplier,
                 magnify_filter=magnify_filter
             )
@@ -231,7 +259,7 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.uint8,
+            ctypes.c_uint8,
             data,
             mipmap_selection=mipmap_selection,
             minify_filter=minify_filter,
@@ -251,7 +279,7 @@ class TextureTest:
             self.create_texture(
                 size,
                 TextureComponents.R,
-                glm.uint8,
+                ctypes.c_uint8,
                 b'\x00' * self.data_multiplier,
                 wrap=wrap,
             )
@@ -268,7 +296,7 @@ class TextureTest:
             self.create_texture(
                 size,
                 TextureComponents.R,
-                glm.uint8,
+                ctypes.c_uint8,
                 b'\x00' * self.data_multiplier,
                 wrap=wrap,
             )
@@ -284,13 +312,11 @@ class TextureTest:
             self.create_texture(
                 size,
                 TextureComponents.R,
-                glm.uint8,
+                ctypes.c_uint8,
                 b'\x00' * self.data_multiplier,
                 wrap_color=wrap_color,
             )
-        assert str(excinfo.value) == (
-            'wrap_color must be a sequence of four floats'
-        )
+        assert str(excinfo.value) == 'wrap color must be FVector4'
 
     @pytest.mark.parametrize("wrap_s", list(TextureWrap))
     @pytest.mark.parametrize("wrap_t", list(TextureWrap))
@@ -307,7 +333,7 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.uint8,
+            ctypes.c_uint8,
             data,
             wrap=wrap,
         )
@@ -321,7 +347,7 @@ class TextureTest:
             self.create_texture(
                 size,
                 TextureComponents.R,
-                glm.int8,
+                ctypes.c_int8,
                 b'',
                 anisotropy=anisotropy
             )
@@ -333,17 +359,17 @@ class TextureTest:
         self.create_texture(
             size,
             TextureComponents.R,
-            glm.int8,
+            ctypes.c_int8,
             data,
             anisotropy=anisotropy
         )
 
     def test_depth_stencil(self, size: Any) -> None:
-        data = b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
+        data = b'\x00' * c_sizeof(ctypes.c_uint32) * self.data_multiplier
         texture = self.create_texture(
             size,
             TextureComponents.DS,
-            glm.uint32,
+            ctypes.c_uint32,
             data
         )
         assert texture.components == TextureComponents.DS
@@ -352,7 +378,7 @@ class TextureTest:
 
     @pytest.mark.parametrize("data_type", [
         dt for dt in TEXTURE_DATA_TYPES_SORTED
-        if dt != glm.uint32
+        if dt != ctypes.c_uint32
     ])
     def test_depth_stencil_invalid_data_types(
         self,
@@ -368,7 +394,7 @@ class TextureTest:
                 data
             )
         assert str(excinfo.value) == (
-            f'data_type must be {glm.uint32} when components is '
+            f'data_type must be {ctypes.c_uint32} when components is '
             f'{TextureComponents.DS}'
         )
 
@@ -376,7 +402,7 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.int8,
+            ctypes.c_int8,
             b'\x00' * self.data_multiplier
         )
         assert texture.is_open
@@ -396,15 +422,16 @@ class TextureTest:
         components: TextureComponents,
         input_data_type: type[TextureDataType],
         output_data_type: type[TextureDataType],
+        size_type: Any
     ) -> None:
-        size = [c * 2 for c in size]
+        size = size_type(*(c * 2 for c in size))
         pixel_count = prod(size) * self.data_multiplier
         pixels = [i / pixel_count for i in range(pixel_count)]
 
         component_count = TEXTURE_COMPONENTS_COUNT[components] * pixel_count
         input_max = TEXTURE_DATA_TYPE_MAX[input_data_type]
         input_data = struct.pack(
-            TEXTURE_DATA_TYPE_STRUCT[input_data_type] * component_count,
+            '=' + TEXTURE_DATA_TYPE_STRUCT[input_data_type] * component_count,
             *(input_max.__class__(p * input_max)
               for p in pixels
               for i in range(TEXTURE_COMPONENTS_COUNT[components])
@@ -435,6 +462,7 @@ class TextureTest:
             c / output_max
             for c in
             struct.unpack(
+                '=' +
                 TEXTURE_DATA_TYPE_STRUCT[output_data_type] * component_count,
                 view.bytes
             )
@@ -447,23 +475,24 @@ class TextureTest:
 
     @pytest.mark.parametrize("output_data_type", [
         dt for dt in TEXTURE_DATA_TYPES_SORTED
-        if dt != glm.uint32
+        if dt != ctypes.c_uint32
     ])
     def test_texture_view_depth_stencil_invalid_output_data_type(
         self,
         size: Any,
-        output_data_type: type[TextureDataType]
+        output_data_type: type[TextureDataType],
+        size_type: Any
     ) -> None:
         components = TextureComponents.DS
-        input_data_type = glm.uint32
-        size = [c * 2 for c in size]
+        input_data_type = ctypes.c_uint32
+        size = size_type(*(c * 2 for c in size))
         pixel_count = prod(size) * self.data_multiplier
         pixels = [i / pixel_count for i in range(pixel_count)]
 
         component_count = TEXTURE_COMPONENTS_COUNT[components] * pixel_count
         input_max = TEXTURE_DATA_TYPE_MAX[input_data_type]
         input_data = struct.pack(
-            TEXTURE_DATA_TYPE_STRUCT[input_data_type] * component_count,
+            '=' + TEXTURE_DATA_TYPE_STRUCT[input_data_type] * component_count,
             *(int(p * input_max)
               for p in pixels
               for i in range(TEXTURE_COMPONENTS_COUNT[components])
@@ -480,7 +509,7 @@ class TextureTest:
         with pytest.raises(ValueError) as excinfo:
             TextureView(texture, output_data_type)
         assert str(excinfo.value) == (
-            f'data_type must be {glm.uint32} when components is '
+            f'data_type must be {ctypes.c_uint32} when components is '
             f'{TextureComponents.DS}'
         )
 
@@ -488,12 +517,12 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.int8,
+            ctypes.c_int8,
             b'\x00' * self.data_multiplier
         )
         texture.close()
         with pytest.raises(RuntimeError) as excinfo:
-            TextureView(texture, glm.int8)
+            TextureView(texture, ctypes.c_int8)
         assert str(excinfo.value) == 'texture is closed'
 
 
@@ -501,10 +530,10 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.int8,
+            ctypes.c_int8,
             b'\x00' * self.data_multiplier
         )
-        view = TextureView(texture, glm.int8)
+        view = TextureView(texture, ctypes.c_int8)
 
         texture.close()
         assert view.is_open
@@ -521,7 +550,7 @@ class TextureTest:
     @pytest.mark.parametrize("texture", [None, object(), 'test', 1.0])
     def test_texture_view_non_texture(self, texture: Any) -> None:
         with pytest.raises(TypeError) as excinfo:
-            TextureView(texture, glm.int8)
+            TextureView(texture, ctypes.c_int8)
         assert str(excinfo.value) == (
             'texture must be <class \'gamut.graphics._texture.Texture\'>'
         )
@@ -535,7 +564,7 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.int8,
+            ctypes.c_int8,
             b'\x00' * self.data_multiplier
         )
         with pytest.raises(TypeError) as excinfo:
@@ -547,10 +576,10 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.R,
-            glm.int8,
+            ctypes.c_int8,
             b'\x00' * self.data_multiplier
         )
-        view = TextureView(texture, glm.int8)
+        view = TextureView(texture, ctypes.c_int8)
         assert view.is_open
 
         view.close()
@@ -572,8 +601,8 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.DS,
-            glm.uint32,
-            b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
+            ctypes.c_uint32,
+            b'\x00' * c_sizeof(ctypes.c_uint32) * self.data_multiplier
         )
 
         class App(Application):
@@ -593,8 +622,8 @@ class TextureTest:
                 texture = self.create_texture(
                     size,
                     TextureComponents.DS,
-                    glm.uint32,
-                    b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
+                    ctypes.c_uint32,
+                    b'\x00' * c_sizeof(ctypes.c_uint32) * self.data_multiplier
                 )
 
         app = App()
@@ -609,8 +638,8 @@ class TextureTest:
         texture = self.create_texture(
             size,
             TextureComponents.DS,
-            glm.uint32,
-            b'\x00' * c_sizeof(glm.uint32) * self.data_multiplier
+            ctypes.c_uint32,
+            b'\x00' * c_sizeof(ctypes.c_uint32) * self.data_multiplier
         )
 
         def thread_main() -> None:
@@ -630,7 +659,7 @@ class TextureTestType(TextureTest):
     @classmethod
     def create_texture(
         cls,
-        size: I32Vector1 | I32Vector2 | I32Vector3,
+        size: IVector1 | IVector2 | IVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,

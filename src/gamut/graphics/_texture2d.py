@@ -8,16 +8,14 @@ from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureType,
                        TextureWrap)
 # gamut
-from gamut.glmhelp import F32Vector4, I32Vector2, I32Vector3
-# pyglm
-from glm import ivec2, ivec3
+from gamut.math import FVector3, IVector2, IVector3
 
 
 class Texture2d(Texture):
 
     def __init__(
         self,
-        size: I32Vector2,
+        size: IVector2,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -27,7 +25,7 @@ class Texture2d(Texture):
         minify_filter: TextureFilter | None = None,
         magnify_filter: TextureFilter | None = None,
         wrap: tuple[TextureWrap, TextureWrap] | None = None,
-        wrap_color: F32Vector4 | None = None
+        wrap_color: FVector3 | None = None
     ):
         super().__init__(
             TextureType.NORMAL_2D,
@@ -44,9 +42,9 @@ class Texture2d(Texture):
         )
 
     @property
-    def size(self) -> ivec2:
+    def size(self) -> IVector2:
         size = super().size
-        assert isinstance(size, ivec2)
+        assert isinstance(size, IVector2)
         return size
 
 
@@ -58,7 +56,7 @@ class Texture2dArray(Texture):
 
     def __init__(
         self,
-        size: I32Vector3,
+        size: IVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -68,7 +66,7 @@ class Texture2dArray(Texture):
         minify_filter: TextureFilter | None = None,
         magnify_filter: TextureFilter | None = None,
         wrap: tuple[TextureWrap, TextureWrap] | None = None,
-        wrap_color: F32Vector4 | None = None
+        wrap_color: FVector3 | None = None
     ):
         super().__init__(
             TextureType.ARRAY_2D,
@@ -85,9 +83,9 @@ class Texture2dArray(Texture):
         )
 
     @property
-    def size(self) -> ivec3:
+    def size(self) -> IVector3:
         size = super().size
-        assert isinstance(size, ivec3)
+        assert isinstance(size, IVector3)
         return size
 
 
