@@ -14,8 +14,8 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut.math import U64Vector2
 import gamut.math
+from gamut.math import U64Vector2
 # python
 import ctypes
 from ctypes import POINTER as c_pointer
