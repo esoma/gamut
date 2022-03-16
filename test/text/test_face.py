@@ -1,7 +1,7 @@
 
 
 # gamut
-from gamut.math import IVector2, Vector2
+from gamut.math import IVector2, UVector2, Vector2
 from gamut.text import (BreakChunk, Face, FontSize, PositionedGlyph,
                         RenderedGlyphFormat)
 # python
@@ -78,10 +78,10 @@ def test_request_point_size_no_dimensions(file: str) -> None:
 ])
 @pytest.mark.parametrize("dpi", [
     None,
-    IVector2(72, 72),
-    IVector2(144, 72),
-    IVector2(72, 144),
-    IVector2(144, 144),
+    UVector2(72, 72),
+    UVector2(144, 72),
+    UVector2(72, 144),
+    UVector2(144, 144),
 ])
 def test_request_point_size(
     file: str,
@@ -98,7 +98,7 @@ def test_request_point_size(
         kwargs["dpi"] = dpi
     else:
         dpi = (72, 72)
-    expected_nominal_size = IVector2(
+    expected_nominal_size = UVector2(
         int((height if width is None else width) * (dpi[0] / 72.0)),
         int((width if height is None else height) * (dpi[1] / 72.0)),
     )
@@ -108,9 +108,9 @@ def test_request_point_size(
     assert size.face is face
 
     nominal_size = size.nominal_size
-    assert isinstance(nominal_size, IVector2)
+    assert isinstance(nominal_size, UVector2)
     assert nominal_size == expected_nominal_size
-    nominal_size += IVector2(1, 1)
+    nominal_size += UVector2(1, 1)
     assert size.nominal_size is not nominal_size
     assert size.nominal_size != nominal_size
 
@@ -139,7 +139,7 @@ def test_request_pixel_size(
         kwargs["width"] = width
     if height is not None:
         kwargs["height"] = height
-    expected_nominal_size = IVector2(
+    expected_nominal_size = UVector2(
         height if width is None else width,
         width if height is None else height,
     )
@@ -149,9 +149,9 @@ def test_request_pixel_size(
     assert size.face is face
 
     nominal_size = size.nominal_size
-    assert isinstance(nominal_size, IVector2)
+    assert isinstance(nominal_size, UVector2)
     assert nominal_size == expected_nominal_size
-    nominal_size += IVector2(1, 1)
+    nominal_size += UVector2(1, 1)
     assert size.nominal_size is not nominal_size
     assert size.nominal_size != nominal_size
 
@@ -361,11 +361,11 @@ def test_render_glyph(
         )
     )
 
-    assert isinstance(rendered_glyph.size, IVector2)
+    assert isinstance(rendered_glyph.size, UVector2)
     assert rendered_glyph.size.x > 0
     assert rendered_glyph.size.y > 0
     rendered_glyph_size = rendered_glyph.size
-    rendered_glyph_size += IVector2(1, 1)
+    rendered_glyph_size += UVector2(1, 1)
     assert rendered_glyph.size != rendered_glyph_size
 
     assert isinstance(rendered_glyph.bearing, IVector2)

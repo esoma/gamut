@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['Pack2d', 'Packed2dItem']
 
 # gamut
-from gamut.math import IVector2
+from gamut.math import UVector2
 # python
 from typing import Optional
 
@@ -13,22 +13,22 @@ class Pack2d:
 
     def __init__(
         self,
-        bin_size: IVector2,
+        bin_size: UVector2,
         *,
         max_bins: Optional[int] = None,
     ):
-        if not isinstance(bin_size, IVector2):
-            raise TypeError('bin size must be IVector2')
+        if not isinstance(bin_size, UVector2):
+            raise TypeError('bin size must be UVector2')
         self._bin_size = bin_size
         self._max_bins = max_bins
-        self._items: list[IVector2] = []
+        self._items: list[UVector2] = []
         self._unpacked_indexes: set[int] = set()
         self._bins: list[Bin] = []
         self._map: dict[int, Packed2dItem] = {}
 
-    def add(self, size: IVector2) -> int:
-        if not isinstance(size, IVector2):
-            raise TypeError('size must be IVector2')
+    def add(self, size: UVector2) -> int:
+        if not isinstance(size, UVector2):
+            raise TypeError('size must be UVector2')
         id = len(self._items)
         self._items.append(size)
         self._unpacked_indexes.add(id)
@@ -69,7 +69,7 @@ class Pack2d:
 
 class Packed2dItem:
 
-    def __init__(self, bin: int, position: IVector2):
+    def __init__(self, bin: int, position: UVector2):
         self._bin = bin
         self._position = position
 
@@ -86,7 +86,7 @@ class Packed2dItem:
         return self._bin
 
     @property
-    def position(self) -> IVector2:
+    def position(self) -> UVector2:
         return self._position
 
     def __repr__(self) -> str:
@@ -98,11 +98,11 @@ class Packed2dItem:
 
 class Bin:
 
-    def __init__(self, max_size: IVector2):
+    def __init__(self, max_size: UVector2):
         self.max_size = max_size
         self.lines: list[list[int]] = []
 
-    def add(self, size: IVector2) -> Optional[IVector2]:
+    def add(self, size: UVector2) -> Optional[UVector2]:
         # early out for things that are larger than the max bin size
         if size[0] > self.max_size[0] or size[1] > self.max_size[1]:
             return None
@@ -115,11 +115,11 @@ class Bin:
             # only the last line can have its height expanded
             if (i + 1) < len(self.lines) and size[1] > line_height:
                 continue
-            position = IVector2(line_width, bottom - line_height)
+            position = UVector2(line_width, bottom - line_height)
             self.lines[i] = [line_width + size[0], max(line_height, size[1])]
             return position
         # thing is too vertically large to fit in a new line
         if bottom + size[1] > self.max_size[1]:
             return None
         self.lines.append(list(size))
-        return IVector2(0, bottom)
+        return UVector2(0, bottom)
