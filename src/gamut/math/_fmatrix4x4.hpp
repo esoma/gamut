@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 16:23:50.371692 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 20:45:19.177599 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X4_HPP
 #define GAMUT_MATH_FMATRIX4X4_HPP
@@ -1247,6 +1247,72 @@ static PyGetSetDef FMatrix4x4_PyGetSetDef[] = {
         return result;
     }
 
+    static FMatrix4x4 *
+    FMatrix4x4_orthographic(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 6)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 6 argument, got %zi", nargs);
+            return 0;
+        }
+
+        double left = PyFloat_AsDouble(args[0]);
+        if (PyErr_Occurred()){ return 0; }
+        double right = PyFloat_AsDouble(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+        double bottom = PyFloat_AsDouble(args[2]);
+        if (PyErr_Occurred()){ return 0; }
+        double top = PyFloat_AsDouble(args[3]);
+        if (PyErr_Occurred()){ return 0; }
+        double near = PyFloat_AsDouble(args[4]);
+        if (PyErr_Occurred()){ return 0; }
+        double far = PyFloat_AsDouble(args[5]);
+        if (PyErr_Occurred()){ return 0; }
+
+        auto *result = (FMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FMatrix4x4Glm(glm::ortho(left, right, bottom, top, near, far));
+        return result;
+    }
+
+    static FMatrix4x4 *
+    FMatrix4x4_look_at(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 3)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 3 argument, got %zi", nargs);
+            return 0;
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vec3_cls = module_state->FVector3_PyTypeObject;
+
+        if (Py_TYPE(args[0]) != vec3_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected FVector3 for eye, got %R", args[0]);
+            return 0;
+        }
+        auto eye = (FVector3 *)args[0];
+        if (Py_TYPE(args[1]) != vec3_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected FVector3 for center, got %R", args[1]);
+            return 0;
+        }
+        auto center = (FVector3 *)args[1];
+        if (Py_TYPE(args[2]) != vec3_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected FVector3 for up, got %R", args[2]);
+            return 0;
+        }
+        auto up = (FVector3 *)args[2];
+
+        auto *result = (FMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FMatrix4x4Glm(glm::lookAt(*eye->glm, *center->glm, *up->glm));
+        return result;
+    }
+
     static FMatrix3x3 *
     FMatrix4x4_to_matrix3(FMatrix4x4 *self, void*)
     {
@@ -1395,6 +1461,8 @@ static PyMethodDef FMatrix4x4_PyMethodDef[] = {
         {"scale", (PyCFunction)FMatrix4x4_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction)FMatrix4x4_translate, METH_FASTCALL, 0},
         {"perspective", (PyCFunction)FMatrix4x4_perspective, METH_CLASS | METH_FASTCALL, 0},
+        {"orthographic", (PyCFunction)FMatrix4x4_orthographic, METH_CLASS | METH_FASTCALL, 0},
+        {"look_at", (PyCFunction)FMatrix4x4_look_at, METH_CLASS | METH_FASTCALL, 0},
         {"to_matrix3", (PyCFunction)FMatrix4x4_to_matrix3, METH_NOARGS, 0},
 
 

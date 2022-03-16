@@ -19,8 +19,6 @@ from random import randrange
 import traceback
 from typing import Final
 import warnings
-# pyglm
-from glm import ortho
 
 DIR: Final = Path(__file__).parent
 
@@ -82,11 +80,11 @@ class App(Application):
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)
-        self.projection = FMatrix4(*(FVector4(*c) for c in ortho(
+        self.projection = FMatrix4.orthographic(
             0, self.window.size[0],
             0, self.window.size[1],
             -1000, 1000
-        )))
+        )
 
         self.listener = Listener(gain=.25)
         self.listener.activate()

@@ -1,5 +1,5 @@
 
-# generated 2022-03-16 16:23:50.460691 from codegen/math/templates/_math.pyi
+# generated 2022-03-16 20:45:19.271101 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -24654,13 +24654,10 @@ class DMatrix2x2:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix2x2: ...
 
@@ -24824,13 +24821,10 @@ class FMatrix2x2:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix2x2: ...
 
@@ -24986,13 +24980,10 @@ class DMatrix2x3:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix2x3: ...
 
@@ -25148,13 +25139,10 @@ class FMatrix2x3:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix2x3: ...
 
@@ -25314,13 +25302,10 @@ class DMatrix2x4:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix2x4: ...
 
@@ -25480,13 +25465,10 @@ class FMatrix2x4:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix2x4: ...
 
@@ -25644,13 +25626,10 @@ class DMatrix3x2:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix3x2: ...
 
@@ -25808,13 +25787,10 @@ class FMatrix3x2:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix3x2: ...
 
@@ -25990,13 +25966,10 @@ class DMatrix3x3:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix3x3: ...
 
@@ -26172,13 +26145,10 @@ class FMatrix3x3:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix3x3: ...
 
@@ -26348,13 +26318,10 @@ class DMatrix3x4:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix3x4: ...
 
@@ -26524,13 +26491,10 @@ class FMatrix3x4:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix3x4: ...
 
@@ -26694,13 +26658,10 @@ class DMatrix4x2:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix4x2: ...
 
@@ -26864,13 +26825,10 @@ class FMatrix4x2:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix4x2: ...
 
@@ -27042,13 +27000,10 @@ class DMatrix4x3:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix4x3: ...
 
@@ -27220,13 +27175,10 @@ class FMatrix4x3:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix4x3: ...
 
@@ -27425,6 +27377,10 @@ class DMatrix4x4:
     def translate(self, translation: DVector3, /) -> DMatrix4x4: ...
     @classmethod
     def perspective(cls, fov: float, aspect_ratio: float, near: float, far: float, /) -> DMatrix4x4: ...
+    @classmethod
+    def orthographic(cls, left: float, right: float, top: float, bottom: float, near: float, far: float, /) -> DMatrix4x4: ...
+    @classmethod
+    def look_at(cls, eye: DVector3, center: DVector3, up: DVector3, /) -> DMatrix4x4: ...
     def to_matrix3(self) -> DMatrix3x3: ...
 
 
@@ -27432,13 +27388,10 @@ class DMatrix4x4:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> DMatrix4x4: ...
 
@@ -27637,6 +27590,10 @@ class FMatrix4x4:
     def translate(self, translation: FVector3, /) -> FMatrix4x4: ...
     @classmethod
     def perspective(cls, fov: float, aspect_ratio: float, near: float, far: float, /) -> FMatrix4x4: ...
+    @classmethod
+    def orthographic(cls, left: float, right: float, top: float, bottom: float, near: float, far: float, /) -> FMatrix4x4: ...
+    @classmethod
+    def look_at(cls, eye: FVector3, center: FVector3, up: FVector3, /) -> FMatrix4x4: ...
     def to_matrix3(self) -> FMatrix3x3: ...
 
 
@@ -27644,13 +27601,10 @@ class FMatrix4x4:
 
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
-
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
     @classmethod
     def get_size(self) -> int: ...
-
     @classmethod
     def from_buffer(cls, buffer: Any) -> FMatrix4x4: ...
 

@@ -14,8 +14,6 @@ from datetime import timedelta
 from math import cos, pi, radians, sin
 from pathlib import Path
 from typing import Any, Final
-# pyglm
-from glm import lookAt, ortho
 
 RESOURCES: Final = Path(__file__).parent / 'resources'
 
@@ -44,10 +42,11 @@ class App(Application):
             mouse = (await MouseConnected).mouse
         mouse.relative = True
 
-        self.ortho_projection = FMatrix4(*(
-            FVector4(*c) for c in
-            ortho(0, 800, 0, 800, -1000, 1000)
-        ))
+        self.ortho_projection = FMatrix4.orthographic(
+            0, 800,
+            0, 800,
+            -1000, 1000
+        )
 
         self.player_position = FVector3(0, 0, 5)
         self.player_yaw = -pi / 2
@@ -110,14 +109,11 @@ class App(Application):
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
-        self.player_node.local_transform = FMatrix4(*(
-            FVector4(*c) for c in
-            lookAt(
-                self.player_position,
-                self.player_position + player_direction,
-                FVector3(0, 1, 0),
-            )
-        ))
+        self.player_node.local_transform = FMatrix4.look_at(
+            self.player_position,
+            self.player_position + player_direction,
+            FVector3(0, 1, 0),
+        )
 
         clear_render_target(
             self.window_render_target,
