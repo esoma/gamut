@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 02:18:47.215466 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 16:23:50.371692 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X4_HPP
 #define GAMUT_MATH_FMATRIX4X4_HPP
@@ -1247,6 +1247,19 @@ static PyGetSetDef FMatrix4x4_PyGetSetDef[] = {
         return result;
     }
 
+    static FMatrix3x3 *
+    FMatrix4x4_to_matrix3(FMatrix4x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FMatrix3x3_PyTypeObject;
+
+        auto *result = (FMatrix3x3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FMatrix3x3Glm(*self->glm);
+        return result;
+    }
+
 
 
 static FVector4 *
@@ -1354,6 +1367,25 @@ FMatrix4x4_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+
+
+
+
+    static DMatrix4x4 *
+    FMatrix4x4_to_dmatrix(FMatrix4x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+        auto *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(*self->glm);
+        return result;
+    }
+
+
+
 static PyMethodDef FMatrix4x4_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)FMatrix4x4_inverse, METH_NOARGS, 0},
@@ -1363,6 +1395,11 @@ static PyMethodDef FMatrix4x4_PyMethodDef[] = {
         {"scale", (PyCFunction)FMatrix4x4_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction)FMatrix4x4_translate, METH_FASTCALL, 0},
         {"perspective", (PyCFunction)FMatrix4x4_perspective, METH_CLASS | METH_FASTCALL, 0},
+        {"to_matrix3", (PyCFunction)FMatrix4x4_to_matrix3, METH_NOARGS, 0},
+
+
+
+        {"to_dmatrix", (PyCFunction)FMatrix4x4_to_dmatrix, METH_NOARGS, 0},
 
     {"get_row", (PyCFunction)FMatrix4x4_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)FMatrix4x4_transpose, METH_NOARGS, 0},

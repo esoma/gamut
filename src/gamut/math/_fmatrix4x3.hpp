@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 02:18:47.213466 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 16:23:50.369691 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X3_HPP
 #define GAMUT_MATH_FMATRIX4X3_HPP
@@ -1088,8 +1088,31 @@ FMatrix4x3_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+
+
+
+
+    static DMatrix4x3 *
+    FMatrix4x3_to_dmatrix(FMatrix4x3 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DMatrix4x3_PyTypeObject;
+
+        auto *result = (DMatrix4x3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x3Glm(*self->glm);
+        return result;
+    }
+
+
+
 static PyMethodDef FMatrix4x3_PyMethodDef[] = {
 
+
+
+
+        {"to_dmatrix", (PyCFunction)FMatrix4x3_to_dmatrix, METH_NOARGS, 0},
 
     {"get_row", (PyCFunction)FMatrix4x3_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)FMatrix4x3_transpose, METH_NOARGS, 0},

@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 02:18:47.208467 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 16:23:50.365192 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX3X4_HPP
 #define GAMUT_MATH_DMATRIX3X4_HPP
@@ -1071,7 +1071,30 @@ DMatrix3x4_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+
+    static FMatrix3x4 *
+    DMatrix3x4_to_fmatrix(DMatrix3x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FMatrix3x4_PyTypeObject;
+
+        auto *result = (FMatrix3x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FMatrix3x4Glm(*self->glm);
+        return result;
+    }
+
+
+
+
+
+
 static PyMethodDef DMatrix3x4_PyMethodDef[] = {
+
+
+
+        {"to_fmatrix", (PyCFunction)DMatrix3x4_to_fmatrix, METH_NOARGS, 0},
 
 
     {"get_row", (PyCFunction)DMatrix3x4_get_row, METH_FASTCALL, 0},

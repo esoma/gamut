@@ -5,17 +5,17 @@ from gamut.event import Bind
 from gamut.graphics import (BlendFactor, BufferViewMap, clear_render_target,
                             Color, execute_shader, PrimitiveMode, Shader,
                             WindowRenderTarget)
-from gamut.math import UVector2
+from gamut.math import FMatrix4, FVector3, FVector4, UVector2
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
 # python
 from datetime import timedelta
+from math import cos, pi, radians, sin
 from pathlib import Path
 from typing import Any, Final
 # pyglm
-from glm import (cos, cross, lookAt, mat4, normalize, ortho, perspective, pi,
-                 radians, scale, sin, translate, vec3, vec4)
+from glm import lookAt, ortho
 
 RESOURCES: Final = Path(__file__).parent / 'resources'
 
@@ -44,13 +44,16 @@ class App(Application):
             mouse = (await MouseConnected).mouse
         mouse.relative = True
 
-        self.ortho_projection = ortho(0, 800, 0, 800, -1000, 1000)
+        self.ortho_projection = FMatrix4(*(
+            FVector4(*c) for c in
+            ortho(0, 800, 0, 800, -1000, 1000)
+        ))
 
-        self.player_position = vec3(0, 0, 5)
-        self.player_yaw = -pi() / 2
+        self.player_position = FVector3(0, 0, 5)
+        self.player_yaw = -pi / 2
         self.player_pitch = 0.0
         self.player_node: TransformNode[Any] = TransformNode()
-        self.projection = perspective(radians(45), 1, .1, 100)
+        self.projection = FMatrix4.perspective(radians(45), 1, .1, 100)
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
         face = Face(RESOURCES / 'OpenSans-Regular.ttf')
@@ -83,15 +86,14 @@ class App(Application):
             self.player_pitch -= mouse_moved.delta[1] * .005
 
     async def draw(self, draw: Draw) -> None:
-        player_direction = normalize(vec3(
+        player_direction = FVector3(
             cos(self.player_yaw) * cos(self.player_pitch),
             sin(self.player_pitch),
             sin(self.player_yaw) * cos(self.player_pitch)
-        ))
-        player_cross_direction = normalize(cross(
-            player_direction,
-            vec3(0, 1, 0)
-        ))
+        ).normalize()
+        player_cross_direction = player_direction.cross(
+            FVector3(0, 1, 0)
+        ).normalize()
 
         player_frame_speed = (
             (draw.when - draw.previous).total_seconds() /
@@ -108,11 +110,14 @@ class App(Application):
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
-        self.player_node.local_transform = lookAt(
-            self.player_position,
-            self.player_position + player_direction,
-            vec3(0, 1, 0),
-        )
+        self.player_node.local_transform = FMatrix4(*(
+            FVector4(*c) for c in
+            lookAt(
+                self.player_position,
+                self.player_position + player_direction,
+                FVector3(0, 1, 0),
+            )
+        ))
 
         clear_render_target(
             self.window_render_target,
@@ -130,17 +135,15 @@ class App(Application):
                 }),
                 {
                     "transform": (
-                        self.projection * self.player_node.transform *
-                        scale(
-                            translate(
-                                mat4(1),
-                                vec3(-1.5, 1, -5),
-                            ),
-                            vec3(.01, .01, 1)
+                        self.projection @ self.player_node.transform @
+                        FMatrix4(1).translate(
+                            FVector3(-1.5, 1, -5),
+                        ).scale(
+                            FVector3(.01, .01, 1)
                         )
                     ),
                     "tex": texture,
-                    "color": vec4(.5, 1, 1, 1),
+                    "color": FVector4(.5, 1, 1, 1),
                 },
                 index_range=(0, len(pos)),
                 blend_source=BlendFactor.SOURCE_ALPHA,
@@ -158,14 +161,11 @@ class App(Application):
                 }),
                 {
                     "transform": (
-                        self.ortho_projection *
-                        translate(
-                            mat4(1),
-                            vec3(0, 800, 0)
-                        )
+                        self.ortho_projection @
+                        FMatrix4(1).translate(FVector3(0, 800, 0))
                     ),
                     "tex": texture,
-                    "color": vec4(1, 1, 1, 1),
+                    "color": FVector4(1, 1, 1, 1),
                 },
                 index_range=(0, len(pos)),
                 blend_source=BlendFactor.SOURCE_ALPHA,

@@ -1018,6 +1018,46 @@ class MatrixTest:
         with pytest.raises(BufferError):
             self.array_cls.from_buffer(b'\x00')
 
+    def test_to_matrix3(self) -> None:
+        if self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls().to_matrix3
+            return
+
+        mat3_cls = globals()[f'{self.cls.__name__[0]}Matrix3x3']
+        assert isinstance(self.cls(1).to_matrix3(), mat3_cls)
+        assert self.cls(1).to_matrix3() == mat3_cls(1)
+        assert self.cls(*range(16)).to_matrix3() == mat3_cls(
+            0, 1, 2,
+            4, 5, 6,
+            8, 9, 10
+        )
+
+    def test_to_fmatrix(self) -> None:
+        if self.struct_format == 'f':
+            with pytest.raises(AttributeError):
+                self.cls().to_fmatrix
+            return
+        f_cls = globals()[f'F{self.cls.__name__[1:]}']
+        assert isinstance(self.cls(1).to_fmatrix(), f_cls)
+        assert self.cls(1).to_fmatrix() == f_cls(1)
+        assert self.cls(*range(self.component_count)).to_fmatrix() == (
+            f_cls(*range(self.component_count))
+        )
+
+    def test_to_dmatrix(self) -> None:
+        if self.struct_format == 'd':
+            with pytest.raises(AttributeError):
+                self.cls().to_dmatrix
+            return
+        d_cls = globals()[f'D{self.cls.__name__[1:]}']
+        assert isinstance(self.cls(1).to_dmatrix(), d_cls)
+        assert self.cls(1).to_dmatrix() == d_cls(1)
+        assert self.cls(*range(self.component_count)).to_dmatrix() == (
+            d_cls(*range(self.component_count))
+        )
+
+
 class TestFMatrix2x2(
     MatrixTest,
     cls=FMatrix2x2,

@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 02:18:47.199466 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 16:23:50.357692 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX2X2_HPP
 #define GAMUT_MATH_FMATRIX2X2_HPP
@@ -865,10 +865,33 @@ FMatrix2x2_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+
+
+
+
+    static DMatrix2x2 *
+    FMatrix2x2_to_dmatrix(FMatrix2x2 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DMatrix2x2_PyTypeObject;
+
+        auto *result = (DMatrix2x2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix2x2Glm(*self->glm);
+        return result;
+    }
+
+
+
 static PyMethodDef FMatrix2x2_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)FMatrix2x2_inverse, METH_NOARGS, 0},
 
+
+
+
+        {"to_dmatrix", (PyCFunction)FMatrix2x2_to_dmatrix, METH_NOARGS, 0},
 
     {"get_row", (PyCFunction)FMatrix2x2_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)FMatrix2x2_transpose, METH_NOARGS, 0},

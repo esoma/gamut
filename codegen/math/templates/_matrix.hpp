@@ -771,6 +771,19 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
         result->glm = new {{ name }}Glm(glm::perspective(fov, aspect, near, far));
         return result;
     }
+
+    static {{ name[0] }}Matrix3x3 *
+    {{ name }}_to_matrix3({{ name }} *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->{{ name[0] }}Matrix3x3_PyTypeObject;
+
+        auto *result = ({{ name[0] }}Matrix3x3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name[0] }}Matrix3x3Glm(*self->glm);
+        return result;
+    }
 {% endif %}
 
 
@@ -879,6 +892,38 @@ static PyObject *
 }
 
 
+{% if c_type != 'float' %}
+    static F{{ name[1:] }} *
+    {{ name }}_to_fmatrix({{ name }} *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->F{{ name[1:] }}_PyTypeObject;
+
+        auto *result = (F{{ name[1:] }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new F{{ name[1:] }}Glm(*self->glm);
+        return result;
+    }
+{% endif %}
+
+
+{% if c_type != 'double' %}
+    static D{{ name[1:] }} *
+    {{ name }}_to_dmatrix({{ name }} *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->D{{ name[1:] }}_PyTypeObject;
+
+        auto *result = (D{{ name[1:] }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new D{{ name[1:] }}Glm(*self->glm);
+        return result;
+    }
+{% endif %}
+
+
 static PyMethodDef {{ name }}_PyMethodDef[] = {
     {% if row_size == column_size %}
         {"inverse", (PyCFunction){{ name }}_inverse, METH_NOARGS, 0},
@@ -888,6 +933,13 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
         {"scale", (PyCFunction){{ name }}_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction){{ name }}_translate, METH_FASTCALL, 0},
         {"perspective", (PyCFunction){{ name }}_perspective, METH_CLASS | METH_FASTCALL, 0},
+        {"to_matrix3", (PyCFunction){{ name }}_to_matrix3, METH_NOARGS, 0},
+    {% endif %}
+    {% if c_type != 'float' %}
+        {"to_fmatrix", (PyCFunction){{ name }}_to_fmatrix, METH_NOARGS, 0},
+    {% endif %}
+    {% if c_type != 'double' %}
+        {"to_dmatrix", (PyCFunction){{ name }}_to_dmatrix, METH_NOARGS, 0},
     {% endif %}
     {"get_row", (PyCFunction){{ name }}_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction){{ name }}_transpose, METH_NOARGS, 0},
