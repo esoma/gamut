@@ -6,7 +6,7 @@ from ._texture2d import Texture2d
 from ._texture import (MipmapSelection, TextureComponents, TextureFilter,
                        TextureWrap)
 # gamut
-from gamut.math import FVector4, IVector2
+from gamut.math import FVector4, UVector2
 # python
 from ctypes import c_uint8
 from pathlib import Path
@@ -126,9 +126,9 @@ class Image:
         return self._pil is not None
 
     @property
-    def size(self) -> IVector2:
+    def size(self) -> UVector2:
         self._ensure_open()
         size: tuple[int, int] = self._pil.size
         assert isinstance(size, tuple)
         assert len(size) == 2
-        return IVector2(*size)
+        return UVector2(*size)

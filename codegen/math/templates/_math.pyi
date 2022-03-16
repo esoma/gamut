@@ -152,11 +152,21 @@ class {{ type }}:
     def distance(self, other: {{ type }}, /) -> {{ component_type }}: ...
 {% endif %}
 
+    def min(self, min: {{ component_type }}) -> {{ type }}: ...
+    def max(self, max: {{ component_type }}) -> {{ type }}: ...
+    def clamp(self, min: {{ component_type }}, max: {{ component_type }}) -> {{ type }}: ...
+
     @classmethod
     def get_limits(cls) -> tuple[{{ component_type }}, {{ component_type }}]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 
 @final
@@ -175,7 +185,10 @@ class {{ type }}Array:
 
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 {% endwith %}
 {% endwith %}
@@ -315,6 +328,11 @@ class {{ type }}:
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 @final
 class {{ type }}Array:
@@ -332,6 +350,10 @@ class {{ type }}Array:
 
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 {% endwith %}
 {% endwith %}
@@ -423,6 +445,11 @@ class {{ type }}:
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 @final
 class {{ type }}Array:
@@ -440,7 +467,10 @@ class {{ type }}Array:
 
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 {% endwith %}
 {% endwith %}
@@ -482,6 +512,10 @@ class {{ type }}Array:
 
     @property
     def pointer(self) -> ctypes.pointer[{{ ctypes_type }}]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> {{ type }}: ...
 
 {% endwith %}
 {% endwith %}

@@ -7,10 +7,10 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
+from gamut.math import FVector3, FVector3Array, UVector2
 # python
+import ctypes
 from typing import Final, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -41,17 +41,17 @@ def draw_fullscreen_quad(
     query_occluded: bool
 ) -> ShaderExecutionResult:
     xyz = [
-        glm.vec3(-1, -1, z),
-        glm.vec3(-1, 1, z),
-        glm.vec3(1, 1, z),
-        glm.vec3(1, -1, z),
+        FVector3(-1, -1, z),
+        FVector3(-1, 1, z),
+        FVector3(1, 1, z),
+        FVector3(1, -1, z),
     ]
     return execute_shader(
         render_target,
         shader,
         PrimitiveMode.TRIANGLE_FAN,
         BufferViewMap({
-            "xyz": BufferView(Buffer(glm.array(xyz).to_bytes()), glm.vec3)
+            "xyz": BufferView(Buffer(FVector3Array(*xyz)), FVector3)
         }), {
         },
         index_range=(0, 4),
@@ -62,8 +62,8 @@ def draw_fullscreen_quad(
 
 def test_disabled() -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -84,8 +84,8 @@ def test_disabled() -> None:
 
 def test_enabled() -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget(

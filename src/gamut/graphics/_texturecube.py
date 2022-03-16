@@ -8,14 +8,14 @@ from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureType,
                        TextureWrap)
 # gamut
-from gamut.math import FVector4, IVector2
+from gamut.math import FVector4, UVector2
 
 
 class TextureCube(Texture):
 
     def __init__(
         self,
-        size: I32Vector2,
+        size: UVector2,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -42,9 +42,9 @@ class TextureCube(Texture):
         )
 
     @property
-    def size(self) -> IVector2:
+    def size(self) -> UVector2:
         size = super().size
-        assert isinstance(size, IVector2)
+        assert isinstance(size, UVector2)
         return size
 
 

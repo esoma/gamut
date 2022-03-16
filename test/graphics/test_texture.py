@@ -10,7 +10,7 @@ from gamut.graphics import (Buffer, MipmapSelection, Texture,
                             TextureType, TextureView, TextureWrap)
 from gamut.graphics._texture import (TEXTURE_DATA_TYPES,
                                      TEXTURE_DATA_TYPES_SORTED)
-from gamut.math import IVector1, IVector2, IVector3
+from gamut.math import UVector1, UVector2, UVector3
 # python
 import ctypes
 from ctypes import sizeof as c_sizeof
@@ -62,7 +62,7 @@ class TextureTest:
     @classmethod
     def create_texture(
         cls,
-        size: IVector1 | IVector2 | IVector3,
+        size: UVector1 | UVector2 | UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -82,9 +82,9 @@ class TextureTest:
     @pytest.fixture
     def size_type(self) -> Any:
         return {
-            1: IVector1,
-            2: IVector2,
-            3: IVector3
+            1: UVector1,
+            2: UVector2,
+            3: UVector3
         }[self.size_length]
 
     @pytest.fixture
@@ -99,7 +99,7 @@ class TextureTest:
             f'size must be {size_type.__name__}'
         )
 
-    @pytest.mark.parametrize("width", [-100, -1, 0])
+    @pytest.mark.parametrize("width", [0])
     def test_width_out_of_range(
         self,
         width: int,
@@ -113,7 +113,7 @@ class TextureTest:
             self.create_texture(size, TextureComponents.R, ctypes.c_int8, b'')
         assert str(excinfo.value) == 'width must be > 0'
 
-    @pytest.mark.parametrize("height", [-100, -1, 0])
+    @pytest.mark.parametrize("height", [0])
     def test_height_out_of_range(
         self,
         height: int,
@@ -129,7 +129,7 @@ class TextureTest:
             self.create_texture(size, TextureComponents.R, ctypes.c_int8, b'')
         assert str(excinfo.value) == 'height must be > 0'
 
-    @pytest.mark.parametrize("depth", [-100, -1, 0])
+    @pytest.mark.parametrize("depth", [0])
     def test_depth_out_of_range(
         self,
         depth: int,
@@ -659,7 +659,7 @@ class TextureTestType(TextureTest):
     @classmethod
     def create_texture(
         cls,
-        size: IVector1 | IVector2 | IVector3,
+        size: UVector1 | UVector2 | UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,

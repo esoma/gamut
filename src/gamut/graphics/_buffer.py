@@ -14,23 +14,28 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-import gamut.math
-from gamut.math import U64Vector2
+from gamut.math import (DMatrix2x2, DMatrix2x3, DMatrix2x4, DMatrix3x2,
+                        DMatrix3x3, DMatrix3x4, DMatrix4x2, DMatrix4x3,
+                        DMatrix4x4, DVector2, DVector3, DVector4, FMatrix2x2,
+                        FMatrix2x3, FMatrix2x4, FMatrix3x2, FMatrix3x3,
+                        FMatrix3x4, FMatrix4x2, FMatrix4x3, FMatrix4x4,
+                        FVector2, FVector3, FVector4, I8Vector2, I8Vector3,
+                        I8Vector4, I16Vector2, I16Vector3, I16Vector4,
+                        I32Vector2, I32Vector3, I32Vector4, IVector2, IVector3,
+                        IVector4, U8Vector2, U8Vector3, U8Vector4, U16Vector2,
+                        U16Vector3, U16Vector4, U32Vector2, U32Vector3,
+                        U32Vector4, U64Vector2, UVector2, UVector3, UVector4)
 # python
 import ctypes
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p
 from ctypes import cast as c_cast
+from ctypes import sizeof as c_sizeof
 from enum import Enum
 from struct import unpack as c_unpack
 from typing import (Any, Final, Generator, Generic, Optional, TYPE_CHECKING,
                     TypeVar, Union)
 from weakref import ref, WeakKeyDictionary
-# pyglm
-import glm
-from glm import sizeof as glm_sizeof
-# pyglm-typing
-from glm_typing import U32Vector2
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COPY_READ_BUFFER,
@@ -80,13 +85,13 @@ FREQUENCY_NATURE_TO_GL_ACCESS: Final = {
 }
 
 
-GLM_POD_TO_STRUCT_NAME: Final[dict[Any, str]] = {
+CTYPES_TO_STRUCT_NAME: Final[dict[Any, str]] = {
     ctypes.c_float: '=f',
     ctypes.c_double: '=d',
     ctypes.c_int8: '=b',
     ctypes.c_uint8: '=B',
     ctypes.c_int16: '=h',
-    ctypes.c_uint8: '=H',
+    ctypes.c_uint16: '=H',
     ctypes.c_int32: '=i',
     ctypes.c_uint32: '=I',
 }
@@ -313,18 +318,18 @@ BVT = TypeVar('BVT',
     ctypes.c_int8, ctypes.c_uint8,
     ctypes.c_int16, ctypes.c_uint16,
     ctypes.c_int32, ctypes.c_uint32,
-    glm.Vector2, glm.dVector2, glm.iVector2, glm.uVector2,
-    glm.Vector3, glm.dVector3, glm.iVector3, glm.uVector3,
-    glm.Vector4, glm.dVector4, glm.iVector4, glm.uVector4,
-    glm.Mat2x2, glm.dMat2x2, glm.iMat2x2, glm.uMat2x2,
-    glm.Mat2x3, glm.dMat2x3, glm.iMat2x3, glm.uMat2x3,
-    glm.Mat2x4, glm.dMat2x4, glm.iMat2x4, glm.uMat2x4,
-    glm.Mat3x2, glm.dMat3x2, glm.iMat3x2, glm.uMat3x2,
-    glm.Mat3x3, glm.dMat3x3, glm.iMat3x3, glm.uMat3x3,
-    glm.Mat3x4, glm.dMat3x4, glm.iMat3x4, glm.uMat3x4,
-    glm.Mat4x2, glm.dMat4x2, glm.iMat4x2, glm.uMat4x2,
-    glm.Mat4x3, glm.dMat4x3, glm.iMat4x3, glm.uMat4x3,
-    glm.Mat4x4, glm.dMat4x4, glm.iMat4x4, glm.uMat4x4,
+    FVector2, DVector2, IVector2, UVector2,
+    FVector3, DVector3, IVector3, UVector3,
+    FVector4, DVector4, IVector4, UVector4,
+    FMatrix2x2, DMatrix2x2,
+    FMatrix2x3, DMatrix2x3,
+    FMatrix2x4, DMatrix2x4,
+    FMatrix3x2, DMatrix3x2,
+    FMatrix3x3, DMatrix3x3,
+    FMatrix3x4, DMatrix3x4,
+    FMatrix4x2, DMatrix4x2,
+    FMatrix4x3, DMatrix4x3,
+    FMatrix4x4, DMatrix4x4,
 )
 
 
@@ -343,7 +348,7 @@ class BufferView(Generic[BVT]):
         self._data_type: type[BVT] = data_type
         # check stride
         if stride is None:
-            stride = glm_sizeof(data_type)
+            stride = get_size_of(data_type)
         else:
             try:
                 stride = int(stride)
@@ -379,13 +384,14 @@ class BufferView(Generic[BVT]):
         buffer_bytes = self._buffer.bytes
         for i in range(len(self)):
             start_index = self._offset + (self._stride * i)
-            end_index = start_index + glm_sizeof(self._data_type)
+            end_index = start_index + get_size_of(self._data_type)
             chunk = buffer_bytes[start_index:end_index]
             try:
-                struct_name = GLM_POD_TO_STRUCT_NAME[self._data_type]
+                struct_name = CTYPES_TO_STRUCT_NAME[self._data_type]
+                print(struct_name, self._data_type)
                 data = c_unpack(struct_name, chunk)[0]
             except KeyError:
-                data = self._data_type.from_bytes(chunk) # type: ignore
+                data = self._data_type.from_buffer(chunk) # type: ignore
             yield data # type: ignore
 
     @property
@@ -550,74 +556,56 @@ class GlVertexArray:
 
 
 BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER: Final = {
-    glm.float32: (OpenGL.GL.GL_FLOAT, 1, 1),
-    glm.double: (OpenGL.GL.GL_DOUBLE, 1, 1),
-    glm.int8: (OpenGL.GL.GL_BYTE, 1, 1),
-    glm.uint8: (OpenGL.GL.GL_UNSIGNED_BYTE, 1, 1),
-    glm.int16: (OpenGL.GL.GL_SHORT, 1, 1),
-    glm.uint16: (OpenGL.GL.GL_UNSIGNED_SHORT, 1, 1),
-    glm.int32: (OpenGL.GL.GL_INT, 1, 1),
-    glm.uint32: (OpenGL.GL.GL_UNSIGNED_INT, 1, 1),
-    glm.vec2: (OpenGL.GL.GL_FLOAT, 2, 1),
-    glm.dvec2: (OpenGL.GL.GL_DOUBLE, 2, 1),
-    glm.i8vec2: (OpenGL.GL.GL_BYTE, 2, 1),
-    glm.i16vec2: (OpenGL.GL.GL_SHORT, 2, 1),
-    glm.ivec2: (OpenGL.GL.GL_INT, 2, 1),
-    glm.u8vec2: (OpenGL.GL.GL_UNSIGNED_BYTE, 2, 1),
-    glm.u16vec2: (OpenGL.GL.GL_UNSIGNED_SHORT, 2, 1),
-    glm.uvec2: (OpenGL.GL.GL_UNSIGNED_INT, 2, 1),
-    glm.vec3: (OpenGL.GL.GL_FLOAT, 3, 1),
-    glm.dvec3: (OpenGL.GL.GL_DOUBLE, 3, 1),
-    glm.i8vec3: (OpenGL.GL.GL_BYTE, 3, 1),
-    glm.i16vec3: (OpenGL.GL.GL_SHORT, 3, 1),
-    glm.ivec3: (OpenGL.GL.GL_INT, 3, 1),
-    glm.u8vec3: (OpenGL.GL.GL_UNSIGNED_BYTE, 3, 1),
-    glm.u16vec3: (OpenGL.GL.GL_UNSIGNED_SHORT, 3, 1),
-    glm.uvec3: (OpenGL.GL.GL_UNSIGNED_INT, 3, 1),
-    glm.vec4: (OpenGL.GL.GL_FLOAT, 4, 1),
-    glm.dvec4: (OpenGL.GL.GL_DOUBLE, 4, 1),
-    glm.i8vec4: (OpenGL.GL.GL_BYTE, 4, 1),
-    glm.i16vec4: (OpenGL.GL.GL_SHORT, 4, 1),
-    glm.ivec4: (OpenGL.GL.GL_INT, 4, 1),
-    glm.u8vec4: (OpenGL.GL. GL_UNSIGNED_BYTE, 4, 1),
-    glm.u16vec4: (OpenGL.GL. GL_UNSIGNED_SHORT, 4, 1),
-    glm.uvec4: (OpenGL.GL.GL_UNSIGNED_INT, 4, 1),
-    glm.mat2x2: (OpenGL.GL.GL_FLOAT, 2, 2),
-    glm.dmat2x2: (OpenGL.GL.GL_DOUBLE, 2, 2),
-    glm.imat2x2: (OpenGL.GL.GL_INT, 2, 2),
-    glm.umat2x2: (OpenGL.GL.GL_UNSIGNED_INT, 2, 2),
-    glm.mat2x3: (OpenGL.GL.GL_FLOAT, 2, 3),
-    glm.dmat2x3: (OpenGL.GL.GL_DOUBLE, 2, 3),
-    glm.imat2x3: (OpenGL.GL.GL_INT, 2, 3),
-    glm.umat2x3: (OpenGL.GL.GL_UNSIGNED_INT, 2, 3),
-    glm.mat2x4: (OpenGL.GL.GL_FLOAT, 2, 4),
-    glm.dmat2x4: (OpenGL.GL.GL_DOUBLE, 2, 4),
-    glm.imat2x4: (OpenGL.GL.GL_INT, 2, 4),
-    glm.umat2x4: (OpenGL.GL.GL_UNSIGNED_INT, 2, 4),
-    glm.mat3x2: (OpenGL.GL.GL_FLOAT, 3, 2),
-    glm.dmat3x2: (OpenGL.GL.GL_DOUBLE, 3, 2),
-    glm.imat3x2: (OpenGL.GL.GL_INT, 3, 2),
-    glm.umat3x2: (OpenGL.GL.GL_UNSIGNED_INT, 3, 2),
-    glm.mat3x3: (OpenGL.GL.GL_FLOAT, 3, 3),
-    glm.dmat3x3: (OpenGL.GL.GL_DOUBLE, 3, 3),
-    glm.imat3x3: (OpenGL.GL.GL_INT, 3, 3),
-    glm.umat3x3: (OpenGL.GL.GL_UNSIGNED_INT, 3, 3),
-    glm.mat3x4: (OpenGL.GL.GL_FLOAT, 3, 4),
-    glm.dmat3x4: (OpenGL.GL.GL_DOUBLE, 3, 4),
-    glm.imat3x4: (OpenGL.GL.GL_INT, 3, 4),
-    glm.umat3x4: (OpenGL.GL.GL_UNSIGNED_INT, 3, 4),
-    glm.mat4x2: (OpenGL.GL.GL_FLOAT, 4, 2),
-    glm.dmat4x2: (OpenGL.GL.GL_DOUBLE, 4, 2),
-    glm.imat4x2: (OpenGL.GL.GL_INT, 4, 2),
-    glm.umat4x2: (OpenGL.GL.GL_UNSIGNED_INT, 4, 2),
-    glm.mat4x3: (OpenGL.GL.GL_FLOAT, 4, 3),
-    glm.dmat4x3: (OpenGL.GL.GL_DOUBLE, 4, 3),
-    glm.imat4x3: (OpenGL.GL.GL_INT, 4, 3),
-    glm.umat4x3: (OpenGL.GL.GL_UNSIGNED_INT, 4, 3),
-    glm.mat4x4: (OpenGL.GL.GL_FLOAT, 4, 4),
-    glm.dmat4x4: (OpenGL.GL.GL_DOUBLE, 4, 4),
-    glm.imat4x4: (OpenGL.GL.GL_INT, 4, 4),
-    glm.umat4x4: (OpenGL.GL.GL_UNSIGNED_INT, 4, 4),
+    ctypes.c_float: (OpenGL.GL.GL_FLOAT, 1, 1),
+    ctypes.c_double: (OpenGL.GL.GL_DOUBLE, 1, 1),
+    ctypes.c_int8: (OpenGL.GL.GL_BYTE, 1, 1),
+    ctypes.c_uint8: (OpenGL.GL.GL_UNSIGNED_BYTE, 1, 1),
+    ctypes.c_int16: (OpenGL.GL.GL_SHORT, 1, 1),
+    ctypes.c_uint16: (OpenGL.GL.GL_UNSIGNED_SHORT, 1, 1),
+    ctypes.c_int32: (OpenGL.GL.GL_INT, 1, 1),
+    ctypes.c_uint32: (OpenGL.GL.GL_UNSIGNED_INT, 1, 1),
+    FVector2: (OpenGL.GL.GL_FLOAT, 2, 1),
+    DVector2: (OpenGL.GL.GL_DOUBLE, 2, 1),
+    I8Vector2: (OpenGL.GL.GL_BYTE, 2, 1),
+    I16Vector2: (OpenGL.GL.GL_SHORT, 2, 1),
+    I32Vector2: (OpenGL.GL.GL_INT, 2, 1),
+    U8Vector2: (OpenGL.GL.GL_UNSIGNED_BYTE, 2, 1),
+    U16Vector2: (OpenGL.GL.GL_UNSIGNED_SHORT, 2, 1),
+    U32Vector2: (OpenGL.GL.GL_UNSIGNED_INT, 2, 1),
+    FVector3: (OpenGL.GL.GL_FLOAT, 3, 1),
+    DVector3: (OpenGL.GL.GL_DOUBLE, 3, 1),
+    I8Vector3: (OpenGL.GL.GL_BYTE, 3, 1),
+    I16Vector3: (OpenGL.GL.GL_SHORT, 3, 1),
+    I32Vector3: (OpenGL.GL.GL_INT, 3, 1),
+    U8Vector3: (OpenGL.GL.GL_UNSIGNED_BYTE, 3, 1),
+    U16Vector3: (OpenGL.GL.GL_UNSIGNED_SHORT, 3, 1),
+    U32Vector3: (OpenGL.GL.GL_UNSIGNED_INT, 3, 1),
+    FVector4: (OpenGL.GL.GL_FLOAT, 4, 1),
+    DVector4: (OpenGL.GL.GL_DOUBLE, 4, 1),
+    I8Vector4: (OpenGL.GL.GL_BYTE, 4, 1),
+    I16Vector4: (OpenGL.GL.GL_SHORT, 4, 1),
+    I32Vector4: (OpenGL.GL.GL_INT, 4, 1),
+    U8Vector4: (OpenGL.GL. GL_UNSIGNED_BYTE, 4, 1),
+    U16Vector4: (OpenGL.GL. GL_UNSIGNED_SHORT, 4, 1),
+    U32Vector4: (OpenGL.GL.GL_UNSIGNED_INT, 4, 1),
+    FMatrix2x2: (OpenGL.GL.GL_FLOAT, 2, 2),
+    DMatrix2x2: (OpenGL.GL.GL_DOUBLE, 2, 2),
+    FMatrix2x3: (OpenGL.GL.GL_FLOAT, 2, 3),
+    DMatrix2x3: (OpenGL.GL.GL_DOUBLE, 2, 3),
+    FMatrix2x4: (OpenGL.GL.GL_FLOAT, 2, 4),
+    DMatrix2x4: (OpenGL.GL.GL_DOUBLE, 2, 4),
+    FMatrix3x2: (OpenGL.GL.GL_FLOAT, 3, 2),
+    DMatrix3x2: (OpenGL.GL.GL_DOUBLE, 3, 2),
+    FMatrix3x3: (OpenGL.GL.GL_FLOAT, 3, 3),
+    DMatrix3x3: (OpenGL.GL.GL_DOUBLE, 3, 3),
+    FMatrix3x4: (OpenGL.GL.GL_FLOAT, 3, 4),
+    DMatrix3x4: (OpenGL.GL.GL_DOUBLE, 3, 4),
+    FMatrix4x2: (OpenGL.GL.GL_FLOAT, 4, 2),
+    DMatrix4x2: (OpenGL.GL.GL_DOUBLE, 4, 2),
+    FMatrix4x3: (OpenGL.GL.GL_FLOAT, 4, 3),
+    DMatrix4x3: (OpenGL.GL.GL_DOUBLE, 4, 3),
+    FMatrix4x4: (OpenGL.GL.GL_FLOAT, 4, 4),
+    DMatrix4x4: (OpenGL.GL.GL_DOUBLE, 4, 4),
 }
 
 
@@ -633,21 +621,21 @@ def use_buffer_view_map_with_shader(
     gl_vertex_array.use()
 
 
-INDEX_TYPES: Final = {glm.uint8, glm.uint16, glm.uint32}
+INDEX_TYPES: Final = {ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint32}
 
 
 def use_buffer_view_as_element_indexes(
     view: Union[
-        BufferView[glm.uint8],
-        BufferView[glm.uint16],
-        BufferView[glm.uint32]
+        BufferView[ctypes.c_uint8],
+        BufferView[ctypes.c_uint16],
+        BufferView[ctypes.c_uint32]
     ]
 ) -> Any:
     if view.type not in INDEX_TYPES:
         raise ValueError(
             f'view buffer with type {view.type} cannot be used for indexing'
         )
-    if view.stride != glm_sizeof(view.type):
+    if view.stride != get_size_of(view.type):
         raise ValueError(
             'view buffer with a stride different from its type cannot be used '
             'for indexing'
@@ -663,3 +651,10 @@ def use_buffer_view_as_element_indexes(
         )
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, view.buffer._gl)
     return BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER[view.type][0]
+
+
+def get_size_of(t: type[BVT]) -> int:
+    try:
+        return t.get_size() # type: ignore
+    except AttributeError:
+        return c_sizeof(t) # type: ignore

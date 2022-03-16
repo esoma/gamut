@@ -29,17 +29,33 @@ from ._texture import bind_texture, Texture
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
+from gamut.math import (BArray, DArray, DMatrix2x2, DMatrix2x2Array,
+                        DMatrix2x3, DMatrix2x3Array, DMatrix2x4,
+                        DMatrix2x4Array, DMatrix3x2, DMatrix3x2Array,
+                        DMatrix3x3, DMatrix3x3Array, DMatrix3x4,
+                        DMatrix3x4Array, DMatrix4x2, DMatrix4x2Array,
+                        DMatrix4x3, DMatrix4x3Array, DMatrix4x4,
+                        DMatrix4x4Array, DVector2, DVector2Array, DVector3,
+                        DVector3Array, DVector4, DVector4Array, FArray,
+                        FMatrix2x2, FMatrix2x2Array, FMatrix2x3,
+                        FMatrix2x3Array, FMatrix2x4, FMatrix2x4Array,
+                        FMatrix3x2, FMatrix3x2Array, FMatrix3x3,
+                        FMatrix3x3Array, FMatrix3x4, FMatrix3x4Array,
+                        FMatrix4x2, FMatrix4x2Array, FMatrix4x3,
+                        FMatrix4x3Array, FMatrix4x4, FMatrix4x4Array, FVector2,
+                        FVector2Array, FVector3, FVector3Array, FVector4,
+                        FVector4Array, I32Array, I32Vector2, I32Vector2Array,
+                        I32Vector3, I32Vector3Array, I32Vector4,
+                        I32Vector4Array, U32Array, U32Vector2, U32Vector2Array,
+                        U32Vector3, U32Vector3Array, U32Vector4,
+                        U32Vector4Array)
 # python
+import ctypes
 from ctypes import c_void_p
 from enum import Enum
 from typing import (Any, Final, Generic, Optional, overload, Sequence, Type,
                     TypeVar, Union)
 from weakref import ref
-# pyglm
-import glm
-from glm import array as glm_array
-from glm import int32
-from glm import value_ptr as glm_value_ptr
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
@@ -63,17 +79,17 @@ from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                glLinkProgram, glShaderSource, glUseProgram)
 
 T = TypeVar('T',
-    glm.float32, glm.vec2, glm.vec3, glm.vec4,
-    glm.double, glm.dvec2, glm.dvec3, glm.dvec4,
-    int32, glm.ivec2, glm.ivec3, glm.ivec4,
-    glm.uint32, glm.uvec2, glm.uvec3, glm.uvec4,
-    glm.bool_,
-    glm.mat2x2, glm.mat2x3, glm.mat2x4,
-    glm.mat3x2, glm.mat3x3, glm.mat3x4,
-    glm.mat4x2, glm.mat4x3, glm.mat4x4,
-    glm.dmat2x2, glm.dmat2x3, glm.dmat2x4,
-    glm.dmat3x2, glm.dmat3x3, glm.dmat3x4,
-    glm.dmat4x2, glm.dmat4x3, glm.dmat4x4,
+    ctypes.c_float, FVector2, FVector3, FVector4,
+    ctypes.c_double, DVector2, DVector3, DVector4,
+    ctypes.c_int32, I32Vector2, I32Vector3, I32Vector4,
+    ctypes.c_uint32, U32Vector2, U32Vector3, U32Vector4,
+    ctypes.c_bool,
+    FMatrix2x2, FMatrix2x3, FMatrix2x4,
+    FMatrix3x2, FMatrix3x3, FMatrix3x4,
+    FMatrix4x2, FMatrix4x3, FMatrix4x4,
+    DMatrix2x2, DMatrix2x3, DMatrix2x4,
+    DMatrix3x2, DMatrix3x3, DMatrix3x4,
+    DMatrix4x2, DMatrix4x3, DMatrix4x4,
     Texture,
 )
 
@@ -304,41 +320,41 @@ class Shader:
         self,
         uniform: ShaderUniform[Any],
         value: Union[
-            glm.float32, glm.array[glm.float32],
-            glm.vec2, glm.array[glm.vec2],
-            glm.vec3, glm.array[glm.vec3],
-            glm.vec4, glm.array[glm.vec4],
-            glm.double, glm.array[glm.double],
-            glm.dvec2, glm.array[glm.dvec2],
-            glm.dvec3, glm.array[glm.dvec3],
-            glm.dvec4, glm.array[glm.dvec4],
-            int32, glm.array[int32],
-            glm.ivec2, glm.array[glm.ivec2],
-            glm.ivec3, glm.array[glm.ivec3],
-            glm.ivec4, glm.array[glm.ivec4],
-            glm.uint32, glm.array[glm.uint32],
-            glm.uvec2, glm.array[glm.uvec2],
-            glm.uvec3, glm.array[glm.uvec3],
-            glm.uvec4, glm.array[glm.uvec4],
-            glm.bool_,
-            glm.mat2x2, glm.array[glm.mat2x2],
-            glm.mat2x3, glm.array[glm.mat2x3],
-            glm.mat2x4, glm.array[glm.mat2x4],
-            glm.mat3x2, glm.array[glm.mat3x2],
-            glm.mat3x3, glm.array[glm.mat3x3],
-            glm.mat3x4, glm.array[glm.mat3x4],
-            glm.mat4x2, glm.array[glm.mat4x2],
-            glm.mat4x3, glm.array[glm.mat4x3],
-            glm.mat4x4, glm.array[glm.mat4x4],
-            glm.dmat2x2, glm.array[glm.dmat2x2],
-            glm.dmat2x3, glm.array[glm.dmat2x3],
-            glm.dmat2x4, glm.array[glm.dmat2x4],
-            glm.dmat3x2, glm.array[glm.dmat3x2],
-            glm.dmat3x3, glm.array[glm.dmat3x3],
-            glm.dmat3x4, glm.array[glm.dmat3x4],
-            glm.dmat4x2, glm.array[glm.dmat4x2],
-            glm.dmat4x3, glm.array[glm.dmat4x3],
-            glm.dmat4x4, glm.array[glm.dmat4x4],
+            ctypes.c_float, FArray,
+            FVector2, FVector2Array,
+            FVector3, FVector3Array,
+            FVector4, FVector4Array,
+            ctypes.c_double, DArray,
+            DVector2, DVector2Array,
+            DVector3, DVector3Array,
+            DVector4, DVector4Array,
+            ctypes.c_int32, I32Array,
+            I32Vector2, I32Vector2Array,
+            I32Vector3, I32Vector3Array,
+            I32Vector4, I32Vector4Array,
+            ctypes.c_uint32, U32Array,
+            U32Vector2, U32Vector2Array,
+            U32Vector3, U32Vector3Array,
+            U32Vector4, U32Vector4Array,
+            ctypes.c_bool,
+            FMatrix2x2, FMatrix2x2Array,
+            FMatrix2x3, FMatrix2x3Array,
+            FMatrix2x4, FMatrix2x4Array,
+            FMatrix3x2, FMatrix3x2Array,
+            FMatrix3x3, FMatrix3x3Array,
+            FMatrix3x4, FMatrix3x4Array,
+            FMatrix4x2, FMatrix4x2Array,
+            FMatrix4x3, FMatrix4x3Array,
+            FMatrix4x4, FMatrix4x4Array,
+            DMatrix2x2, DMatrix2x2Array,
+            DMatrix2x3, DMatrix2x3Array,
+            DMatrix2x4, DMatrix2x4Array,
+            DMatrix3x2, DMatrix3x2Array,
+            DMatrix3x3, DMatrix3x3Array,
+            DMatrix3x4, DMatrix3x4Array,
+            DMatrix4x2, DMatrix4x2Array,
+            DMatrix4x3, DMatrix4x3Array,
+            DMatrix4x4, DMatrix4x4Array,
             Texture, Sequence[Texture],
         ],
     ) -> None:
@@ -372,8 +388,8 @@ class Shader:
                     bind_texture(texture, self._next_texture_index)
                     texture_values.append(self._next_texture_index)
                     self._next_texture_index += 1
-                value = glm_array.from_numbers(int32, *texture_values)
-                input_value = value.ptr
+                value = I32Array(*texture_values)
+                input_value = value.pointer
             else:
                 if not isinstance(value, Texture):
                     raise ValueError(
@@ -381,21 +397,16 @@ class Shader:
                         f'(got {type(value)})'
                     )
                 bind_texture(value, self._next_texture_index)
-                value = int32(self._next_texture_index)
+                value = ctypes.c_int32(self._next_texture_index)
                 self._next_texture_index += 1
                 input_value = value.value
         else:
             if uniform.size > 1:
-                if not isinstance(value, glm_array):
+                array_type = PY_TYPE_TO_ARRAY[uniform.type]
+                if not isinstance(value, array_type):
                     raise ValueError(
-                        f'expected {glm.array} for {uniform.name} '
+                        f'expected {array_type} for {uniform.name} '
                         f'(got {type(value)})'
-                    )
-                if not issubclass(value.element_type, uniform._set_type):
-                    raise ValueError(
-                        f'expected array of {uniform._set_type} '
-                        f'for {uniform.name} '
-                        f'(got array of {value.element_type})'
                     )
                 if len(value) != uniform.size:
                     raise ValueError(
@@ -403,7 +414,7 @@ class Shader:
                         f'for {uniform.name} '
                         f'(got array of length {len(value)})'
                     )
-                input_value = value.ptr
+                input_value = value.pointer
             else:
                 assert uniform.size == 1
                 if not isinstance(value, uniform._set_type):
@@ -415,7 +426,7 @@ class Shader:
                     input_value = value.value
                     cache_key = value.value
                 else:
-                    input_value = glm_value_ptr(value)
+                    input_value = value.pointer
         uniform._set(uniform.location, uniform.size, input_value, cache_key)
 
     def close(self) -> None:
@@ -498,7 +509,7 @@ class ShaderUniform(Generic[T]):
         self._size = size
         self._location = location
         self._setter = TYPE_TO_UNIFORM_SETTER[self._type]
-        self._set_type: Any = int32 if type is Texture else type
+        self._set_type: Any = ctypes.c_int32 if type is Texture else type
         self._cache: Any = None
 
     def __repr__(self) -> str:
@@ -616,9 +627,9 @@ def execute_shader(
     instances: int = 1,
     index_range: Optional[tuple[int, int]] = None,
     index_buffer_view: Optional[Union[
-        BufferView[glm.uint8],
-        BufferView[glm.uint16],
-        BufferView[glm.uint32],
+        BufferView[ctypes.c_uint8],
+        BufferView[ctypes.c_uint16],
+        BufferView[ctypes.c_uint32],
     ]] = None,
     query_occluded: bool = False,
 ) -> ShaderExecutionResult:
@@ -751,11 +762,11 @@ def execute_shader(
 
 
 POD_UNIFORM_TYPES: Final = {
-    glm.float32,
-    glm.double,
-    int32,
-    glm.uint32,
-    glm.bool_,
+    ctypes.c_float,
+    ctypes.c_double,
+    ctypes.c_int32,
+    ctypes.c_uint32,
+    ctypes.c_bool,
 }
 
 
@@ -766,94 +777,139 @@ def wrap_uniform_matrix(f: Any) -> Any:
 
 
 TYPE_TO_UNIFORM_SETTER: Final[dict[Any, Any]] = {
-    glm.float32: OpenGL.GL.glUniform1fv,
-    glm.vec2: OpenGL.GL.glUniform2fv,
-    glm.vec3: OpenGL.GL.glUniform3fv,
-    glm.vec4: OpenGL.GL.glUniform4fv,
+    ctypes.c_float: OpenGL.GL.glUniform1fv,
+    FVector2: OpenGL.GL.glUniform2fv,
+    FVector3: OpenGL.GL.glUniform3fv,
+    FVector4: OpenGL.GL.glUniform4fv,
 
-    glm.double: OpenGL.GL.glUniform1dv,
-    glm.dvec2: OpenGL.GL.glUniform2dv,
-    glm.dvec3: OpenGL.GL.glUniform3dv,
-    glm.dvec4: OpenGL.GL.glUniform4dv,
+    ctypes.c_double: OpenGL.GL.glUniform1dv,
+    DVector2: OpenGL.GL.glUniform2dv,
+    DVector3: OpenGL.GL.glUniform3dv,
+    DVector4: OpenGL.GL.glUniform4dv,
 
-    int32: OpenGL.GL.glUniform1iv,
-    glm.ivec2: OpenGL.GL.glUniform2iv,
-    glm.ivec3: OpenGL.GL.glUniform3iv,
-    glm.ivec4: OpenGL.GL.glUniform4iv,
+    ctypes.c_int32: OpenGL.GL.glUniform1iv,
+    I32Vector2: OpenGL.GL.glUniform2iv,
+    I32Vector3: OpenGL.GL.glUniform3iv,
+    I32Vector4: OpenGL.GL.glUniform4iv,
 
-    glm.uint32: OpenGL.GL.glUniform1uiv,
-    glm.uvec2: OpenGL.GL.glUniform2uiv,
-    glm.uvec3: OpenGL.GL.glUniform3uiv,
-    glm.uvec4: OpenGL.GL.glUniform4uiv,
+    ctypes.c_uint32: OpenGL.GL.glUniform1uiv,
+    U32Vector2: OpenGL.GL.glUniform2uiv,
+    U32Vector3: OpenGL.GL.glUniform3uiv,
+    U32Vector4: OpenGL.GL.glUniform4uiv,
 
-    glm.bool_: OpenGL.GL.glUniform1iv,
+    ctypes.c_bool: OpenGL.GL.glUniform1iv,
 
-    glm.mat2x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2fv),
-    glm.mat2x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x3fv),
-    glm.mat2x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x4fv),
-    glm.mat3x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x2fv),
-    glm.mat3x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3fv),
-    glm.mat3x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x4fv),
-    glm.mat4x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x2fv),
-    glm.mat4x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x3fv),
-    glm.mat4x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4fv),
+    FMatrix2x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2fv),
+    FMatrix2x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x3fv),
+    FMatrix2x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x4fv),
+    FMatrix3x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x2fv),
+    FMatrix3x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3fv),
+    FMatrix3x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x4fv),
+    FMatrix4x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x2fv),
+    FMatrix4x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x3fv),
+    FMatrix4x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4fv),
 
-    glm.dmat2x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2dv),
-    glm.dmat2x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x3dv),
-    glm.dmat2x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x4dv),
-    glm.dmat3x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x2dv),
-    glm.dmat3x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3dv),
-    glm.dmat3x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x4dv),
-    glm.dmat4x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x2dv),
-    glm.dmat4x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x3dv),
-    glm.dmat4x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4dv),
+    DMatrix2x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2dv),
+    DMatrix2x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x3dv),
+    DMatrix2x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix2x4dv),
+    DMatrix3x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x2dv),
+    DMatrix3x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3dv),
+    DMatrix3x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix3x4dv),
+    DMatrix4x2: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x2dv),
+    DMatrix4x3: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4x3dv),
+    DMatrix4x4: wrap_uniform_matrix(OpenGL.GL.glUniformMatrix4dv),
 
     Texture: OpenGL.GL.glUniform1iv,
 }
 
 
+PY_TYPE_TO_ARRAY: Final = {
+    ctypes.c_float: FArray,
+    FVector2: FVector2Array,
+    FVector3: FVector3Array,
+    FVector4: FVector4Array,
+
+    ctypes.c_double: DArray,
+    DVector2: DVector2Array,
+    DVector3: DVector3Array,
+    DVector4: DVector4Array,
+
+    ctypes.c_int32: I32Array,
+    I32Vector2: I32Vector2Array,
+    I32Vector3: I32Vector3Array,
+    I32Vector4: I32Vector4Array,
+
+    ctypes.c_uint32: U32Array,
+    U32Vector2: U32Vector2Array,
+    U32Vector3: U32Vector3Array,
+    U32Vector4: U32Vector4Array,
+
+    ctypes.c_bool: BArray,
+
+    FMatrix2x2: FMatrix2x2Array,
+    FMatrix3x3: FMatrix3x3Array,
+    FMatrix4x4: FMatrix4x4Array,
+    FMatrix2x3: FMatrix2x3Array,
+    FMatrix2x4: FMatrix2x4Array,
+    FMatrix3x2: FMatrix3x2Array,
+    FMatrix3x4: FMatrix3x4Array,
+    FMatrix4x2: FMatrix4x2Array,
+    FMatrix4x3: FMatrix4x3Array,
+
+    DMatrix2x2: DMatrix2x2Array,
+    DMatrix3x3: DMatrix3x3Array,
+    DMatrix4x4: DMatrix4x4Array,
+    DMatrix2x3: DMatrix2x3Array,
+    DMatrix2x4: DMatrix2x4Array,
+    DMatrix3x2: DMatrix3x2Array,
+    DMatrix3x4: DMatrix3x4Array,
+    DMatrix4x2: DMatrix4x2Array,
+    DMatrix4x3: DMatrix4x3Array,
+}
+
+
 GL_TYPE_TO_PY: Final = {
-    OpenGL.GL.GL_FLOAT: glm.float32,
-    OpenGL.GL.GL_FLOAT_VEC2: glm.vec2,
-    OpenGL.GL.GL_FLOAT_VEC3: glm.vec3,
-    OpenGL.GL.GL_FLOAT_VEC4: glm.vec4,
+    OpenGL.GL.GL_FLOAT: ctypes.c_float,
+    OpenGL.GL.GL_FLOAT_VEC2: FVector2,
+    OpenGL.GL.GL_FLOAT_VEC3: FVector3,
+    OpenGL.GL.GL_FLOAT_VEC4: FVector4,
 
-    OpenGL.GL.GL_DOUBLE: glm.double,
-    OpenGL.GL.GL_DOUBLE_VEC2: glm.dvec2,
-    OpenGL.GL.GL_DOUBLE_VEC3: glm.dvec3,
-    OpenGL.GL.GL_DOUBLE_VEC4: glm.dvec4,
+    OpenGL.GL.GL_DOUBLE: ctypes.c_double,
+    OpenGL.GL.GL_DOUBLE_VEC2: DVector2,
+    OpenGL.GL.GL_DOUBLE_VEC3: DVector3,
+    OpenGL.GL.GL_DOUBLE_VEC4: DVector4,
 
-    OpenGL.GL.GL_INT: int32,
-    OpenGL.GL.GL_INT_VEC2: glm.ivec2,
-    OpenGL.GL.GL_INT_VEC3: glm.ivec3,
-    OpenGL.GL.GL_INT_VEC4: glm.ivec4,
+    OpenGL.GL.GL_INT: ctypes.c_int32,
+    OpenGL.GL.GL_INT_VEC2: I32Vector2,
+    OpenGL.GL.GL_INT_VEC3: I32Vector3,
+    OpenGL.GL.GL_INT_VEC4: I32Vector4,
 
-    OpenGL.GL.GL_UNSIGNED_INT: glm.uint32,
-    OpenGL.GL.GL_UNSIGNED_INT_VEC2: glm.uvec2,
-    OpenGL.GL.GL_UNSIGNED_INT_VEC3: glm.uvec3,
-    OpenGL.GL.GL_UNSIGNED_INT_VEC4: glm.uvec4,
+    OpenGL.GL.GL_UNSIGNED_INT: ctypes.c_uint32,
+    OpenGL.GL.GL_UNSIGNED_INT_VEC2: U32Vector2,
+    OpenGL.GL.GL_UNSIGNED_INT_VEC3: U32Vector3,
+    OpenGL.GL.GL_UNSIGNED_INT_VEC4: U32Vector4,
 
-    OpenGL.GL.GL_BOOL: glm.bool_,
+    OpenGL.GL.GL_BOOL: ctypes.c_bool,
 
-    OpenGL.GL.GL_FLOAT_MAT2: glm.mat2x2,
-    OpenGL.GL.GL_FLOAT_MAT3: glm.mat3x3,
-    OpenGL.GL.GL_FLOAT_MAT4: glm.mat4x4,
-    OpenGL.GL.GL_FLOAT_MAT2x3: glm.mat2x3,
-    OpenGL.GL.GL_FLOAT_MAT2x4: glm.mat2x4,
-    OpenGL.GL.GL_FLOAT_MAT3x2: glm.mat3x2,
-    OpenGL.GL.GL_FLOAT_MAT3x4: glm.mat3x4,
-    OpenGL.GL.GL_FLOAT_MAT4x2: glm.mat4x2,
-    OpenGL.GL.GL_FLOAT_MAT4x3: glm.mat4x3,
+    OpenGL.GL.GL_FLOAT_MAT2: FMatrix2x2,
+    OpenGL.GL.GL_FLOAT_MAT3: FMatrix3x3,
+    OpenGL.GL.GL_FLOAT_MAT4: FMatrix4x4,
+    OpenGL.GL.GL_FLOAT_MAT2x3: FMatrix2x3,
+    OpenGL.GL.GL_FLOAT_MAT2x4: FMatrix2x4,
+    OpenGL.GL.GL_FLOAT_MAT3x2: FMatrix3x2,
+    OpenGL.GL.GL_FLOAT_MAT3x4: FMatrix3x4,
+    OpenGL.GL.GL_FLOAT_MAT4x2: FMatrix4x2,
+    OpenGL.GL.GL_FLOAT_MAT4x3: FMatrix4x3,
 
-    OpenGL.GL.GL_DOUBLE_MAT2: glm.dmat2x2,
-    OpenGL.GL.GL_DOUBLE_MAT3: glm.dmat3x3,
-    OpenGL.GL.GL_DOUBLE_MAT4: glm.dmat4x4,
-    OpenGL.GL.GL_DOUBLE_MAT2x3: glm.dmat2x3,
-    OpenGL.GL.GL_DOUBLE_MAT2x4: glm.dmat2x4,
-    OpenGL.GL.GL_DOUBLE_MAT3x2: glm.dmat3x2,
-    OpenGL.GL.GL_DOUBLE_MAT3x4: glm.dmat3x4,
-    OpenGL.GL.GL_DOUBLE_MAT4x2: glm.dmat4x2,
-    OpenGL.GL.GL_DOUBLE_MAT4x3: glm.dmat4x3,
+    OpenGL.GL.GL_DOUBLE_MAT2: DMatrix2x2,
+    OpenGL.GL.GL_DOUBLE_MAT3: DMatrix3x3,
+    OpenGL.GL.GL_DOUBLE_MAT4: DMatrix4x4,
+    OpenGL.GL.GL_DOUBLE_MAT2x3: DMatrix2x3,
+    OpenGL.GL.GL_DOUBLE_MAT2x4: DMatrix2x4,
+    OpenGL.GL.GL_DOUBLE_MAT3x2: DMatrix3x2,
+    OpenGL.GL.GL_DOUBLE_MAT3x4: DMatrix3x4,
+    OpenGL.GL.GL_DOUBLE_MAT4x2: DMatrix4x2,
+    OpenGL.GL.GL_DOUBLE_MAT4x3: DMatrix4x3,
 
     OpenGL.GL.GL_SAMPLER_1D: Texture,
     OpenGL.GL.GL_INT_SAMPLER_1D: Texture,
@@ -898,46 +954,46 @@ GL_TYPE_TO_PY: Final = {
 
 
 IndexBuffer = Union[
-    BufferView[glm.uint8],
-    BufferView[glm.uint16],
-    BufferView[glm.uint32],
+    BufferView[ctypes.c_uint8],
+    BufferView[ctypes.c_uint16],
+    BufferView[ctypes.c_uint32],
 ]
 
 UniformMap = dict[str, Union[
-    glm.float32, 'glm.array[glm.float32]',
-    glm.vec2, 'glm.array[glm.vec2]',
-    glm.vec3, 'glm.array[glm.vec3]',
-    glm.vec4, 'glm.array[glm.vec4]',
-    glm.double, 'glm.array[glm.double]',
-    glm.dvec2, 'glm.array[glm.dvec2]',
-    glm.dvec3, 'glm.array[glm.dvec3]',
-    glm.dvec4, 'glm.array[glm.dvec4]',
-    int32, 'glm.array[int32]',
-    glm.ivec2, 'glm.array[glm.ivec2]',
-    glm.ivec3, 'glm.array[glm.ivec3]',
-    glm.ivec4, 'glm.array[glm.ivec4]',
-    glm.uint32, 'glm.array[glm.uint32]',
-    glm.uvec2, 'glm.array[glm.uvec2]',
-    glm.uvec3, 'glm.array[glm.uvec3]',
-    glm.uvec4, 'glm.array[glm.uvec4]',
-    glm.bool_,
-    glm.mat2x2, 'glm.array[glm.mat2x2]',
-    glm.mat2x3, 'glm.array[glm.mat2x3]',
-    glm.mat2x4, 'glm.array[glm.mat2x4]',
-    glm.mat3x2, 'glm.array[glm.mat3x2]',
-    glm.mat3x3, 'glm.array[glm.mat3x3]',
-    glm.mat3x4, 'glm.array[glm.mat3x4]',
-    glm.mat4x2, 'glm.array[glm.mat4x2]',
-    glm.mat4x3, 'glm.array[glm.mat4x3]',
-    glm.mat4x4, 'glm.array[glm.mat4x4]',
-    glm.dmat2x2, 'glm.array[glm.dmat2x2]',
-    glm.dmat2x3, 'glm.array[glm.dmat2x3]',
-    glm.dmat2x4, 'glm.array[glm.dmat2x4]',
-    glm.dmat3x2, 'glm.array[glm.dmat3x2]',
-    glm.dmat3x3, 'glm.array[glm.dmat3x3]',
-    glm.dmat3x4, 'glm.array[glm.dmat3x4]',
-    glm.dmat4x2, 'glm.array[glm.dmat4x2]',
-    glm.dmat4x3, 'glm.array[glm.dmat4x3]',
-    glm.dmat4x4, 'glm.array[glm.dmat4x4]',
+    ctypes.c_float, 'FArray',
+    FVector2, 'FVector2Array',
+    FVector3, 'FVector3Array',
+    FVector4, 'FVector4Array',
+    ctypes.c_double, 'DArray',
+    DVector2, 'DVector2Array',
+    DVector3, 'DVector3Array',
+    DVector4, 'DVector4Array',
+    ctypes.c_int32, 'I32Array',
+    I32Vector2, 'I32Vector2Array',
+    I32Vector3, 'I32Vector3Array',
+    I32Vector4, 'I32Vector4Array',
+    ctypes.c_uint32, 'U32Array',
+    U32Vector2, 'U32Vector2Array',
+    U32Vector3, 'U32Vector3Array',
+    U32Vector4, 'U32Vector4Array',
+    ctypes.c_bool,
+    FMatrix2x2, 'FMatrix2x2Array',
+    FMatrix2x3, 'FMatrix2x3Array',
+    FMatrix2x4, 'FMatrix2x4Array',
+    FMatrix3x2, 'FMatrix3x2Array',
+    FMatrix3x3, 'FMatrix3x3Array',
+    FMatrix3x4, 'FMatrix3x4Array',
+    FMatrix4x2, 'FMatrix4x2Array',
+    FMatrix4x3, 'FMatrix4x3Array',
+    FMatrix4x4, 'FMatrix4x4Array',
+    DMatrix2x2, 'DMatrix2x2Array',
+    DMatrix2x3, 'DMatrix2x3Array',
+    DMatrix2x4, 'DMatrix2x4Array',
+    DMatrix3x2, 'DMatrix3x2Array',
+    DMatrix3x3, 'DMatrix3x3Array',
+    DMatrix3x4, 'DMatrix3x4Array',
+    DMatrix4x2, 'DMatrix4x2Array',
+    DMatrix4x3, 'DMatrix4x3Array',
+    DMatrix4x4, 'DMatrix4x4Array',
     Texture, Sequence[Texture]
 ]]

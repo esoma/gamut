@@ -1,5 +1,5 @@
 
-# generated 2022-03-14 18:08:34.897035 from codegen/math/templates/_math.pyi
+# generated 2022-03-16 02:18:47.309466 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -270,11 +270,21 @@ class BVector1:
 
 
 
+    def min(self, min: bool) -> BVector1: ...
+    def max(self, max: bool) -> BVector1: ...
+    def clamp(self, min: bool, max: bool) -> BVector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector1: ...
 
 
 @final
@@ -293,7 +303,10 @@ class BVector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector1: ...
 
 
 
@@ -463,11 +476,21 @@ class DVector1:
 
 
 
+    def min(self, min: int) -> DVector1: ...
+    def max(self, max: int) -> DVector1: ...
+    def clamp(self, min: int, max: int) -> DVector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector1: ...
 
 
 @final
@@ -486,7 +509,10 @@ class DVector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector1: ...
 
 
 
@@ -684,11 +710,21 @@ class FVector1:
     def distance(self, other: FVector1, /) -> float: ...
 
 
+    def min(self, min: float) -> FVector1: ...
+    def max(self, max: float) -> FVector1: ...
+    def clamp(self, min: float, max: float) -> FVector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector1: ...
 
 
 @final
@@ -707,7 +743,10 @@ class FVector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector1: ...
 
 
 
@@ -877,11 +916,21 @@ class I8Vector1:
 
 
 
+    def min(self, min: int) -> I8Vector1: ...
+    def max(self, max: int) -> I8Vector1: ...
+    def clamp(self, min: int, max: int) -> I8Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector1: ...
 
 
 @final
@@ -900,7 +949,10 @@ class I8Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector1: ...
 
 
 
@@ -1072,11 +1124,21 @@ class U8Vector1:
 
 
 
+    def min(self, min: int) -> U8Vector1: ...
+    def max(self, max: int) -> U8Vector1: ...
+    def clamp(self, min: int, max: int) -> U8Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector1: ...
 
 
 @final
@@ -1095,7 +1157,10 @@ class U8Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector1: ...
 
 
 
@@ -1265,11 +1330,21 @@ class I16Vector1:
 
 
 
+    def min(self, min: int) -> I16Vector1: ...
+    def max(self, max: int) -> I16Vector1: ...
+    def clamp(self, min: int, max: int) -> I16Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector1: ...
 
 
 @final
@@ -1288,7 +1363,10 @@ class I16Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector1: ...
 
 
 
@@ -1460,11 +1538,21 @@ class U16Vector1:
 
 
 
+    def min(self, min: int) -> U16Vector1: ...
+    def max(self, max: int) -> U16Vector1: ...
+    def clamp(self, min: int, max: int) -> U16Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector1: ...
 
 
 @final
@@ -1483,7 +1571,10 @@ class U16Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector1: ...
 
 
 
@@ -1653,11 +1744,21 @@ class I32Vector1:
 
 
 
+    def min(self, min: int) -> I32Vector1: ...
+    def max(self, max: int) -> I32Vector1: ...
+    def clamp(self, min: int, max: int) -> I32Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector1: ...
 
 
 @final
@@ -1676,7 +1777,10 @@ class I32Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector1: ...
 
 
 
@@ -1848,11 +1952,21 @@ class U32Vector1:
 
 
 
+    def min(self, min: int) -> U32Vector1: ...
+    def max(self, max: int) -> U32Vector1: ...
+    def clamp(self, min: int, max: int) -> U32Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector1: ...
 
 
 @final
@@ -1871,7 +1985,10 @@ class U32Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector1: ...
 
 
 
@@ -2041,11 +2158,21 @@ class IVector1:
 
 
 
+    def min(self, min: int) -> IVector1: ...
+    def max(self, max: int) -> IVector1: ...
+    def clamp(self, min: int, max: int) -> IVector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector1: ...
 
 
 @final
@@ -2064,7 +2191,10 @@ class IVector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector1: ...
 
 
 
@@ -2236,11 +2366,21 @@ class UVector1:
 
 
 
+    def min(self, min: int) -> UVector1: ...
+    def max(self, max: int) -> UVector1: ...
+    def clamp(self, min: int, max: int) -> UVector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector1: ...
 
 
 @final
@@ -2259,7 +2399,10 @@ class UVector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector1: ...
 
 
 
@@ -2429,11 +2572,21 @@ class I64Vector1:
 
 
 
+    def min(self, min: int) -> I64Vector1: ...
+    def max(self, max: int) -> I64Vector1: ...
+    def clamp(self, min: int, max: int) -> I64Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector1: ...
 
 
 @final
@@ -2452,7 +2605,10 @@ class I64Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector1: ...
 
 
 
@@ -2624,11 +2780,21 @@ class U64Vector1:
 
 
 
+    def min(self, min: int) -> U64Vector1: ...
+    def max(self, max: int) -> U64Vector1: ...
+    def clamp(self, min: int, max: int) -> U64Vector1: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector1: ...
 
 
 @final
@@ -2647,7 +2813,10 @@ class U64Vector1Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector1: ...
 
 
 
@@ -2931,11 +3100,21 @@ class BVector2:
 
 
 
+    def min(self, min: bool) -> BVector2: ...
+    def max(self, max: bool) -> BVector2: ...
+    def clamp(self, min: bool, max: bool) -> BVector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector2: ...
 
 
 @final
@@ -2954,7 +3133,10 @@ class BVector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector2: ...
 
 
 
@@ -3247,11 +3429,21 @@ class DVector2:
 
 
 
+    def min(self, min: int) -> DVector2: ...
+    def max(self, max: int) -> DVector2: ...
+    def clamp(self, min: int, max: int) -> DVector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector2: ...
 
 
 @final
@@ -3270,7 +3462,10 @@ class DVector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector2: ...
 
 
 
@@ -3591,11 +3786,21 @@ class FVector2:
     def distance(self, other: FVector2, /) -> float: ...
 
 
+    def min(self, min: float) -> FVector2: ...
+    def max(self, max: float) -> FVector2: ...
+    def clamp(self, min: float, max: float) -> FVector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector2: ...
 
 
 @final
@@ -3614,7 +3819,10 @@ class FVector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector2: ...
 
 
 
@@ -3907,11 +4115,21 @@ class I8Vector2:
 
 
 
+    def min(self, min: int) -> I8Vector2: ...
+    def max(self, max: int) -> I8Vector2: ...
+    def clamp(self, min: int, max: int) -> I8Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector2: ...
 
 
 @final
@@ -3930,7 +4148,10 @@ class I8Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector2: ...
 
 
 
@@ -4225,11 +4446,21 @@ class U8Vector2:
 
 
 
+    def min(self, min: int) -> U8Vector2: ...
+    def max(self, max: int) -> U8Vector2: ...
+    def clamp(self, min: int, max: int) -> U8Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector2: ...
 
 
 @final
@@ -4248,7 +4479,10 @@ class U8Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector2: ...
 
 
 
@@ -4541,11 +4775,21 @@ class I16Vector2:
 
 
 
+    def min(self, min: int) -> I16Vector2: ...
+    def max(self, max: int) -> I16Vector2: ...
+    def clamp(self, min: int, max: int) -> I16Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector2: ...
 
 
 @final
@@ -4564,7 +4808,10 @@ class I16Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector2: ...
 
 
 
@@ -4859,11 +5106,21 @@ class U16Vector2:
 
 
 
+    def min(self, min: int) -> U16Vector2: ...
+    def max(self, max: int) -> U16Vector2: ...
+    def clamp(self, min: int, max: int) -> U16Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector2: ...
 
 
 @final
@@ -4882,7 +5139,10 @@ class U16Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector2: ...
 
 
 
@@ -5175,11 +5435,21 @@ class I32Vector2:
 
 
 
+    def min(self, min: int) -> I32Vector2: ...
+    def max(self, max: int) -> I32Vector2: ...
+    def clamp(self, min: int, max: int) -> I32Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector2: ...
 
 
 @final
@@ -5198,7 +5468,10 @@ class I32Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector2: ...
 
 
 
@@ -5493,11 +5766,21 @@ class U32Vector2:
 
 
 
+    def min(self, min: int) -> U32Vector2: ...
+    def max(self, max: int) -> U32Vector2: ...
+    def clamp(self, min: int, max: int) -> U32Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector2: ...
 
 
 @final
@@ -5516,7 +5799,10 @@ class U32Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector2: ...
 
 
 
@@ -5809,11 +6095,21 @@ class IVector2:
 
 
 
+    def min(self, min: int) -> IVector2: ...
+    def max(self, max: int) -> IVector2: ...
+    def clamp(self, min: int, max: int) -> IVector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector2: ...
 
 
 @final
@@ -5832,7 +6128,10 @@ class IVector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector2: ...
 
 
 
@@ -6127,11 +6426,21 @@ class UVector2:
 
 
 
+    def min(self, min: int) -> UVector2: ...
+    def max(self, max: int) -> UVector2: ...
+    def clamp(self, min: int, max: int) -> UVector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector2: ...
 
 
 @final
@@ -6150,7 +6459,10 @@ class UVector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector2: ...
 
 
 
@@ -6443,11 +6755,21 @@ class I64Vector2:
 
 
 
+    def min(self, min: int) -> I64Vector2: ...
+    def max(self, max: int) -> I64Vector2: ...
+    def clamp(self, min: int, max: int) -> I64Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector2: ...
 
 
 @final
@@ -6466,7 +6788,10 @@ class I64Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector2: ...
 
 
 
@@ -6761,11 +7086,21 @@ class U64Vector2:
 
 
 
+    def min(self, min: int) -> U64Vector2: ...
+    def max(self, max: int) -> U64Vector2: ...
+    def clamp(self, min: int, max: int) -> U64Vector2: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector2: ...
 
 
 @final
@@ -6784,7 +7119,10 @@ class U64Vector2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector2: ...
 
 
 
@@ -7248,11 +7586,21 @@ class BVector3:
 
 
 
+    def min(self, min: bool) -> BVector3: ...
+    def max(self, max: bool) -> BVector3: ...
+    def clamp(self, min: bool, max: bool) -> BVector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector3: ...
 
 
 @final
@@ -7271,7 +7619,10 @@ class BVector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector3: ...
 
 
 
@@ -7744,11 +8095,21 @@ class DVector3:
 
 
 
+    def min(self, min: int) -> DVector3: ...
+    def max(self, max: int) -> DVector3: ...
+    def clamp(self, min: int, max: int) -> DVector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector3: ...
 
 
 @final
@@ -7767,7 +8128,10 @@ class DVector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector3: ...
 
 
 
@@ -8271,11 +8635,21 @@ class FVector3:
     def distance(self, other: FVector3, /) -> float: ...
 
 
+    def min(self, min: float) -> FVector3: ...
+    def max(self, max: float) -> FVector3: ...
+    def clamp(self, min: float, max: float) -> FVector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector3: ...
 
 
 @final
@@ -8294,7 +8668,10 @@ class FVector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector3: ...
 
 
 
@@ -8767,11 +9144,21 @@ class I8Vector3:
 
 
 
+    def min(self, min: int) -> I8Vector3: ...
+    def max(self, max: int) -> I8Vector3: ...
+    def clamp(self, min: int, max: int) -> I8Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector3: ...
 
 
 @final
@@ -8790,7 +9177,10 @@ class I8Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector3: ...
 
 
 
@@ -9265,11 +9655,21 @@ class U8Vector3:
 
 
 
+    def min(self, min: int) -> U8Vector3: ...
+    def max(self, max: int) -> U8Vector3: ...
+    def clamp(self, min: int, max: int) -> U8Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector3: ...
 
 
 @final
@@ -9288,7 +9688,10 @@ class U8Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector3: ...
 
 
 
@@ -9761,11 +10164,21 @@ class I16Vector3:
 
 
 
+    def min(self, min: int) -> I16Vector3: ...
+    def max(self, max: int) -> I16Vector3: ...
+    def clamp(self, min: int, max: int) -> I16Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector3: ...
 
 
 @final
@@ -9784,7 +10197,10 @@ class I16Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector3: ...
 
 
 
@@ -10259,11 +10675,21 @@ class U16Vector3:
 
 
 
+    def min(self, min: int) -> U16Vector3: ...
+    def max(self, max: int) -> U16Vector3: ...
+    def clamp(self, min: int, max: int) -> U16Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector3: ...
 
 
 @final
@@ -10282,7 +10708,10 @@ class U16Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector3: ...
 
 
 
@@ -10755,11 +11184,21 @@ class I32Vector3:
 
 
 
+    def min(self, min: int) -> I32Vector3: ...
+    def max(self, max: int) -> I32Vector3: ...
+    def clamp(self, min: int, max: int) -> I32Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector3: ...
 
 
 @final
@@ -10778,7 +11217,10 @@ class I32Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector3: ...
 
 
 
@@ -11253,11 +11695,21 @@ class U32Vector3:
 
 
 
+    def min(self, min: int) -> U32Vector3: ...
+    def max(self, max: int) -> U32Vector3: ...
+    def clamp(self, min: int, max: int) -> U32Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector3: ...
 
 
 @final
@@ -11276,7 +11728,10 @@ class U32Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector3: ...
 
 
 
@@ -11749,11 +12204,21 @@ class IVector3:
 
 
 
+    def min(self, min: int) -> IVector3: ...
+    def max(self, max: int) -> IVector3: ...
+    def clamp(self, min: int, max: int) -> IVector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector3: ...
 
 
 @final
@@ -11772,7 +12237,10 @@ class IVector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector3: ...
 
 
 
@@ -12247,11 +12715,21 @@ class UVector3:
 
 
 
+    def min(self, min: int) -> UVector3: ...
+    def max(self, max: int) -> UVector3: ...
+    def clamp(self, min: int, max: int) -> UVector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector3: ...
 
 
 @final
@@ -12270,7 +12748,10 @@ class UVector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector3: ...
 
 
 
@@ -12743,11 +13224,21 @@ class I64Vector3:
 
 
 
+    def min(self, min: int) -> I64Vector3: ...
+    def max(self, max: int) -> I64Vector3: ...
+    def clamp(self, min: int, max: int) -> I64Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector3: ...
 
 
 @final
@@ -12766,7 +13257,10 @@ class I64Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector3: ...
 
 
 
@@ -13241,11 +13735,21 @@ class U64Vector3:
 
 
 
+    def min(self, min: int) -> U64Vector3: ...
+    def max(self, max: int) -> U64Vector3: ...
+    def clamp(self, min: int, max: int) -> U64Vector3: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector3: ...
 
 
 @final
@@ -13264,7 +13768,10 @@ class U64Vector3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector3: ...
 
 
 
@@ -14043,11 +14550,21 @@ class BVector4:
 
 
 
+    def min(self, min: bool) -> BVector4: ...
+    def max(self, max: bool) -> BVector4: ...
+    def clamp(self, min: bool, max: bool) -> BVector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[bool, bool]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector4: ...
 
 
 @final
@@ -14066,7 +14583,10 @@ class BVector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> BVector4: ...
 
 
 
@@ -14854,11 +15374,21 @@ class DVector4:
 
 
 
+    def min(self, min: int) -> DVector4: ...
+    def max(self, max: int) -> DVector4: ...
+    def clamp(self, min: int, max: int) -> DVector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector4: ...
 
 
 @final
@@ -14877,7 +15407,10 @@ class DVector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DVector4: ...
 
 
 
@@ -15693,11 +16226,21 @@ class FVector4:
     def distance(self, other: FVector4, /) -> float: ...
 
 
+    def min(self, min: float) -> FVector4: ...
+    def max(self, max: float) -> FVector4: ...
+    def clamp(self, min: float, max: float) -> FVector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[float, float]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector4: ...
 
 
 @final
@@ -15716,7 +16259,10 @@ class FVector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FVector4: ...
 
 
 
@@ -16504,11 +17050,21 @@ class I8Vector4:
 
 
 
+    def min(self, min: int) -> I8Vector4: ...
+    def max(self, max: int) -> I8Vector4: ...
+    def clamp(self, min: int, max: int) -> I8Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector4: ...
 
 
 @final
@@ -16527,7 +17083,10 @@ class I8Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8Vector4: ...
 
 
 
@@ -17317,11 +17876,21 @@ class U8Vector4:
 
 
 
+    def min(self, min: int) -> U8Vector4: ...
+    def max(self, max: int) -> U8Vector4: ...
+    def clamp(self, min: int, max: int) -> U8Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector4: ...
 
 
 @final
@@ -17340,7 +17909,10 @@ class U8Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8Vector4: ...
 
 
 
@@ -18128,11 +18700,21 @@ class I16Vector4:
 
 
 
+    def min(self, min: int) -> I16Vector4: ...
+    def max(self, max: int) -> I16Vector4: ...
+    def clamp(self, min: int, max: int) -> I16Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector4: ...
 
 
 @final
@@ -18151,7 +18733,10 @@ class I16Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16Vector4: ...
 
 
 
@@ -18941,11 +19526,21 @@ class U16Vector4:
 
 
 
+    def min(self, min: int) -> U16Vector4: ...
+    def max(self, max: int) -> U16Vector4: ...
+    def clamp(self, min: int, max: int) -> U16Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector4: ...
 
 
 @final
@@ -18964,7 +19559,10 @@ class U16Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16Vector4: ...
 
 
 
@@ -19752,11 +20350,21 @@ class I32Vector4:
 
 
 
+    def min(self, min: int) -> I32Vector4: ...
+    def max(self, max: int) -> I32Vector4: ...
+    def clamp(self, min: int, max: int) -> I32Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector4: ...
 
 
 @final
@@ -19775,7 +20383,10 @@ class I32Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32Vector4: ...
 
 
 
@@ -20565,11 +21176,21 @@ class U32Vector4:
 
 
 
+    def min(self, min: int) -> U32Vector4: ...
+    def max(self, max: int) -> U32Vector4: ...
+    def clamp(self, min: int, max: int) -> U32Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector4: ...
 
 
 @final
@@ -20588,7 +21209,10 @@ class U32Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32Vector4: ...
 
 
 
@@ -21376,11 +22000,21 @@ class IVector4:
 
 
 
+    def min(self, min: int) -> IVector4: ...
+    def max(self, max: int) -> IVector4: ...
+    def clamp(self, min: int, max: int) -> IVector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector4: ...
 
 
 @final
@@ -21399,7 +22033,10 @@ class IVector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> IVector4: ...
 
 
 
@@ -22189,11 +22826,21 @@ class UVector4:
 
 
 
+    def min(self, min: int) -> UVector4: ...
+    def max(self, max: int) -> UVector4: ...
+    def clamp(self, min: int, max: int) -> UVector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector4: ...
 
 
 @final
@@ -22212,7 +22859,10 @@ class UVector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> UVector4: ...
 
 
 
@@ -23000,11 +23650,21 @@ class I64Vector4:
 
 
 
+    def min(self, min: int) -> I64Vector4: ...
+    def max(self, max: int) -> I64Vector4: ...
+    def clamp(self, min: int, max: int) -> I64Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector4: ...
 
 
 @final
@@ -23023,7 +23683,10 @@ class I64Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64Vector4: ...
 
 
 
@@ -23813,11 +24476,21 @@ class U64Vector4:
 
 
 
+    def min(self, min: int) -> U64Vector4: ...
+    def max(self, max: int) -> U64Vector4: ...
+    def clamp(self, min: int, max: int) -> U64Vector4: ...
+
     @classmethod
     def get_limits(cls) -> tuple[int, int]: ...
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector4: ...
 
 
 @final
@@ -23836,7 +24509,10 @@ class U64Vector4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64Vector4: ...
 
 
 
@@ -23982,6 +24658,11 @@ class DMatrix2x2:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix2x2: ...
 
 @final
 class DMatrix2x2Array:
@@ -23999,6 +24680,10 @@ class DMatrix2x2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix2x2: ...
 
 
 
@@ -24143,6 +24828,11 @@ class FMatrix2x2:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix2x2: ...
 
 @final
 class FMatrix2x2Array:
@@ -24160,6 +24850,10 @@ class FMatrix2x2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix2x2: ...
 
 
 
@@ -24296,6 +24990,11 @@ class DMatrix2x3:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix2x3: ...
 
 @final
 class DMatrix2x3Array:
@@ -24313,6 +25012,10 @@ class DMatrix2x3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix2x3: ...
 
 
 
@@ -24449,6 +25152,11 @@ class FMatrix2x3:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix2x3: ...
 
 @final
 class FMatrix2x3Array:
@@ -24466,6 +25174,10 @@ class FMatrix2x3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix2x3: ...
 
 
 
@@ -24606,6 +25318,11 @@ class DMatrix2x4:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix2x4: ...
 
 @final
 class DMatrix2x4Array:
@@ -24623,6 +25340,10 @@ class DMatrix2x4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix2x4: ...
 
 
 
@@ -24763,6 +25484,11 @@ class FMatrix2x4:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix2x4: ...
 
 @final
 class FMatrix2x4Array:
@@ -24780,6 +25506,10 @@ class FMatrix2x4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix2x4: ...
 
 
 
@@ -24918,6 +25648,11 @@ class DMatrix3x2:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix3x2: ...
 
 @final
 class DMatrix3x2Array:
@@ -24935,6 +25670,10 @@ class DMatrix3x2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix3x2: ...
 
 
 
@@ -25073,6 +25812,11 @@ class FMatrix3x2:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix3x2: ...
 
 @final
 class FMatrix3x2Array:
@@ -25090,6 +25834,10 @@ class FMatrix3x2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix3x2: ...
 
 
 
@@ -25246,6 +25994,11 @@ class DMatrix3x3:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix3x3: ...
 
 @final
 class DMatrix3x3Array:
@@ -25263,6 +26016,10 @@ class DMatrix3x3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix3x3: ...
 
 
 
@@ -25419,6 +26176,11 @@ class FMatrix3x3:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix3x3: ...
 
 @final
 class FMatrix3x3Array:
@@ -25436,6 +26198,10 @@ class FMatrix3x3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix3x3: ...
 
 
 
@@ -25586,6 +26352,11 @@ class DMatrix3x4:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix3x4: ...
 
 @final
 class DMatrix3x4Array:
@@ -25603,6 +26374,10 @@ class DMatrix3x4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix3x4: ...
 
 
 
@@ -25753,6 +26528,11 @@ class FMatrix3x4:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix3x4: ...
 
 @final
 class FMatrix3x4Array:
@@ -25770,6 +26550,10 @@ class FMatrix3x4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix3x4: ...
 
 
 
@@ -25914,6 +26698,11 @@ class DMatrix4x2:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix4x2: ...
 
 @final
 class DMatrix4x2Array:
@@ -25931,6 +26720,10 @@ class DMatrix4x2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix4x2: ...
 
 
 
@@ -26075,6 +26868,11 @@ class FMatrix4x2:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix4x2: ...
 
 @final
 class FMatrix4x2Array:
@@ -26092,6 +26890,10 @@ class FMatrix4x2Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix4x2: ...
 
 
 
@@ -26244,6 +27046,11 @@ class DMatrix4x3:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix4x3: ...
 
 @final
 class DMatrix4x3Array:
@@ -26261,6 +27068,10 @@ class DMatrix4x3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix4x3: ...
 
 
 
@@ -26413,6 +27224,11 @@ class FMatrix4x3:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix4x3: ...
 
 @final
 class FMatrix4x3Array:
@@ -26430,6 +27246,10 @@ class FMatrix4x3Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix4x3: ...
 
 
 
@@ -26615,6 +27435,11 @@ class DMatrix4x4:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix4x4: ...
 
 @final
 class DMatrix4x4Array:
@@ -26632,6 +27457,10 @@ class DMatrix4x4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DMatrix4x4: ...
 
 
 
@@ -26817,6 +27646,11 @@ class FMatrix4x4:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix4x4: ...
 
 @final
 class FMatrix4x4Array:
@@ -26834,6 +27668,10 @@ class FMatrix4x4Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FMatrix4x4: ...
 
 
 
@@ -26922,6 +27760,11 @@ class DQuaternion:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DQuaternion: ...
 
 @final
 class DQuaternionArray:
@@ -26939,7 +27782,10 @@ class DQuaternionArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> DQuaternion: ...
 
 
 
@@ -27022,6 +27868,11 @@ class FQuaternion:
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
 
+    @classmethod
+    def get_size(self) -> int: ...
+
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FQuaternion: ...
 
 @final
 class FQuaternionArray:
@@ -27039,7 +27890,10 @@ class FQuaternionArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
-
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> FQuaternion: ...
 
 
 
@@ -27067,6 +27921,10 @@ class BArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_bool]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> B: ...
 
 
 
@@ -27090,6 +27948,10 @@ class DArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_double]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> D: ...
 
 
 
@@ -27113,6 +27975,10 @@ class FArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_float]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> F: ...
 
 
 
@@ -27136,6 +28002,10 @@ class I8Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int8]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I8: ...
 
 
 
@@ -27159,6 +28029,10 @@ class U8Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint8]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U8: ...
 
 
 
@@ -27182,6 +28056,10 @@ class I16Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int16]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I16: ...
 
 
 
@@ -27205,6 +28083,10 @@ class U16Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint16]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U16: ...
 
 
 
@@ -27228,6 +28110,10 @@ class I32Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int32]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I32: ...
 
 
 
@@ -27251,6 +28137,10 @@ class U32Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint32]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U32: ...
 
 
 
@@ -27274,6 +28164,10 @@ class IArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I: ...
 
 
 
@@ -27297,6 +28191,10 @@ class UArray:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U: ...
 
 
 
@@ -27320,6 +28218,10 @@ class I64Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_int64]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> I64: ...
 
 
 
@@ -27343,6 +28245,10 @@ class U64Array:
 
     @property
     def pointer(self) -> ctypes.pointer[ctypes.c_uint64]: ...
+    @property
+    def size(self) -> int: ...
+    @classmethod
+    def from_buffer(cls, buffer: Any) -> U64: ...
 
 
 

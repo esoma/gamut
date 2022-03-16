@@ -23,7 +23,7 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut.math import FVector4, IVector1, IVector2, IVector3
+from gamut.math import FVector4, UVector1, UVector2, UVector3
 # python
 import ctypes
 from ctypes import c_uint32
@@ -58,7 +58,7 @@ class Texture:
         type: TextureType,
         *,
         anisotropy: float = 1.0,
-        size: IVector1 | IVector2 | IVector3,
+        size: UVector1 | UVector2 | UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -112,15 +112,15 @@ class Texture:
             raise TypeError('anisotropy must be float')
         # check the size
         if size_length == 1:
-            if not isinstance(size, IVector1):
-                raise TypeError('size must be IVector1')
+            if not isinstance(size, UVector1):
+                raise TypeError('size must be UVector1')
         elif size_length == 2:
-            if not isinstance(size, IVector2):
-                raise TypeError('size must be IVector2')
+            if not isinstance(size, UVector2):
+                raise TypeError('size must be UVector2')
         else:
             assert size_length == 3
-            if not isinstance(size, IVector3):
-                raise TypeError('size must be IVector3')
+            if not isinstance(size, UVector3):
+                raise TypeError('size must be UVector3')
         for value, name in zip(size, ['width', 'height', 'depth']):
             if value < 1:
                 raise ValueError(f'{name} must be > 0')
@@ -193,7 +193,7 @@ class Texture:
         self._gl = glGenTextures(1)
         glBindTexture(self._gl_target, self._gl)
         if type == TextureType.NORMAL_2D:
-            assert isinstance(size, IVector2)
+            assert isinstance(size, UVector2)
             glTexImage2D(
                 self._gl_target,
                 0,
@@ -203,7 +203,7 @@ class Texture:
                 components.value, gl_data_type, data
             )
         elif type == TextureType.ARRAY_2D:
-            assert isinstance(size, IVector3)
+            assert isinstance(size, UVector3)
             glTexImage3D(
                 self._gl_target,
                 0,
@@ -213,7 +213,7 @@ class Texture:
                 components.value, gl_data_type, data
             )
         elif type == TextureType.NORMAL_CUBE:
-            assert isinstance(size, IVector2)
+            assert isinstance(size, UVector2)
             for i, gl_cube_target in enumerate(GL_TEXTURE_CUBE_MAP_TARGETS):
                 glTexImage2D(
                     gl_cube_target,
@@ -274,7 +274,7 @@ class Texture:
         return self._components
 
     @property
-    def size(self) -> IVector1 | IVector2 | IVector3:
+    def size(self) -> UVector1 | UVector2 | UVector3:
         return self._size
 
     @property

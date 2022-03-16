@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.724535 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 02:18:47.116466 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_IVECTOR1_HPP
 #define GAMUT_MATH_IVECTOR1_HPP
@@ -478,11 +478,32 @@ IVector1_getbufferproc(IVector1 *self, Py_buffer *view, int flags)
     view->len = sizeof(int) * 1;
     view->readonly = 1;
     view->itemsize = sizeof(int);
-    view->format = "i";
     view->ndim = 1;
-    static Py_ssize_t shape = 1;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "i";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 1;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -709,7 +730,64 @@ static PyMemberDef IVector1_PyMemberDef[] = {
 
 
 static PyObject *
-IVector1_get_limits(IVector1 *self, void *)
+IVector1_min(IVector1 *self, PyObject *min)
+{
+    auto c_min = pyobject_to_c_int(min);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::min(*self->glm, c_min);
+    IVector1 *result = (IVector1 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new IVector1Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+IVector1_max(IVector1 *self, PyObject *max)
+{
+    auto c_max = pyobject_to_c_int(max);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::max(*self->glm, c_max);
+    IVector1 *result = (IVector1 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new IVector1Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+IVector1_clamp(IVector1 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+    auto c_min = pyobject_to_c_int(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    auto c_max = pyobject_to_c_int(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto cls = Py_TYPE(self);
+    auto vector = glm::clamp(*self->glm, c_min, c_max);
+    IVector1 *result = (IVector1 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new IVector1Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+IVector1_get_size(IVector1 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(int) * 1);
+}
+
+
+static PyObject *
+IVector1_get_limits(IVector1 *cls, void *)
 {
     auto c_min = std::numeric_limits<int>::lowest();
     auto c_max = std::numeric_limits<int>::max();
@@ -734,9 +812,41 @@ IVector1_get_limits(IVector1 *self, void *)
 }
 
 
+static PyObject *
+IVector1_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(int) * 1;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (IVector1 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new IVector1Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static PyMethodDef IVector1_PyMethodDef[] = {
 
+    {"min", (PyCFunction)IVector1_min, METH_O, 0},
+    {"max", (PyCFunction)IVector1_max, METH_O, 0},
+    {"clamp", (PyCFunction)IVector1_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)IVector1_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)IVector1_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)IVector1_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -999,26 +1109,48 @@ IVector1Array_getbufferproc(IVector1Array *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "IVector1 is read only");
+        PyErr_SetString(PyExc_BufferError, "IVector1 is read only");
         view->obj = 0;
         return -1;
     }
+
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(int) * 1 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(int);
-    view->format = "i";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        1
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(int) * 1,
-        sizeof(int)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "i";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            1
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(int) * 1,
+            sizeof(int)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1049,9 +1181,59 @@ IVector1Array_pointer(IVector1Array *self, void *)
 }
 
 
+static PyObject *
+IVector1Array_size(IVector1Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(int) * 1 * self->length);
+}
+
+
 static PyGetSetDef IVector1Array_PyGetSetDef[] = {
     {"pointer", (getter)IVector1Array_pointer, 0, 0, 0},
+    {"size", (getter)IVector1Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+IVector1Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(int);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(int) * 1))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(int), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(int) * 1);
+
+    auto *result = (IVector1Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new IVector1Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef IVector1Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)IVector1Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1068,6 +1250,7 @@ static PyType_Slot IVector1Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)IVector1Array_releasebufferproc},
     {Py_tp_getset, (void*)IVector1Array_PyGetSetDef},
     {Py_tp_members, (void*)IVector1Array_PyMemberDef},
+    {Py_tp_methods, (void*)IVector1Array_PyMethodDef},
     {0, 0},
 };
 

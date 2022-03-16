@@ -212,6 +212,33 @@ class PodTest:
         for i in range(5):
             array.pointer[i] == self.type(i)
 
+    def test_array_size(self) -> None:
+        assert self.array_cls().size == 0
+        assert self.array_cls(1).size == (
+            struct.calcsize('=' + self.struct_format)
+        )
+        assert self.array_cls(1, 2).size == (
+            struct.calcsize('=' + self.struct_format) *
+            2
+        )
+
+    def test_from_array_buffer(self) -> None:
+        for a in (
+            self.array_cls(),
+            self.array_cls(1),
+            self.array_cls(1, 2),
+        ):
+            ba = self.array_cls.from_buffer(a)
+            assert isinstance(ba, self.array_cls)
+            assert ba == a
+            assert self.array_cls.from_buffer(bytes(a)) == a
+
+        with pytest.raises(TypeError):
+            self.array_cls.from_buffer(None)
+        if struct.calcsize(self.struct_byte_order + self.struct_format) > 1:
+            with pytest.raises(BufferError):
+                self.array_cls.from_buffer(b'\x00')
+
 
 class TestB(
     PodTest,

@@ -5,11 +5,12 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             PrimitiveMode, read_color_from_render_target,
                             Shader, Texture2d, TextureComponents,
                             TextureRenderTarget, WindowRenderTarget)
+from gamut.math import (FVector2, FVector2Array, FVector3, FVector3Array,
+                        UVector2)
 # python
+import ctypes
 from itertools import permutations
 from typing import Final, Sequence, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -46,16 +47,16 @@ def draw_fullscreen_quads(
         shader,
         PrimitiveMode.TRIANGLE_FAN,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-1, -1),
-                glm.vec2(-1, 1),
-                glm.vec2(1, 1),
-                glm.vec2(1, -1),
-            ).to_bytes()), glm.vec2),
-            "instance_color": BufferView(Buffer(glm.array(*(
-                glm.vec3(c.red, c.green, c.blue)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-1, -1),
+                FVector2(-1, 1),
+                FVector2(1, 1),
+                FVector2(1, -1),
+            )), FVector2),
+            "instance_color": BufferView(Buffer(FVector3Array(*(
+                FVector3(c.red, c.green, c.blue)
                 for c in colors
-            )).to_bytes() if colors else b''), glm.vec3, instancing_divisor=1),
+            )) if colors else b''), FVector3, instancing_divisor=1),
         }), {
         },
         index_range=(0, 4),
@@ -65,8 +66,8 @@ def draw_fullscreen_quads(
 
 def test_negative_instances() -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -77,8 +78,8 @@ def test_negative_instances() -> None:
             shader,
             PrimitiveMode.TRIANGLE_FAN,
             BufferViewMap({
-                "xy": BufferView(Buffer(), glm.vec2),
-                "instance_color": BufferView(Buffer(), glm.vec3),
+                "xy": BufferView(Buffer(), FVector2),
+                "instance_color": BufferView(Buffer(), FVector3),
             }), {
             },
             index_range=(0, 4),
@@ -89,8 +90,8 @@ def test_negative_instances() -> None:
 
 def test_zero_instances() -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -118,8 +119,8 @@ def test_zero_instances() -> None:
 ]))
 def test_basic(colors: Sequence[Color]) -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])

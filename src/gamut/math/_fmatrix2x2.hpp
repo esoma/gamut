@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.797035 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 02:18:47.199466 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX2X2_HPP
 #define GAMUT_MATH_FMATRIX2X2_HPP
@@ -673,20 +673,47 @@ FMatrix2x2_getbufferproc(FMatrix2x2 *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "FMatrix2x2 cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
     view->len = sizeof(float) * 4;
     view->readonly = 1;
     view->itemsize = sizeof(float);
-    view->format = "f";
     view->ndim = 2;
-    static Py_ssize_t shape[] = { 2, 2 };
-    view->shape = &shape[0];
-    static Py_ssize_t strides[] = {
-        sizeof(float) * 2,
-        sizeof(float)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "f";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape[] = { 2, 2 };
+        view->shape = &shape[0];
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(float) * 2,
+            sizeof(float)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -779,6 +806,13 @@ FMatrix2x2_transpose(FMatrix2x2 *self, void*)
 
 
 static PyObject *
+FMatrix2x2_get_size(FMatrix2x2 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(float) * 4);
+}
+
+
+static PyObject *
 FMatrix2x2_get_limits(FMatrix2x2 *self, void *)
 {
     auto c_min = std::numeric_limits<float>::lowest();
@@ -804,6 +838,33 @@ FMatrix2x2_get_limits(FMatrix2x2 *self, void *)
 }
 
 
+static PyObject *
+FMatrix2x2_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(float) * 4;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (FMatrix2x2 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new FMatrix2x2Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static PyMethodDef FMatrix2x2_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)FMatrix2x2_inverse, METH_NOARGS, 0},
@@ -812,6 +873,8 @@ static PyMethodDef FMatrix2x2_PyMethodDef[] = {
     {"get_row", (PyCFunction)FMatrix2x2_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)FMatrix2x2_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)FMatrix2x2_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)FMatrix2x2_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)FMatrix2x2_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -1073,24 +1136,51 @@ FMatrix2x2Array_getbufferproc(FMatrix2x2Array *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "FMatrix2x2 cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(float) * 4 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(float);
-    view->format = "f";
     view->ndim = 3;
-    view->shape = new Py_ssize_t[3] {
-        (Py_ssize_t)self->length,
-        2,
-        2
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(float) * 4,
-        sizeof(float) * 2,
-        sizeof(float)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "f";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[3] {
+            (Py_ssize_t)self->length,
+            2,
+            2
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(float) * 4,
+            sizeof(float) * 2,
+            sizeof(float)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1121,9 +1211,59 @@ FMatrix2x2Array_pointer(FMatrix2x2Array *self, void *)
 }
 
 
+static PyObject *
+FMatrix2x2Array_size(FMatrix2x2Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(float) * 4 * self->length);
+}
+
+
 static PyGetSetDef FMatrix2x2Array_PyGetSetDef[] = {
     {"pointer", (getter)FMatrix2x2Array_pointer, 0, 0, 0},
+    {"size", (getter)FMatrix2x2Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+FMatrix2x2Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(float);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(float) * 4))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(float), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(float) * 4);
+
+    auto *result = (FMatrix2x2Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new FMatrix2x2Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef FMatrix2x2Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)FMatrix2x2Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1140,6 +1280,7 @@ static PyType_Slot FMatrix2x2Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)FMatrix2x2Array_releasebufferproc},
     {Py_tp_getset, (void*)FMatrix2x2Array_PyGetSetDef},
     {Py_tp_members, (void*)FMatrix2x2Array_PyMemberDef},
+    {Py_tp_methods, (void*)FMatrix2x2Array_PyMethodDef},
     {0, 0},
 };
 

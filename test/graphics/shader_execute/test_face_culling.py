@@ -6,10 +6,10 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             read_color_from_render_target, Shader, Texture2d,
                             TextureComponents, TextureRenderTarget,
                             WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector4, UVector2
 # python
+import ctypes
 from typing import Final, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -41,21 +41,21 @@ def draw_fullscreen_quad(
     face_cull: FaceCull
 ) -> None:
     xy = [
-        glm.vec2(-1, -1),
-        glm.vec2(-1, 1),
-        glm.vec2(1, 1),
-        glm.vec2(1, -1),
+        FVector2(-1, -1),
+        FVector2(-1, 1),
+        FVector2(1, 1),
+        FVector2(1, -1),
     ]
     execute_shader(
         render_target,
         shader,
         PrimitiveMode.TRIANGLE_FAN,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
+            "xy": BufferView(Buffer(FVector2Array(
                 *(reversed(xy) if front else xy)
-            ).to_bytes()), glm.vec2)
+            )), FVector2)
         }), {
-            "color": glm.vec4(*color),
+            "color": FVector4(*color),
         },
         index_range=(0, 4),
         face_cull=face_cull
@@ -69,8 +69,8 @@ def draw_fullscreen_quad(
 ])
 def test_basic(face_cull: FaceCull, expected_color: Color) -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])

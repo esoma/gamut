@@ -5,7 +5,7 @@ from .test_texture import TextureTest
 # gamut
 from gamut.graphics import (MipmapSelection, TextureComponents, TextureCube,
                             TextureDataType, TextureFilter, TextureWrap)
-from gamut.math import FVector4, IVector1, IVector2, IVector3
+from gamut.math import FVector4, UVector1, UVector2, UVector3
 # python
 from typing import Any, cast
 
@@ -19,7 +19,7 @@ class TestTextureCube(TextureTest):
     @classmethod
     def create_texture(
         cls,
-        size: IVector1 | IVector2 | IVector3,
+        size: UVector1 | UVector2 | UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,

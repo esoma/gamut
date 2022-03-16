@@ -8,14 +8,14 @@ from ._texture import (MipmapSelection, Texture, TextureComponents,
                        TextureDataType, TextureFilter, TextureType,
                        TextureWrap)
 # gamut
-from gamut.math import FVector3, IVector2, IVector3
+from gamut.math import FVector3, UVector2, UVector3
 
 
 class Texture2d(Texture):
 
     def __init__(
         self,
-        size: IVector2,
+        size: UVector2,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -42,9 +42,9 @@ class Texture2d(Texture):
         )
 
     @property
-    def size(self) -> IVector2:
+    def size(self) -> UVector2:
         size = super().size
-        assert isinstance(size, IVector2)
+        assert isinstance(size, UVector2)
         return size
 
 
@@ -56,7 +56,7 @@ class Texture2dArray(Texture):
 
     def __init__(
         self,
-        size: IVector3,
+        size: UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -83,9 +83,9 @@ class Texture2dArray(Texture):
         )
 
     @property
-    def size(self) -> IVector3:
+    def size(self) -> UVector3:
         size = super().size
-        assert isinstance(size, IVector3)
+        assert isinstance(size, UVector3)
         return size
 
 

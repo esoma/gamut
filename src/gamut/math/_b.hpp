@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.843534 from codegen/math/templates/_pod.hpp
+// generated 2022-03-16 02:18:47.254466 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_B_HPP
 #define GAMUT_MATH_B_HPP
@@ -217,12 +217,33 @@ BArray_getbufferproc(BArray *self, Py_buffer *view, int flags)
     view->len = sizeof(bool) * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(bool);
-    view->format = "?";
     view->ndim = 1;
-    view->shape = new Py_ssize_t[1] {
-        (Py_ssize_t)self->length
-    };
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "?";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[1] {
+            (Py_ssize_t)self->length
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -253,9 +274,59 @@ BArray_pointer(BArray *self, void *)
 }
 
 
+static PyObject *
+BArray_size(BArray *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(bool) * self->length);
+}
+
+
 static PyGetSetDef BArray_PyGetSetDef[] = {
     {"pointer", (getter)BArray_pointer, 0, 0, 0},
+    {"size", (getter)BArray_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+BArray_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(bool);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % sizeof(bool))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(bool), view_length);
+        return 0;
+    }
+    auto array_length = view_length / sizeof(bool);
+
+    auto *result = (BArray *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->pod = new bool[array_length];
+        std::memcpy(result->pod, view.buf, view_length);
+    }
+    else
+    {
+        result->pod = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef BArray_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)BArray_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -272,6 +343,7 @@ static PyType_Slot BArray_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)BArray_releasebufferproc},
     {Py_tp_getset, (void*)BArray_PyGetSetDef},
     {Py_tp_members, (void*)BArray_PyMemberDef},
+    {Py_tp_methods, (void*)BArray_PyMethodDef},
     {0, 0},
 };
 

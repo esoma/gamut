@@ -5,12 +5,14 @@ from gamut._glcontext import get_gl_context
 from gamut.graphics import (Buffer, Shader, ShaderAttribute, ShaderUniform,
                             Texture, Texture2d, TextureComponents)
 from gamut.graphics._shader import use_shader
+import gamut.math
+from gamut.math import (BArray, DArray, FArray, I32Array, U8Array, U32Array,
+                        UVector2)
 # python
+import ctypes
 import sys
 import threading
 from typing import Any, Optional
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -148,10 +150,10 @@ def test_close() -> None:
 
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("glsl_type, python_type", [
-    ('float', glm.float32),
-    ('double', glm.double),
-    ('int', glm.int32),
-    ('uint', glm.uint32),
+    ('float', ctypes.c_float),
+    ('double', ctypes.c_double),
+    ('int', ctypes.c_int32),
+    ('uint', ctypes.c_uint32),
 ])
 @pytest.mark.parametrize("array", [False, True])
 def test_pod_attributes(
@@ -202,18 +204,19 @@ def test_pod_attributes(
 
 
 @pytest.mark.parametrize("location", [None, 1])
-@pytest.mark.parametrize("glsl_type, python_type", [
-    ('float', glm.float32),
-    ('double', glm.double),
-    ('int', glm.int32),
-    ('uint', glm.uint32),
-    ('bool', glm.bool_),
+@pytest.mark.parametrize("glsl_type, python_type, array_type", [
+    ('float', ctypes.c_float, FArray),
+    ('double', ctypes.c_double, DArray),
+    ('int', ctypes.c_int32, I32Array),
+    ('uint', ctypes.c_uint32, U32Array),
+    ('bool', ctypes.c_bool, BArray),
 ])
 @pytest.mark.parametrize("array", [False, True])
 def test_pod_uniforms(
     location: Optional[int],
     glsl_type: str,
     python_type: Any,
+    array_type: Any,
     array: bool,
 ) -> None:
     _ = Window()
@@ -262,24 +265,23 @@ def test_pod_uniforms(
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.array} for uni_name (got {type(None)})'
+            f'expected {array_type} for uni_name (got {type(None)})'
         )
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
-                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+                U8Array(0, 100) # type: ignore
             )
         assert str(excinfo.value) == (
-            f'expected array of {python_type} for uni_name '
-            f'(got array of {glm.uint8})'
+            f'expected {array_type} for uni_name (got {U8Array})'
         )
         with pytest.raises(ValueError) as excinfo:
-            shader._set_uniform(uni, glm.array.from_numbers(python_type, 0))
+            shader._set_uniform(uni, array_type(0))
         assert str(excinfo.value) == (
             f'expected array of length 2 for uni_name '
             f'(got array of length 1)'
         )
-        shader._set_uniform(uni, glm.array.from_numbers(python_type, 0, 100))
+        shader._set_uniform(uni, array_type(0, 100))
     else:
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
@@ -373,7 +375,7 @@ def test_sampler_uniforms(
         assert str(excinfo.value) == (
             f'expected sequence of {Texture} for uni_name (got {type(None)})'
         )
-        bad_value = glm.array.from_numbers(glm.uint8, 0, 100)
+        bad_value = U8Array(0, 100)
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
@@ -384,14 +386,24 @@ def test_sampler_uniforms(
             f'(found {bad_value[0]} in sequence)'
         )
         with pytest.raises(ValueError) as excinfo:
-            shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0))
+            shader._set_uniform(uni, I32Array(0))
         assert str(excinfo.value) == (
             f'expected sequence of length 2 for uni_name '
             f'(got sequence of length 1)'
         )
         shader._set_uniform(uni, [
-            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00'),
-            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d(
+                UVector2(1, 1),
+                TextureComponents.R,
+                ctypes.c_uint8,
+                b'\x00'
+            ),
+            Texture2d(
+                UVector2(1, 1),
+                TextureComponents.R,
+                ctypes.c_uint8,
+                b'\x00'
+            ),
         ])
     else:
         with pytest.raises(ValueError) as excinfo:
@@ -401,7 +413,12 @@ def test_sampler_uniforms(
         )
         shader._set_uniform(
             uni,
-            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d(
+                UVector2(1, 1),
+                TextureComponents.R,
+                ctypes.c_uint8,
+                b'\x00'
+            ),
         )
 
 
@@ -467,7 +484,7 @@ def test_shadow_sampler_uniforms(
         assert str(excinfo.value) == (
             f'expected sequence of {Texture} for uni_name (got {type(None)})'
         )
-        bad_value = glm.array.from_numbers(glm.uint8, 0, 100)
+        bad_value = U8Array(0, 100)
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
@@ -478,14 +495,24 @@ def test_shadow_sampler_uniforms(
             f'(found {bad_value[0]} in sequence)'
         )
         with pytest.raises(ValueError) as excinfo:
-            shader._set_uniform(uni, glm.array.from_numbers(glm.int32, 0))
+            shader._set_uniform(uni, I32Array(0))
         assert str(excinfo.value) == (
             f'expected sequence of length 2 for uni_name '
             f'(got sequence of length 1)'
         )
         shader._set_uniform(uni, [
-            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00'),
-            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d(
+                UVector2(1, 1),
+                TextureComponents.R,
+                ctypes.c_uint8,
+                b'\x00'
+            ),
+            Texture2d(
+                UVector2(1, 1),
+                TextureComponents.R,
+                ctypes.c_uint8,
+                b'\x00'
+            ),
         ])
     else:
         with pytest.raises(ValueError) as excinfo:
@@ -495,18 +522,29 @@ def test_shadow_sampler_uniforms(
         )
         shader._set_uniform(
             uni,
-            Texture2d((1, 1), TextureComponents.R, glm.uint8, b'\x00')
+            Texture2d(
+                UVector2(1, 1),
+                TextureComponents.R,
+                ctypes.c_uint8,
+                b'\x00'
+            ),
         )
 
 
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("components", [2, 3, 4])
-@pytest.mark.parametrize("prefix", ['', 'd', 'i', 'u'])
+@pytest.mark.parametrize("glsl_prefix, gamut_prefix", [
+    ('', 'F'),
+    ('d', 'D'),
+    ('i', 'I32'),
+    ('u', 'U32')
+])
 @pytest.mark.parametrize("array", [False, True])
 def test_vector_attributes(
     location: Optional[int],
     components: int,
-    prefix: str,
+    glsl_prefix: str,
+    gamut_prefix: str,
     array: bool,
 ) -> None:
     _ = Window()
@@ -522,7 +560,7 @@ def test_vector_attributes(
         if get_gl_context().version < (4, 0):
             pytest.xfail()
 
-    if prefix == 'd':
+    if glsl_prefix == 'd':
         glsl_version = '410 core'
         if get_gl_context().version < (4, 1):
             pytest.xfail()
@@ -540,7 +578,7 @@ def test_vector_attributes(
         x_value = 'attr_name.x'
         y_value = '0'
     shader = Shader(vertex=f'''#version {glsl_version}
-    {layout} in {prefix}vec{components} attr_name{array_def};
+    {layout} in {glsl_prefix}vec{components} attr_name{array_def};
     void main()
     {{
         gl_Position = vec4({x_value}, {y_value}, 0, 1);
@@ -551,25 +589,34 @@ def test_vector_attributes(
     assert shader.attributes[0] is attr
     assert isinstance(attr, ShaderAttribute)
     assert attr.name == "attr_name"
-    assert attr.type is getattr(glm, f'{prefix}vec{components}')
+    assert attr.type is getattr(
+        gamut.math,
+        f'{gamut_prefix}Vector{components}'
+    )
     assert attr.size == (2 if array else 1)
     assert attr.location == (0 if location is None else location)
 
 
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("components", [2, 3, 4])
-@pytest.mark.parametrize("prefix", ['', 'd', 'i', 'u'])
+@pytest.mark.parametrize("glsl_prefix, gamut_prefix", [
+    ('', 'F'),
+    ('d', 'D'),
+    ('i', 'I32'),
+    ('u', 'U32')
+])
 @pytest.mark.parametrize("array", [False, True])
 def test_vector_uniforms(
     location: Optional[int],
     components: int,
-    prefix: str,
+    glsl_prefix: str,
+    gamut_prefix: str,
     array: bool,
 ) -> None:
     _ = Window()
     glsl_version = '140'
 
-    if prefix == 'd':
+    if glsl_prefix == 'd':
         glsl_version = '400 core'
         if get_gl_context().version < (4, 0):
             pytest.xfail()
@@ -592,7 +639,7 @@ def test_vector_uniforms(
         x_value = 'uni_name.x'
         y_value = '0'
     shader = Shader(vertex=f'''#version {glsl_version}
-    {layout} uniform {prefix}vec{components} uni_name{array_def};
+    {layout} uniform {glsl_prefix}vec{components} uni_name{array_def};
     void main()
     {{
         gl_Position = vec4({x_value}, {y_value}, 0, 1);
@@ -603,34 +650,34 @@ def test_vector_uniforms(
     assert shader.uniforms[0] is uni
     assert isinstance(uni, ShaderUniform)
     assert uni.name == "uni_name"
-    assert uni.type is getattr(glm, f'{prefix}vec{components}')
+    assert uni.type is getattr(gamut.math, f'{gamut_prefix}Vector{components}')
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
 
-    python_type = getattr(glm, f'{prefix}vec{components}')
+    python_type = getattr(gamut.math, f'{gamut_prefix}Vector{components}')
     use_shader(shader)
     if array:
+        array_type = getattr(gamut.math, python_type.__name__ + 'Array')
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.array} for uni_name (got {type(None)})'
+            f'expected {array_type} for uni_name (got {type(None)})'
         )
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
-                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+                U8Array(0, 100), # type: ignore
             )
         assert str(excinfo.value) == (
-            f'expected array of {python_type} for uni_name '
-            f'(got array of {glm.uint8})'
+            f'expected {array_type} for uni_name (got {U8Array})'
         )
         with pytest.raises(ValueError) as excinfo:
-            shader._set_uniform(uni, glm.array(python_type(25)))
+            shader._set_uniform(uni, array_type(python_type(25)))
         assert str(excinfo.value) == (
             f'expected array of length 2 for uni_name '
             f'(got array of length 1)'
         )
-        shader._set_uniform(uni, glm.array(python_type(25)).repeat(2))
+        shader._set_uniform(uni, array_type(python_type(25), python_type(25)))
     else:
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
@@ -643,12 +690,16 @@ def test_vector_uniforms(
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("rows", [2, 3, 4])
 @pytest.mark.parametrize("columns", [2, 3, 4])
-@pytest.mark.parametrize("prefix", ['', 'd'])
+@pytest.mark.parametrize("glsl_prefix, gamut_prefix", [
+    ('', 'F'),
+    ('d', 'D'),
+])
 @pytest.mark.parametrize("array", [False, True])
 def test_matrix_attributes(
     location: Optional[int],
     rows: int, columns: int,
-    prefix: str,
+    glsl_prefix: str,
+    gamut_prefix: str,
     array: bool,
 ) -> None:
     _ = Window()
@@ -664,13 +715,13 @@ def test_matrix_attributes(
         if get_gl_context().version < (4, 0):
             pytest.xfail()
 
-    if prefix == 'd':
+    if glsl_prefix == 'd':
         glsl_version = '410 core'
         if get_gl_context().version < (4, 1):
             pytest.xfail()
 
     # macos has problems with dmat3x3+ in arrays?
-    if (sys.platform == 'darwin' and prefix == 'd' and
+    if (sys.platform == 'darwin' and glsl_prefix == 'd' and
         columns >= 3 and rows >= 3 and array):
         pytest.xfail()
 
@@ -687,7 +738,7 @@ def test_matrix_attributes(
         x_value = 'attr_name[0][0]'
         y_value = '0'
     shader = Shader(vertex=f'''#version {glsl_version}
-    {layout} in {prefix}mat{rows}x{columns} attr_name{array_def};
+    {layout} in {glsl_prefix}mat{rows}x{columns} attr_name{array_def};
     void main()
     {{
         gl_Position = vec4({x_value}, {y_value}, 0, 1);
@@ -698,7 +749,10 @@ def test_matrix_attributes(
     assert shader.attributes[0] is attr
     assert isinstance(attr, ShaderAttribute)
     assert attr.name == "attr_name"
-    assert attr.type is getattr(glm, f'{prefix}mat{rows}x{columns}')
+    assert attr.type is getattr(
+        gamut.math,
+        f'{gamut_prefix}Matrix{rows}x{columns}'
+    )
     assert attr.size == (2 if array else 1)
     assert attr.location == (0 if location is None else location)
 
@@ -706,18 +760,22 @@ def test_matrix_attributes(
 @pytest.mark.parametrize("location", [None, 1])
 @pytest.mark.parametrize("rows", [2, 3, 4])
 @pytest.mark.parametrize("columns", [2, 3, 4])
-@pytest.mark.parametrize("prefix", ['', 'd'])
+@pytest.mark.parametrize("glsl_prefix, gamut_prefix", [
+    ('', 'F'),
+    ('d', 'D'),
+])
 @pytest.mark.parametrize("array", [False, True])
 def test_matrix_uniforms(
     location: Optional[int],
     rows: int, columns: int,
-    prefix: str,
+    glsl_prefix: str,
+    gamut_prefix: str,
     array: bool,
 ) -> None:
     _ = Window()
     glsl_version = '140'
 
-    if prefix == 'd':
+    if glsl_prefix == 'd':
         glsl_version = '400 core'
         if get_gl_context().version < (4, 0):
             pytest.xfail()
@@ -740,7 +798,7 @@ def test_matrix_uniforms(
         x_value = 'uni_name[0][0]'
         y_value = '0'
     shader = Shader(vertex=f'''#version {glsl_version}
-    {layout} uniform {prefix}mat{rows}x{columns} uni_name{array_def};
+    {layout} uniform {glsl_prefix}mat{rows}x{columns} uni_name{array_def};
     void main()
     {{
         gl_Position = vec4({x_value}, {y_value}, 0, 1);
@@ -751,34 +809,37 @@ def test_matrix_uniforms(
     assert shader.uniforms[0] is uni
     assert isinstance(uni, ShaderUniform)
     assert uni.name == "uni_name"
-    assert uni.type is getattr(glm, f'{prefix}mat{rows}x{columns}')
+    assert uni.type is getattr(
+        gamut.math,
+        f'{gamut_prefix}Matrix{rows}x{columns}'
+    )
     assert uni.size == (2 if array else 1)
     assert uni.location == (0 if location is None else location)
 
-    python_type = getattr(glm, f'{prefix}mat{rows}x{columns}')
+    python_type = getattr(gamut.math, f'{gamut_prefix}Matrix{rows}x{columns}')
     use_shader(shader)
     if array:
+        array_type = getattr(gamut.math, python_type.__name__ + 'Array')
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore
         assert str(excinfo.value) == (
-            f'expected {glm.array} for uni_name (got {type(None)})'
+            f'expected {array_type} for uni_name (got {type(None)})'
         )
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(
                 uni,
-                glm.array.from_numbers(glm.uint8, 0, 100) # type: ignore
+                U8Array(0, 100)
             )
         assert str(excinfo.value) == (
-            f'expected array of {python_type} for uni_name '
-            f'(got array of {glm.uint8})'
+            f'expected {array_type} for uni_name (got {U8Array})'
         )
         with pytest.raises(ValueError) as excinfo:
-            shader._set_uniform(uni, glm.array(python_type(25)))
+            shader._set_uniform(uni, array_type(python_type(25)))
         assert str(excinfo.value) == (
             f'expected array of length 2 for uni_name '
             f'(got array of length 1)'
         )
-        shader._set_uniform(uni, glm.array(python_type(25)).repeat(2))
+        shader._set_uniform(uni, array_type(python_type(25), python_type(25)))
     else:
         with pytest.raises(ValueError) as excinfo:
             shader._set_uniform(uni, None) # type: ignore

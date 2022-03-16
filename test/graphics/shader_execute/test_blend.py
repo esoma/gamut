@@ -6,10 +6,10 @@ from gamut.graphics import (BlendFactor, BlendFunction, Buffer, BufferView,
                             read_color_from_render_target, Shader, Texture2d,
                             TextureComponents, TextureRenderTarget,
                             WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector4, UVector2
 # python
+import ctypes
 from typing import Final, Optional, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -49,14 +49,14 @@ def draw_fullscreen_quad(
         shader,
         PrimitiveMode.TRIANGLE_FAN,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-1, -1),
-                glm.vec2(-1, 1),
-                glm.vec2(1, 1),
-                glm.vec2(1, -1),
-            ).to_bytes()), glm.vec2)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-1, -1),
+                FVector2(-1, 1),
+                FVector2(1, 1),
+                FVector2(1, -1),
+            )), FVector2)
         }), {
-            "color": glm.vec4(*color),
+            "color": FVector4(*color),
         },
         index_range=(0, 4),
         blend_source=blend_source,
@@ -73,35 +73,35 @@ def calculate_factor(
     source_color: Color,
     destination_color: Color,
     blend_color: Color
-) -> glm.vec4:
+) -> FVector4:
     if factor == BlendFactor.ZERO:
-        return glm.vec4(0)
+        return FVector4(0)
     elif factor == BlendFactor.ONE:
-        return glm.vec4(1)
+        return FVector4(1)
     elif factor == BlendFactor.SOURCE_COLOR:
-        return glm.vec4(*source_color)
+        return FVector4(*source_color)
     elif factor == BlendFactor.ONE_MINUS_SOURCE_COLOR:
-        return 1 - glm.vec4(*source_color)
+        return 1 - FVector4(*source_color)
     elif factor == BlendFactor.DESTINATION_COLOR:
-        return glm.vec4(*destination_color)
+        return FVector4(*destination_color)
     elif factor == BlendFactor.ONE_MINUS_DESTINATION_COLOR:
-        return 1 - glm.vec4(*destination_color)
+        return 1 - FVector4(*destination_color)
     elif factor == BlendFactor.SOURCE_ALPHA:
-        return glm.vec4(source_color.alpha)
+        return FVector4(source_color.alpha)
     elif factor == BlendFactor.ONE_MINUS_SOURCE_ALPHA:
-        return 1 - glm.vec4(source_color.alpha)
+        return 1 - FVector4(source_color.alpha)
     elif factor == BlendFactor.DESTINATION_ALPHA:
-        return glm.vec4(destination_color.alpha)
+        return FVector4(destination_color.alpha)
     elif factor == BlendFactor.ONE_MINUS_DESTINATION_ALPHA:
-        return 1 - glm.vec4(destination_color.alpha)
+        return 1 - FVector4(destination_color.alpha)
     elif factor == BlendFactor.BLEND_COLOR:
-        return glm.vec4(*blend_color)
+        return FVector4(*blend_color)
     elif factor == BlendFactor.ONE_MINUS_BLEND_COLOR:
-        return 1 - glm.vec4(*blend_color)
+        return 1 - FVector4(*blend_color)
     elif factor == BlendFactor.BLEND_ALPHA:
-        return glm.vec4(blend_color.alpha)
+        return FVector4(blend_color.alpha)
     elif factor == BlendFactor.ONE_MINUS_BLEND_ALPHA:
-        return 1 - glm.vec4(blend_color.alpha)
+        return 1 - FVector4(blend_color.alpha)
     assert False
 
 
@@ -116,8 +116,8 @@ def test_source_destination_factors(
     blend_color = Color(.8, .7, .6, .5)
 
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -149,10 +149,10 @@ def test_source_destination_factors(
         clear_color,
         blend_color
     )
-    expected_color = glm.clamp((
-        (glm.vec4(*color) * source_factor) +
-        (glm.vec4(*clear_color) * destination_factor)
-    ), 0.0, 1.0)
+    expected_color = (
+        (FVector4(*color) * source_factor) +
+        (FVector4(*clear_color) * destination_factor)
+    ).clamp(0.0, 1.0)
 
     colors = read_color_from_render_target(
         render_target,
@@ -180,8 +180,8 @@ def test_source_destination_alpha_factors(
     blend_color = Color(.8, .7, .6, .5)
 
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -213,16 +213,16 @@ def test_source_destination_alpha_factors(
         clear_color,
         blend_color
     )
-    expected_color = glm.clamp((
-        glm.vec4(
+    expected_color = (
+        FVector4(
             color.red, color.green, color.blue,
             color.alpha * source_factor[3]
         ) +
-        glm.vec4(
+        FVector4(
             clear_color.red, clear_color.green, clear_color.blue,
             clear_color.alpha * destination_factor[3]
         )
-    ), 0.0, 1.0)
+    ).clamp(0.0, 1.0)
 
     colors = read_color_from_render_target(
         render_target,
@@ -245,8 +245,8 @@ def test_function(blend_function: BlendFunction,) -> None:
     clear_color = Color(.2, .5, .2)
 
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -266,8 +266,8 @@ def test_function(blend_function: BlendFunction,) -> None:
         None,
     )
 
-    source = glm.vec4(*color)
-    destination = glm.vec4(*clear_color)
+    source = FVector4(*color)
+    destination = FVector4(*clear_color)
     if blend_function == BlendFunction.ADD:
         expected_color = source + destination
     elif blend_function == BlendFunction.SUBTRACT:
@@ -275,10 +275,16 @@ def test_function(blend_function: BlendFunction,) -> None:
     elif blend_function == BlendFunction.SUBTRACT_REVERSED:
         expected_color = destination - source
     elif blend_function == BlendFunction.MIN:
-        expected_color = glm.min(source, destination)
+        expected_color = FVector4(*(
+            min(s, d)
+            for s, d in zip(source, destination)
+        ))
     elif blend_function == BlendFunction.MAX:
-        expected_color = glm.max(source, destination)
-    expected_color = glm.clamp((expected_color), 0.0, 1.0)
+        expected_color = FVector4(*(
+            max(s, d)
+            for s, d in zip(source, destination)
+        ))
+    expected_color = expected_color.clamp(0.0, 1.0)
 
     colors = read_color_from_render_target(
         render_target,
@@ -297,8 +303,8 @@ def test_function(blend_function: BlendFunction,) -> None:
 
 def test_default_blend_color() -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])

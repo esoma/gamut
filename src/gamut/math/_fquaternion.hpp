@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.836036 from codegen/math/templates/_quaternion.hpp
+// generated 2022-03-16 02:18:47.245965 from codegen/math/templates/_quaternion.hpp
 
 #ifndef GAMUT_MATH_FQUATERNION_HPP
 #define GAMUT_MATH_FQUATERNION_HPP
@@ -412,11 +412,32 @@ FQuaternion_getbufferproc(FQuaternion *self, Py_buffer *view, int flags)
     view->len = sizeof(float) * 4;
     view->readonly = 1;
     view->itemsize = sizeof(float);
-    view->format = "f";
     view->ndim = 1;
-    static Py_ssize_t shape = 4;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "f";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 4;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -561,6 +582,33 @@ FQuaternion_get_limits(FQuaternion *self, void *)
 }
 
 
+static PyObject *
+FQuaternion_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(float) * 4;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (FQuaternion *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new FQuaternionGlm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static FQuaternion *
 FQuaternion_normalize(FQuaternion *self, void*)
 {
@@ -620,6 +668,13 @@ FQuaternion_cross(FQuaternion *self, FQuaternion *other)
 }
 
 
+static PyObject *
+FQuaternion_get_size(FQuaternion *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(float) * 4);
+}
+
+
 static PyMethodDef FQuaternion_PyMethodDef[] = {
     {"cross", (PyCFunction)FQuaternion_cross, METH_O, 0},
     {"to_matrix3", (PyCFunction)FQuaternion_to_matrix3, METH_NOARGS, 0},
@@ -628,6 +683,8 @@ static PyMethodDef FQuaternion_PyMethodDef[] = {
     {"inverse", (PyCFunction)FQuaternion_inverse, METH_NOARGS, 0},
     {"rotate", (PyCFunction)FQuaternion_rotate, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)FQuaternion_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)FQuaternion_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)FQuaternion_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -886,22 +943,49 @@ FQuaternionArray_getbufferproc(FQuaternionArray *self, Py_buffer *view, int flag
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "FQuaternion cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(float) * 4* self->length;
     view->readonly = 1;
     view->itemsize = sizeof(float);
-    view->format = "f";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        4
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(float) * 4,
-        sizeof(float)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "f";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            4
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(float) * 4,
+            sizeof(float)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -932,9 +1016,58 @@ FQuaternionArray_pointer(FQuaternionArray *self, void *)
 }
 
 
+static PyObject *
+FQuaternionArray_size(FQuaternionArray *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(float) * 4 * self->length);
+}
+
 static PyGetSetDef FQuaternionArray_PyGetSetDef[] = {
     {"pointer", (getter)FQuaternionArray_pointer, 0, 0, 0},
+    {"size", (getter)FQuaternionArray_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+FQuaternionArray_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(float);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(float) * 4))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(float), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(float) * 4);
+
+    auto *result = (FQuaternionArray *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new FQuaternionGlm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef FQuaternionArray_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)FQuaternionArray_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -951,6 +1084,7 @@ static PyType_Slot FQuaternionArray_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)FQuaternionArray_releasebufferproc},
     {Py_tp_getset, (void*)FQuaternionArray_PyGetSetDef},
     {Py_tp_members, (void*)FQuaternionArray_PyMemberDef},
+    {Py_tp_methods, (void*)FQuaternionArray_PyMethodDef},
     {0, 0},
 };
 
