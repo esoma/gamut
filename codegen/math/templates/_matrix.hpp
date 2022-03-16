@@ -772,6 +772,72 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
         return result;
     }
 
+    static {{ name }} *
+    {{ name }}_orthographic(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 6)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 6 argument, got %zi", nargs);
+            return 0;
+        }
+
+        double left = PyFloat_AsDouble(args[0]);
+        if (PyErr_Occurred()){ return 0; }
+        double right = PyFloat_AsDouble(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+        double bottom = PyFloat_AsDouble(args[2]);
+        if (PyErr_Occurred()){ return 0; }
+        double top = PyFloat_AsDouble(args[3]);
+        if (PyErr_Occurred()){ return 0; }
+        double near = PyFloat_AsDouble(args[4]);
+        if (PyErr_Occurred()){ return 0; }
+        double far = PyFloat_AsDouble(args[5]);
+        if (PyErr_Occurred()){ return 0; }
+
+        auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(glm::ortho(left, right, bottom, top, near, far));
+        return result;
+    }
+
+    static {{ name }} *
+    {{ name }}_look_at(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 3)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 3 argument, got %zi", nargs);
+            return 0;
+        }
+
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto vec3_cls = module_state->{{ name[0] }}Vector3_PyTypeObject;
+
+        if (Py_TYPE(args[0]) != vec3_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected {{ name[0] }}Vector3 for eye, got %R", args[0]);
+            return 0;
+        }
+        auto eye = ({{ name[0] }}Vector3 *)args[0];
+        if (Py_TYPE(args[1]) != vec3_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected {{ name[0] }}Vector3 for center, got %R", args[1]);
+            return 0;
+        }
+        auto center = ({{ name[0] }}Vector3 *)args[1];
+        if (Py_TYPE(args[2]) != vec3_cls)
+        {
+            PyErr_Format(PyExc_TypeError, "expected {{ name[0] }}Vector3 for up, got %R", args[2]);
+            return 0;
+        }
+        auto up = ({{ name[0] }}Vector3 *)args[2];
+
+        auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(glm::lookAt(*eye->glm, *center->glm, *up->glm));
+        return result;
+    }
+
     static {{ name[0] }}Matrix3x3 *
     {{ name }}_to_matrix3({{ name }} *self, void*)
     {
@@ -933,6 +999,8 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
         {"scale", (PyCFunction){{ name }}_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction){{ name }}_translate, METH_FASTCALL, 0},
         {"perspective", (PyCFunction){{ name }}_perspective, METH_CLASS | METH_FASTCALL, 0},
+        {"orthographic", (PyCFunction){{ name }}_orthographic, METH_CLASS | METH_FASTCALL, 0},
+        {"look_at", (PyCFunction){{ name }}_look_at, METH_CLASS | METH_FASTCALL, 0},
         {"to_matrix3", (PyCFunction){{ name }}_to_matrix3, METH_NOARGS, 0},
     {% endif %}
     {% if c_type != 'float' %}

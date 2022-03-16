@@ -1057,6 +1057,104 @@ class MatrixTest:
             d_cls(*range(self.component_count))
         )
 
+    def test_orthographic(self) -> None:
+        if self.type != float or self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls.orthographic
+            return
+
+        with pytest.raises(TypeError):
+            self.cls.orthographic()
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3, 4)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3, 4, 5)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3, 4, 5, 6, 7)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(None, 2, 3, 4, 5, 6)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, None, 3, 4, 5, 6)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, None, 4, 5, 6)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3, None, 5, 6)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3, 4, None, 6)
+        with pytest.raises(TypeError):
+            self.cls.orthographic(1, 2, 3, 4, 5, None)
+
+        orthographic = self.cls.orthographic(-2, 2, -2, 2, .1, 100)
+        assert isinstance(orthographic, self.cls)
+        assert isclose(orthographic[0][0], .5)
+        assert isclose(orthographic[0][1], 0)
+        assert isclose(orthographic[0][2], 0)
+        assert isclose(orthographic[0][3], 0)
+        assert isclose(orthographic[1][0], 0)
+        assert isclose(orthographic[1][1], .5)
+        assert isclose(orthographic[1][2], 0)
+        assert isclose(orthographic[1][3], 0)
+        assert isclose(orthographic[2][0], 0)
+        assert isclose(orthographic[2][1], 0)
+        assert isclose(orthographic[2][2], -0.0200200192630291)
+        assert isclose(orthographic[2][3], 0)
+        assert isclose(orthographic[3][0], 0)
+        assert isclose(orthographic[3][1], 0)
+        assert isclose(orthographic[3][2], -1.0020020008087158)
+        assert isclose(orthographic[3][3], 1)
+
+    def test_look_at(self) -> None:
+        if self.type != float or self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls.look_at
+            return
+
+        vec3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+
+        with pytest.raises(TypeError):
+            self.cls.look_at()
+        with pytest.raises(TypeError):
+            self.cls.look_at(vec3_cls())
+        with pytest.raises(TypeError):
+            self.cls.look_at(vec3_cls(), vec3_cls())
+        with pytest.raises(TypeError):
+            self.cls.look_at(vec3_cls(), vec3_cls(), vec3_cls(), vec3_cls())
+        with pytest.raises(TypeError):
+            self.cls.look_at(None, vec3_cls(), vec3_cls())
+        with pytest.raises(TypeError):
+            self.cls.look_at(vec3_cls(), None, vec3_cls())
+        with pytest.raises(TypeError):
+            self.cls.look_at(vec3_cls(), vec3_cls(), None)
+
+        mat = self.cls.look_at(
+            vec3_cls(0),
+            vec3_cls(-1, 0, -1),
+            vec3_cls(0, 1, 0)
+        )
+        assert isinstance(mat, self.cls)
+        assert isclose(mat[0][0], 0.7071068286895752)
+        assert isclose(mat[0][1], 0)
+        assert isclose(mat[0][2], 0.7071067690849304)
+        assert isclose(mat[0][3], 0)
+        assert isclose(mat[1][0], 0)
+        assert isclose(mat[1][1], 1)
+        assert isclose(mat[1][2], 0)
+        assert isclose(mat[1][3], 0)
+        assert isclose(mat[2][0], -0.7071068286895752)
+        assert isclose(mat[2][1], 0)
+        assert isclose(mat[2][2], 0.7071067690849304)
+        assert isclose(mat[2][3], 0)
+        assert isclose(mat[3][0], 0)
+        assert isclose(mat[3][1], 0)
+        assert isclose(mat[3][2], 0)
+        assert isclose(mat[3][3], 1)
+
 
 class TestFMatrix2x2(
     MatrixTest,

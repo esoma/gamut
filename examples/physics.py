@@ -8,7 +8,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             execute_shader, FaceCull, PrimitiveMode, Shader,
                             WindowRenderTarget)
 from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector3, FVector3Array,
-                        FVector4, Matrix4, U8Array, UVector2, Vector3)
+                        Matrix4, U8Array, UVector2, Vector3)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 from gamut.physics import Body, BodyType, World
@@ -18,8 +18,6 @@ from datetime import timedelta
 from math import cos, radians, sin
 import random
 from typing import Any
-# pyglm
-from glm import lookAt
 
 
 class Draw(TimerExpired):
@@ -166,14 +164,11 @@ class App(Application):
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
-        self.player_node.local_transform = FMatrix4(*(
-            FVector4(*c) for c in
-            lookAt(
-                self.player_position,
-                self.player_position + player_direction,
-                FVector3(0, 1, 0),
-            )
-        ))
+        self.player_node.local_transform = FMatrix4.look_at(
+            self.player_position,
+            self.player_position + player_direction,
+            FVector3(0, 1, 0),
+        )
 
         clear_render_target(
             self.window_render_target,

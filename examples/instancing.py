@@ -7,7 +7,7 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             execute_shader, FaceCull, Image, PrimitiveMode,
                             Shader, WindowRenderTarget)
 from gamut.math import (FMatrix4, FMatrix4Array, FVector2, FVector2Array,
-                        FVector3, FVector3Array, FVector4, U8Array, UVector2)
+                        FVector3, FVector3Array, U8Array, UVector2)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 # python
@@ -16,8 +16,6 @@ from datetime import timedelta
 from math import cos, pi, radians, sin
 from pathlib import Path
 from typing import Any, Final
-# pyglm
-from glm import lookAt
 
 RESOURCES: Final = Path(__file__).parent / 'resources'
 
@@ -157,14 +155,11 @@ class App(Application):
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
-        self.player_node.local_transform = FMatrix4(*(
-            FVector4(*c) for c in
-            lookAt(
-                self.player_position,
-                self.player_position + player_direction,
-                FVector3(0, 1, 0),
-            )
-        ))
+        self.player_node.local_transform = FMatrix4.look_at(
+            self.player_position,
+            self.player_position + player_direction,
+            FVector3(0, 1, 0),
+        )
 
         self.cube_transform = self.cube_transform.rotate(
             .02,

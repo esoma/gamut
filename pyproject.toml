@@ -52,22 +52,20 @@ known_sdl2 = 'sdl2'
 known_opengl = 'OpenGL'
 known_pil = 'PIL'
 known_numpy = 'numpy'
-known_glm = 'glm'
 known_openal = 'openal'
 known_uharfbuzz = 'uharfbuzz'
 known_freetypepy = 'freetype'
 known_pyicu = 'icu'
-known_pyglm_typing = 'glm_typing'
 known_jinja2 = 'jinja2'
 
 sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
-            'FREETYPEPY', 'JINJA2', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'GLM',
-            'PYGLM_TYPING', 'OPENAL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
-            'UHARFBUZZ', 'THIRDPARTY']
+            'FREETYPEPY', 'JINJA2', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'OPENAL',
+            'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'UHARFBUZZ',
+            'THIRDPARTY']
 no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
                    'FREETYPEPY', 'JINJA2', 'MYPY', 'NUMPY', 'PIL', 'PYICU',
-                   'GLM', 'PYGLM_TYPING', 'OPENAL', 'OPENGL', 'SDL2', 'PYTEST',
-                   'SETUPTOOLS', 'UHARFBUZZ', 'THIRDPARTY']
+                   'OPENAL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
+                   'UHARFBUZZ', 'THIRDPARTY']
 
 import_heading_localfolder = 'gamut'
 import_heading_evdev = 'evdev'
@@ -78,8 +76,6 @@ import_heading_mypy = 'mypy'
 import_heading_numpy = 'numpy'
 import_heading_pil = 'pillow'
 import_heading_pyicu = 'pyicu'
-import_heading_glm = 'pyglm'
-import_heading_pyglm_typing = 'pyglm-typing'
 import_heading_openal = 'pyopenal'
 import_heading_opengl = 'pyopengl'
 import_heading_sdl2 = 'pysdl2'
