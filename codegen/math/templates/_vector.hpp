@@ -13,6 +13,7 @@
 #include <structmember.h>
 // glm
 #include <glm/glm.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
@@ -819,6 +820,39 @@ static PyMemberDef {{ name }}_PyMemberDef[] = {
         }
     {% endif %}
 
+
+    static PyObject *
+    {{ name }}_lerp({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 2)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+            return 0;
+        }
+
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(args[0]) != cls)
+        {
+            PyErr_Format(PyExc_TypeError, "%R is not {{ name }}", args[0]);
+            return 0;
+        }
+        auto other = ({{ name }} *)args[0];
+
+        auto c_x = pyobject_to_c_{{ c_type.replace(' ', '_') }}(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+
+        {% if component_count == 1 %}
+            auto vector = glm::lerp<{{ c_type }}>(*({{ c_type }} *)self->glm, *({{ c_type }} *)other->glm, c_x);
+        {% else %}
+            auto vector = glm::lerp(*self->glm, *other->glm, c_x);
+        {% endif %}
+        auto result = ({{ name }} *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name }}Glm(vector);
+        return (PyObject *)result;
+    }
+
+
     static {{ name }} *
     {{ name }}_normalize({{ name }} *self, void*)
     {
@@ -966,6 +1000,7 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
             {"cross", (PyCFunction){{ name }}_cross, METH_O, 0},
             {"to_quaternion", (PyCFunction){{ name }}_to_quaternion, METH_NOARGS, 0},
         {% endif %}
+        {"lerp", (PyCFunction){{ name }}_lerp, METH_FASTCALL, 0},
         {"normalize", (PyCFunction){{ name }}_normalize, METH_NOARGS, 0},
         {"distance", (PyCFunction){{ name }}_distance, METH_O, 0},
     {% endif %}

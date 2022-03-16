@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 20:45:19.085100 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 22:57:53.875656 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR2_HPP
 #define GAMUT_MATH_DVECTOR2_HPP
@@ -13,6 +13,7 @@
 #include <structmember.h>
 // glm
 #include <glm/glm.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
@@ -898,6 +899,37 @@ static PyMemberDef DVector2_PyMemberDef[] = {
 
 
 
+
+    static PyObject *
+    DVector2_lerp(DVector2 *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 2)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+            return 0;
+        }
+
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(args[0]) != cls)
+        {
+            PyErr_Format(PyExc_TypeError, "%R is not DVector2", args[0]);
+            return 0;
+        }
+        auto other = (DVector2 *)args[0];
+
+        auto c_x = pyobject_to_c_double(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+
+
+            auto vector = glm::lerp(*self->glm, *other->glm, c_x);
+
+        auto result = (DVector2 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector2Glm(vector);
+        return (PyObject *)result;
+    }
+
+
     static DVector2 *
     DVector2_normalize(DVector2 *self, void*)
     {
@@ -1044,6 +1076,7 @@ DVector2_from_buffer(PyTypeObject *cls, PyObject *buffer)
 static PyMethodDef DVector2_PyMethodDef[] = {
 
 
+        {"lerp", (PyCFunction)DVector2_lerp, METH_FASTCALL, 0},
         {"normalize", (PyCFunction)DVector2_normalize, METH_NOARGS, 0},
         {"distance", (PyCFunction)DVector2_distance, METH_O, 0},
 

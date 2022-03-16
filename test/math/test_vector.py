@@ -1198,6 +1198,14 @@ class VectorTest:
             with pytest.raises((TypeError, OverflowError)):
                 self.cls(1).clamp(1, None)
 
+    def test_lerp(self) -> None:
+        if self.type is not float:
+            with pytest.raises(AttributeError):
+                self.cls().lerp
+            return
+
+        assert self.cls(0).lerp(self.cls(1), .5) == self.cls(1) * .5
+
 
 class TestBVector1(
     VectorTest,

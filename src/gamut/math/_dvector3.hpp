@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 20:45:19.095100 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 22:57:53.886657 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR3_HPP
 #define GAMUT_MATH_DVECTOR3_HPP
@@ -13,6 +13,7 @@
 #include <structmember.h>
 // glm
 #include <glm/glm.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
@@ -1009,6 +1010,37 @@ static PyMemberDef DVector3_PyMemberDef[] = {
         }
 
 
+
+    static PyObject *
+    DVector3_lerp(DVector3 *self, PyObject *const *args, Py_ssize_t nargs)
+    {
+        if (nargs != 2)
+        {
+            PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+            return 0;
+        }
+
+        auto cls = Py_TYPE(self);
+        if (Py_TYPE(args[0]) != cls)
+        {
+            PyErr_Format(PyExc_TypeError, "%R is not DVector3", args[0]);
+            return 0;
+        }
+        auto other = (DVector3 *)args[0];
+
+        auto c_x = pyobject_to_c_double(args[1]);
+        if (PyErr_Occurred()){ return 0; }
+
+
+            auto vector = glm::lerp(*self->glm, *other->glm, c_x);
+
+        auto result = (DVector3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DVector3Glm(vector);
+        return (PyObject *)result;
+    }
+
+
     static DVector3 *
     DVector3_normalize(DVector3 *self, void*)
     {
@@ -1160,6 +1192,7 @@ static PyMethodDef DVector3_PyMethodDef[] = {
             {"cross", (PyCFunction)DVector3_cross, METH_O, 0},
             {"to_quaternion", (PyCFunction)DVector3_to_quaternion, METH_NOARGS, 0},
 
+        {"lerp", (PyCFunction)DVector3_lerp, METH_FASTCALL, 0},
         {"normalize", (PyCFunction)DVector3_normalize, METH_NOARGS, 0},
         {"distance", (PyCFunction)DVector3_distance, METH_O, 0},
 
