@@ -7,7 +7,8 @@ from gamut.graphics import (BlendFactor, Buffer, BufferFrequency, BufferView,
                             BufferViewMap, clear_render_target, Color,
                             create_quad_position_array, execute_shader,
                             PrimitiveMode, Shader, WindowRenderTarget)
-from gamut.math import UVector2
+from gamut.math import (FMatrix4, FVector2, FVector3, FVector4, FVector4Array,
+                        UVector2)
 from gamut.peripheral import MouseButtonPressed, MouseConnected, MouseMoved
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
 # python
@@ -19,10 +20,7 @@ import traceback
 from typing import Final
 import warnings
 # pyglm
-from glm import array as glm_array
-from glm import mat4, ortho
-from glm import sizeof as glm_sizeof
-from glm import translate, vec2, vec3, vec4
+from glm import ortho
 
 DIR: Final = Path(__file__).parent
 
@@ -34,12 +32,12 @@ class Draw(TimerExpired):
 class Brick:
 
     HITS_TO_COLOR: Final = {
-        0: vec4(0, 0, 0, 0),
-        1: vec4(0.764, 0.956, 0.933, 1),
-        2: vec4(0.572, 0.890, 0.682, 1),
-        3: vec4(0.737, 0.870, 0.486, 1),
-        4: vec4(0.878, 0.764, 0.403, 1),
-        5: vec4(0.886, 0.301, 0.250, 1),
+        0: FVector4(0, 0, 0, 0),
+        1: FVector4(0.764, 0.956, 0.933, 1),
+        2: FVector4(0.572, 0.890, 0.682, 1),
+        3: FVector4(0.737, 0.870, 0.486, 1),
+        4: FVector4(0.878, 0.764, 0.403, 1),
+        5: FVector4(0.886, 0.301, 0.250, 1),
     }
 
     def __init__(
@@ -47,12 +45,12 @@ class Brick:
         index: int,
         row: int, column: int,
         hits: int,
-        size: vec2,
+        size: FVector2,
         y_offset: int
     ):
-        size = vec2(size.x, -size.y)
+        size = FVector2(size.x, -size.y)
         self.index = index
-        self.top_left = vec2(size.x * column, (size.y * row) + y_offset)
+        self.top_left = FVector2(size.x * column, (size.y * row) + y_offset)
         self.bottom_right = self.top_left + size
         self.hits = hits
         self.update_color()
@@ -70,7 +68,7 @@ class App(Application):
     SCREEN_SIZE: Final = UVector2(800, 800)
     MAX_BALLS_SPEED: Final = 750
 
-    ball_transform: mat4
+    ball_transform: FMatrix4
 
     async def main(self) -> None:
         try:
@@ -84,11 +82,11 @@ class App(Application):
         self.window.recenter()
         self.window.is_visible = True
         self.window_render_target = WindowRenderTarget(self.window)
-        self.projection = ortho(
+        self.projection = FMatrix4(*(FVector4(*c) for c in ortho(
             0, self.window.size[0],
             0, self.window.size[1],
             -1000, 1000
-        )
+        )))
 
         self.listener = Listener(gain=.25)
         self.listener.activate()
@@ -190,7 +188,7 @@ class App(Application):
         # setup the bricks
         self.brick_columns = 10
         self.brick_rows = 10
-        self.brick_size = vec2(
+        self.brick_size = FVector2(
             self.SCREEN_SIZE[0] / self.brick_columns,
             self.SCREEN_SIZE[1] / 30.0
         )
@@ -220,21 +218,21 @@ class App(Application):
                 bottom=brick.bottom_right.y
             )
         self.bricks_color_buffer = Buffer(
-            glm_array(
-                [brick.color for brick in self.bricks for _ in range(6)]
-            ).to_bytes(),
+            FVector4Array(*(
+                brick.color for brick in self.bricks for _ in range(6)
+            )),
             frequency=BufferFrequency.DYNAMIC,
         )
         self.bricks_buffer_view_map = BufferViewMap({
-            "pos": BufferView(Buffer(bricks_pos_data), vec4),
-            "color": BufferView(self.bricks_color_buffer, vec4)
+            "pos": BufferView(Buffer(bricks_pos_data), FVector4),
+            "color": BufferView(self.bricks_color_buffer, FVector4)
         })
         # setup the ball
         self.ball_active = False
-        self.ball_velocity = vec2(0, 0)
+        self.ball_velocity = FVector2(0, 0)
         self.ball_primitive_mode = PrimitiveMode.TRIANGLE_FAN
-        self.ball_color = vec4(0.294, 0.498, 0.945, 1)
-        self.ball_size = vec2(
+        self.ball_color = FVector4(0.294, 0.498, 0.945, 1)
+        self.ball_size = FVector2(
             self.SCREEN_SIZE[0] / 30.0,
             self.SCREEN_SIZE[1] / 30.0
         )
@@ -245,13 +243,13 @@ class App(Application):
                     left=self.ball_size.x / -2.0, right=self.ball_size.x / 2.0,
                     bottom=self.ball_size.y / -2.0, top=self.ball_size.y / 2.0,
                 )
-            ), vec4)
+            ), FVector4)
         })
         # setup the paddle
         self.paddle_x_velocity = 0.0
         self.paddle_primitive_mode = PrimitiveMode.TRIANGLE_FAN
-        self.paddle_color = vec4(1, 1, 1, 1)
-        self.paddle_size = vec2(
+        self.paddle_color = FVector4(1, 1, 1, 1)
+        self.paddle_size = FVector2(
             self.SCREEN_SIZE[0] / 6.0,
             self.SCREEN_SIZE[1] / 30.0
         )
@@ -262,17 +260,17 @@ class App(Application):
                     left=0, right=self.paddle_size.x,
                     bottom=0, top=self.paddle_size.y,
                 )
-            ), vec4)
+            ), FVector4)
         })
         self.update_paddle_transform(self.SCREEN_SIZE[0] / 2.0)
-        self.paddle_previous_x = (self.paddle_transform * vec3(0)).x
+        self.paddle_previous_x = (self.paddle_transform @ FVector3(0)).x
 
 
     def play_boop(self) -> None:
         self.speaker.play(self.boop_sample)
 
     def step_physics(self, duration: timedelta) -> None:
-        paddle_current_x = (self.paddle_transform * vec3(0)).x
+        paddle_current_x = (self.paddle_transform @ FVector3(0)).x
         self.paddle_x_velocity = (
             abs(self.paddle_previous_x) - abs(paddle_current_x)
         )
@@ -285,17 +283,17 @@ class App(Application):
         if self.ball_active:
             return
         self.ball_active = True
-        self.ball_velocity = vec2(
+        self.ball_velocity = FVector2(
             randrange(-self.MAX_BALLS_SPEED // 2, self.MAX_BALLS_SPEED // 2),
             self.MAX_BALLS_SPEED
         )
 
-    def do_ball_physics(self, ball_step_velocity: vec2) -> None:
+    def do_ball_physics(self, ball_step_velocity: FVector2) -> None:
         ball_position = (
-            (self.ball_transform * vec3(0)) +
-            vec3(ball_step_velocity.x, ball_step_velocity.y, 0)
+            (self.ball_transform @ FVector3(0)) +
+            FVector3(ball_step_velocity.x, ball_step_velocity.y, 0)
         )
-        current_ball_position = self.ball_transform * vec3(0)
+        current_ball_position = self.ball_transform @ FVector3(0)
         current_ball_bottom = (
             current_ball_position.y -
             (self.ball_size[1] / 2.0)
@@ -318,19 +316,19 @@ class App(Application):
         ball_right = ball_position.x + (self.ball_size[0] / 2.0)
         # check if the ball will go outside the collidable bounds of the screen
         if ball_top >= self.SCREEN_SIZE[0]:
-            self.ball_velocity *= vec2(1, -1)
-            ball_step_velocity.y += self.SCREEN_SIZE[0] - ball_top
+            self.ball_velocity *= FVector2(1, -1)
+            ball_step_velocity += FVector2(0, self.SCREEN_SIZE[0] - ball_top)
             self.play_boop()
         if ball_left <= 0:
-            self.ball_velocity *= vec2(-1, 1)
-            ball_step_velocity.x -= ball_left
+            self.ball_velocity *= FVector2(-1, 1)
+            ball_step_velocity -= FVector2(ball_left, 0)
             self.play_boop()
         if ball_right >= self.SCREEN_SIZE[1]:
-            self.ball_velocity *= vec2(-1, 1)
-            ball_step_velocity.x += self.SCREEN_SIZE[1] - ball_right
+            self.ball_velocity *= FVector2(-1, 1)
+            ball_step_velocity += FVector2(self.SCREEN_SIZE[1] - ball_right, 0)
             self.play_boop()
         # check if the ball will collide with the paddle
-        paddle_position = self.paddle_transform * vec3(0)
+        paddle_position = self.paddle_transform @ FVector3(0)
         paddle_left = paddle_position.x
         paddle_right = paddle_position.x + self.paddle_size.x
         if (ball_step_velocity.y < 0 and
@@ -338,12 +336,15 @@ class App(Application):
             ball_bottom <= self.paddle_size.y and
             ball_left <= paddle_right and ball_right >= paddle_left):
             self.play_boop()
-            ball_step_velocity.y += self.paddle_size.y - ball_bottom
-            self.ball_velocity *= vec2(1, -1)
-            self.ball_velocity -= vec2(self.paddle_x_velocity * 50, 0)
-            self.ball_velocity.x = max(
-                min(self.ball_velocity.x, self.MAX_BALLS_SPEED),
-                -self.MAX_BALLS_SPEED
+            ball_step_velocity += FVector2(0, self.paddle_size.y - ball_bottom)
+            self.ball_velocity *= FVector2(1, -1)
+            self.ball_velocity -= FVector2(self.paddle_x_velocity * 50, 0)
+            self.ball_velocity = FVector2(
+                max(
+                    min(self.ball_velocity.x, self.MAX_BALLS_SPEED),
+                    -self.MAX_BALLS_SPEED
+                ),
+                self.ball_velocity.y
             )
         # check if the ball went outside the bottom of the screen
         if ball_top <= 0:
@@ -364,8 +365,10 @@ class App(Application):
                     ball_left <= brick.bottom_right.x and
                     ball_right >= brick.top_left.x
                 ):
-                    self.ball_velocity *= vec2(1, -1)
-                    ball_step_velocity.y += brick.bottom_right.y - ball_top
+                    self.ball_velocity *= FVector2(1, -1)
+                    ball_step_velocity += FVector2(
+                        0, brick.bottom_right.y - ball_top
+                    )
                     self.hit_brick(brick)
                     break
                 # ball hits top of brick
@@ -375,8 +378,10 @@ class App(Application):
                     ball_left <= brick.bottom_right.x and
                     ball_right >= brick.top_left.x
                 ):
-                    self.ball_velocity *= vec2(1, -1)
-                    ball_step_velocity.y -= brick.top_left.y - ball_bottom
+                    self.ball_velocity *= FVector2(1, -1)
+                    ball_step_velocity -= FVector2(
+                        0, brick.top_left.y - ball_bottom
+                    )
                     self.hit_brick(brick)
                     break
 
@@ -387,8 +392,11 @@ class App(Application):
                     ball_top >= brick.bottom_right.y and
                     ball_bottom <= brick.top_left.y
                 ):
-                    self.ball_velocity *= vec2(-1, 1)
-                    ball_step_velocity.x += brick.top_left.x - ball_right
+                    self.ball_velocity *= FVector2(-1, 1)
+                    ball_step_velocity += FVector2(
+                        brick.top_left.x - ball_right,
+                        0
+                    )
                     self.hit_brick(brick)
                     break
                 # ball hits right side of brick
@@ -398,19 +406,21 @@ class App(Application):
                     ball_top >= brick.bottom_right.y and
                     ball_bottom <= brick.top_left.y
                 ):
-                    self.ball_velocity *= vec2(-1, 1)
-                    ball_step_velocity.x -= brick.bottom_right.x - ball_left
+                    self.ball_velocity *= FVector2(-1, 1)
+                    ball_step_velocity -= FVector2(
+                        brick.bottom_right.x - ball_left,
+                        0
+                    )
                     self.hit_brick(brick)
                     break
-        self.ball_transform = translate(
-            self.ball_transform,
-            vec3(ball_step_velocity.x, ball_step_velocity.y, 0)
+        self.ball_transform = self.ball_transform.translate(
+            FVector3(ball_step_velocity.x, ball_step_velocity.y, 0)
         )
 
     def lost_ball(self) -> None:
-        paddle_position = self.paddle_transform * vec3(0)
+        paddle_position = self.paddle_transform @ FVector3(0)
         self.ball_active = False
-        self.ball_velocity = vec2(0)
+        self.ball_velocity = FVector2(0)
         self.update_paddle_transform(
             paddle_position.x + (self.paddle_size.x / 2.0)
         )
@@ -426,10 +436,10 @@ class App(Application):
         brick.update_color()
         if brick.hits == 0:
             brick.is_active = False
-        colors = glm_array(brick.color).repeat(6)
+        colors = FVector4Array(*(brick.color for _ in range(6)))
         self.bricks_color_buffer.replace(
-            brick.index * glm_sizeof(vec4) * 6,
-            colors.to_bytes(),
+            brick.index * FVector4.get_size() * 6,
+            colors,
         )
         self.speaker.play(self.bwop_sample)
         if all(not brick.is_active for brick in self.bricks):
@@ -444,12 +454,11 @@ class App(Application):
         # clamp so that it doesn't go outside the bounds of the screen
         x -= self.paddle_size.x / 2.0
         x = max(min(x, self.SCREEN_SIZE[0] - self.paddle_size.x), 0)
-        self.paddle_transform = translate(mat4(1), vec3(x, 0, 0))
+        self.paddle_transform = FMatrix4(1).translate(FVector3(x, 0, 0))
         # update the ball position to the paddle if its not active
         if not self.ball_active:
-            self.ball_transform = translate(
-                mat4(1),
-                vec3(
+            self.ball_transform = FMatrix4(1).translate(
+                FVector3(
                     x + (self.paddle_size.x / 2.0),
                     self.paddle_size.y + (self.ball_size.y / 2.0),
                     0
@@ -489,7 +498,7 @@ class App(Application):
             self.paddle_buffer_view_map,
             {
                 "color": self.paddle_color,
-                "transform": self.projection * self.paddle_transform,
+                "transform": self.projection @ self.paddle_transform,
             },
             index_range=(0, len(self.paddle_buffer_view_map["pos"]))
         )
@@ -501,7 +510,7 @@ class App(Application):
             self.ball_buffer_view_map,
             {
                 "color": self.ball_color,
-                "transform": self.projection * self.ball_transform,
+                "transform": self.projection @ self.ball_transform,
             },
             index_range=(0, len(self.ball_buffer_view_map["pos"]))
         )
@@ -516,13 +525,12 @@ class App(Application):
                     "uv": uv,
                 }),
                 {
-                    "color": vec4(0, 0, 0, 1),
+                    "color": FVector4(0, 0, 0, 1),
                     "tex": texture,
                     "transform":
-                        self.projection *
-                        translate(
-                            self.paddle_transform,
-                            vec3(20, self.paddle_size[1], 0)
+                        self.projection @
+                        self.paddle_transform.translate(
+                            FVector3(20, self.paddle_size[1], 0)
                         ),
                 },
                 index_range=(0, len(pos)),
