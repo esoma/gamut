@@ -6,51 +6,69 @@ from gamut._glcontext import get_gl_context
 from gamut.graphics import (Buffer, BufferFrequency, BufferNature, BufferView,
                             BufferViewMap, Shader)
 from gamut.graphics._buffer import use_buffer_view_map_with_shader
+from gamut.math import (DMatrix2x2, DMatrix2x3, DMatrix2x4, DMatrix3x2,
+                        DMatrix3x3, DMatrix3x4, DMatrix4x2, DMatrix4x3,
+                        DMatrix4x4, DVector2, DVector3, DVector4, FMatrix2x2,
+                        FMatrix2x3, FMatrix2x4, FMatrix3x2, FMatrix3x3,
+                        FMatrix3x4, FMatrix4x2, FMatrix4x3, FMatrix4x4,
+                        FVector2, FVector3, FVector4, I8Vector2, I8Vector3,
+                        I8Vector4, I16Vector2, I16Vector3, I16Vector4,
+                        I32Vector2, I32Vector3, I32Vector4, U8Vector2,
+                        U8Vector3, U8Vector4, U16Vector2, U16Vector3,
+                        U16Vector4, U32Vector2, U32Vector3, U32Vector4,
+                        U64Vector2)
 # python
+import ctypes
 import gc
 from struct import unpack as c_unpack
 import threading
 from typing import Any, Final, Optional
-# pyglm
-import glm
 # pytest
 import pytest
 
+
+def get_size_of(t: Any) -> int:
+    try:
+        return t.get_size()
+    except AttributeError:
+        return ctypes.sizeof(t)
+
+
 VIEW_DATA_TYPES: Final = (
-    glm.float32, glm.double,
-    glm.int8, glm.uint8,
-    glm.int16, glm.uint16,
-    glm.int32, glm.uint32,
-    glm.vec2, glm.dvec2,
-    glm.i8vec2, glm.i16vec2, glm.ivec2,
-    glm.u8vec2, glm.u16vec2, glm.uvec2,
-    glm.vec3, glm.dvec3,
-    glm.i8vec3, glm.i16vec3, glm.ivec3,
-    glm.u8vec3, glm.u16vec3, glm.uvec3,
-    glm.vec4, glm.dvec4,
-    glm.i8vec4, glm.i16vec4, glm.ivec4,
-    glm.u8vec4, glm.u16vec4, glm.uvec4,
-    glm.mat2x2, glm.dmat2x2, glm.imat2x2, glm.umat2x2,
-    glm.mat2x3, glm.dmat2x3, glm.imat2x3, glm.umat2x3,
-    glm.mat2x4, glm.dmat2x4, glm.imat2x4, glm.umat2x4,
-    glm.mat3x2, glm.dmat3x2, glm.imat3x2, glm.umat3x2,
-    glm.mat3x3, glm.dmat3x3, glm.imat3x3, glm.umat3x3,
-    glm.mat3x4, glm.dmat3x4, glm.imat3x4, glm.umat3x4,
-    glm.mat4x2, glm.dmat4x2, glm.imat4x2, glm.umat4x2,
-    glm.mat4x3, glm.dmat4x3, glm.imat4x3, glm.umat4x3,
-    glm.mat4x4, glm.dmat4x4, glm.imat4x4, glm.umat4x4,
+    ctypes.c_float, ctypes.c_double,
+    ctypes.c_int8, ctypes.c_uint8,
+    ctypes.c_int16, ctypes.c_uint16,
+    ctypes.c_int32, ctypes.c_uint32,
+    FVector2, DVector2,
+    I8Vector2, I16Vector2, I32Vector2,
+    U8Vector2, U16Vector2, U32Vector2,
+    FVector3, DVector3,
+    I8Vector3, I16Vector3, I32Vector3,
+    U8Vector3, U16Vector3, U32Vector3,
+    FVector4, DVector4,
+    I8Vector4, I16Vector4, I32Vector4,
+    U8Vector4, U16Vector4, U32Vector4,
+    FMatrix2x2, DMatrix2x2,
+    FMatrix2x3, DMatrix2x3,
+    FMatrix2x4, DMatrix2x4,
+    FMatrix3x2, DMatrix3x2,
+    FMatrix3x3, DMatrix3x3,
+    FMatrix3x4, DMatrix3x4,
+    FMatrix4x2, DMatrix4x2,
+    FMatrix4x3, DMatrix4x3,
+    FMatrix4x4, DMatrix4x4,
 )
 
 
-GLM_POD_TO_STRUCT_NAME: Final[dict[Any, str]] = {
-    glm.float32: 'f',
-    glm.double: 'd',
-    glm.int8: 'b',
-    glm.uint8: 'B',
-    glm.int16: 'h',
-    glm.uint16: 'H',
-    glm.int32: 'i',
-    glm.uint32: 'I',
+CTYPES_TO_STRUCT_NAME: Final[dict[Any, str]] = {
+    ctypes.c_float: 'f',
+    ctypes.c_double: 'd',
+    ctypes.c_int8: 'b',
+    ctypes.c_uint8: 'B',
+    ctypes.c_int16: 'h',
+    ctypes.c_uint16: 'H',
+    ctypes.c_int32: 'i',
+    ctypes.c_uint32: 'I',
 }
 
 
@@ -248,7 +266,6 @@ def test_replace(
     length: int | None,
     data_type: type[bytes] | type[Buffer]
 ) -> None:
-
     typed_data = data_type(data)
 
     if data_offset is None:
@@ -292,11 +309,11 @@ def test_clear_invalid_range_type(range: Any) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(TypeError) as excinfo:
         buffer.clear(b'\x00', range=range)
-    assert str(excinfo.value) == 'range must be a uvec2'
+    assert str(excinfo.value) == 'range must be U64Vector2'
 
 
-@pytest.mark.parametrize("range", [(0, 5), (5, 6)])
-def test_clear_invalid_range_beyond_length(range: tuple[int, int]) -> None:
+@pytest.mark.parametrize("range", [U64Vector2(0, 5), U64Vector2(5, 6)])
+def test_clear_invalid_range_beyond_length(range: U64Vector2) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(ValueError) as excinfo:
         buffer.clear(b'\x00', range=range)
@@ -305,26 +322,34 @@ def test_clear_invalid_range_beyond_length(range: tuple[int, int]) -> None:
     )
 
 
-@pytest.mark.parametrize("range", [(0, 0), (1, 0), (4, 0)])
-def test_clear_invalid_range_start_after_end(range: tuple[int, int]) -> None:
+@pytest.mark.parametrize("range", [
+    U64Vector2(0, 0),
+    U64Vector2(1, 0),
+    U64Vector2(4, 0)
+])
+def test_clear_invalid_range_start_after_end(range: U64Vector2) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     with pytest.raises(ValueError) as excinfo:
         buffer.clear(b'\x00', range=range)
     assert str(excinfo.value) == 'range end must come after start'
 
 
-
 @pytest.mark.parametrize("data", [b'\x00', b'\x01'])
-@pytest.mark.parametrize("range", [None, (0, 4)])
-def test_clear_full(data: bytes, range: tuple[int, int]) -> None:
+@pytest.mark.parametrize("range", [None, U64Vector2(0, 4)])
+def test_clear_full(data: bytes, range: U64Vector2) -> None:
     buffer = Buffer(b'\x00\x01\x02\x03')
     buffer.clear(data, range=range)
     assert buffer.bytes == data * 4
 
 
 @pytest.mark.parametrize("data", [b'\x00', b'\x01'])
-@pytest.mark.parametrize("range", [(0, 1), (1, 2), (2, 4), (1, 3)])
-def test_clear_range(data: bytes, range: tuple[int, int]) -> None:
+@pytest.mark.parametrize("range", [
+    U64Vector2(0, 1),
+    U64Vector2(1, 2),
+    U64Vector2(2, 4),
+    U64Vector2(1, 3)
+])
+def test_clear_range(data: bytes, range: U64Vector2) -> None:
     original_data = b'\x00\x01\x02\x03'
     expected_data = (
         original_data[:range[0]] +
@@ -342,7 +367,7 @@ def test_view_init(data_type: Any) -> None:
     view = BufferView(buffer, data_type)
     assert view.buffer is buffer
     assert view.type is data_type
-    assert view.stride == glm.sizeof(data_type)
+    assert view.stride == get_size_of(data_type)
     assert view.offset == 0
     assert view.instancing_divisor is None
     assert len(view) == 0
@@ -358,35 +383,39 @@ def test_view_empty_buffer(data_type: Any) -> None:
 @pytest.mark.parametrize("stride", [(1, 2), 'abc'])
 def test_view_stride_invalid(stride: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        BufferView(Buffer(), glm.int8, stride=stride)
+        BufferView(Buffer(), ctypes.c_int8, stride=stride)
     assert str(excinfo.value) == 'stride must be an int'
 
 
 @pytest.mark.parametrize("stride", [-100, -1, 0])
 def test_view_non_positive_stride(stride: int) -> None:
     with pytest.raises(ValueError) as excinfo:
-        BufferView(Buffer(), glm.float32, stride=stride)
+        BufferView(Buffer(), ctypes.c_float, stride=stride)
     assert str(excinfo.value) == 'stride must be greater than 0'
 
 
 @pytest.mark.parametrize("offset", [(1, 2), 'abc'])
 def test_view_offset_invalid(offset: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        BufferView(Buffer(), glm.int8, offset=offset)
+        BufferView(Buffer(), ctypes.c_int8, offset=offset)
     assert str(excinfo.value) == 'offset must be an int'
 
 
 @pytest.mark.parametrize("offset", [-100, -1])
 def test_view_negative_offset(offset: int) -> None:
     with pytest.raises(ValueError) as excinfo:
-        BufferView(Buffer(), glm.float32, offset=offset)
+        BufferView(Buffer(), ctypes.c_float, offset=offset)
     assert str(excinfo.value) == 'offset must be 0 or greater'
 
 
 @pytest.mark.parametrize("instancing_divisor", [(1, 2), 'abc'])
 def test_view_instancing_divisor_invalid(instancing_divisor: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        BufferView(Buffer(), glm.int8, instancing_divisor=instancing_divisor)
+        BufferView(
+            Buffer(),
+            ctypes.c_int8,
+            instancing_divisor=instancing_divisor
+        )
     assert str(excinfo.value) == 'instancing divisor must be an int'
 
 
@@ -395,7 +424,7 @@ def test_view_non_positive_instancing_divisor(instancing_divisor: int) -> None:
     with pytest.raises(ValueError) as excinfo:
         BufferView(
             Buffer(),
-            glm.float32,
+            ctypes.c_float,
             instancing_divisor=instancing_divisor
         )
     assert str(excinfo.value) == 'instancing divisor must be greater than 0'
@@ -412,19 +441,19 @@ def test_view_read(
     instancing_divisor: Optional[int]
 ) -> None:
     data = bytes(range(200))
-    stride = glm.sizeof(data_type)
+    stride = get_size_of(data_type)
     if add_stride is not None:
         stride += add_stride
     expected_length = ((len(data) - offset) // stride)
     expected_python_data: list[Any] = []
     for i in range(expected_length):
         data_start = offset + (stride * i)
-        data_bytes = data[data_start:data_start + glm.sizeof(data_type)]
+        data_bytes = data[data_start:data_start + get_size_of(data_type)]
         try:
-            struct_name = GLM_POD_TO_STRUCT_NAME[data_type]
+            struct_name = CTYPES_TO_STRUCT_NAME[data_type]
             expected_python_data.append(c_unpack(struct_name, data_bytes)[0])
         except KeyError:
-            expected_python_data.append(data_type.from_bytes(data_bytes))
+            expected_python_data.append(data_type.from_buffer(data_bytes))
 
     view = BufferView(
         Buffer(data),
@@ -438,8 +467,8 @@ def test_view_read(
 
 
 def test_view_map_read_only_mapping() -> None:
-    bv_1 = BufferView(Buffer(), glm.float32)
-    bv_2 = BufferView(Buffer(), glm.float32)
+    bv_1 = BufferView(Buffer(), ctypes.c_float)
+    bv_2 = BufferView(Buffer(), ctypes.c_float)
     map = {
         "vbo_1": bv_1,
         "vbo_2": bv_2,
@@ -453,7 +482,7 @@ def test_view_map_read_only_mapping() -> None:
         bvm["vbo_3"]
 
     with pytest.raises(TypeError):
-        bvm["vbo_1"] = BufferView(Buffer(), glm.float32) # type: ignore
+        bvm["vbo_1"] = BufferView(Buffer(), ctypes.c_float) # type: ignore
 
     map.clear()
     assert len(bvm) == 2
@@ -471,7 +500,7 @@ def test_buffer_view_map_mapping_invalid(mapping: Any) -> None:
 @pytest.mark.parametrize("key", [None, 1, (1, 2, 3)])
 def test_buffer_view_map_key_invalid(key: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        BufferViewMap({key: BufferView(Buffer(), glm.uint8)})
+        BufferViewMap({key: BufferView(Buffer(), ctypes.c_uint8)})
     assert str(excinfo.value) == f'invalid key {key!r}, expected str'
 
 
@@ -562,7 +591,7 @@ def test_buffer_thread_transfer_to_app() -> None:
 
 def test_buffer_view_map_transfer_to_app() -> None:
     bvm: Optional[BufferViewMap] = BufferViewMap({
-        "attr": BufferView(Buffer(), glm.uint8)
+        "attr": BufferView(Buffer(), ctypes.c_uint8)
     })
     shader = Shader(vertex=f"""
     #version 140
@@ -609,7 +638,7 @@ def test_buffer_view_map_transfer_to_main() -> None:
         async def main(self) -> None:
             nonlocal bvm
             bvm = BufferViewMap({
-                "attr": BufferView(Buffer(), glm.uint8)
+                "attr": BufferView(Buffer(), ctypes.c_uint8)
             })
             shader = Shader(vertex=f"""
             #version 140
@@ -647,7 +676,7 @@ def test_buffer_thread_destroyed_outside_render_thread() -> None:
 def test_buffer_view_map_thread_destroyed_outside_render_thread() -> None:
     keep_alive_buffer = Buffer()
     bvm: Optional[BufferViewMap] = BufferViewMap({
-        "attr": BufferView(Buffer(), glm.uint8)
+        "attr": BufferView(Buffer(), ctypes.c_uint8)
     })
     shader = Shader(vertex=f"""
     #version 140

@@ -1,15 +1,13 @@
 
 # gamut
 from gamut.graphics import BufferView, Texture2d
-from gamut.math import IVector2, Vector2
+from gamut.math import FVector2, FVector4, IVector2, UVector2, Vector2
 from gamut.text import AtlasFont, AtlasGlyph, Face, RenderedGlyphFormat
 # python
 import gc
 import os
 from pathlib import Path
 from typing import Final
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -31,8 +29,8 @@ def test_init(file: str, format: RenderedGlyphFormat) -> None:
     assert font.face is face
     assert font.size is size
     assert font.format is format
-    assert isinstance(font.texture_size, IVector2)
-    assert font.texture_size == IVector2(512, 512)
+    assert isinstance(font.texture_size, UVector2)
+    assert font.texture_size == UVector2(512, 512)
     assert isinstance(font.textures, tuple)
     assert len(font.textures) == 0
 
@@ -69,13 +67,13 @@ def test_get(file: str, character: str, format: RenderedGlyphFormat) -> None:
     assert atlas_glyph.bearing != atlas_glyph_bearing
 
     atlas_glyph_position = atlas_glyph.position
-    assert isinstance(atlas_glyph.position, IVector2)
-    atlas_glyph_position += IVector2(1, 1)
+    assert isinstance(atlas_glyph.position, UVector2)
+    atlas_glyph_position += UVector2(1, 1)
     assert atlas_glyph.position != atlas_glyph_position
 
     atlas_glyph_size = atlas_glyph.size
-    assert isinstance(atlas_glyph.size, IVector2)
-    atlas_glyph_size += IVector2(1, 1)
+    assert isinstance(atlas_glyph.size, UVector2)
+    atlas_glyph_size += UVector2(1, 1)
     assert atlas_glyph.size != atlas_glyph_size
 
     uv_top_left, uv_bottom_right = atlas_glyph.uv
@@ -115,13 +113,13 @@ def test_orphaned_atlas_glyph(file: str) -> None:
 
 @pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("texture_size", [
-    IVector2(16, 16),
-    IVector2(128, 128),
-    IVector2(256, 256),
+    UVector2(16, 16),
+    UVector2(128, 128),
+    UVector2(256, 256),
 ])
 def test_buffer_positioned_glyphs(
     file: str,
-    texture_size: IVector2
+    texture_size: UVector2
 ) -> None:
     face = Face(file)
     size = face.request_pixel_size(height=12)
@@ -141,20 +139,20 @@ def test_buffer_positioned_glyphs(
         assert len(buffers) == 2
         pos, uv = buffers
         assert isinstance(pos, BufferView)
-        assert pos.type is glm.vec4
+        assert pos.type is FVector4
         assert isinstance(uv, BufferView)
-        assert uv.type is glm.vec2
+        assert uv.type is FVector2
 
 
 @pytest.mark.parametrize("file", FONTS)
 @pytest.mark.parametrize("texture_size", [
-    IVector2(16, 16),
-    IVector2(128, 128),
-    IVector2(256, 256),
+    UVector2(16, 16),
+    UVector2(128, 128),
+    UVector2(256, 256),
 ])
 def test_buffer_text(
     file: str,
-    texture_size: IVector2
+    texture_size: UVector2
 ) -> None:
     face = Face(file)
     size = face.request_pixel_size(height=12)
@@ -173,6 +171,6 @@ def test_buffer_text(
         assert len(buffers) == 2
         pos, uv = buffers
         assert isinstance(pos, BufferView)
-        assert pos.type is glm.vec4
+        assert pos.type is FVector4
         assert isinstance(uv, BufferView)
-        assert uv.type is glm.vec2
+        assert uv.type is FVector2

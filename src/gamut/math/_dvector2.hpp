@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.728035 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 16:23:50.281193 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_DVECTOR2_HPP
 #define GAMUT_MATH_DVECTOR2_HPP
@@ -605,11 +605,32 @@ DVector2_getbufferproc(DVector2 *self, Py_buffer *view, int flags)
     view->len = sizeof(double) * 2;
     view->readonly = 1;
     view->itemsize = sizeof(double);
-    view->format = "d";
     view->ndim = 1;
-    static Py_ssize_t shape = 2;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "d";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 2;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -911,7 +932,64 @@ static PyMemberDef DVector2_PyMemberDef[] = {
 
 
 static PyObject *
-DVector2_get_limits(DVector2 *self, void *)
+DVector2_min(DVector2 *self, PyObject *min)
+{
+    auto c_min = pyobject_to_c_double(min);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::min(*self->glm, c_min);
+    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector2Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DVector2_max(DVector2 *self, PyObject *max)
+{
+    auto c_max = pyobject_to_c_double(max);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::max(*self->glm, c_max);
+    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector2Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DVector2_clamp(DVector2 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+    auto c_min = pyobject_to_c_double(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    auto c_max = pyobject_to_c_double(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto cls = Py_TYPE(self);
+    auto vector = glm::clamp(*self->glm, c_min, c_max);
+    DVector2 *result = (DVector2 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DVector2Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+DVector2_get_size(DVector2 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(double) * 2);
+}
+
+
+static PyObject *
+DVector2_get_limits(DVector2 *cls, void *)
 {
     auto c_min = std::numeric_limits<double>::lowest();
     auto c_max = std::numeric_limits<double>::max();
@@ -936,13 +1014,45 @@ DVector2_get_limits(DVector2 *self, void *)
 }
 
 
+static PyObject *
+DVector2_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(double) * 2;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (DVector2 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new DVector2Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static PyMethodDef DVector2_PyMethodDef[] = {
 
 
         {"normalize", (PyCFunction)DVector2_normalize, METH_NOARGS, 0},
         {"distance", (PyCFunction)DVector2_distance, METH_O, 0},
 
+    {"min", (PyCFunction)DVector2_min, METH_O, 0},
+    {"max", (PyCFunction)DVector2_max, METH_O, 0},
+    {"clamp", (PyCFunction)DVector2_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)DVector2_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)DVector2_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)DVector2_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -1223,26 +1333,55 @@ DVector2Array_getbufferproc(DVector2Array *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "DVector2 is read only");
+        PyErr_SetString(PyExc_BufferError, "DVector2 is read only");
         view->obj = 0;
         return -1;
     }
+
+        if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+        {
+            PyErr_SetString(PyExc_BufferError, "DVector2 cannot be made Fortran contiguous");
+            view->obj = 0;
+            return -1;
+        }
+
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(double) * 2 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(double);
-    view->format = "d";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        2
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(double) * 2,
-        sizeof(double)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "d";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            2
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(double) * 2,
+            sizeof(double)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1273,9 +1412,59 @@ DVector2Array_pointer(DVector2Array *self, void *)
 }
 
 
+static PyObject *
+DVector2Array_size(DVector2Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(double) * 2 * self->length);
+}
+
+
 static PyGetSetDef DVector2Array_PyGetSetDef[] = {
     {"pointer", (getter)DVector2Array_pointer, 0, 0, 0},
+    {"size", (getter)DVector2Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+DVector2Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(double);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(double) * 2))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(double), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(double) * 2);
+
+    auto *result = (DVector2Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new DVector2Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef DVector2Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)DVector2Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1292,6 +1481,7 @@ static PyType_Slot DVector2Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)DVector2Array_releasebufferproc},
     {Py_tp_getset, (void*)DVector2Array_PyGetSetDef},
     {Py_tp_members, (void*)DVector2Array_PyMemberDef},
+    {Py_tp_methods, (void*)DVector2Array_PyMethodDef},
     {0, 0},
 };
 

@@ -5,11 +5,10 @@ from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, execute_shader,
                             PrimitiveMode, Shader, WindowRenderTarget)
-from gamut.math import UVector2
+from gamut.math import (FMatrix4, FVector2, FVector2Array, FVector3,
+                        FVector3Array, UVector2)
 # python
 from datetime import timedelta
-# pyglm
-from glm import array, mat4, rotate, vec2, vec3
 
 
 class Draw(TimerExpired):
@@ -27,23 +26,23 @@ class App(Application):
         self.window_render_target = WindowRenderTarget(self.window)
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
-        self.triangle_transform = mat4(1)
+        self.triangle_transform = FMatrix4(1)
         self.triangle_attributes = BufferViewMap({
             "pos": BufferView(
-                Buffer(array(
-                    vec2(-.5, -.5),
-                    vec2(0, .5),
-                    vec2(.5, -.5),
-                ).to_bytes()),
-                vec2,
+                Buffer(FVector2Array(
+                    FVector2(-.5, -.5),
+                    FVector2(0, .5),
+                    FVector2(.5, -.5),
+                )),
+                FVector2,
             ),
             "color": BufferView(
-                Buffer(array(
-                    vec3(1, 0, 0),
-                    vec3(0, 1, 0),
-                    vec3(0, 0, 1),
-                ).to_bytes()),
-                vec3,
+                Buffer(FVector3Array(
+                    FVector3(1, 0, 0),
+                    FVector3(0, 1, 0),
+                    FVector3(0, 0, 1),
+                )),
+                FVector3,
             ),
         })
 
@@ -63,7 +62,10 @@ class App(Application):
             color=Color(0, 0, 0),
             depth=0,
         )
-        self.triangle_transform *= rotate(.02, vec3(0, 0, -1))
+        self.triangle_transform = self.triangle_transform.rotate(
+            .02,
+            FVector3(0, 0, -1)
+        )
         execute_shader(
             self.window_render_target,
             self.shader,

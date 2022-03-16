@@ -8,10 +8,10 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector4, UVector2
 # python
+import ctypes
 from typing import Final, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -49,15 +49,15 @@ def draw_fullscreen_quad(
         shader,
         PrimitiveMode.TRIANGLE_FAN,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-1, -1),
-                glm.vec2(-1, 1),
-                glm.vec2(1, 1),
-                glm.vec2(1, -1),
-            ).to_bytes()), glm.vec2)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-1, -1),
+                FVector2(-1, 1),
+                FVector2(1, 1),
+                FVector2(1, -1),
+            )), FVector2)
         }), {
-            "color": glm.vec4(*color),
-            "depth": glm.float32(depth),
+            "color": FVector4(*color),
+            "depth": ctypes.c_float(depth),
         },
         index_range=(0, 4),
         depth_test=depth_test,
@@ -87,8 +87,8 @@ def test_no_depth_buffer_fail(
     depth_write: bool
 ) -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget(
@@ -120,8 +120,8 @@ def test_no_depth_buffer_okay(
     expected_color: Color
 ) -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget(
@@ -174,8 +174,8 @@ def test_basic(
     expected_depth: float
 ) -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget(

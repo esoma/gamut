@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.846035 from codegen/math/templates/_pod.hpp
+// generated 2022-03-16 16:23:50.409191 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I32_HPP
 #define GAMUT_MATH_I32_HPP
@@ -217,12 +217,33 @@ I32Array_getbufferproc(I32Array *self, Py_buffer *view, int flags)
     view->len = sizeof(int32_t) * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(int32_t);
-    view->format = "=i";
     view->ndim = 1;
-    view->shape = new Py_ssize_t[1] {
-        (Py_ssize_t)self->length
-    };
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "=i";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[1] {
+            (Py_ssize_t)self->length
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -253,9 +274,59 @@ I32Array_pointer(I32Array *self, void *)
 }
 
 
+static PyObject *
+I32Array_size(I32Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(int32_t) * self->length);
+}
+
+
 static PyGetSetDef I32Array_PyGetSetDef[] = {
     {"pointer", (getter)I32Array_pointer, 0, 0, 0},
+    {"size", (getter)I32Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+I32Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(int32_t);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % sizeof(int32_t))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(int32_t), view_length);
+        return 0;
+    }
+    auto array_length = view_length / sizeof(int32_t);
+
+    auto *result = (I32Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->pod = new int32_t[array_length];
+        std::memcpy(result->pod, view.buf, view_length);
+    }
+    else
+    {
+        result->pod = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef I32Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)I32Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -272,6 +343,7 @@ static PyType_Slot I32Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)I32Array_releasebufferproc},
     {Py_tp_getset, (void*)I32Array_PyGetSetDef},
     {Py_tp_members, (void*)I32Array_PyMemberDef},
+    {Py_tp_methods, (void*)I32Array_PyMethodDef},
     {0, 0},
 };
 

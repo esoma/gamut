@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.743535 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 16:23:50.297691 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_UVECTOR3_HPP
 #define GAMUT_MATH_UVECTOR3_HPP
@@ -558,11 +558,32 @@ UVector3_getbufferproc(UVector3 *self, Py_buffer *view, int flags)
     view->len = sizeof(unsigned int) * 3;
     view->readonly = 1;
     view->itemsize = sizeof(unsigned int);
-    view->format = "I";
     view->ndim = 1;
-    static Py_ssize_t shape = 3;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "I";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 3;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -851,7 +872,64 @@ static PyMemberDef UVector3_PyMemberDef[] = {
 
 
 static PyObject *
-UVector3_get_limits(UVector3 *self, void *)
+UVector3_min(UVector3 *self, PyObject *min)
+{
+    auto c_min = pyobject_to_c_unsigned_int(min);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::min(*self->glm, c_min);
+    UVector3 *result = (UVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new UVector3Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+UVector3_max(UVector3 *self, PyObject *max)
+{
+    auto c_max = pyobject_to_c_unsigned_int(max);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::max(*self->glm, c_max);
+    UVector3 *result = (UVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new UVector3Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+UVector3_clamp(UVector3 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+    auto c_min = pyobject_to_c_unsigned_int(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    auto c_max = pyobject_to_c_unsigned_int(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto cls = Py_TYPE(self);
+    auto vector = glm::clamp(*self->glm, c_min, c_max);
+    UVector3 *result = (UVector3 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new UVector3Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+UVector3_get_size(UVector3 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(unsigned int) * 3);
+}
+
+
+static PyObject *
+UVector3_get_limits(UVector3 *cls, void *)
 {
     auto c_min = std::numeric_limits<unsigned int>::lowest();
     auto c_max = std::numeric_limits<unsigned int>::max();
@@ -876,9 +954,41 @@ UVector3_get_limits(UVector3 *self, void *)
 }
 
 
+static PyObject *
+UVector3_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(unsigned int) * 3;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (UVector3 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new UVector3Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static PyMethodDef UVector3_PyMethodDef[] = {
 
+    {"min", (PyCFunction)UVector3_min, METH_O, 0},
+    {"max", (PyCFunction)UVector3_max, METH_O, 0},
+    {"clamp", (PyCFunction)UVector3_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)UVector3_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)UVector3_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)UVector3_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -1139,26 +1249,55 @@ UVector3Array_getbufferproc(UVector3Array *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "UVector3 is read only");
+        PyErr_SetString(PyExc_BufferError, "UVector3 is read only");
         view->obj = 0;
         return -1;
     }
+
+        if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+        {
+            PyErr_SetString(PyExc_BufferError, "UVector3 cannot be made Fortran contiguous");
+            view->obj = 0;
+            return -1;
+        }
+
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(unsigned int) * 3 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(unsigned int);
-    view->format = "I";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        3
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(unsigned int) * 3,
-        sizeof(unsigned int)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "I";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            3
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(unsigned int) * 3,
+            sizeof(unsigned int)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1189,9 +1328,59 @@ UVector3Array_pointer(UVector3Array *self, void *)
 }
 
 
+static PyObject *
+UVector3Array_size(UVector3Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(unsigned int) * 3 * self->length);
+}
+
+
 static PyGetSetDef UVector3Array_PyGetSetDef[] = {
     {"pointer", (getter)UVector3Array_pointer, 0, 0, 0},
+    {"size", (getter)UVector3Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+UVector3Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(unsigned int);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(unsigned int) * 3))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(unsigned int), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(unsigned int) * 3);
+
+    auto *result = (UVector3Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new UVector3Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef UVector3Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)UVector3Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1208,6 +1397,7 @@ static PyType_Slot UVector3Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)UVector3Array_releasebufferproc},
     {Py_tp_getset, (void*)UVector3Array_PyGetSetDef},
     {Py_tp_members, (void*)UVector3Array_PyMemberDef},
+    {Py_tp_methods, (void*)UVector3Array_PyMethodDef},
     {0, 0},
 };
 

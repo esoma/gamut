@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.845035 from codegen/math/templates/_pod.hpp
+// generated 2022-03-16 16:23:50.408191 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U8_HPP
 #define GAMUT_MATH_U8_HPP
@@ -217,12 +217,33 @@ U8Array_getbufferproc(U8Array *self, Py_buffer *view, int flags)
     view->len = sizeof(uint8_t) * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(uint8_t);
-    view->format = "=B";
     view->ndim = 1;
-    view->shape = new Py_ssize_t[1] {
-        (Py_ssize_t)self->length
-    };
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "=B";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[1] {
+            (Py_ssize_t)self->length
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -253,9 +274,59 @@ U8Array_pointer(U8Array *self, void *)
 }
 
 
+static PyObject *
+U8Array_size(U8Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(uint8_t) * self->length);
+}
+
+
 static PyGetSetDef U8Array_PyGetSetDef[] = {
     {"pointer", (getter)U8Array_pointer, 0, 0, 0},
+    {"size", (getter)U8Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+U8Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(uint8_t);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % sizeof(uint8_t))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(uint8_t), view_length);
+        return 0;
+    }
+    auto array_length = view_length / sizeof(uint8_t);
+
+    auto *result = (U8Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->pod = new uint8_t[array_length];
+        std::memcpy(result->pod, view.buf, view_length);
+    }
+    else
+    {
+        result->pod = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef U8Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)U8Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -272,6 +343,7 @@ static PyType_Slot U8Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)U8Array_releasebufferproc},
     {Py_tp_getset, (void*)U8Array_PyGetSetDef},
     {Py_tp_members, (void*)U8Array_PyMemberDef},
+    {Py_tp_methods, (void*)U8Array_PyMethodDef},
     {0, 0},
 };
 

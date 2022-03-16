@@ -23,18 +23,14 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut.glmhelp import (F32Vector4, I32Vector1, I32Vector2, I32Vector3,
-                           ivec1_exact, ivec2_exact, ivec3_exact, vec4_exact)
+from gamut.math import FVector4, UVector1, UVector2, UVector3
 # python
+import ctypes
+from ctypes import c_uint32
 from ctypes import sizeof as c_sizeof
 from enum import Enum
 from math import prod
 from typing import Any, Final, Union
-# pyglm
-import glm
-from glm import ivec1, ivec2, ivec3, uint32
-from glm import value_ptr as glm_value_ptr
-from glm import vec4
 # pyopengl
 import OpenGL.GL
 from OpenGL.GL import (GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY,
@@ -62,7 +58,7 @@ class Texture:
         type: TextureType,
         *,
         anisotropy: float = 1.0,
-        size: I32Vector1 | I32Vector2 | I32Vector3,
+        size: UVector1 | UVector2 | UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -106,7 +102,7 @@ class Texture:
             )
             assert wrap is not None
         if wrap_color is None:
-            wrap_color = vec4(0, 0, 0, 0)
+            wrap_color = FVector4(0, 0, 0, 0)
         # check anisotropy
         if anisotropy is None:
             anisotropy = 1.0
@@ -115,18 +111,16 @@ class Texture:
         except (TypeError, ValueError):
             raise TypeError('anisotropy must be float')
         # check the size
-        try:
-            if size_length == 1:
-                size = ivec1_exact(size)
-            elif size_length == 2:
-                size = ivec2_exact(size)
-            else:
-                assert size_length == 3
-                size = ivec3_exact(size)
-        except TypeError:
-            raise TypeError(
-                f'size must be a sequence of {size_length} integers'
-            )
+        if size_length == 1:
+            if not isinstance(size, UVector1):
+                raise TypeError('size must be UVector1')
+        elif size_length == 2:
+            if not isinstance(size, UVector2):
+                raise TypeError('size must be UVector2')
+        else:
+            assert size_length == 3
+            if not isinstance(size, UVector3):
+                raise TypeError('size must be UVector3')
         for value, name in zip(size, ['width', 'height', 'depth']):
             if value < 1:
                 raise ValueError(f'{name} must be > 0')
@@ -154,15 +148,13 @@ class Texture:
             if not isinstance(wrap_value, TextureWrap):
                 raise TypeError(f'wrap items must be {TextureWrap}')
         # check wrap color
-        try:
-            wrap_color = vec4_exact(wrap_color)
-        except TypeError:
-            raise TypeError('wrap_color must be a sequence of four floats')
+        if not isinstance(wrap_color, FVector4):
+            raise TypeError('wrap color must be FVector4')
         # check components and get the number of components for the given
         if components == TextureComponents.DS:
-            if data_type != uint32:
+            if data_type != c_uint32:
                 raise ValueError(
-                    f'data_type must be {uint32} when '
+                    f'data_type must be {c_uint32} when '
                     f'components is {TextureComponents.DS}'
                 )
             gl_data_type = GL_UNSIGNED_INT_24_8
@@ -201,7 +193,7 @@ class Texture:
         self._gl = glGenTextures(1)
         glBindTexture(self._gl_target, self._gl)
         if type == TextureType.NORMAL_2D:
-            assert isinstance(size, ivec2)
+            assert isinstance(size, UVector2)
             glTexImage2D(
                 self._gl_target,
                 0,
@@ -211,7 +203,7 @@ class Texture:
                 components.value, gl_data_type, data
             )
         elif type == TextureType.ARRAY_2D:
-            assert isinstance(size, ivec3)
+            assert isinstance(size, UVector3)
             glTexImage3D(
                 self._gl_target,
                 0,
@@ -221,7 +213,7 @@ class Texture:
                 components.value, gl_data_type, data
             )
         elif type == TextureType.NORMAL_CUBE:
-            assert isinstance(size, ivec2)
+            assert isinstance(size, UVector2)
             for i, gl_cube_target in enumerate(GL_TEXTURE_CUBE_MAP_TARGETS):
                 glTexImage2D(
                     gl_cube_target,
@@ -250,7 +242,7 @@ class Texture:
         glTexParameterfv(
             self._gl_target,
             GL_TEXTURE_BORDER_COLOR,
-            glm_value_ptr(wrap_color)
+            wrap_color.pointer
         )
         # set anisotropy
         if anisotropy > 1.0 and glInitTextureFilterAnisotropicEXT():
@@ -282,8 +274,8 @@ class Texture:
         return self._components
 
     @property
-    def size(self) -> ivec1 | ivec2 | ivec3:
-        return type(self._size)(self._size) # type: ignore
+    def size(self) -> UVector1 | UVector2 | UVector3:
+        return self._size
 
     @property
     def is_open(self) -> bool:
@@ -366,13 +358,13 @@ TEXTURE_COMPONENTS_COUNT: Final = {
 
 
 TEXTURE_DATA_TYPE_TO_GL_DATA_TYPE: Final[dict[type[TextureDataType], Any]] = {
-    glm.uint8: OpenGL.GL.GL_UNSIGNED_BYTE,
-    glm.int8: OpenGL.GL.GL_BYTE,
-    glm.uint16: OpenGL.GL.GL_UNSIGNED_SHORT,
-    glm.int16: OpenGL.GL.GL_SHORT,
-    glm.uint32: OpenGL.GL.GL_UNSIGNED_INT,
-    glm.int32: OpenGL.GL.GL_INT,
-    glm.float32: OpenGL.GL.GL_FLOAT,
+    ctypes.c_uint8: OpenGL.GL.GL_UNSIGNED_BYTE,
+    ctypes.c_int8: OpenGL.GL.GL_BYTE,
+    ctypes.c_uint16: OpenGL.GL.GL_UNSIGNED_SHORT,
+    ctypes.c_int16: OpenGL.GL.GL_SHORT,
+    ctypes.c_uint32: OpenGL.GL.GL_UNSIGNED_INT,
+    ctypes.c_int32: OpenGL.GL.GL_INT,
+    ctypes.c_float: OpenGL.GL.GL_FLOAT,
 }
 
 
@@ -397,10 +389,10 @@ TEXTURE_FILTER_TO_GL_MAG_FILTER: Final = {
 
 
 TextureDataType = Union[
-    glm.uint8, glm.int8,
-    glm.uint16, glm.int16,
-    glm.uint32, glm.int32,
-    glm.float32
+    ctypes.c_uint8, ctypes.c_int8,
+    ctypes.c_uint16, ctypes.c_int16,
+    ctypes.c_uint32, ctypes.c_int32,
+    ctypes.c_float
 ]
 
 

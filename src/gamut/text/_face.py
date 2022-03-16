@@ -12,7 +12,7 @@ __all__ = [
 # gamut
 from ._break import break_never, BreakMethod
 # gamut
-from gamut.math import IVector2, Vector2
+from gamut.math import IVector2, UVector2, Vector2
 # python
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -72,12 +72,12 @@ class Face:
         self,
         width: Optional[float] = None,
         height: Optional[float] = None,
-        dpi: IVector2 = IVector2(72, 72),
+        dpi: UVector2 = UVector2(72, 72),
     ) -> FontSize:
         if width is None and height is None:
             raise TypeError('width or height must be specified')
-        if not isinstance(dpi, IVector2):
-            raise TypeError('dpi must be IVector2')
+        if not isinstance(dpi, UVector2):
+            raise TypeError('dpi must be UVector2')
         return PointFontSize(
             self,
             0 if width is None else (width * 64),
@@ -146,7 +146,7 @@ class Face:
             ))
         return RenderedGlyph(
             data,
-            IVector2(width, height),
+            UVector2(width, height),
             IVector2(ft_glyph.bitmap_left, -ft_glyph.bitmap_top),
             format,
         )
@@ -238,7 +238,7 @@ class RenderedGlyph:
     def __init__(
         self,
         data: bytes,
-        size: IVector2,
+        size: UVector2,
         bearing: IVector2,
         format: RenderedGlyphFormat
     ):
@@ -252,7 +252,7 @@ class RenderedGlyph:
         return self._data
 
     @property
-    def size(self) -> IVector2:
+    def size(self) -> UVector2:
         return self._size
 
     @property
@@ -269,7 +269,7 @@ class FontSize(ABC):
     def __init__(self, face: Face):
         self._face = face
         self._use()
-        self._nominal_size = IVector2(
+        self._nominal_size = UVector2(
             self._face._ft_face.size.x_ppem,
             self._face._ft_face.size.y_ppem,
         )
@@ -301,7 +301,7 @@ class FontSize(ABC):
         return self._face
 
     @property
-    def nominal_size(self) -> IVector2:
+    def nominal_size(self) -> UVector2:
         return self._nominal_size
 
 
@@ -312,7 +312,7 @@ class PointFontSize(FontSize):
         face: Face,
         width: Optional[float],
         height: Optional[float],
-        dpi: IVector2
+        dpi: UVector2
     ):
         self._args = (width, height, dpi.x, dpi.y)
         super().__init__(face)

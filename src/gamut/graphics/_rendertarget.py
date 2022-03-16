@@ -19,13 +19,12 @@ from ._texture import Texture, TextureComponents
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
 from gamut._window import get_sdl_window_from_window, Window
+from gamut.math import UVector1, UVector2
 # python
 from ctypes import byref as c_byref
 from ctypes import c_int
 from enum import Enum
 from typing import Optional, Sequence, Union
-# pyglm
-from glm import ivec1, ivec2
 # pyopengl
 from OpenGL.GL import (GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT,
                        GL_DEPTH24_STENCIL8, GL_DEPTH_ATTACHMENT,
@@ -75,10 +74,10 @@ class TextureRenderTarget:
         if len(sizes) != 1:
             raise ValueError('all textures must have the same size')
         target_size = list(sizes)[0]
-        if isinstance(target_size, ivec1):
-            self._size = ivec2(target_size.x, 1)
+        if isinstance(target_size, UVector1):
+            self._size = UVector2(target_size.x, 1)
         else:
-            self._size = ivec2(target_size.x, target_size.y)
+            self._size = UVector2(target_size.x, target_size.y)
 
         self._gl = glGenFramebuffers(1)
         glBindFramebuffer(GL_FRAMEBUFFER, self._gl)
@@ -154,7 +153,7 @@ class TextureRenderTarget:
         return self._depth_stencil
 
     @property
-    def size(self) -> ivec2:
+    def size(self) -> UVector2:
         return self._size
 
     @property
@@ -175,12 +174,12 @@ class WindowRenderTarget:
         self._gl_context = release_gl_context(self._gl_context)
 
     @property
-    def size(self) -> ivec2:
+    def size(self) -> UVector2:
         sdl_window = get_sdl_window_from_window(self._window)
         x = c_int()
         y = c_int()
         SDL_GL_GetDrawableSize(sdl_window, c_byref(x), c_byref(y))
-        return ivec2(x.value, y.value)
+        return UVector2(x.value, y.value)
 
     @property
     def window(self) -> Window:

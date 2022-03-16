@@ -5,10 +5,10 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             PrimitiveMode, read_color_from_render_target,
                             Shader, Texture2d, TextureComponents,
                             TextureRenderTarget, WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector4, UVector2
 # python
+import ctypes
 from typing import Final, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -43,14 +43,14 @@ def draw_fullscreen_quad(
         shader,
         PrimitiveMode.TRIANGLE_FAN,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-1, -1),
-                glm.vec2(-1, 1),
-                glm.vec2(1, 1),
-                glm.vec2(1, -1),
-            ).to_bytes()), glm.vec2)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-1, -1),
+                FVector2(-1, 1),
+                FVector2(1, 1),
+                FVector2(1, -1),
+            )), FVector2)
         }), {
-            "color": glm.vec4(*color),
+            "color": FVector4(*color),
         },
         index_range=(0, 4),
         color_write=color_write,
@@ -63,8 +63,8 @@ def draw_fullscreen_quad(
 @pytest.mark.parametrize("alpha", [True, False])
 def test_mask(red: bool, green: bool, blue: bool, alpha: bool) -> None:
     texture = Texture2d(
-        (10, 10),
-        TextureComponents.RGBA, glm.uint8,
+        UVector2(10, 10),
+        TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
@@ -79,7 +79,7 @@ def test_mask(red: bool, green: bool, blue: bool, alpha: bool) -> None:
         (red, green, blue, alpha)
     )
 
-    expected_color = glm.vec4(
+    expected_color = FVector4(
         .2 if red else 0,
         .4 if green else 0,
         .6 if blue else 0,

@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.math import IVector2, Vector2
+from gamut.math import IVector2, UVector2, Vector2
 from gamut.text import (BreakChunk, Face, Font, PositionedGlyph,
                         RenderedGlyphFormat)
 # python
@@ -255,11 +255,11 @@ def test_render_glyph(
         )
     )
 
-    assert isinstance(rendered_glyph.size, IVector2)
+    assert isinstance(rendered_glyph.size, UVector2)
     assert rendered_glyph.size.x > 0
     assert rendered_glyph.size.y > 0
     rendered_glyph_size = rendered_glyph.size
-    rendered_glyph_size += IVector2(1, 1)
+    rendered_glyph_size += UVector2(1, 1)
     assert rendered_glyph.size != rendered_glyph_size
 
     assert isinstance(rendered_glyph.bearing, IVector2)

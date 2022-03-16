@@ -1,46 +1,19 @@
 
 # gamut
 from gamut import TransformNode
+from gamut.math import FMatrix4, FVector3
 # python
 from typing import Any, Optional
-# pyglm
-from glm import mat4, translate, vec3
 # pytest
 import pytest
 
 
 def test_defaults() -> None:
     node: TransformNode[Any] = TransformNode()
-    assert node.local_transform == mat4(1)
-    assert node.transform == mat4(1)
+    assert node.local_transform == FMatrix4(1)
+    assert node.transform == FMatrix4(1)
     assert node.parent is None
     assert node.children == set()
-
-
-def test_local_transform_identity() -> None:
-    local_transform = mat4(1)
-    node: TransformNode[Any] = TransformNode(local_transform=local_transform)
-    assert node.local_transform == local_transform
-    assert node.local_transform is not local_transform
-
-    local_transform[0][0] = 4
-    assert node.local_transform != local_transform
-    assert node.local_transform is not local_transform
-
-    local_transform = node.local_transform
-    local_transform[0][0] = 4
-    assert node.local_transform != local_transform
-    assert node.local_transform is not local_transform
-
-
-def test_transform_identity() -> None:
-    node: TransformNode[Any] = TransformNode()
-    transform = node.transform
-    assert node.transform is not transform
-
-    transform[0][0] = 4
-    assert node.transform != transform
-    assert node.transform is not transform
 
 
 @pytest.mark.parametrize("translation_x", [-8, 0, 7])
@@ -51,9 +24,8 @@ def test_transform_no_parent(
     translation_y: int,
     translation_z: int,
 ) -> None:
-    local_transform = translate(
-        mat4(1),
-        vec3(translation_x, translation_y, translation_z),
+    local_transform = FMatrix4(1).translate(
+        FVector3(translation_x, translation_y, translation_z)
     )
     node: TransformNode[Any] = TransformNode(local_transform=local_transform)
     assert node.local_transform == local_transform
@@ -68,51 +40,44 @@ def test_transform_parent(
     translation_y: int,
     translation_z: int,
 ) -> None:
-    local_transform = translate(
-        mat4(1),
-        vec3(translation_x, translation_y, translation_z),
+    local_transform = FMatrix4(1).translate(
+        FVector3(translation_x, translation_y, translation_z)
     )
 
     parent: TransformNode[Any] = TransformNode(local_transform=local_transform)
     node = TransformNode(local_transform=local_transform, parent=parent)
     assert node.local_transform == local_transform
-    assert node.transform == local_transform * local_transform
+    assert node.transform == local_transform @ local_transform
 
 
 def test_add_parent() -> None:
-    node_local_transform = translate(
-        mat4(1),
-        vec3(1, 1, 1),
-    )
+    node_local_transform = FMatrix4(1).translate(FVector3(1))
     node: TransformNode[Any] = TransformNode(
         local_transform=node_local_transform
     )
     assert node.local_transform == node_local_transform
     assert node.transform == node_local_transform
 
-    parent_local_transform = translate(
-        mat4(1),
-        vec3(-2, -2, -2),
-    )
+    parent_local_transform = FMatrix4(1).translate(FVector3(-2))
     parent: TransformNode[Any] = TransformNode(
         local_transform=parent_local_transform
     )
     node.parent = parent
     assert node.local_transform == node_local_transform
-    assert node.transform == parent_local_transform * node_local_transform
+    assert node.transform == parent_local_transform @ node_local_transform
     assert parent.children == {node}
 
 
 def test_remove_parent() -> None:
-    parent_local_transform = translate(mat4(1), vec3(-2, -2, -2))
+    parent_local_transform = FMatrix4(1).translate(FVector3(-2))
     parent: TransformNode[Any] = TransformNode(
         local_transform=parent_local_transform
     )
 
-    node_local_transform = translate(mat4(1), vec3(1, 1, 1))
+    node_local_transform = FMatrix4(1).translate(FVector3(1, 1, 1))
     node = TransformNode(local_transform=node_local_transform, parent=parent)
     assert node.local_transform == node_local_transform
-    assert node.transform == parent_local_transform * node_local_transform
+    assert node.transform == parent_local_transform @ node_local_transform
 
     node.parent = None
     assert node.local_transform == node_local_transform
@@ -124,10 +89,10 @@ def test_change_parent_local_transform() -> None:
     parent: TransformNode[Any] = TransformNode()
     node = TransformNode(parent=parent)
 
-    assert parent.transform == mat4(1)
-    assert node.transform == mat4(1)
+    assert parent.transform == FMatrix4(1)
+    assert node.transform == FMatrix4(1)
 
-    parent.local_transform = translate(mat4(1), vec3(-2, 1, 99))
+    parent.local_transform = FMatrix4(1).translate(FVector3(-2, 1, 99))
     assert parent.transform == parent.local_transform
     assert node.transform == parent.local_transform
 

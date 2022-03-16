@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.746035 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 16:23:50.300192 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR4_HPP
 #define GAMUT_MATH_BVECTOR4_HPP
@@ -539,11 +539,32 @@ BVector4_getbufferproc(BVector4 *self, Py_buffer *view, int flags)
     view->len = sizeof(bool) * 4;
     view->readonly = 1;
     view->itemsize = sizeof(bool);
-    view->format = "?";
     view->ndim = 1;
-    static Py_ssize_t shape = 4;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "?";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 4;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -861,7 +882,64 @@ static PyMemberDef BVector4_PyMemberDef[] = {
 
 
 static PyObject *
-BVector4_get_limits(BVector4 *self, void *)
+BVector4_min(BVector4 *self, PyObject *min)
+{
+    auto c_min = pyobject_to_c_bool(min);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::min(*self->glm, c_min);
+    BVector4 *result = (BVector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new BVector4Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+BVector4_max(BVector4 *self, PyObject *max)
+{
+    auto c_max = pyobject_to_c_bool(max);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::max(*self->glm, c_max);
+    BVector4 *result = (BVector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new BVector4Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+BVector4_clamp(BVector4 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+    auto c_min = pyobject_to_c_bool(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    auto c_max = pyobject_to_c_bool(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto cls = Py_TYPE(self);
+    auto vector = glm::clamp(*self->glm, c_min, c_max);
+    BVector4 *result = (BVector4 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new BVector4Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+BVector4_get_size(BVector4 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(bool) * 4);
+}
+
+
+static PyObject *
+BVector4_get_limits(BVector4 *cls, void *)
 {
     auto c_min = std::numeric_limits<bool>::lowest();
     auto c_max = std::numeric_limits<bool>::max();
@@ -886,9 +964,41 @@ BVector4_get_limits(BVector4 *self, void *)
 }
 
 
+static PyObject *
+BVector4_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(bool) * 4;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (BVector4 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new BVector4Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static PyMethodDef BVector4_PyMethodDef[] = {
 
+    {"min", (PyCFunction)BVector4_min, METH_O, 0},
+    {"max", (PyCFunction)BVector4_max, METH_O, 0},
+    {"clamp", (PyCFunction)BVector4_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)BVector4_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)BVector4_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)BVector4_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -1149,26 +1259,55 @@ BVector4Array_getbufferproc(BVector4Array *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "BVector4 is read only");
+        PyErr_SetString(PyExc_BufferError, "BVector4 is read only");
         view->obj = 0;
         return -1;
     }
+
+        if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+        {
+            PyErr_SetString(PyExc_BufferError, "BVector4 cannot be made Fortran contiguous");
+            view->obj = 0;
+            return -1;
+        }
+
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(bool) * 4 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(bool);
-    view->format = "?";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        4
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(bool) * 4,
-        sizeof(bool)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "?";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            4
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(bool) * 4,
+            sizeof(bool)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1199,9 +1338,59 @@ BVector4Array_pointer(BVector4Array *self, void *)
 }
 
 
+static PyObject *
+BVector4Array_size(BVector4Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(bool) * 4 * self->length);
+}
+
+
 static PyGetSetDef BVector4Array_PyGetSetDef[] = {
     {"pointer", (getter)BVector4Array_pointer, 0, 0, 0},
+    {"size", (getter)BVector4Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+BVector4Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(bool);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(bool) * 4))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(bool), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(bool) * 4);
+
+    auto *result = (BVector4Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new BVector4Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef BVector4Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)BVector4Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1218,6 +1407,7 @@ static PyType_Slot BVector4Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)BVector4Array_releasebufferproc},
     {Py_tp_getset, (void*)BVector4Array_PyGetSetDef},
     {Py_tp_members, (void*)BVector4Array_PyMemberDef},
+    {Py_tp_methods, (void*)BVector4Array_PyMethodDef},
     {0, 0},
 };
 

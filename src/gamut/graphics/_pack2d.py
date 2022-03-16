@@ -4,30 +4,31 @@ from __future__ import annotations
 __all__ = ['Pack2d', 'Packed2dItem']
 
 # gamut
-from gamut.glmhelp import I32Vector2, ivec2_exact
+from gamut.math import UVector2
 # python
 from typing import Optional
-# pyglm
-from glm import ivec2
 
 
 class Pack2d:
 
     def __init__(
         self,
-        bin_size: I32Vector2,
+        bin_size: UVector2,
         *,
         max_bins: Optional[int] = None,
     ):
-        self._bin_size = ivec2_exact(bin_size)
+        if not isinstance(bin_size, UVector2):
+            raise TypeError('bin size must be UVector2')
+        self._bin_size = bin_size
         self._max_bins = max_bins
-        self._items: list[ivec2] = []
+        self._items: list[UVector2] = []
         self._unpacked_indexes: set[int] = set()
         self._bins: list[Bin] = []
         self._map: dict[int, Packed2dItem] = {}
 
-    def add(self, size: I32Vector2) -> int:
-        size = ivec2_exact(size)
+    def add(self, size: UVector2) -> int:
+        if not isinstance(size, UVector2):
+            raise TypeError('size must be UVector2')
         id = len(self._items)
         self._items.append(size)
         self._unpacked_indexes.add(id)
@@ -39,7 +40,7 @@ class Pack2d:
         for i, unit in unpacked:
             for bin_index, bin in enumerate(self._bins):
                 position = bin.add(unit)
-                if position:
+                if position is not None:
                     break
             else:
                 if self._max_bins is not None:
@@ -50,7 +51,7 @@ class Pack2d:
                 bin = Bin(self._bin_size)
                 self._bins.append(bin)
                 position = bin.add(unit)
-                if not position:
+                if position is None:
                     raise RuntimeError('item is too large to pack')
             self._map[i] = Packed2dItem(bin_index, position)
         self._unpacked_indexes = set()
@@ -68,7 +69,7 @@ class Pack2d:
 
 class Packed2dItem:
 
-    def __init__(self, bin: int, position: ivec2):
+    def __init__(self, bin: int, position: UVector2):
         self._bin = bin
         self._position = position
 
@@ -85,8 +86,8 @@ class Packed2dItem:
         return self._bin
 
     @property
-    def position(self) -> ivec2:
-        return ivec2(self._position)
+    def position(self) -> UVector2:
+        return self._position
 
     def __repr__(self) -> str:
         return (
@@ -97,11 +98,11 @@ class Packed2dItem:
 
 class Bin:
 
-    def __init__(self, max_size: ivec2):
+    def __init__(self, max_size: UVector2):
         self.max_size = max_size
         self.lines: list[list[int]] = []
 
-    def add(self, size: ivec2) -> Optional[ivec2]:
+    def add(self, size: UVector2) -> Optional[UVector2]:
         # early out for things that are larger than the max bin size
         if size[0] > self.max_size[0] or size[1] > self.max_size[1]:
             return None
@@ -114,11 +115,11 @@ class Bin:
             # only the last line can have its height expanded
             if (i + 1) < len(self.lines) and size[1] > line_height:
                 continue
-            position = ivec2(line_width, bottom - line_height)
+            position = UVector2(line_width, bottom - line_height)
             self.lines[i] = [line_width + size[0], max(line_height, size[1])]
             return position
         # thing is too vertically large to fit in a new line
         if bottom + size[1] > self.max_size[1]:
             return None
         self.lines.append(list(size))
-        return ivec2(0, bottom)
+        return UVector2(0, bottom)

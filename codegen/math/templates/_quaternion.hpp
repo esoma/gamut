@@ -412,11 +412,32 @@ static int
     view->len = sizeof({{ c_type }}) * 4;
     view->readonly = 1;
     view->itemsize = sizeof({{ c_type }});
-    view->format = "{{ struct_format }}";
     view->ndim = 1;
-    static Py_ssize_t shape = 4;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "{{ struct_format }}";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 4;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -561,6 +582,33 @@ static PyObject *
 }
 
 
+static PyObject *
+{{ name }}_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof({{ c_type }}) * 4;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new {{ name }}Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static {{ name }} *
 {{ name }}_normalize({{ name }} *self, void*)
 {
@@ -620,6 +668,13 @@ static {{ name }} *
 }
 
 
+static PyObject *
+{{ name }}_get_size({{ name }} *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof({{ c_type }}) * 4);
+}
+
+
 static PyMethodDef {{ name }}_PyMethodDef[] = {
     {"cross", (PyCFunction){{ name }}_cross, METH_O, 0},
     {"to_matrix3", (PyCFunction){{ name }}_to_matrix3, METH_NOARGS, 0},
@@ -628,6 +683,8 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
     {"inverse", (PyCFunction){{ name }}_inverse, METH_NOARGS, 0},
     {"rotate", (PyCFunction){{ name }}_rotate, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction){{ name }}_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction){{ name }}_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -886,22 +943,49 @@ static int
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "{{ name }} cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof({{ c_type }}) * 4* self->length;
     view->readonly = 1;
     view->itemsize = sizeof({{ c_type }});
-    view->format = "{{ struct_format }}";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        4
-    };
-    static Py_ssize_t strides[] = {
-        sizeof({{ c_type }}) * 4,
-        sizeof({{ c_type }})
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "{{ struct_format }}";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            4
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof({{ c_type }}) * 4,
+            sizeof({{ c_type }})
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -932,9 +1016,58 @@ static PyObject *
 }
 
 
+static PyObject *
+{{ name }}Array_size({{ name }}Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof({{ c_type }}) * 4 * self->length);
+}
+
 static PyGetSetDef {{ name }}Array_PyGetSetDef[] = {
     {"pointer", (getter){{ name }}Array_pointer, 0, 0, 0},
+    {"size", (getter){{ name }}Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+{{ name }}Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof({{ c_type }});
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof({{ c_type }}) * 4))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof({{ c_type }}), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof({{ c_type }}) * 4);
+
+    auto *result = ({{ name }}Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new {{ name }}Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef {{ name }}Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction){{ name }}Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -951,6 +1084,7 @@ static PyType_Slot {{ name }}Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*){{ name }}Array_releasebufferproc},
     {Py_tp_getset, (void*){{ name }}Array_PyGetSetDef},
     {Py_tp_members, (void*){{ name }}Array_PyMemberDef},
+    {Py_tp_methods, (void*){{ name }}Array_PyMethodDef},
     {0, 0},
 };
 

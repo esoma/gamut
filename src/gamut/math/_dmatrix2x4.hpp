@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.799535 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 16:23:50.360191 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X4_HPP
 #define GAMUT_MATH_DMATRIX2X4_HPP
@@ -763,20 +763,47 @@ DMatrix2x4_getbufferproc(DMatrix2x4 *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "DMatrix2x4 cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
     view->len = sizeof(double) * 8;
     view->readonly = 1;
     view->itemsize = sizeof(double);
-    view->format = "d";
     view->ndim = 2;
-    static Py_ssize_t shape[] = { 2, 4 };
-    view->shape = &shape[0];
-    static Py_ssize_t strides[] = {
-        sizeof(double) * 4,
-        sizeof(double)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "d";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape[] = { 2, 4 };
+        view->shape = &shape[0];
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(double) * 4,
+            sizeof(double)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -858,6 +885,13 @@ DMatrix2x4_transpose(DMatrix2x4 *self, void*)
 
 
 static PyObject *
+DMatrix2x4_get_size(DMatrix2x4 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(double) * 8);
+}
+
+
+static PyObject *
 DMatrix2x4_get_limits(DMatrix2x4 *self, void *)
 {
     auto c_min = std::numeric_limits<double>::lowest();
@@ -883,12 +917,64 @@ DMatrix2x4_get_limits(DMatrix2x4 *self, void *)
 }
 
 
+static PyObject *
+DMatrix2x4_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(double) * 8;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (DMatrix2x4 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new DMatrix2x4Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+
+    static FMatrix2x4 *
+    DMatrix2x4_to_fmatrix(DMatrix2x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FMatrix2x4_PyTypeObject;
+
+        auto *result = (FMatrix2x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FMatrix2x4Glm(*self->glm);
+        return result;
+    }
+
+
+
+
+
+
 static PyMethodDef DMatrix2x4_PyMethodDef[] = {
+
+
+
+        {"to_fmatrix", (PyCFunction)DMatrix2x4_to_fmatrix, METH_NOARGS, 0},
 
 
     {"get_row", (PyCFunction)DMatrix2x4_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)DMatrix2x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix2x4_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)DMatrix2x4_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)DMatrix2x4_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -1150,24 +1236,51 @@ DMatrix2x4Array_getbufferproc(DMatrix2x4Array *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "DMatrix2x4 cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(double) * 8 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(double);
-    view->format = "d";
     view->ndim = 3;
-    view->shape = new Py_ssize_t[3] {
-        (Py_ssize_t)self->length,
-        2,
-        4
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(double) * 8,
-        sizeof(double) * 4,
-        sizeof(double)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "d";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[3] {
+            (Py_ssize_t)self->length,
+            2,
+            4
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(double) * 8,
+            sizeof(double) * 4,
+            sizeof(double)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1198,9 +1311,59 @@ DMatrix2x4Array_pointer(DMatrix2x4Array *self, void *)
 }
 
 
+static PyObject *
+DMatrix2x4Array_size(DMatrix2x4Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(double) * 8 * self->length);
+}
+
+
 static PyGetSetDef DMatrix2x4Array_PyGetSetDef[] = {
     {"pointer", (getter)DMatrix2x4Array_pointer, 0, 0, 0},
+    {"size", (getter)DMatrix2x4Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+DMatrix2x4Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(double);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(double) * 8))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(double), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(double) * 8);
+
+    auto *result = (DMatrix2x4Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new DMatrix2x4Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef DMatrix2x4Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)DMatrix2x4Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1217,6 +1380,7 @@ static PyType_Slot DMatrix2x4Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)DMatrix2x4Array_releasebufferproc},
     {Py_tp_getset, (void*)DMatrix2x4Array_PyGetSetDef},
     {Py_tp_members, (void*)DMatrix2x4Array_PyMemberDef},
+    {Py_tp_methods, (void*)DMatrix2x4Array_PyMethodDef},
     {0, 0},
 };
 

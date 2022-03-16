@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.720535 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 16:23:50.272692 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I8VECTOR1_HPP
 #define GAMUT_MATH_I8VECTOR1_HPP
@@ -478,11 +478,32 @@ I8Vector1_getbufferproc(I8Vector1 *self, Py_buffer *view, int flags)
     view->len = sizeof(int8_t) * 1;
     view->readonly = 1;
     view->itemsize = sizeof(int8_t);
-    view->format = "=b";
     view->ndim = 1;
-    static Py_ssize_t shape = 1;
-    view->shape = &shape;
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "=b";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape = 1;
+        view->shape = &shape;
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -709,7 +730,64 @@ static PyMemberDef I8Vector1_PyMemberDef[] = {
 
 
 static PyObject *
-I8Vector1_get_limits(I8Vector1 *self, void *)
+I8Vector1_min(I8Vector1 *self, PyObject *min)
+{
+    auto c_min = pyobject_to_c_int8_t(min);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::min(*self->glm, c_min);
+    I8Vector1 *result = (I8Vector1 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new I8Vector1Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+I8Vector1_max(I8Vector1 *self, PyObject *max)
+{
+    auto c_max = pyobject_to_c_int8_t(max);
+    if (PyErr_Occurred()){ return 0; }
+    auto cls = Py_TYPE(self);
+    auto vector = glm::max(*self->glm, c_max);
+    I8Vector1 *result = (I8Vector1 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new I8Vector1Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+I8Vector1_clamp(I8Vector1 *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+    auto c_min = pyobject_to_c_int8_t(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    auto c_max = pyobject_to_c_int8_t(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto cls = Py_TYPE(self);
+    auto vector = glm::clamp(*self->glm, c_min, c_max);
+    I8Vector1 *result = (I8Vector1 *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new I8Vector1Glm(vector);
+    return (PyObject *)result;
+}
+
+
+static PyObject *
+I8Vector1_get_size(I8Vector1 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(int8_t) * 1);
+}
+
+
+static PyObject *
+I8Vector1_get_limits(I8Vector1 *cls, void *)
 {
     auto c_min = std::numeric_limits<int8_t>::lowest();
     auto c_max = std::numeric_limits<int8_t>::max();
@@ -734,9 +812,41 @@ I8Vector1_get_limits(I8Vector1 *self, void *)
 }
 
 
+static PyObject *
+I8Vector1_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(int8_t) * 1;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (I8Vector1 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new I8Vector1Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
 static PyMethodDef I8Vector1_PyMethodDef[] = {
 
+    {"min", (PyCFunction)I8Vector1_min, METH_O, 0},
+    {"max", (PyCFunction)I8Vector1_max, METH_O, 0},
+    {"clamp", (PyCFunction)I8Vector1_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)I8Vector1_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)I8Vector1_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)I8Vector1_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -999,26 +1109,48 @@ I8Vector1Array_getbufferproc(I8Vector1Array *self, Py_buffer *view, int flags)
 {
     if (flags & PyBUF_WRITABLE)
     {
-        PyErr_SetString(PyExc_TypeError, "I8Vector1 is read only");
+        PyErr_SetString(PyExc_BufferError, "I8Vector1 is read only");
         view->obj = 0;
         return -1;
     }
+
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(int8_t) * 1 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(int8_t);
-    view->format = "=b";
     view->ndim = 2;
-    view->shape = new Py_ssize_t[2] {
-        (Py_ssize_t)self->length,
-        1
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(int8_t) * 1,
-        sizeof(int8_t)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "=b";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[2] {
+            (Py_ssize_t)self->length,
+            1
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(int8_t) * 1,
+            sizeof(int8_t)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1049,9 +1181,59 @@ I8Vector1Array_pointer(I8Vector1Array *self, void *)
 }
 
 
+static PyObject *
+I8Vector1Array_size(I8Vector1Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(int8_t) * 1 * self->length);
+}
+
+
 static PyGetSetDef I8Vector1Array_PyGetSetDef[] = {
     {"pointer", (getter)I8Vector1Array_pointer, 0, 0, 0},
+    {"size", (getter)I8Vector1Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+I8Vector1Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(int8_t);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(int8_t) * 1))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(int8_t), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(int8_t) * 1);
+
+    auto *result = (I8Vector1Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new I8Vector1Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef I8Vector1Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)I8Vector1Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1068,6 +1250,7 @@ static PyType_Slot I8Vector1Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)I8Vector1Array_releasebufferproc},
     {Py_tp_getset, (void*)I8Vector1Array_PyGetSetDef},
     {Py_tp_members, (void*)I8Vector1Array_PyMemberDef},
+    {Py_tp_methods, (void*)I8Vector1Array_PyMethodDef},
     {0, 0},
 };
 

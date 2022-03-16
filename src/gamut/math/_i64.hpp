@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.847535 from codegen/math/templates/_pod.hpp
+// generated 2022-03-16 16:23:50.410691 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I64_HPP
 #define GAMUT_MATH_I64_HPP
@@ -217,12 +217,33 @@ I64Array_getbufferproc(I64Array *self, Py_buffer *view, int flags)
     view->len = sizeof(int64_t) * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(int64_t);
-    view->format = "=q";
     view->ndim = 1;
-    view->shape = new Py_ssize_t[1] {
-        (Py_ssize_t)self->length
-    };
-    view->strides = &view->itemsize;
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "=q";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[1] {
+            (Py_ssize_t)self->length
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        view->strides = &view->itemsize;
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -253,9 +274,59 @@ I64Array_pointer(I64Array *self, void *)
 }
 
 
+static PyObject *
+I64Array_size(I64Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(int64_t) * self->length);
+}
+
+
 static PyGetSetDef I64Array_PyGetSetDef[] = {
     {"pointer", (getter)I64Array_pointer, 0, 0, 0},
+    {"size", (getter)I64Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+I64Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(int64_t);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % sizeof(int64_t))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(int64_t), view_length);
+        return 0;
+    }
+    auto array_length = view_length / sizeof(int64_t);
+
+    auto *result = (I64Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->pod = new int64_t[array_length];
+        std::memcpy(result->pod, view.buf, view_length);
+    }
+    else
+    {
+        result->pod = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef I64Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)I64Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -272,6 +343,7 @@ static PyType_Slot I64Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)I64Array_releasebufferproc},
     {Py_tp_getset, (void*)I64Array_PyGetSetDef},
     {Py_tp_members, (void*)I64Array_PyMemberDef},
+    {Py_tp_methods, (void*)I64Array_PyMethodDef},
     {0, 0},
 };
 

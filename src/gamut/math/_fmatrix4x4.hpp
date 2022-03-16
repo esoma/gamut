@@ -1,5 +1,5 @@
 
-// generated 2022-03-14 18:08:34.811034 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-16 16:23:50.371692 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X4_HPP
 #define GAMUT_MATH_FMATRIX4X4_HPP
@@ -1051,20 +1051,47 @@ FMatrix4x4_getbufferproc(FMatrix4x4 *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "FMatrix4x4 cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = glm::value_ptr(*self->glm);
     view->obj = (PyObject *)self;
     view->len = sizeof(float) * 16;
     view->readonly = 1;
     view->itemsize = sizeof(float);
-    view->format = "f";
     view->ndim = 2;
-    static Py_ssize_t shape[] = { 4, 4 };
-    view->shape = &shape[0];
-    static Py_ssize_t strides[] = {
-        sizeof(float) * 4,
-        sizeof(float)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "f";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        static Py_ssize_t shape[] = { 4, 4 };
+        view->shape = &shape[0];
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(float) * 4,
+            sizeof(float)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1220,6 +1247,19 @@ static PyGetSetDef FMatrix4x4_PyGetSetDef[] = {
         return result;
     }
 
+    static FMatrix3x3 *
+    FMatrix4x4_to_matrix3(FMatrix4x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FMatrix3x3_PyTypeObject;
+
+        auto *result = (FMatrix3x3 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FMatrix3x3Glm(*self->glm);
+        return result;
+    }
+
 
 
 static FVector4 *
@@ -1268,6 +1308,13 @@ FMatrix4x4_transpose(FMatrix4x4 *self, void*)
 
 
 static PyObject *
+FMatrix4x4_get_size(FMatrix4x4 *cls, void *)
+{
+    return PyLong_FromSize_t(sizeof(float) * 16);
+}
+
+
+static PyObject *
 FMatrix4x4_get_limits(FMatrix4x4 *self, void *)
 {
     auto c_min = std::numeric_limits<float>::lowest();
@@ -1293,6 +1340,52 @@ FMatrix4x4_get_limits(FMatrix4x4 *self, void *)
 }
 
 
+static PyObject *
+FMatrix4x4_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(float) * 16;
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length < expected_size)
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer of size %zd, got %zd", expected_size, view_length);
+        return 0;
+    }
+
+    auto *result = (FMatrix4x4 *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->glm = new FMatrix4x4Glm();
+    std::memcpy(result->glm, view.buf, expected_size);
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+
+
+
+
+    static DMatrix4x4 *
+    FMatrix4x4_to_dmatrix(FMatrix4x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DMatrix4x4_PyTypeObject;
+
+        auto *result = (DMatrix4x4 *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DMatrix4x4Glm(*self->glm);
+        return result;
+    }
+
+
+
 static PyMethodDef FMatrix4x4_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)FMatrix4x4_inverse, METH_NOARGS, 0},
@@ -1302,10 +1395,17 @@ static PyMethodDef FMatrix4x4_PyMethodDef[] = {
         {"scale", (PyCFunction)FMatrix4x4_scale, METH_FASTCALL, 0},
         {"translate", (PyCFunction)FMatrix4x4_translate, METH_FASTCALL, 0},
         {"perspective", (PyCFunction)FMatrix4x4_perspective, METH_CLASS | METH_FASTCALL, 0},
+        {"to_matrix3", (PyCFunction)FMatrix4x4_to_matrix3, METH_NOARGS, 0},
+
+
+
+        {"to_dmatrix", (PyCFunction)FMatrix4x4_to_dmatrix, METH_NOARGS, 0},
 
     {"get_row", (PyCFunction)FMatrix4x4_get_row, METH_FASTCALL, 0},
     {"transpose", (PyCFunction)FMatrix4x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)FMatrix4x4_get_limits, METH_NOARGS | METH_STATIC, 0},
+    {"get_size", (PyCFunction)FMatrix4x4_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"from_buffer", (PyCFunction)FMatrix4x4_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
@@ -1567,24 +1667,51 @@ FMatrix4x4Array_getbufferproc(FMatrix4x4Array *self, Py_buffer *view, int flags)
         view->obj = 0;
         return -1;
     }
+    if ((!(flags & PyBUF_C_CONTIGUOUS)) && flags & PyBUF_F_CONTIGUOUS)
+    {
+        PyErr_SetString(PyExc_BufferError, "FMatrix4x4 cannot be made Fortran contiguous");
+        view->obj = 0;
+        return -1;
+    }
     view->buf = self->glm;
     view->obj = (PyObject *)self;
     view->len = sizeof(float) * 16 * self->length;
     view->readonly = 1;
     view->itemsize = sizeof(float);
-    view->format = "f";
     view->ndim = 3;
-    view->shape = new Py_ssize_t[3] {
-        (Py_ssize_t)self->length,
-        4,
-        4
-    };
-    static Py_ssize_t strides[] = {
-        sizeof(float) * 16,
-        sizeof(float) * 4,
-        sizeof(float)
-    };
-    view->strides = &strides[0];
+    if (flags & PyBUF_FORMAT)
+    {
+        view->format = "f";
+    }
+    else
+    {
+        view->format = 0;
+    }
+    if (flags & PyBUF_ND)
+    {
+        view->shape = new Py_ssize_t[3] {
+            (Py_ssize_t)self->length,
+            4,
+            4
+        };
+    }
+    else
+    {
+        view->shape = 0;
+    }
+    if (flags & PyBUF_STRIDES)
+    {
+        static Py_ssize_t strides[] = {
+            sizeof(float) * 16,
+            sizeof(float) * 4,
+            sizeof(float)
+        };
+        view->strides = &strides[0];
+    }
+    else
+    {
+        view->strides = 0;
+    }
     view->suboffsets = 0;
     view->internal = 0;
     Py_INCREF(self);
@@ -1615,9 +1742,59 @@ FMatrix4x4Array_pointer(FMatrix4x4Array *self, void *)
 }
 
 
+static PyObject *
+FMatrix4x4Array_size(FMatrix4x4Array *self, void *)
+{
+    return PyLong_FromSize_t(sizeof(float) * 16 * self->length);
+}
+
+
 static PyGetSetDef FMatrix4x4Array_PyGetSetDef[] = {
     {"pointer", (getter)FMatrix4x4Array_pointer, 0, 0, 0},
+    {"size", (getter)FMatrix4x4Array_size, 0, 0, 0},
     {0, 0, 0, 0, 0}
+};
+
+
+static PyObject *
+FMatrix4x4Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
+{
+    static Py_ssize_t expected_size = sizeof(float);
+    Py_buffer view;
+    if (PyObject_GetBuffer(buffer, &view, PyBUF_SIMPLE) == -1){ return 0; }
+    auto view_length = view.len;
+    if (view_length % (sizeof(float) * 16))
+    {
+        PyBuffer_Release(&view);
+        PyErr_Format(PyExc_BufferError, "expected buffer evenly divisible by %zd, got %zd", sizeof(float), view_length);
+        return 0;
+    }
+    auto array_length = view_length / (sizeof(float) * 16);
+
+    auto *result = (FMatrix4x4Array *)cls->tp_alloc(cls, 0);
+    if (!result)
+    {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+    result->length = array_length;
+    if (array_length > 0)
+    {
+        result->glm = new FMatrix4x4Glm[array_length];
+        std::memcpy(result->glm, view.buf, view_length);
+    }
+    else
+    {
+        result->glm = 0;
+    }
+    PyBuffer_Release(&view);
+    return (PyObject *)result;
+}
+
+
+static PyMethodDef FMatrix4x4Array_PyMethodDef[] = {
+    {"from_buffer", (PyCFunction)FMatrix4x4Array_from_buffer, METH_O | METH_CLASS, 0},
+    {0, 0, 0, 0}
 };
 
 
@@ -1634,6 +1811,7 @@ static PyType_Slot FMatrix4x4Array_PyType_Slots [] = {
     {Py_bf_releasebuffer, (void*)FMatrix4x4Array_releasebufferproc},
     {Py_tp_getset, (void*)FMatrix4x4Array_PyGetSetDef},
     {Py_tp_members, (void*)FMatrix4x4Array_PyMemberDef},
+    {Py_tp_methods, (void*)FMatrix4x4Array_PyMethodDef},
     {0, 0},
 };
 

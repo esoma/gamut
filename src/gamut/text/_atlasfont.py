@@ -11,15 +11,14 @@ from ._font import Font
 from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
                             create_quad_uv_array, Pack2d, PrimitiveMode,
                             Texture2d, TextureComponents)
-from gamut.math import (FMatrix4, FVector3, FVector4, FVector4Array, IVector2,
-                        Vector2)
+from gamut.math import (FMatrix4, FVector2, FVector3, FVector4, FVector4Array,
+                        IVector2, UVector2, Vector2)
 # python
+from ctypes import c_uint8
 from typing import Final, Iterable, Optional, Union
 from weakref import ref
 # pillow
 from PIL import Image as PilImage
-# pyglm
-from glm import uint8, vec2, vec4
 
 GLYPH_FORMAT_TO_PIL_MODE: Final = {
     RenderedGlyphFormat.ALPHA: 'L',
@@ -44,13 +43,13 @@ class AtlasFont(Font):
         size: FontSize,
         format: RenderedGlyphFormat,
         *,
-        texture_size: IVector2 = IVector2(512, 512),
+        texture_size: UVector2 = UVector2(512, 512),
         padding: int = 1,
     ):
         super().__init__(size)
         self._format = format
-        if not isinstance(texture_size, IVector2):
-            raise TypeError('texture size must be IVector2')
+        if not isinstance(texture_size, UVector2):
+            raise TypeError('texture size must be UVector2')
         self._texture_size = texture_size
         self._padding = padding
         self._glyph_map: dict[int, AtlasGlyph] = {}
@@ -90,12 +89,12 @@ class AtlasFont(Font):
             )
             canvas.paste(
                 glyph_canvas,
-                tuple(packed.position + IVector2(self._padding, self._padding))
+                tuple(packed.position + UVector2(self._padding))
             )
         texture = Texture2d(
             self._texture_size,
             GLYPH_FORMAT_TO_TEXTURE_MODE[self._format],
-            uint8,
+            c_uint8,
             canvas.tobytes()
         )
         try:
@@ -107,7 +106,7 @@ class AtlasFont(Font):
     def _map_glyph(self, glyph_index: int) -> AtlasGlyph:
         assert glyph_index not in self._glyph_map
         rendered_glyph = self.render_glyph(glyph_index)
-        pack_index = self._pack.add(IVector2(
+        pack_index = self._pack.add(UVector2(
             rendered_glyph.size[0] + (self._padding * 2),
             rendered_glyph.size[1] + (self._padding * 2)
         ))
@@ -119,7 +118,7 @@ class AtlasFont(Font):
             self,
             IVector2(rendered_glyph.bearing[0], -rendered_glyph.bearing[1]),
             packed.bin,
-            IVector2(
+            UVector2(
                 packed.position[0] + self._padding,
                 packed.position[1] + self._padding
             ),
@@ -170,10 +169,9 @@ class AtlasFont(Font):
                 PrimitiveMode.TRIANGLE,
                 left=0, bottom=0,
             )
-            glyph_position = FVector4Array(
-                *(transform @ FVector4(*p) for p in glyph_position)
+            pos += FVector4Array(
+                *(transform @ p for p in glyph_position)
             )
-            pos += bytes(glyph_position)
             # generate the vertex uvs
             top_left_uv, bottom_right_uv = atlas_glyph.uv
             uvs += create_quad_uv_array(
@@ -182,12 +180,12 @@ class AtlasFont(Font):
                 right=bottom_right_uv.x,
                 bottom=bottom_right_uv.y,
                 top=top_left_uv.y
-            ).to_bytes()
+            )
 
         return {
             texture: (
-                BufferView(Buffer(bytes(pos)), vec4),
-                BufferView(Buffer(bytes(uvs)), vec2),
+                BufferView(Buffer(bytes(pos)), FVector4),
+                BufferView(Buffer(bytes(uvs)), FVector2),
             )
             for texture, (pos, uvs) in texture_buffers.items()
         }
@@ -213,7 +211,7 @@ class AtlasFont(Font):
         return self._format
 
     @property
-    def texture_size(self) -> IVector2:
+    def texture_size(self) -> UVector2:
         return self._texture_size
 
     @property
@@ -228,8 +226,8 @@ class AtlasGlyph:
         font: AtlasFont,
         bearing: IVector2,
         texture_index: int,
-        position: IVector2,
-        size: IVector2,
+        position: UVector2,
+        size: UVector2,
         *,
         data: Optional[bytes] = None,
     ):
@@ -238,11 +236,11 @@ class AtlasGlyph:
             raise TypeError('bearing must be IVector2')
         self._bearing = bearing
         self._texture_index = texture_index
-        if not isinstance(position, IVector2):
-            raise TypeError('position must be IVector2')
+        if not isinstance(position, UVector2):
+            raise TypeError('position must be UVector2')
         self._position = position
-        if not isinstance(size, IVector2):
-            raise TypeError('size must be IVector2')
+        if not isinstance(size, UVector2):
+            raise TypeError('size must be UVector2')
         self._size = size
 
     def __repr__(self) -> str:
@@ -275,11 +273,11 @@ class AtlasGlyph:
         return self._bearing
 
     @property
-    def position(self) -> IVector2:
+    def position(self) -> UVector2:
         return self._position
 
     @property
-    def size(self) -> IVector2:
+    def size(self) -> UVector2:
         return self._size
 
     @property

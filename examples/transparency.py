@@ -6,17 +6,18 @@ from gamut.graphics import (BlendFactor, Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
                             execute_shader, FaceCull, Image, PrimitiveMode,
                             Shader, WindowRenderTarget)
-from gamut.math import UVector2
+from gamut.math import (FMatrix4, FVector2, FVector2Array, FVector3,
+                        FVector3Array, FVector4, U8Array, UVector2)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
                               MouseConnected, MouseMoved)
 # python
+import ctypes
 from datetime import timedelta
+from math import cos, pi, radians, sin
 from pathlib import Path
 from typing import Any, Final
 # pyglm
-from glm import (array, cos, cross, float32, lookAt, mat4, normalize,
-                 perspective, pi, radians, rotate, scale, sin, uint8, vec2,
-                 vec3)
+from glm import lookAt
 
 RESOURCES: Final = Path(__file__).parent / 'resources'
 
@@ -45,53 +46,53 @@ class App(Application):
             mouse = (await MouseConnected).mouse
         mouse.relative = True
 
-        self.player_position = vec3(0, 0, 10)
-        self.player_yaw = -pi() / 2
+        self.player_position = FVector3(0, 0, 10)
+        self.player_yaw = -pi / 2
         self.player_pitch = 0.0
         self.player_node: TransformNode[Any] = TransformNode()
-        self.projection = perspective(radians(45), 1, .1, 100)
+        self.projection = FMatrix4.perspective(radians(45), 1, .1, 100)
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
-        self.cube_transform = mat4(1)
-        self.outer_cube_transform = scale(vec3(2, 2, 2))
+        self.cube_transform = FMatrix4(1)
+        self.outer_cube_transform = FMatrix4(1).scale(FVector3(2, 2, 2))
         self.cube_attributes = BufferViewMap({
             "pos": BufferView(
-                Buffer(array(
-                    vec3(-1, -1, -1),
-                    vec3(1, -1, -1),
-                    vec3(1, 1, -1),
-                    vec3(-1, 1, -1),
-                    vec3(-1, -1, 1),
-                    vec3(1, -1, 1),
-                    vec3(1, 1, 1),
-                    vec3(-1, 1, 1),
-                ).to_bytes()),
-                vec3,
+                Buffer(FVector3Array(
+                    FVector3(-1, -1, -1),
+                    FVector3(1, -1, -1),
+                    FVector3(1, 1, -1),
+                    FVector3(-1, 1, -1),
+                    FVector3(-1, -1, 1),
+                    FVector3(1, -1, 1),
+                    FVector3(1, 1, 1),
+                    FVector3(-1, 1, 1),
+                )),
+                FVector3,
             ),
             "uv": BufferView(
-                Buffer(array(
-                    vec2(0, 0),
-                    vec2(1, 0),
-                    vec2(1, 1),
-                    vec2(0, 1),
-                    vec2(1, 1),
-                    vec2(0, 1),
-                    vec2(0, 0),
-                    vec2(1, 0),
-                ).to_bytes()),
-                vec2
+                Buffer(FVector2Array(
+                    FVector2(0, 0),
+                    FVector2(1, 0),
+                    FVector2(1, 1),
+                    FVector2(0, 1),
+                    FVector2(1, 1),
+                    FVector2(0, 1),
+                    FVector2(0, 0),
+                    FVector2(1, 0),
+                )),
+                FVector2
             )
         })
         self.cube_index_buffer_view = BufferView(
-            Buffer(array.from_numbers(uint8,
+            Buffer(U8Array(
                 0, 2, 1, 2, 0, 3,
                 4, 5, 6, 6, 7, 4,
                 1, 6, 5, 6, 1, 2,
                 0, 7, 3, 7, 0, 4,
                 0, 5, 4, 5, 0, 1,
                 3, 7, 6, 6, 2, 3,
-            ).to_bytes()),
-            uint8
+            )),
+            ctypes.c_uint8
         )
         self.cube_texture = Image(RESOURCES / 'yee.jpg').to_texture()
 
@@ -118,15 +119,14 @@ class App(Application):
             self.player_pitch -= mouse_moved.delta[1] * .005
 
     async def draw(self, draw: Draw) -> None:
-        player_direction = normalize(vec3(
+        player_direction = FVector3(
             cos(self.player_yaw) * cos(self.player_pitch),
             sin(self.player_pitch),
             sin(self.player_yaw) * cos(self.player_pitch)
-        ))
-        player_cross_direction = normalize(cross(
-            player_direction,
-            vec3(0, 1, 0)
-        ))
+        ).normalize()
+        player_cross_direction = player_direction.cross(
+            FVector3(0, 1, 0)
+        ).normalize()
 
         player_frame_speed = (
             (draw.when - draw.previous).total_seconds() /
@@ -143,16 +143,22 @@ class App(Application):
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
-        self.player_node.local_transform = lookAt(
-            self.player_position,
-            self.player_position + player_direction,
-            vec3(0, 1, 0),
-        )
+        self.player_node.local_transform = FMatrix4(*(
+            FVector4(*c) for c in
+            lookAt(
+                self.player_position,
+                self.player_position + player_direction,
+                FVector3(0, 1, 0),
+            )
+        ))
 
-        self.cube_transform = self.cube_transform * rotate(.02, vec3(1, 1, 1))
-        self.outer_cube_transform = (
-            self.outer_cube_transform *
-            rotate(-.04, vec3(1, 1, 1))
+        self.cube_transform = self.cube_transform.rotate(
+            .02,
+            FVector3(1, 1, 1)
+        )
+        self.outer_cube_transform = self.outer_cube_transform.rotate(
+            -.04,
+            FVector3(1, 1, 1)
         )
 
         clear_render_target(
@@ -167,10 +173,10 @@ class App(Application):
             self.cube_attributes,
             {
                 "camera_transform":
-                    self.projection * self.player_node.transform,
+                    self.projection @ self.player_node.transform,
                 "model_transform": self.cube_transform,
                 "tex": self.cube_texture,
-                "alpha": float32(1.0),
+                "alpha": ctypes.c_float(1.0),
             },
             index_buffer_view=self.cube_index_buffer_view,
             depth_write=True,
@@ -185,10 +191,10 @@ class App(Application):
             self.cube_attributes,
             {
                 "camera_transform":
-                    self.projection * self.player_node.transform,
+                    self.projection @ self.player_node.transform,
                 "model_transform": self.outer_cube_transform,
                 "tex": self.cube_texture,
-                "alpha": float32(.5),
+                "alpha": ctypes.c_float(.5),
             },
             index_buffer_view=self.cube_index_buffer_view,
             depth_write=True,

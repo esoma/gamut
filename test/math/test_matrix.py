@@ -918,7 +918,6 @@ class MatrixTest:
         with pytest.raises(TypeError):
             matrix.get_row(None)
 
-
     def test_perspective(self) -> None:
         if self.type != float or self.row_size != 4 or self.column_size != 4:
             with pytest.raises(AttributeError):
@@ -962,6 +961,101 @@ class MatrixTest:
         assert isclose(perspective[3][1], 0)
         assert isclose(perspective[3][2], -0.20020020008087158)
         assert isclose(perspective[3][3], 0)
+
+    def test_get_size(self) -> None:
+        assert self.cls.get_size() == (
+            struct.calcsize('=' + self.struct_format) *
+            self.row_size *
+            self.column_size
+        )
+
+    def test_array_size(self) -> None:
+        assert self.array_cls().size == 0
+        assert self.array_cls(self.cls()).size == (
+            struct.calcsize('=' + self.struct_format) *
+            self.row_size *
+            self.column_size
+        )
+        assert self.array_cls(self.cls(), self.cls()).size == (
+            struct.calcsize('=' + self.struct_format) *
+            self.row_size *
+            self.column_size *
+            2
+        )
+
+    def test_from_buffer(self) -> None:
+        for v in (
+            self.cls(),
+            self.cls(1),
+            self.cls(*range(self.component_count))
+        ):
+            bv = self.cls.from_buffer(v)
+            assert isinstance(bv, self.cls)
+            assert bv == v
+            assert self.cls.from_buffer(bytes(v)) == v
+
+        with pytest.raises(TypeError):
+            self.cls.from_buffer(None)
+        with pytest.raises(BufferError):
+            self.cls.from_buffer(b'')
+
+    def test_from_array_buffer(self) -> None:
+        for a in (
+            self.array_cls(),
+            self.array_cls(self.cls(1)),
+            self.array_cls(
+                self.cls(1),
+                self.cls(*range(self.component_count))
+            ),
+        ):
+            ba = self.array_cls.from_buffer(a)
+            assert isinstance(ba, self.array_cls)
+            assert ba == a
+            assert self.array_cls.from_buffer(bytes(a)) == a
+
+        with pytest.raises(TypeError):
+            self.array_cls.from_buffer(None)
+        with pytest.raises(BufferError):
+            self.array_cls.from_buffer(b'\x00')
+
+    def test_to_matrix3(self) -> None:
+        if self.row_size != 4 or self.column_size != 4:
+            with pytest.raises(AttributeError):
+                self.cls().to_matrix3
+            return
+
+        mat3_cls = globals()[f'{self.cls.__name__[0]}Matrix3x3']
+        assert isinstance(self.cls(1).to_matrix3(), mat3_cls)
+        assert self.cls(1).to_matrix3() == mat3_cls(1)
+        assert self.cls(*range(16)).to_matrix3() == mat3_cls(
+            0, 1, 2,
+            4, 5, 6,
+            8, 9, 10
+        )
+
+    def test_to_fmatrix(self) -> None:
+        if self.struct_format == 'f':
+            with pytest.raises(AttributeError):
+                self.cls().to_fmatrix
+            return
+        f_cls = globals()[f'F{self.cls.__name__[1:]}']
+        assert isinstance(self.cls(1).to_fmatrix(), f_cls)
+        assert self.cls(1).to_fmatrix() == f_cls(1)
+        assert self.cls(*range(self.component_count)).to_fmatrix() == (
+            f_cls(*range(self.component_count))
+        )
+
+    def test_to_dmatrix(self) -> None:
+        if self.struct_format == 'd':
+            with pytest.raises(AttributeError):
+                self.cls().to_dmatrix
+            return
+        d_cls = globals()[f'D{self.cls.__name__[1:]}']
+        assert isinstance(self.cls(1).to_dmatrix(), d_cls)
+        assert self.cls(1).to_dmatrix() == d_cls(1)
+        assert self.cls(*range(self.component_count)).to_dmatrix() == (
+            d_cls(*range(self.component_count))
+        )
 
 
 class TestFMatrix2x2(

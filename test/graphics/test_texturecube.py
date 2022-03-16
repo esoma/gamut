@@ -3,9 +3,9 @@ from __future__ import annotations
 # gamut
 from .test_texture import TextureTest
 # gamut
-from gamut.glmhelp import F32Vector4, I32Vector1, I32Vector2, I32Vector3
 from gamut.graphics import (MipmapSelection, TextureComponents, TextureCube,
                             TextureDataType, TextureFilter, TextureWrap)
+from gamut.math import FVector4, UVector1, UVector2, UVector3
 # python
 from typing import Any, cast
 
@@ -19,7 +19,7 @@ class TestTextureCube(TextureTest):
     @classmethod
     def create_texture(
         cls,
-        size: I32Vector1 | I32Vector2 | I32Vector3,
+        size: UVector1 | UVector2 | UVector3,
         components: TextureComponents,
         data_type: type[TextureDataType],
         data: bytes,
@@ -32,7 +32,7 @@ class TestTextureCube(TextureTest):
               tuple[TextureWrap, TextureWrap] |
               tuple[TextureWrap, TextureWrap, TextureWrap] |
               None = None,
-        wrap_color: F32Vector4 | None = None
+        wrap_color: FVector4 | None = None
     ) -> TextureCube:
         return TextureCube(
             cast(Any, size),

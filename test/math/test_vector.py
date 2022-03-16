@@ -1111,6 +1111,93 @@ class VectorTest:
         assert isclose(rotation.y, 0.7071067811865476)
         assert isclose(rotation.z, 0)
 
+    def test_get_size(self) -> None:
+        assert self.cls.get_size() == (
+            struct.calcsize('=' + self.struct_format) *
+            self.component_count
+        )
+
+    def test_array_size(self) -> None:
+        assert self.array_cls().size == 0
+        assert self.array_cls(self.cls()).size == (
+            struct.calcsize('=' + self.struct_format) *
+            self.component_count
+        )
+        assert self.array_cls(self.cls(), self.cls()).size == (
+            struct.calcsize('=' + self.struct_format) *
+            self.component_count * 2
+        )
+
+    def test_from_buffer(self) -> None:
+        for v in (
+            self.cls(),
+            self.cls(1),
+            self.cls(*range(self.component_count))
+        ):
+            bv = self.cls.from_buffer(v)
+            assert isinstance(bv, self.cls)
+            assert bv == v
+            assert self.cls.from_buffer(bytes(v)) == v
+
+        with pytest.raises(TypeError):
+            self.cls.from_buffer(None)
+        with pytest.raises(BufferError):
+            self.cls.from_buffer(b'')
+
+    def test_from_array_buffer(self) -> None:
+        for a in (
+            self.array_cls(),
+            self.array_cls(self.cls(1)),
+            self.array_cls(
+                self.cls(1),
+                self.cls(*range(self.component_count))
+            ),
+        ):
+            ba = self.array_cls.from_buffer(a)
+            assert isinstance(ba, self.array_cls)
+            assert ba == a
+            assert self.array_cls.from_buffer(bytes(a)) == a
+
+        with pytest.raises(TypeError):
+            self.array_cls.from_buffer(None)
+
+        if self.cls.get_size() > 1:
+            with pytest.raises(BufferError):
+                self.array_cls.from_buffer(b'\x00')
+
+    def test_min(self) -> None:
+        assert self.cls(1).min(0) == self.cls(0)
+        assert self.cls(1).min(1) == self.cls(1)
+
+        if self.type is not bool:
+            with pytest.raises((TypeError, OverflowError)):
+                self.cls(1).min(None)
+
+    def test_max(self) -> None:
+        assert self.cls(0).max(0) == self.cls(0)
+        assert self.cls(0).max(1) == self.cls(1)
+
+        if self.type is not bool:
+            with pytest.raises((TypeError, OverflowError)):
+                self.cls(1).max(None)
+
+    def test_clamp(self) -> None:
+        assert self.cls(1).clamp(0, 0) == self.cls(0)
+        assert self.cls(0).clamp(1, 1) == self.cls(1)
+        assert self.cls(0).clamp(0, 1) == self.cls(0)
+        assert self.cls(1).clamp(0, 1) == self.cls(1)
+
+        with pytest.raises(TypeError):
+            self.cls(1).clamp(1)
+        with pytest.raises(TypeError):
+            self.cls(1).clamp(1, 2, 3)
+
+        if self.type is not bool:
+            with pytest.raises((TypeError, OverflowError)):
+                self.cls(1).clamp(None, 1)
+            with pytest.raises((TypeError, OverflowError)):
+                self.cls(1).clamp(1, None)
+
 
 class TestBVector1(
     VectorTest,

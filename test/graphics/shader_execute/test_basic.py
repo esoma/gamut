@@ -8,12 +8,12 @@ from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from gamut.math import UVector2
+from gamut.math import (FVector2, FVector2Array, FVector4, U8Array, U16Array,
+                        U32Array, UVector2)
 # python
+import ctypes
 from pathlib import Path
 from typing import Any, Optional, Union
-# pyglm
-import glm
 # pytest
 import pytest
 
@@ -25,8 +25,8 @@ def create_render_target(
 ) -> Union[TextureRenderTarget, WindowRenderTarget]:
     if cls is TextureRenderTarget:
         texture = Texture2d(
-            (10, 10),
-            TextureComponents.RGBA, glm.uint8,
+            UVector2(10, 10),
+            TextureComponents.RGBA, ctypes.c_uint8,
             b'\x00' * 10 * 10 * 4
         )
         return TextureRenderTarget(
@@ -62,14 +62,14 @@ def test_not_a_uniform(
             shader,
             PrimitiveMode.POINT,
             BufferViewMap({
-                "xy": BufferView(Buffer(glm.array(
-                    glm.vec2(-.9, -.9),
-                    glm.vec2(-.9, .9),
-                    glm.vec2(.9, .9),
-                    glm.vec2(.9, -.9),
-                ).to_bytes()), glm.vec2)
+                "xy": BufferView(Buffer(FVector2Array(
+                    FVector2(-.9, -.9),
+                    FVector2(-.9, .9),
+                    FVector2(.9, .9),
+                    FVector2(.9, -.9),
+                )), FVector2)
             }), {
-                "color": glm.vec4()
+                "color": FVector4()
             },
             index_range=(0, 4),
         )
@@ -105,14 +105,14 @@ def test_ignored_uniform(
         shader,
         PrimitiveMode.POINT,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-.9, -.9),
-                glm.vec2(-.9, .9),
-                glm.vec2(.9, .9),
-                glm.vec2(.9, -.9),
-            ).to_bytes()), glm.vec2)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-.9, -.9),
+                FVector2(-.9, .9),
+                FVector2(.9, .9),
+                FVector2(.9, -.9),
+            )), FVector2)
         }), {
-            "color": glm.vec4()
+            "color": FVector4()
         },
         index_range=(0, 4),
     )
@@ -140,12 +140,12 @@ def test_missing_uniform(
             shader,
             PrimitiveMode.POINT,
             BufferViewMap({
-                "xy": BufferView(Buffer(glm.array(
-                    glm.vec2(-.9, -.9),
-                    glm.vec2(-.9, .9),
-                    glm.vec2(.9, .9),
-                    glm.vec2(.9, -.9),
-                ).to_bytes()), glm.vec2)
+                "xy": BufferView(Buffer(FVector2Array(
+                    FVector2(-.9, -.9),
+                    FVector2(-.9, .9),
+                    FVector2(.9, .9),
+                    FVector2(.9, -.9),
+                )), FVector2)
             }), {
             },
             index_range=(0, 4),
@@ -173,12 +173,12 @@ def test_not_an_attribute(
             shader,
             PrimitiveMode.POINT,
             BufferViewMap({
-                "xy": BufferView(Buffer(glm.array(
-                    glm.vec2(-.9, -.9),
-                    glm.vec2(-.9, .9),
-                    glm.vec2(.9, .9),
-                    glm.vec2(.9, -.9),
-                ).to_bytes()), glm.vec2)
+                "xy": BufferView(Buffer(FVector2Array(
+                    FVector2(-.9, -.9),
+                    FVector2(-.9, .9),
+                    FVector2(.9, .9),
+                    FVector2(.9, -.9),
+                )), FVector2)
             }), {
             },
             index_range=(0, 4),
@@ -214,12 +214,12 @@ def test_ignored_attribute(
         shader,
         PrimitiveMode.POINT,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-.9, -.9),
-                glm.vec2(-.9, .9),
-                glm.vec2(.9, .9),
-                glm.vec2(.9, -.9),
-            ).to_bytes()), glm.vec2)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-.9, -.9),
+                FVector2(-.9, .9),
+                FVector2(.9, .9),
+                FVector2(.9, -.9),
+            )), FVector2)
         }), {
         },
         index_range=(0, 4),
@@ -248,12 +248,12 @@ def test_missing_attribute(
             shader,
             PrimitiveMode.POINT,
             BufferViewMap({
-                "xy": BufferView(Buffer(glm.array(
-                    glm.vec2(-.9, -.9),
-                    glm.vec2(-.9, .9),
-                    glm.vec2(.9, .9),
-                    glm.vec2(.9, -.9),
-                ).to_bytes()), glm.vec2)
+                "xy": BufferView(Buffer(FVector2Array(
+                    FVector2(-.9, -.9),
+                    FVector2(-.9, .9),
+                    FVector2(.9, .9),
+                    FVector2(.9, -.9),
+                )), FVector2)
             }), {
             },
             index_range=(0, 4),
@@ -269,30 +269,30 @@ def test_missing_attribute(
     Color(0, 1, 0),
     Color(0, 0, 1),
 ])
-@pytest.mark.parametrize("index_type", [
-    None,
-    glm.uint8,
-    glm.uint16,
-    glm.uint32
+@pytest.mark.parametrize("index_type, index_array_type", [
+    (None, None),
+    (ctypes.c_uint8, U8Array),
+    (ctypes.c_uint16, U16Array),
+    (ctypes.c_uint32, U32Array)
 ])
 def test_basic(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
     primitive_mode: PrimitiveMode,
     color: Color,
     index_type: Any,
+    index_array_type: Any,
 ) -> None:
     render_target = create_render_target(cls)
     clear_render_target(render_target, color=Color(0, 0, 0, 0), depth=True)
 
     index_range: Optional[tuple[int, int]] = None
-    index_buffer_view: Optional[BufferView[glm.uint32]] = None
+    index_buffer_view: Optional[BufferView[ctypes.c_uint32]] = None
     if index_type is None:
         index_range = (0, 4)
     else:
-        index_buffer_view = BufferView(Buffer(glm.array.from_numbers(
-            index_type,
+        index_buffer_view = BufferView(Buffer(index_array_type(
             0, 1, 2, 3,
-        ).to_bytes()), index_type)
+        )), index_type)
 
     shader = Shader(
         vertex=b"""
@@ -318,14 +318,14 @@ def test_basic(
         shader,
         primitive_mode,
         BufferViewMap({
-            "xy": BufferView(Buffer(glm.array(
-                glm.vec2(-.9, -.9),
-                glm.vec2(-.9, .9),
-                glm.vec2(.9, .9),
-                glm.vec2(.9, -.9),
-            ).to_bytes()), glm.vec2)
+            "xy": BufferView(Buffer(FVector2Array(
+                FVector2(-.9, -.9),
+                FVector2(-.9, .9),
+                FVector2(.9, .9),
+                FVector2(.9, -.9),
+            )), FVector2)
         }), {
-            "color": glm.vec4(*color)
+            "color": FVector4(*color)
         },
         index_range=index_range,
         index_buffer_view=index_buffer_view
@@ -353,7 +353,7 @@ def test_index_buffer_view_invalid_type(
         }
         """
     )
-    index_buffer_view = BufferView(Buffer(), glm.int32)
+    index_buffer_view = BufferView(Buffer(), ctypes.c_int32)
     with pytest.raises(ValueError) as excinfo:
         execute_shader(
             render_target,
@@ -365,7 +365,7 @@ def test_index_buffer_view_invalid_type(
             index_buffer_view=index_buffer_view # type: ignore
         )
     assert str(excinfo.value) == (
-        f'view buffer with type {glm.int32} cannot be used for indexing'
+        f'view buffer with type {ctypes.c_int32} cannot be used for indexing'
     )
 
 
@@ -383,7 +383,7 @@ def test_index_buffer_view_different_stride(
         }
         """
     )
-    index_buffer_view = BufferView(Buffer(), glm.uint32, stride=1)
+    index_buffer_view = BufferView(Buffer(), ctypes.c_uint32, stride=1)
     with pytest.raises(ValueError) as excinfo:
         execute_shader(
             render_target,
@@ -413,7 +413,7 @@ def test_index_buffer_view_different_offset(
         }
         """
     )
-    index_buffer_view = BufferView(Buffer(), glm.uint32, offset=1)
+    index_buffer_view = BufferView(Buffer(), ctypes.c_uint32, offset=1)
     with pytest.raises(ValueError) as excinfo:
         execute_shader(
             render_target,
@@ -443,7 +443,11 @@ def test_index_buffer_view_with_instancing_divisor(
         }
         """
     )
-    index_buffer_view = BufferView(Buffer(), glm.uint32, instancing_divisor=1)
+    index_buffer_view = BufferView(
+        Buffer(),
+        ctypes.c_uint32,
+        instancing_divisor=1
+    )
     with pytest.raises(ValueError) as excinfo:
         execute_shader(
             render_target,
@@ -510,7 +514,7 @@ def test_both_index(
             }), {
             },
             index_range=(0, 4),
-            index_buffer_view=BufferView(Buffer(), glm.uint32),
+            index_buffer_view=BufferView(Buffer(), ctypes.c_uint32),
         )
     assert str(excinfo.value) == (
         f'both index_buffer_view and index_range cannot be supplied'
