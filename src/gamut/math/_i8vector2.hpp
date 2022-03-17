@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 20:45:19.086600 from codegen/math/templates/_vector.hpp
+// generated 2022-03-16 22:57:53.877157 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I8VECTOR2_HPP
 #define GAMUT_MATH_I8VECTOR2_HPP
@@ -13,6 +13,7 @@
 #include <structmember.h>
 // glm
 #include <glm/glm.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <glm/ext.hpp>
 // gamut
 #include "_modulestate.hpp"
