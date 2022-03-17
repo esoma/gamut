@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 22:57:54.014159 from codegen/math/templates/_pod.hpp
+// generated 2022-03-17 14:23:57.248069 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_U16_HPP
 #define GAMUT_MATH_U16_HPP
@@ -130,7 +130,7 @@ U16Array__len__(U16Array *self)
 
 
 static PyObject *
-U16Array__getitem__(U16Array *self, Py_ssize_t index)
+U16Array__sq_getitem__(U16Array *self, Py_ssize_t index)
 {
     if (index < 0 || index > (Py_ssize_t)self->length - 1)
     {
@@ -138,6 +138,59 @@ U16Array__getitem__(U16Array *self, Py_ssize_t index)
         return 0;
     }
     return c_uint16_t_to_pyobject(self->pod[index]);
+}
+
+
+static PyObject *
+U16Array__mp_getitem__(U16Array *self, PyObject *key)
+{
+    if (PySlice_Check(key))
+    {
+        Py_ssize_t start;
+        Py_ssize_t stop;
+        Py_ssize_t step;
+        Py_ssize_t length;
+        if (PySlice_GetIndicesEx(key, self->length, &start, &stop, &step, &length) != 0)
+        {
+            return 0;
+        }
+        auto cls = Py_TYPE(self);
+        auto *result = (U16Array *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        if (length == 0)
+        {
+            result->length = 0;
+            result->pod = 0;
+        }
+        else
+        {
+            result->length = length;
+            result->pod = new uint16_t[length];
+            for (Py_ssize_t i = 0; i < length; i++)
+            {
+                result->pod[i] = self->pod[start + (i * step)];
+            }
+        }
+        return (PyObject *)result;
+    }
+    else if (PyLong_Check(key))
+    {
+        auto index = PyLong_AsSsize_t(key);
+        if (PyErr_Occurred()){ return 0; }
+        if (index < 0)
+        {
+            index = (Py_ssize_t)self->length + index;
+        }
+        if (index < 0 || index > (Py_ssize_t)self->length - 1)
+        {
+            PyErr_Format(PyExc_IndexError, "index out of range");
+            return 0;
+        }
+
+        return c_uint16_t_to_pyobject(self->pod[index]);
+    }
+    PyErr_Format(PyExc_TypeError, "expected int or slice");
+    return 0;
 }
 
 
@@ -336,7 +389,8 @@ static PyType_Slot U16Array_PyType_Slots [] = {
     {Py_tp_hash, (void*)U16Array__hash__},
     {Py_tp_repr, (void*)U16Array__repr__},
     {Py_sq_length, (void*)U16Array__len__},
-    {Py_sq_item, (void*)U16Array__getitem__},
+    {Py_sq_item, (void*)U16Array__sq_getitem__},
+    {Py_mp_subscript, (void*)U16Array__mp_getitem__},
     {Py_tp_richcompare, (void*)U16Array__richcmp__},
     {Py_nb_bool, (void*)U16Array__bool__},
     {Py_bf_getbuffer, (void*)U16Array_getbufferproc},

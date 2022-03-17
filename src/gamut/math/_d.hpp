@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 22:57:54.012659 from codegen/math/templates/_pod.hpp
+// generated 2022-03-17 14:23:57.246569 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_D_HPP
 #define GAMUT_MATH_D_HPP
@@ -130,7 +130,7 @@ DArray__len__(DArray *self)
 
 
 static PyObject *
-DArray__getitem__(DArray *self, Py_ssize_t index)
+DArray__sq_getitem__(DArray *self, Py_ssize_t index)
 {
     if (index < 0 || index > (Py_ssize_t)self->length - 1)
     {
@@ -138,6 +138,59 @@ DArray__getitem__(DArray *self, Py_ssize_t index)
         return 0;
     }
     return c_double_to_pyobject(self->pod[index]);
+}
+
+
+static PyObject *
+DArray__mp_getitem__(DArray *self, PyObject *key)
+{
+    if (PySlice_Check(key))
+    {
+        Py_ssize_t start;
+        Py_ssize_t stop;
+        Py_ssize_t step;
+        Py_ssize_t length;
+        if (PySlice_GetIndicesEx(key, self->length, &start, &stop, &step, &length) != 0)
+        {
+            return 0;
+        }
+        auto cls = Py_TYPE(self);
+        auto *result = (DArray *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        if (length == 0)
+        {
+            result->length = 0;
+            result->pod = 0;
+        }
+        else
+        {
+            result->length = length;
+            result->pod = new double[length];
+            for (Py_ssize_t i = 0; i < length; i++)
+            {
+                result->pod[i] = self->pod[start + (i * step)];
+            }
+        }
+        return (PyObject *)result;
+    }
+    else if (PyLong_Check(key))
+    {
+        auto index = PyLong_AsSsize_t(key);
+        if (PyErr_Occurred()){ return 0; }
+        if (index < 0)
+        {
+            index = (Py_ssize_t)self->length + index;
+        }
+        if (index < 0 || index > (Py_ssize_t)self->length - 1)
+        {
+            PyErr_Format(PyExc_IndexError, "index out of range");
+            return 0;
+        }
+
+        return c_double_to_pyobject(self->pod[index]);
+    }
+    PyErr_Format(PyExc_TypeError, "expected int or slice");
+    return 0;
 }
 
 
@@ -336,7 +389,8 @@ static PyType_Slot DArray_PyType_Slots [] = {
     {Py_tp_hash, (void*)DArray__hash__},
     {Py_tp_repr, (void*)DArray__repr__},
     {Py_sq_length, (void*)DArray__len__},
-    {Py_sq_item, (void*)DArray__getitem__},
+    {Py_sq_item, (void*)DArray__sq_getitem__},
+    {Py_mp_subscript, (void*)DArray__mp_getitem__},
     {Py_tp_richcompare, (void*)DArray__richcmp__},
     {Py_nb_bool, (void*)DArray__bool__},
     {Py_bf_getbuffer, (void*)DArray_getbufferproc},
