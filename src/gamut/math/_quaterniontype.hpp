@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 22:57:54.005158 from codegen/math/templates/_quaterniontype.hpp
+// generated 2022-03-17 14:23:57.238068 from codegen/math/templates/_quaterniontype.hpp
 
 #ifndef GAMUT_MATH_QUATERNIONTYPE_HPP
 #define GAMUT_MATH_QUATERNIONTYPE_HPP

@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 22:57:54.014659 from codegen/math/templates/_pod.hpp
+// generated 2022-03-17 14:23:57.248570 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_I32_HPP
 #define GAMUT_MATH_I32_HPP
@@ -130,7 +130,7 @@ I32Array__len__(I32Array *self)
 
 
 static PyObject *
-I32Array__getitem__(I32Array *self, Py_ssize_t index)
+I32Array__sq_getitem__(I32Array *self, Py_ssize_t index)
 {
     if (index < 0 || index > (Py_ssize_t)self->length - 1)
     {
@@ -138,6 +138,59 @@ I32Array__getitem__(I32Array *self, Py_ssize_t index)
         return 0;
     }
     return c_int32_t_to_pyobject(self->pod[index]);
+}
+
+
+static PyObject *
+I32Array__mp_getitem__(I32Array *self, PyObject *key)
+{
+    if (PySlice_Check(key))
+    {
+        Py_ssize_t start;
+        Py_ssize_t stop;
+        Py_ssize_t step;
+        Py_ssize_t length;
+        if (PySlice_GetIndicesEx(key, self->length, &start, &stop, &step, &length) != 0)
+        {
+            return 0;
+        }
+        auto cls = Py_TYPE(self);
+        auto *result = (I32Array *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        if (length == 0)
+        {
+            result->length = 0;
+            result->pod = 0;
+        }
+        else
+        {
+            result->length = length;
+            result->pod = new int32_t[length];
+            for (Py_ssize_t i = 0; i < length; i++)
+            {
+                result->pod[i] = self->pod[start + (i * step)];
+            }
+        }
+        return (PyObject *)result;
+    }
+    else if (PyLong_Check(key))
+    {
+        auto index = PyLong_AsSsize_t(key);
+        if (PyErr_Occurred()){ return 0; }
+        if (index < 0)
+        {
+            index = (Py_ssize_t)self->length + index;
+        }
+        if (index < 0 || index > (Py_ssize_t)self->length - 1)
+        {
+            PyErr_Format(PyExc_IndexError, "index out of range");
+            return 0;
+        }
+
+        return c_int32_t_to_pyobject(self->pod[index]);
+    }
+    PyErr_Format(PyExc_TypeError, "expected int or slice");
+    return 0;
 }
 
 
@@ -336,7 +389,8 @@ static PyType_Slot I32Array_PyType_Slots [] = {
     {Py_tp_hash, (void*)I32Array__hash__},
     {Py_tp_repr, (void*)I32Array__repr__},
     {Py_sq_length, (void*)I32Array__len__},
-    {Py_sq_item, (void*)I32Array__getitem__},
+    {Py_sq_item, (void*)I32Array__sq_getitem__},
+    {Py_mp_subscript, (void*)I32Array__mp_getitem__},
     {Py_tp_richcompare, (void*)I32Array__richcmp__},
     {Py_nb_bool, (void*)I32Array__bool__},
     {Py_bf_getbuffer, (void*)I32Array_getbufferproc},

@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 22:57:53.897158 from codegen/math/templates/_vector.hpp
+// generated 2022-03-17 14:23:57.132568 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR4_HPP
 #define GAMUT_MATH_BVECTOR4_HPP
@@ -1173,7 +1173,7 @@ BVector4Array__len__(BVector4Array *self)
 
 
 static PyObject *
-BVector4Array__getitem__(BVector4Array *self, Py_ssize_t index)
+BVector4Array__sq_getitem__(BVector4Array *self, Py_ssize_t index)
 {
     if (index < 0 || index > (Py_ssize_t)self->length - 1)
     {
@@ -1190,6 +1190,66 @@ BVector4Array__getitem__(BVector4Array *self, Py_ssize_t index)
     result->glm = new BVector4Glm(self->glm[index]);
 
     return (PyObject *)result;
+}
+
+
+static PyObject *
+BVector4Array__mp_getitem__(BVector4Array *self, PyObject *key)
+{
+    if (PySlice_Check(key))
+    {
+        Py_ssize_t start;
+        Py_ssize_t stop;
+        Py_ssize_t step;
+        Py_ssize_t length;
+        if (PySlice_GetIndicesEx(key, self->length, &start, &stop, &step, &length) != 0)
+        {
+            return 0;
+        }
+        auto cls = Py_TYPE(self);
+        auto *result = (BVector4Array *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        if (length == 0)
+        {
+            result->length = 0;
+            result->glm = 0;
+        }
+        else
+        {
+            result->length = length;
+            result->glm = new BVector4Glm[length];
+            for (BVector4Glm::length_type i = 0; i < length; i++)
+            {
+                result->glm[i] = self->glm[start + (i * step)];
+            }
+        }
+        return (PyObject *)result;
+    }
+    else if (PyLong_Check(key))
+    {
+        auto index = PyLong_AsSsize_t(key);
+        if (PyErr_Occurred()){ return 0; }
+        if (index < 0)
+        {
+            index = (Py_ssize_t)self->length + index;
+        }
+        if (index < 0 || index > (Py_ssize_t)self->length - 1)
+        {
+            PyErr_Format(PyExc_IndexError, "index out of range");
+            return 0;
+        }
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto element_cls = module_state->BVector4_PyTypeObject;
+
+        BVector4 *result = (BVector4 *)element_cls->tp_alloc(element_cls, 0);
+        if (!result){ return 0; }
+        result->glm = new BVector4Glm(self->glm[index]);
+
+        return (PyObject *)result;
+    }
+    PyErr_Format(PyExc_TypeError, "expected int or slice");
+    return 0;
 }
 
 
@@ -1401,7 +1461,8 @@ static PyType_Slot BVector4Array_PyType_Slots [] = {
     {Py_tp_hash, (void*)BVector4Array__hash__},
     {Py_tp_repr, (void*)BVector4Array__repr__},
     {Py_sq_length, (void*)BVector4Array__len__},
-    {Py_sq_item, (void*)BVector4Array__getitem__},
+    {Py_sq_item, (void*)BVector4Array__sq_getitem__},
+    {Py_mp_subscript, (void*)BVector4Array__mp_getitem__},
     {Py_tp_richcompare, (void*)BVector4Array__richcmp__},
     {Py_nb_bool, (void*)BVector4Array__bool__},
     {Py_bf_getbuffer, (void*)BVector4Array_getbufferproc},

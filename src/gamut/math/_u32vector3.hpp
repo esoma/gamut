@@ -1,5 +1,5 @@
 
-// generated 2022-03-16 22:57:53.893158 from codegen/math/templates/_vector.hpp
+// generated 2022-03-17 14:23:57.129070 from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_U32VECTOR3_HPP
 #define GAMUT_MATH_U32VECTOR3_HPP
@@ -1163,7 +1163,7 @@ U32Vector3Array__len__(U32Vector3Array *self)
 
 
 static PyObject *
-U32Vector3Array__getitem__(U32Vector3Array *self, Py_ssize_t index)
+U32Vector3Array__sq_getitem__(U32Vector3Array *self, Py_ssize_t index)
 {
     if (index < 0 || index > (Py_ssize_t)self->length - 1)
     {
@@ -1180,6 +1180,66 @@ U32Vector3Array__getitem__(U32Vector3Array *self, Py_ssize_t index)
     result->glm = new U32Vector3Glm(self->glm[index]);
 
     return (PyObject *)result;
+}
+
+
+static PyObject *
+U32Vector3Array__mp_getitem__(U32Vector3Array *self, PyObject *key)
+{
+    if (PySlice_Check(key))
+    {
+        Py_ssize_t start;
+        Py_ssize_t stop;
+        Py_ssize_t step;
+        Py_ssize_t length;
+        if (PySlice_GetIndicesEx(key, self->length, &start, &stop, &step, &length) != 0)
+        {
+            return 0;
+        }
+        auto cls = Py_TYPE(self);
+        auto *result = (U32Vector3Array *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        if (length == 0)
+        {
+            result->length = 0;
+            result->glm = 0;
+        }
+        else
+        {
+            result->length = length;
+            result->glm = new U32Vector3Glm[length];
+            for (U32Vector3Glm::length_type i = 0; i < length; i++)
+            {
+                result->glm[i] = self->glm[start + (i * step)];
+            }
+        }
+        return (PyObject *)result;
+    }
+    else if (PyLong_Check(key))
+    {
+        auto index = PyLong_AsSsize_t(key);
+        if (PyErr_Occurred()){ return 0; }
+        if (index < 0)
+        {
+            index = (Py_ssize_t)self->length + index;
+        }
+        if (index < 0 || index > (Py_ssize_t)self->length - 1)
+        {
+            PyErr_Format(PyExc_IndexError, "index out of range");
+            return 0;
+        }
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto element_cls = module_state->U32Vector3_PyTypeObject;
+
+        U32Vector3 *result = (U32Vector3 *)element_cls->tp_alloc(element_cls, 0);
+        if (!result){ return 0; }
+        result->glm = new U32Vector3Glm(self->glm[index]);
+
+        return (PyObject *)result;
+    }
+    PyErr_Format(PyExc_TypeError, "expected int or slice");
+    return 0;
 }
 
 
@@ -1391,7 +1451,8 @@ static PyType_Slot U32Vector3Array_PyType_Slots [] = {
     {Py_tp_hash, (void*)U32Vector3Array__hash__},
     {Py_tp_repr, (void*)U32Vector3Array__repr__},
     {Py_sq_length, (void*)U32Vector3Array__len__},
-    {Py_sq_item, (void*)U32Vector3Array__getitem__},
+    {Py_sq_item, (void*)U32Vector3Array__sq_getitem__},
+    {Py_mp_subscript, (void*)U32Vector3Array__mp_getitem__},
     {Py_tp_richcompare, (void*)U32Vector3Array__richcmp__},
     {Py_nb_bool, (void*)U32Vector3Array__bool__},
     {Py_bf_getbuffer, (void*)U32Vector3Array_getbufferproc},

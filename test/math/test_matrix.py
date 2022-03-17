@@ -222,6 +222,23 @@ class MatrixTest:
             assert isinstance(array[i - 10], self.cls)
             assert array[i - 10] == self.cls(i)
 
+        assert isinstance(array[1:3], self.array_cls)
+        assert array[1:3] == self.array_cls(
+            self.cls(1),
+            self.cls(2),
+        )
+        assert array[-3:-1] == self.array_cls(
+            self.cls(7),
+            self.cls(8),
+        )
+        assert array[::2] == self.array_cls(
+            self.cls(0),
+            self.cls(2),
+            self.cls(4),
+            self.cls(6),
+            self.cls(8),
+        )
+
         with pytest.raises(IndexError) as excinfo:
             array[10]
         assert str(excinfo.value) == 'index out of range'
