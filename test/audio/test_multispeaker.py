@@ -271,8 +271,6 @@ def test_outer_cone_angle(
             )
     assert multi_speaker.outer_cone_angle == outer_cone_angle
     assert isinstance(multi_speaker.outer_cone_angle, float)
-    print([s.outer_cone_angle for s in speakers])
-    print(multi_speaker.outer_cone_angle)
     assert all(
         s.outer_cone_angle == multi_speaker.outer_cone_angle
         for s in speakers
