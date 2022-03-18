@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['Body', 'BodyType']
 
 # gamut
+from ._groups import ALL_GROUPS as G_ALL_GROUPS
+from ._groups import verify_groups, verify_mask
 from ._physics import Body as BaseBody
 from ._physics import Shape
 from ._world import add_body_to_world, remove_body_from_world, World
@@ -14,7 +16,6 @@ from gamut.math import Matrix4, Vector3
 # python
 import ctypes
 from enum import auto, Enum
-import struct
 from typing import Any, Final, Union
 from weakref import ref, WeakKeyDictionary
 
@@ -38,7 +39,7 @@ class BodyType(Enum):
 
 class Body:
 
-    ALL_GROUPS: Final = -1
+    ALL_GROUPS: Final = G_ALL_GROUPS
 
     def __init__(
         self,
@@ -71,8 +72,8 @@ class Body:
         self._kinematic_angular_velocity = Vector3(0)
         self._kinematic_linear_velocity = Vector3(0)
         self._gravity: Vector3 | None = None
-        self._groups = _verify_groups(groups)
-        self._mask = _verify_mask(mask)
+        self._groups = verify_groups(groups)
+        self._mask = verify_mask(mask)
         self._world = None
         self.world = world
 
@@ -232,7 +233,7 @@ class Body:
 
     @groups.setter
     def groups(self, value: int) -> None:
-        self._groups = _verify_groups(value)
+        self._groups = verify_groups(value)
         # re-add the body to the current world to change the groups internally
         world = self.world
         if world:
@@ -245,7 +246,7 @@ class Body:
 
     @mask.setter
     def mask(self, value: int) -> None:
-        self._mask = _verify_mask(value)
+        self._mask = verify_mask(value)
         # re-add the body to the current world to change the mask internally
         world = self.world
         if world:
@@ -262,6 +263,18 @@ class Body:
         self._imp.set_mass(
             _mass_to_implementation_mass(self._mass, self._type)
         )
+
+    def raycast(self, start: Vector3, end: Vector3) -> RaycastHit | None:
+        world = self.world
+        if world is None:
+            raise RuntimeError('body must be in a world')
+        results = list(
+            raycast(world, start, end, G_ALL_GROUPS, G_ALL_GROUPS, self._imp)
+        )
+        if results:
+            assert len(results) == 1
+            return results[0]
+        return None
 
     @property
     def restitution(self) -> float:
@@ -377,30 +390,6 @@ def _mass_to_implementation_mass(mass: float, body_type: BodyType) -> float:
         return 0
     assert mass > 0.0
     return mass
-
-
-def _verify_groups(value: int) -> int:
-    try:
-        value = int(value)
-    except (ValueError, TypeError):
-        raise TypeError('groups must be int')
-    try:
-        struct.pack('=i', value)
-    except struct.error:
-        raise ValueError('groups must be 32 bit signed int')
-    return value
-
-
-def _verify_mask(value: int) -> int:
-    try:
-        value = int(value)
-    except (ValueError, TypeError):
-        raise TypeError('mask must be int')
-    try:
-        struct.pack('=i', value)
-    except struct.error:
-        raise ValueError('mask must be 32 bit signed int')
-    return value
 
 
 def _verify_mass(value: float) -> float:

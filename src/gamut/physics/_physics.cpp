@@ -199,10 +199,55 @@ error:
 }
 
 
+static PyObject *
+World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    auto state = get_module_state();
+    double *raw_from = state->api->GamutMathDVector3_GetValuePointer(args[0]);
+    double *raw_to = state->api->GamutMathDVector3_GetValuePointer(args[1]);
+    btVector3 from(raw_from[0], raw_from[1], raw_from[2]);
+    btVector3 to(raw_to[0], raw_to[1], raw_to[2]);
+    int groups = PyLong_AsLong(args[2]);
+    int mask = PyLong_AsLong(args[3]);
+
+    btCollisionWorld::AllHitsRayResultCallback results(from, to);
+    results.m_collisionFilterGroup = groups;
+    results.m_collisionFilterMask = mask;
+
+    self->world->rayTest(from, to, results);
+    PyObject *py_results = PyList_New(results.m_hitFractions.size());
+    if (!py_results){ return 0; }
+    for (int i = 0; i < results.m_hitFractions.size(); i++)
+    {
+        PyObject *hit = PyTuple_New(4);
+        if (!hit){ Py_DECREF(py_results); return 0; }
+        PyList_SET_ITEM(py_results, i, hit);
+
+        PyObject *position = state->api->GamutMathDVector3_Create(results.m_hitPointWorld[i].m_floats);
+        if (!position){ Py_DECREF(py_results); return 0; }
+        PyTuple_SET_ITEM(hit, 0, position);
+
+        PyObject *normal = state->api->GamutMathDVector3_Create(results.m_hitNormalWorld[i].m_floats);
+        if (!normal){ Py_DECREF(py_results); return 0; }
+        PyTuple_SET_ITEM(hit, 1, normal);
+
+        Body *body = (Body*)results.m_collisionObjects[i]->getUserPointer();
+        PyTuple_SET_ITEM(hit, 2, body->wrapper);
+        Py_INCREF(body->wrapper);
+
+        PyObject *fraction = PyFloat_FromDouble(results.m_hitFractions[i]);
+        if (PyErr_Occurred()){ Py_DECREF(py_results); return 0; }
+        PyTuple_SET_ITEM(hit, 3, fraction);
+    }
+    return py_results;
+}
+
+
 static PyMethodDef World_PyMethodDef[] = {
     {"add_body", (PyCFunction)World_add_body, METH_O, 0},
     {"remove_body", (PyCFunction)World_remove_body, METH_O, 0},
     {"simulate", (PyCFunction)World_simulate, METH_O, 0},
+    {"raycast", (PyCFunction)World_raycast, METH_FASTCALL, 0},
     {0, 0, 0, 0}
 };
 
