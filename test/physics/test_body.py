@@ -2,7 +2,8 @@
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
-from gamut.math import IVector3, IVector3Array, Matrix4, Vector3, Vector3Array
+from gamut.math import (BVector3, IVector3, IVector3Array, Matrix4, Vector3,
+                        Vector3Array)
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -100,12 +101,14 @@ def test_repr(mass: float, shape: Any) -> None:
 def test_defaults() -> None:
     b = Body(1, Sphere(Vector3(0), 1))
     assert b.angular_damping == 0
+    assert b.angular_freedom == BVector3(True)
     assert b.angular_sleep_threshold == 1
     assert b.angular_velocity == Vector3(0)
     assert b.can_sleep
     assert b.is_enabled
     assert not b.is_sleeping
     assert b.linear_damping == 0
+    assert b.linear_freedom == BVector3(True)
     assert b.linear_sleep_threshold == .8
     assert b.linear_velocity == Vector3(0)
     assert b.friction == 0
@@ -141,6 +144,33 @@ def test_angular_damping(angular_damping: Any) -> None:
     b = Body(1, Sphere(Vector3(0), 1))
     b.angular_damping = angular_damping
     assert b.angular_damping == float(angular_damping)
+
+
+@pytest.mark.parametrize("angular_freedom", [
+    None,
+    'abc',
+    (1, 2),
+    (1, 2, 3, 4)
+])
+def test_invalid_angular_freedom_type(angular_freedom: Any) -> None:
+    b = Body(1, Sphere(Vector3(0), 1))
+    with pytest.raises(TypeError) as excinfo:
+        b.angular_freedom = angular_freedom
+    assert str(excinfo.value) == f'expected BVector3, got {angular_freedom!r}'
+
+
+@pytest.mark.parametrize("angular_freedom", [
+    BVector3(False),
+    BVector3(True),
+    BVector3(False, True, True),
+    BVector3(True, False, True),
+    BVector3(True, True, False),
+])
+def test_angular_freedom(angular_freedom: BVector3) -> None:
+    b = Body(1, Sphere(Vector3(0), 1))
+    b.angular_freedom = angular_freedom
+    assert b.angular_freedom == angular_freedom
+    assert isinstance(b.angular_freedom, BVector3)
 
 
 @pytest.mark.parametrize("angular_sleep_threshold", [None, 'abc', []])
@@ -252,6 +282,33 @@ def test_linear_damping(linear_damping: Any) -> None:
     b = Body(1, Sphere(Vector3(0), 1))
     b.linear_damping = linear_damping
     assert b.linear_damping == float(linear_damping)
+
+
+@pytest.mark.parametrize("linear_freedom", [
+    None,
+    'abc',
+    (1, 2),
+    (1, 2, 3, 4)
+])
+def test_invalid_linear_freedom_type(linear_freedom: Any) -> None:
+    b = Body(1, Sphere(Vector3(0), 1))
+    with pytest.raises(TypeError) as excinfo:
+        b.linear_freedom = linear_freedom
+    assert str(excinfo.value) == f'expected BVector3, got {linear_freedom!r}'
+
+
+@pytest.mark.parametrize("linear_freedom", [
+    BVector3(False),
+    BVector3(True),
+    BVector3(False, True, True),
+    BVector3(True, False, True),
+    BVector3(True, True, False),
+])
+def test_linear_freedom(linear_freedom: BVector3) -> None:
+    b = Body(1, Sphere(Vector3(0), 1))
+    b.linear_freedom = linear_freedom
+    assert b.linear_freedom == linear_freedom
+    assert isinstance(b.linear_freedom, BVector3)
 
 
 @pytest.mark.parametrize("linear_sleep_threshold", [None, 'abc', []])

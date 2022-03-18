@@ -12,6 +12,7 @@ class Mesh:
     def __init__(
         self,
         vertices: Vector3Array,
+        # todo: UVector3Array
         triangle_indices: IVector3Array
     ):
         if not isinstance(vertices, Vector3Array):

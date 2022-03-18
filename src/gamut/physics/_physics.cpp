@@ -577,6 +577,38 @@ Body_Setter_angular_damping(Body *self, PyObject *value, void *)
 
 
 static PyObject *
+Body_Getter_angular_freedom(Body *self, void *)
+{
+    auto state = get_module_state();
+    const auto& angular_factor = self->body->getAngularFactor();
+    bool xyz[3] = {
+        angular_factor[0] != 0,
+        angular_factor[1] != 0,
+        angular_factor[2] != 0
+    };
+    return state->api->GamutMathBVector3_Create(xyz);
+}
+
+
+int
+Body_Setter_angular_freedom(Body *self, PyObject *value, void *)
+{
+    auto state = get_module_state();
+    bool *angular_freedom = state->api->GamutMathBVector3_GetValuePointer(value);
+    if (!angular_freedom){ return -1; }
+    btVector3 angular_factor(
+        angular_freedom[0] ? 1 : 0,
+        angular_freedom[1] ? 1 : 0,
+        angular_freedom[2] ? 1 : 0
+    );
+    self->body->setAngularFactor(angular_factor);
+    const auto &velocity = self->body->getAngularVelocity();
+    self->body->setAngularVelocity(velocity * angular_factor);
+    return 0;
+}
+
+
+static PyObject *
 Body_Getter_angular_sleep_threshold(Body *self, void *)
 {
     btScalar threshold = self->body->getAngularSleepingThreshold();
@@ -601,7 +633,7 @@ static PyObject *
 Body_Getter_angular_velocity(Body *self, void *)
 {
     auto state = get_module_state();
-    auto velocity = self->body->getAngularVelocity();
+    const auto &velocity = self->body->getAngularVelocity();
     return state->api->GamutMathDVector3_Create(velocity.m_floats);
 }
 
@@ -612,7 +644,11 @@ Body_Setter_angular_velocity(Body *self, PyObject *value, void *)
     auto state = get_module_state();
     double *velocity = state->api->GamutMathDVector3_GetValuePointer(value);
     if (!velocity){ return -1; }
-    self->body->setAngularVelocity(btVector3(velocity[0], velocity[1], velocity[2]));
+    const auto& angular_factor = self->body->getAngularFactor();
+    self->body->setAngularVelocity(
+        btVector3(velocity[0], velocity[1], velocity[2]) *
+        angular_factor
+    );
     return 0;
 }
 
@@ -661,6 +697,38 @@ Body_Setter_linear_damping(Body *self, PyObject *value, void *)
 
 
 static PyObject *
+Body_Getter_linear_freedom(Body *self, void *)
+{
+    auto state = get_module_state();
+    const auto& linear_factor = self->body->getLinearFactor();
+    bool xyz[3] = {
+        linear_factor[0] != 0,
+        linear_factor[1] != 0,
+        linear_factor[2] != 0
+    };
+    return state->api->GamutMathBVector3_Create(xyz);
+}
+
+
+int
+Body_Setter_linear_freedom(Body *self, PyObject *value, void *)
+{
+    auto state = get_module_state();
+    bool *linear_freedom = state->api->GamutMathBVector3_GetValuePointer(value);
+    if (!linear_freedom){ return -1; }
+    btVector3 linear_factor(
+        linear_freedom[0] ? 1 : 0,
+        linear_freedom[1] ? 1 : 0,
+        linear_freedom[2] ? 1 : 0
+    );
+    self->body->setLinearFactor(linear_factor);
+    const auto &velocity = self->body->getAngularVelocity();
+    self->body->setLinearVelocity(velocity * linear_factor);
+    return 0;
+}
+
+
+static PyObject *
 Body_Getter_linear_sleep_threshold(Body *self, void *)
 {
     btScalar threshold = self->body->getLinearSleepingThreshold();
@@ -685,7 +753,7 @@ static PyObject *
 Body_Getter_linear_velocity(Body *self, void *)
 {
     auto state = get_module_state();
-    auto velocity = self->body->getLinearVelocity();
+    const auto& velocity = self->body->getLinearVelocity();
     return state->api->GamutMathDVector3_Create(velocity.m_floats);
 }
 
@@ -696,7 +764,11 @@ Body_Setter_linear_velocity(Body *self, PyObject *value, void *)
     auto state = get_module_state();
     double *velocity = state->api->GamutMathDVector3_GetValuePointer(value);
     if (!velocity){ return -1; }
-    self->body->setLinearVelocity(btVector3(velocity[0], velocity[1], velocity[2]));
+    const auto& linear_factor = self->body->getLinearFactor();
+    self->body->setLinearVelocity(
+        btVector3(velocity[0], velocity[1], velocity[2]) *
+        linear_factor
+    );
     return 0;
 }
 
@@ -790,6 +862,13 @@ static PyGetSetDef Body_PyGetSetDef[] = {
         0
     },
     {
+        "angular_freedom",
+        (getter)Body_Getter_angular_freedom,
+        (setter)Body_Setter_angular_freedom,
+        0,
+        0
+    },
+    {
         "angular_sleep_threshold",
         (getter)Body_Getter_angular_sleep_threshold,
         (setter)Body_Setter_angular_sleep_threshold,
@@ -815,6 +894,13 @@ static PyGetSetDef Body_PyGetSetDef[] = {
         "linear_damping",
         (getter)Body_Getter_linear_damping,
         (setter)Body_Setter_linear_damping,
+        0,
+        0
+    },
+    {
+        "linear_freedom",
+        (getter)Body_Getter_linear_freedom,
+        (setter)Body_Setter_linear_freedom,
         0,
         0
     },
