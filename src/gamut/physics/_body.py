@@ -12,7 +12,7 @@ from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
-from gamut.math import Matrix4, Vector3
+from gamut.math import BVector3, Matrix4, Vector3
 # python
 import ctypes
 from enum import auto, Enum
@@ -104,6 +104,14 @@ class Body:
         self._imp.angular_damping = value
 
     @property
+    def angular_freedom(self) -> BVector3:
+        return self._imp.angular_freedom
+
+    @angular_freedom.setter
+    def angular_freedom(self, value: BVector3) -> None:
+        self._imp.angular_freedom = value
+
+    @property
     def angular_sleep_threshold(self) -> float:
         return self._imp.angular_sleep_threshold
 
@@ -167,6 +175,14 @@ class Body:
         if value < 0 or value > 1:
             raise ValueError('linear damping must be between 0 and 1')
         self._imp.linear_damping = value
+
+    @property
+    def linear_freedom(self) -> BVector3:
+        return self._imp.linear_freedom
+
+    @linear_freedom.setter
+    def linear_freedom(self, value: BVector3) -> None:
+        self._imp.linear_freedom = value
 
     @property
     def linear_sleep_threshold(self) -> float:

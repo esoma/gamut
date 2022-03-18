@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import Sphere
-from gamut.math import Matrix4, Vector3
+from gamut.math import BVector3, Matrix4, Vector3
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -110,6 +110,24 @@ def test_disabled_linear_damping() -> None:
 
     w.simulate(timedelta(seconds=1))
     assert b.linear_velocity == Vector3(1, 2, 3)
+
+
+def test_linear_freedom() -> None:
+    w = World(timedelta(seconds=.1))
+    b = Body(1, Sphere(Vector3(0), 1), world=w)
+
+    b.linear_freedom = BVector3(False, False, False)
+    b.linear_velocity = Vector3(1, 2, 3)
+    assert b.linear_velocity == Vector3(0)
+
+    b.linear_freedom = BVector3(True, True, True)
+    b.linear_velocity = Vector3(1, 2, 3)
+    b.linear_freedom = BVector3(False, False, False)
+    assert b.linear_velocity == Vector3(0)
+
+    w.gravity = Vector3(1)
+    w.simulate(timedelta(seconds=1))
+    assert b.linear_velocity == Vector3(0)
 
 
 def test_linear_velocity_switch_to_kinematic() -> None:
