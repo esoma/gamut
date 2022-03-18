@@ -1,8 +1,8 @@
 
 # gamut
 from gamut.geometry import Sphere
-from gamut.math import Vector3
-from gamut.physics import Body, World
+from gamut.math import FVector3, Matrix4, Vector3
+from gamut.physics import Body, RaycastHit, World
 # python
 from datetime import timedelta
 from typing import Any
@@ -107,3 +107,59 @@ def test_invalid_fixed_time_step_value(duration: timedelta) -> None:
         str(excinfo.value) ==
         'duration must be greater than or equal to 0 seconds'
     )
+
+
+@pytest.mark.parametrize("start", [None, (1, 2, 3), FVector3(1)])
+def test_raycast_start_invalid(start: Any) -> None:
+    w = World(timedelta(seconds=1))
+    w.raycast(start, Vector3(0))
+
+
+@pytest.mark.parametrize("end", [None, (1, 2, 3), FVector3(1)])
+def test_raycast_start_invalid(end: Any) -> None:
+    w = World(timedelta(seconds=1))
+    w.raycast(Vector3(0), end)
+
+
+def test_raycast() -> None:
+    w = World(timedelta(seconds=1))
+    b1 = Body(1, Sphere(Vector3(0), 1), world=w)
+    b1.transform = Matrix4(1).translate(Vector3(5, 0, 0))
+    b2 = Body(1, Sphere(Vector3(0), 1), world=w)
+    b2.transform = Matrix4(1).translate(Vector3(-5, 0, 0))
+    b3 = Body(1, Sphere(Vector3(0), 1), world=w)
+    b3.transform = Matrix4(1).translate(Vector3(7, 0, 0))
+    b4 = Body(1, Sphere(Vector3(0), 1), world=w)
+    b4.transform = Matrix4(1).translate(Vector3(12, 0, 0))
+
+    hits = list(w.raycast(Vector3(0), Vector3(10, 0, 0)))
+    assert len(hits) == 2
+    assert isinstance(hits[0], RaycastHit)
+    assert isinstance(hits[0].position, Vector3)
+    assert hits[0].position == Vector3(4, 0, 0)
+    assert isinstance(hits[0].normal, Vector3)
+    assert hits[0].normal == Vector3(-1, 0, 0)
+    assert hits[0].body is b1
+
+    assert isinstance(hits[1], RaycastHit)
+    assert isinstance(hits[1].position, Vector3)
+    assert hits[1].position == Vector3(6, 0, 0)
+    assert isinstance(hits[1].normal, Vector3)
+    assert hits[1].normal == Vector3(-1, 0, 0)
+    assert hits[1].body is b3
+
+    hits = list(w.raycast(Vector3(10, 0, 0), Vector3(0)))
+    assert len(hits) == 2
+    assert isinstance(hits[0], RaycastHit)
+    assert isinstance(hits[0].position, Vector3)
+    assert hits[0].position == Vector3(8, 0, 0)
+    assert isinstance(hits[0].normal, Vector3)
+    assert hits[0].normal == Vector3(1, 0, 0)
+    assert hits[0].body is b3
+
+    assert isinstance(hits[1], RaycastHit)
+    assert isinstance(hits[1].position, Vector3)
+    assert hits[1].position == Vector3(6, 0, 0)
+    assert isinstance(hits[1].normal, Vector3)
+    assert hits[1].normal == Vector3(1, 0, 0)
+    assert hits[1].body is b1

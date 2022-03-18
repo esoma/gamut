@@ -1,21 +1,35 @@
 
 from __future__ import annotations
 
-__all__ = ['add_body_to_world', 'remove_body_from_world', 'World']
+__all__ = [
+    'add_body_to_world',
+    'RaycastHit',
+    'remove_body_from_world',
+    'World'
+]
 
 # gamut
 from ._collision import Collision, Contact
+from ._groups import ALL_GROUPS, verify_groups, verify_mask
 from ._physics import World as BaseWorld
 # gamut
 from gamut.math import Vector3
 # python
 from datetime import timedelta
 from math import floor
-from typing import Any, TYPE_CHECKING
+from typing import Any, Generator, TYPE_CHECKING
 
 if TYPE_CHECKING:
     # gamut
     from ._body import Body
+
+
+class RaycastHit:
+
+    def __init__(self, position: Vector3, normal: Vector3, body: Body):
+        self.position = position
+        self.normal = normal
+        self.body = body
 
 
 class World:
@@ -53,6 +67,26 @@ class World:
         assert body in self._bodies
         self._imp.remove_body(body_implementation)
         self._bodies.remove(body)
+
+    def raycast(
+        self,
+        start: Vector3,
+        end: Vector3,
+        *,
+        groups: int = ALL_GROUPS,
+        mask: int = ALL_GROUPS
+    ) -> Generator[RaycastHit, None, None]:
+        if not isinstance(start, Vector3):
+            raise TypeError(f'start must be Vector3, got {start!r}')
+        if not isinstance(end, Vector3):
+            raise TypeError(f'end must be Vector3, got {end!r}')
+        groups = verify_groups(groups)
+        mask = verify_mask(mask)
+
+        results = self._imp.raycast(start, end, groups, mask)
+        results.sort(key=lambda h: h[3])
+        for hit in results:
+            yield RaycastHit(hit[0], hit[1], hit[2])
 
     def simulate(self, duration: timedelta) -> WorldSimulation:
         return WorldSimulation(self, duration)
