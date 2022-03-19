@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.738841 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:47:31.086954 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX4X4_HPP
 #define GAMUT_MATH_DMATRIX4X4_HPP
@@ -1328,6 +1328,22 @@ static PyGetSetDef DMatrix4x4_PyGetSetDef[] = {
 
 
 
+
+    static DQuaternion *
+    DMatrix4x4_to_quaternion(DMatrix4x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DQuaternion_PyTypeObject;
+
+        auto *result = (DQuaternion *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DQuaternionGlm(glm::quat_cast(*self->glm));
+        return result;
+    }
+
+
+
 static DVector4 *
 DMatrix4x4_get_row(DMatrix4x4 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -1464,6 +1480,9 @@ static PyMethodDef DMatrix4x4_PyMethodDef[] = {
         {"orthographic", (PyCFunction)DMatrix4x4_orthographic, METH_CLASS | METH_FASTCALL, 0},
         {"look_at", (PyCFunction)DMatrix4x4_look_at, METH_CLASS | METH_FASTCALL, 0},
         {"to_matrix3", (PyCFunction)DMatrix4x4_to_matrix3, METH_NOARGS, 0},
+
+
+        {"to_quaternion", (PyCFunction)DMatrix4x4_to_quaternion, METH_NOARGS, 0},
 
 
         {"to_fmatrix", (PyCFunction)DMatrix4x4_to_fmatrix, METH_NOARGS, 0},

@@ -6,23 +6,23 @@ from gamut.math import (DMatrix2, DMatrix2Array, DMatrix2x2, DMatrix2x2Array,
                         DMatrix3x2Array, DMatrix3x3, DMatrix3x3Array,
                         DMatrix3x4, DMatrix3x4Array, DMatrix4, DMatrix4Array,
                         DMatrix4x2, DMatrix4x2Array, DMatrix4x3,
-                        DMatrix4x3Array, DMatrix4x4, DMatrix4x4Array, DVector2,
-                        DVector2Array, DVector3, DVector3Array, DVector4,
-                        DVector4Array, FMatrix2, FMatrix2Array, FMatrix2x2,
-                        FMatrix2x2Array, FMatrix2x3, FMatrix2x3Array,
-                        FMatrix2x4, FMatrix2x4Array, FMatrix3, FMatrix3Array,
-                        FMatrix3x2, FMatrix3x2Array, FMatrix3x3,
+                        DMatrix4x3Array, DMatrix4x4, DMatrix4x4Array,
+                        DQuaternion, DVector2, DVector2Array, DVector3,
+                        DVector3Array, DVector4, DVector4Array, FMatrix2,
+                        FMatrix2Array, FMatrix2x2, FMatrix2x2Array, FMatrix2x3,
+                        FMatrix2x3Array, FMatrix2x4, FMatrix2x4Array, FMatrix3,
+                        FMatrix3Array, FMatrix3x2, FMatrix3x2Array, FMatrix3x3,
                         FMatrix3x3Array, FMatrix3x4, FMatrix3x4Array, FMatrix4,
                         FMatrix4Array, FMatrix4x2, FMatrix4x2Array, FMatrix4x3,
-                        FMatrix4x3Array, FMatrix4x4, FMatrix4x4Array, FVector2,
-                        FVector2Array, FVector3, FVector3Array, FVector4,
-                        FVector4Array, Matrix2, Matrix2Array, Matrix2x2,
-                        Matrix2x2Array, Matrix2x3, Matrix2x3Array, Matrix2x4,
-                        Matrix2x4Array, Matrix3, Matrix3Array, Matrix3x2,
-                        Matrix3x2Array, Matrix3x3, Matrix3x3Array, Matrix3x4,
-                        Matrix3x4Array, Matrix4, Matrix4Array, Matrix4x2,
-                        Matrix4x2Array, Matrix4x3, Matrix4x3Array, Matrix4x4,
-                        Matrix4x4Array)
+                        FMatrix4x3Array, FMatrix4x4, FMatrix4x4Array,
+                        FQuaternion, FVector2, FVector2Array, FVector3,
+                        FVector3Array, FVector4, FVector4Array, Matrix2,
+                        Matrix2Array, Matrix2x2, Matrix2x2Array, Matrix2x3,
+                        Matrix2x3Array, Matrix2x4, Matrix2x4Array, Matrix3,
+                        Matrix3Array, Matrix3x2, Matrix3x2Array, Matrix3x3,
+                        Matrix3x3Array, Matrix3x4, Matrix3x4Array, Matrix4,
+                        Matrix4Array, Matrix4x2, Matrix4x2Array, Matrix4x3,
+                        Matrix4x3Array, Matrix4x4, Matrix4x4Array)
 # python
 import ctypes
 from math import inf
@@ -1171,6 +1171,34 @@ class MatrixTest:
         assert isclose(mat[3][1], 0)
         assert isclose(mat[3][2], 0)
         assert isclose(mat[3][3], 1)
+
+    def test_to_quaternion(self) -> None:
+        if self.row_size != self.column_size or self.row_size not in [3, 4]:
+            with pytest.raises(AttributeError):
+                self.cls.to_quaternion
+            return
+
+        quat_cls = globals()[f'{self.cls.__name__[0]}Quaternion']
+        mat4_cls = globals()[f'{self.cls.__name__[0]}Matrix4x4']
+        vec3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+
+        assert isinstance(self.cls().to_quaternion(), quat_cls)
+        assert self.cls(1).to_quaternion() == quat_cls(1)
+
+        axis = vec3_cls(.2, .5, .3).normalize()
+        angle = 1
+        mat4 = mat4_cls(1).rotate(angle, axis)
+        if mat4_cls is self.cls:
+            mat = mat4
+        else:
+            mat = mat4.to_matrix3()
+        quat = quat_cls(1).rotate(angle, axis)
+        mat_quat = mat.to_quaternion()
+
+        assert isclose(mat_quat.w, quat.w)
+        assert isclose(mat_quat.x, quat.x)
+        assert isclose(mat_quat.y, quat.y)
+        assert isclose(mat_quat.z, quat.z)
 
 
 class TestFMatrix2x2(

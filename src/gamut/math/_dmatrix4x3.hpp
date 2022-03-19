@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.736840 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:47:31.084954 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX4X3_HPP
 #define GAMUT_MATH_DMATRIX4X3_HPP
@@ -983,6 +983,9 @@ static PyGetSetDef DMatrix4x3_PyGetSetDef[] = {
 
 
 
+
+
+
 static DVector4 *
 DMatrix4x3_get_row(DMatrix4x3 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -1108,6 +1111,7 @@ DMatrix4x3_from_buffer(PyTypeObject *cls, PyObject *buffer)
 
 
 static PyMethodDef DMatrix4x3_PyMethodDef[] = {
+
 
 
 

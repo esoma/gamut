@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.732342 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:47:31.080454 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX3X3_HPP
 #define GAMUT_MATH_FMATRIX3X3_HPP
@@ -909,6 +909,22 @@ static PyGetSetDef FMatrix3x3_PyGetSetDef[] = {
 
 
 
+
+    static FQuaternion *
+    FMatrix3x3_to_quaternion(FMatrix3x3 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FQuaternion_PyTypeObject;
+
+        auto *result = (FQuaternion *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FQuaternionGlm(glm::quat_cast(*self->glm));
+        return result;
+    }
+
+
+
 static FVector3 *
 FMatrix3x3_get_row(FMatrix3x3 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -1037,6 +1053,9 @@ static PyMethodDef FMatrix3x3_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)FMatrix3x3_inverse, METH_NOARGS, 0},
 
+
+
+        {"to_quaternion", (PyCFunction)FMatrix3x3_to_quaternion, METH_NOARGS, 0},
 
 
 

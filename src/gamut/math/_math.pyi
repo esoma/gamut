@@ -1,5 +1,5 @@
 
-# generated 2022-03-19 16:50:14.833341 from codegen/math/templates/_math.pyi
+# generated 2022-03-19 17:47:31.183954 from codegen/math/templates/_math.pyi
 
 __all__ = [
 
@@ -24810,6 +24810,7 @@ class DMatrix2x2:
 
 
 
+
     def get_row(self, index: int, /) -> DVector2: ...
 
     @classmethod
@@ -24980,6 +24981,7 @@ class FMatrix2x2:
 
 
 
+
     def get_row(self, index: int, /) -> FVector2: ...
 
     @classmethod
@@ -25142,6 +25144,7 @@ class DMatrix2x3:
 
 
 
+
     def get_row(self, index: int, /) -> DVector2: ...
 
     @classmethod
@@ -25300,6 +25303,7 @@ class FMatrix2x3:
 
 
     def transpose(self) -> FMatrix3x2: ...
+
 
 
 
@@ -25470,6 +25474,7 @@ class DMatrix2x4:
 
 
 
+
     def get_row(self, index: int, /) -> DVector2: ...
 
     @classmethod
@@ -25632,6 +25637,7 @@ class FMatrix2x4:
 
 
     def transpose(self) -> FMatrix4x2: ...
+
 
 
 
@@ -25800,6 +25806,7 @@ class DMatrix3x2:
 
 
 
+
     def get_row(self, index: int, /) -> DVector3: ...
 
     @classmethod
@@ -25960,6 +25967,7 @@ class FMatrix3x2:
 
 
     def transpose(self) -> FMatrix2x3: ...
+
 
 
 
@@ -26146,6 +26154,9 @@ class DMatrix3x3:
 
 
 
+    def to_quaternion(self) -> DQuaternion: ...
+
+
     def get_row(self, index: int, /) -> DVector3: ...
 
     @classmethod
@@ -26328,6 +26339,9 @@ class FMatrix3x3:
 
 
 
+    def to_quaternion(self) -> FQuaternion: ...
+
+
     def get_row(self, index: int, /) -> FVector3: ...
 
     @classmethod
@@ -26500,6 +26514,7 @@ class DMatrix3x4:
 
 
     def transpose(self) -> DMatrix4x3: ...
+
 
 
 
@@ -26680,6 +26695,7 @@ class FMatrix3x4:
 
 
 
+
     def get_row(self, index: int, /) -> FVector3: ...
 
     @classmethod
@@ -26850,6 +26866,7 @@ class DMatrix4x2:
 
 
 
+
     def get_row(self, index: int, /) -> DVector4: ...
 
     @classmethod
@@ -27016,6 +27033,7 @@ class FMatrix4x2:
 
 
     def transpose(self) -> FMatrix2x4: ...
+
 
 
 
@@ -27198,6 +27216,7 @@ class DMatrix4x3:
 
 
 
+
     def get_row(self, index: int, /) -> DVector4: ...
 
     @classmethod
@@ -27372,6 +27391,7 @@ class FMatrix4x3:
 
 
     def transpose(self) -> FMatrix3x4: ...
+
 
 
 
@@ -27592,6 +27612,9 @@ class DMatrix4x4:
     def to_matrix3(self) -> DMatrix3x3: ...
 
 
+    def to_quaternion(self) -> DQuaternion: ...
+
+
     def get_row(self, index: int, /) -> DVector4: ...
 
     @classmethod
@@ -27806,6 +27829,9 @@ class FMatrix4x4:
     @classmethod
     def look_at(cls, eye: FVector3, center: FVector3, up: FVector3, /) -> FMatrix4x4: ...
     def to_matrix3(self) -> FMatrix3x3: ...
+
+
+    def to_quaternion(self) -> FQuaternion: ...
 
 
     def get_row(self, index: int, /) -> FVector4: ...
