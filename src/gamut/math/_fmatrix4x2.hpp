@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.736340 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:07:41.574315 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X2_HPP
 #define GAMUT_MATH_FMATRIX4X2_HPP
@@ -873,6 +873,9 @@ static PyGetSetDef FMatrix4x2_PyGetSetDef[] = {
 
 
 
+
+
+
 static FVector4 *
 FMatrix4x2_get_row(FMatrix4x2 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -998,6 +1001,7 @@ FMatrix4x2_from_buffer(PyTypeObject *cls, PyObject *buffer)
 
 
 static PyMethodDef FMatrix4x2_PyMethodDef[] = {
+
 
 
 

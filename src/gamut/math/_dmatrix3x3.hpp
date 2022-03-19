@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.731340 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:07:41.569814 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX3X3_HPP
 #define GAMUT_MATH_DMATRIX3X3_HPP
@@ -909,6 +909,22 @@ static PyGetSetDef DMatrix3x3_PyGetSetDef[] = {
 
 
 
+
+    static DQuaternion *
+    DMatrix3x3_to_quaternion(DMatrix3x3 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->DQuaternion_PyTypeObject;
+
+        auto *result = (DQuaternion *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new DQuaternionGlm(glm::quat_cast(*self->glm));
+        return result;
+    }
+
+
+
 static DVector3 *
 DMatrix3x3_get_row(DMatrix3x3 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -1037,6 +1053,9 @@ static PyMethodDef DMatrix3x3_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)DMatrix3x3_inverse, METH_NOARGS, 0},
 
+
+
+        {"to_quaternion", (PyCFunction)DMatrix3x3_to_quaternion, METH_NOARGS, 0},
 
 
         {"to_fmatrix", (PyCFunction)DMatrix3x3_to_fmatrix, METH_NOARGS, 0},

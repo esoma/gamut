@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.725343 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:07:41.563311 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX2X2_HPP
 #define GAMUT_MATH_FMATRIX2X2_HPP
@@ -760,6 +760,9 @@ static PyGetSetDef FMatrix2x2_PyGetSetDef[] = {
 
 
 
+
+
+
 static FVector2 *
 FMatrix2x2_get_row(FMatrix2x2 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -887,6 +890,7 @@ FMatrix2x2_from_buffer(PyTypeObject *cls, PyObject *buffer)
 static PyMethodDef FMatrix2x2_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)FMatrix2x2_inverse, METH_NOARGS, 0},
+
 
 
 

@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.739840 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:07:41.578313 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX4X4_HPP
 #define GAMUT_MATH_FMATRIX4X4_HPP
@@ -1328,6 +1328,22 @@ static PyGetSetDef FMatrix4x4_PyGetSetDef[] = {
 
 
 
+
+    static FQuaternion *
+    FMatrix4x4_to_quaternion(FMatrix4x4 *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->FQuaternion_PyTypeObject;
+
+        auto *result = (FQuaternion *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new FQuaternionGlm(glm::quat_cast(*self->glm));
+        return result;
+    }
+
+
+
 static FVector4 *
 FMatrix4x4_get_row(FMatrix4x4 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -1464,6 +1480,9 @@ static PyMethodDef FMatrix4x4_PyMethodDef[] = {
         {"orthographic", (PyCFunction)FMatrix4x4_orthographic, METH_CLASS | METH_FASTCALL, 0},
         {"look_at", (PyCFunction)FMatrix4x4_look_at, METH_CLASS | METH_FASTCALL, 0},
         {"to_matrix3", (PyCFunction)FMatrix4x4_to_matrix3, METH_NOARGS, 0},
+
+
+        {"to_quaternion", (PyCFunction)FMatrix4x4_to_quaternion, METH_NOARGS, 0},
 
 
 

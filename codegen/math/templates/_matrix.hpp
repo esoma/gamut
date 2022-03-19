@@ -853,6 +853,22 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
 {% endif %}
 
 
+{% if (row_size == 4 and column_size == 4) or (row_size == 3 and column_size == 3) %}
+    static {{ name[0] }}Quaternion *
+    {{ name }}_to_quaternion({{ name }} *self, void*)
+    {
+        auto module_state = get_module_state();
+        if (!module_state){ return 0; }
+        auto cls = module_state->{{ name[0] }}Quaternion_PyTypeObject;
+
+        auto *result = ({{ name[0] }}Quaternion *)cls->tp_alloc(cls, 0);
+        if (!result){ return 0; }
+        result->glm = new {{ name[0] }}QuaternionGlm(glm::quat_cast(*self->glm));
+        return result;
+    }
+{% endif %}
+
+
 static {{ row_type }} *
 {{ name }}_get_row({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -1002,6 +1018,9 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
         {"orthographic", (PyCFunction){{ name }}_orthographic, METH_CLASS | METH_FASTCALL, 0},
         {"look_at", (PyCFunction){{ name }}_look_at, METH_CLASS | METH_FASTCALL, 0},
         {"to_matrix3", (PyCFunction){{ name }}_to_matrix3, METH_NOARGS, 0},
+    {% endif %}
+    {% if (row_size == 4 and column_size == 4) or (row_size == 3 and column_size == 3) %}
+        {"to_quaternion", (PyCFunction){{ name }}_to_quaternion, METH_NOARGS, 0},
     {% endif %}
     {% if c_type != 'float' %}
         {"to_fmatrix", (PyCFunction){{ name }}_to_fmatrix, METH_NOARGS, 0},

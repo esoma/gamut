@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.777341 from codegen/math/templates/_pod.hpp
+// generated 2022-03-19 17:07:41.616311 from codegen/math/templates/_pod.hpp
 
 #ifndef GAMUT_MATH_B_HPP
 #define GAMUT_MATH_B_HPP

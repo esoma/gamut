@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 16:50:14.724342 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-19 17:07:41.562314 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X2_HPP
 #define GAMUT_MATH_DMATRIX2X2_HPP
@@ -760,6 +760,9 @@ static PyGetSetDef DMatrix2x2_PyGetSetDef[] = {
 
 
 
+
+
+
 static DVector2 *
 DMatrix2x2_get_row(DMatrix2x2 *self, PyObject *const *args, Py_ssize_t nargs)
 {
@@ -887,6 +890,7 @@ DMatrix2x2_from_buffer(PyTypeObject *cls, PyObject *buffer)
 static PyMethodDef DMatrix2x2_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)DMatrix2x2_inverse, METH_NOARGS, 0},
+
 
 
 
