@@ -215,7 +215,7 @@ World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
     results.m_collisionFilterMask = mask;
 
     self->world->rayTest(from, to, results);
-    if (results.m_collisionObject == 0)
+    if (!results.hasHit())
     {
         Py_RETURN_NONE;
     }
@@ -261,11 +261,13 @@ World_spherecast(World *self, PyObject *const *args, Py_ssize_t nargs)
     results.m_collisionFilterMask = mask;
 
     btTransform from_t;
+    from_t.setIdentity();
     from_t.setOrigin(from);
     btTransform to_t;
+    to_t.setIdentity();
     to_t.setOrigin(to);
     self->world->convexSweepTest(&sphere, from_t, to_t, results);
-    if (results.m_hitCollisionObject == 0)
+    if (!results.hasHit())
     {
         Py_RETURN_NONE;
     }
