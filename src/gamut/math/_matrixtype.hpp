@@ -1,5 +1,5 @@
 
-// generated 2022-03-17 14:23:57.211570 from codegen/math/templates/_matrixtype.hpp
+// generated 2022-03-19 16:50:14.742340 from codegen/math/templates/_matrixtype.hpp
 
 #ifndef GAMUT_MATH_MATRIXTYPE_HPP
 #define GAMUT_MATH_MATRIXTYPE_HPP

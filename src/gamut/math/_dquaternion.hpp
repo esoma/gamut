@@ -1,5 +1,5 @@
 
-// generated 2022-03-17 14:23:57.236068 from codegen/math/templates/_quaternion.hpp
+// generated 2022-03-19 16:50:14.767841 from codegen/math/templates/_quaternion.hpp
 
 #ifndef GAMUT_MATH_DQUATERNION_HPP
 #define GAMUT_MATH_DQUATERNION_HPP
@@ -609,6 +609,34 @@ DQuaternion_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+DQuaternion_lerp(DQuaternion *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+
+    auto cls = Py_TYPE(self);
+    if (Py_TYPE(args[0]) != cls)
+    {
+        PyErr_Format(PyExc_TypeError, "%R is not DQuaternion", args[0]);
+        return 0;
+    }
+    auto other = (DQuaternion *)args[0];
+
+    auto c_x = pyobject_to_c_double(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto quat = glm::lerp(*self->glm, *other->glm, c_x);
+    auto result = (DQuaternion *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new DQuaternionGlm(quat);
+    return (PyObject *)result;
+}
+
+
 static DQuaternion *
 DQuaternion_normalize(DQuaternion *self, void*)
 {
@@ -682,6 +710,7 @@ static PyMethodDef DQuaternion_PyMethodDef[] = {
     {"normalize", (PyCFunction)DQuaternion_normalize, METH_NOARGS, 0},
     {"inverse", (PyCFunction)DQuaternion_inverse, METH_NOARGS, 0},
     {"rotate", (PyCFunction)DQuaternion_rotate, METH_FASTCALL, 0},
+    {"lerp", (PyCFunction)DQuaternion_lerp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)DQuaternion_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)DQuaternion_get_size, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)DQuaternion_from_buffer, METH_O | METH_CLASS, 0},

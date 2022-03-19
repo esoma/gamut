@@ -785,6 +785,9 @@ class QuaternionTest:
         with pytest.raises(BufferError):
             self.array_cls.from_buffer(b'\x00')
 
+    def test_lerp(self) -> None:
+        assert self.cls(0).lerp(self.cls(1), .5) == self.cls(1) * .5
+
 
 class TestFQuaternion(
     QuaternionTest,
