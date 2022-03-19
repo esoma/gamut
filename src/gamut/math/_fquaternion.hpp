@@ -1,5 +1,5 @@
 
-// generated 2022-03-17 14:23:57.236569 from codegen/math/templates/_quaternion.hpp
+// generated 2022-03-19 16:50:14.768341 from codegen/math/templates/_quaternion.hpp
 
 #ifndef GAMUT_MATH_FQUATERNION_HPP
 #define GAMUT_MATH_FQUATERNION_HPP
@@ -609,6 +609,34 @@ FQuaternion_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+FQuaternion_lerp(FQuaternion *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+
+    auto cls = Py_TYPE(self);
+    if (Py_TYPE(args[0]) != cls)
+    {
+        PyErr_Format(PyExc_TypeError, "%R is not FQuaternion", args[0]);
+        return 0;
+    }
+    auto other = (FQuaternion *)args[0];
+
+    auto c_x = pyobject_to_c_float(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto quat = glm::lerp(*self->glm, *other->glm, c_x);
+    auto result = (FQuaternion *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new FQuaternionGlm(quat);
+    return (PyObject *)result;
+}
+
+
 static FQuaternion *
 FQuaternion_normalize(FQuaternion *self, void*)
 {
@@ -682,6 +710,7 @@ static PyMethodDef FQuaternion_PyMethodDef[] = {
     {"normalize", (PyCFunction)FQuaternion_normalize, METH_NOARGS, 0},
     {"inverse", (PyCFunction)FQuaternion_inverse, METH_NOARGS, 0},
     {"rotate", (PyCFunction)FQuaternion_rotate, METH_FASTCALL, 0},
+    {"lerp", (PyCFunction)FQuaternion_lerp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)FQuaternion_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)FQuaternion_get_size, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)FQuaternion_from_buffer, METH_O | METH_CLASS, 0},

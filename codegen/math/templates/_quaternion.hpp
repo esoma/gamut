@@ -609,6 +609,34 @@ static PyObject *
 }
 
 
+static PyObject *
+{{ name }}_lerp({{ name }} *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 2)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 2 arguments, got %zi", nargs);
+        return 0;
+    }
+
+    auto cls = Py_TYPE(self);
+    if (Py_TYPE(args[0]) != cls)
+    {
+        PyErr_Format(PyExc_TypeError, "%R is not {{ name }}", args[0]);
+        return 0;
+    }
+    auto other = ({{ name }} *)args[0];
+
+    auto c_x = pyobject_to_c_{{ c_type.replace(' ', '_') }}(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+
+    auto quat = glm::lerp(*self->glm, *other->glm, c_x);
+    auto result = ({{ name }} *)cls->tp_alloc(cls, 0);
+    if (!result){ return 0; }
+    result->glm = new {{ name }}Glm(quat);
+    return (PyObject *)result;
+}
+
+
 static {{ name }} *
 {{ name }}_normalize({{ name }} *self, void*)
 {
@@ -682,6 +710,7 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
     {"normalize", (PyCFunction){{ name }}_normalize, METH_NOARGS, 0},
     {"inverse", (PyCFunction){{ name }}_inverse, METH_NOARGS, 0},
     {"rotate", (PyCFunction){{ name }}_rotate, METH_FASTCALL, 0},
+    {"lerp", (PyCFunction){{ name }}_lerp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction){{ name }}_get_size, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction){{ name }}_from_buffer, METH_O | METH_CLASS, 0},
