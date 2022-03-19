@@ -13,11 +13,12 @@ from ._collision import Collision, Contact
 from ._groups import ALL_GROUPS, verify_groups, verify_mask
 from ._physics import World as BaseWorld
 # gamut
+from gamut.geometry import Sphere
 from gamut.math import Vector3
 # python
 from datetime import timedelta
 from math import floor
-from typing import Any, Generator, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     # gamut
@@ -26,10 +27,17 @@ if TYPE_CHECKING:
 
 class RaycastHit:
 
-    def __init__(self, position: Vector3, normal: Vector3, body: Body):
+    def __init__(
+        self,
+        position: Vector3,
+        normal: Vector3,
+        body: Body,
+        time: float
+    ):
         self.position = position
         self.normal = normal
         self.body = body
+        self.time = time
 
 
 class World:
@@ -73,9 +81,10 @@ class World:
         start: Vector3,
         end: Vector3,
         *,
+        shape: Sphere | None = None,
         groups: int = ALL_GROUPS,
         mask: int = ALL_GROUPS
-    ) -> Generator[RaycastHit, None, None]:
+    ) -> RaycastHit | None:
         if not isinstance(start, Vector3):
             raise TypeError(f'start must be Vector3, got {start!r}')
         if not isinstance(end, Vector3):
@@ -83,10 +92,19 @@ class World:
         groups = verify_groups(groups)
         mask = verify_mask(mask)
 
-        results = self._imp.raycast(start, end, groups, mask)
-        results.sort(key=lambda h: h[3])
-        for hit in results:
-            yield RaycastHit(hit[0], hit[1], hit[2])
+        if isinstance(shape, Sphere):
+            hit = self._imp.spherecast(
+                start + shape.center,
+                end,
+                groups,
+                mask,
+                shape.radius
+            )
+        else:
+            hit = self._imp.raycast(start, end, groups, mask)
+        if hit is None:
+            return None
+        return RaycastHit(*hit)
 
     def simulate(self, duration: timedelta) -> WorldSimulation:
         return WorldSimulation(self, duration)

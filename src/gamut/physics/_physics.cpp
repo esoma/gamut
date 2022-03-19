@@ -210,36 +210,87 @@ World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
     int groups = PyLong_AsLong(args[2]);
     int mask = PyLong_AsLong(args[3]);
 
-    btCollisionWorld::AllHitsRayResultCallback results(from, to);
+    btCollisionWorld::ClosestRayResultCallback results(from, to);
     results.m_collisionFilterGroup = groups;
     results.m_collisionFilterMask = mask;
 
     self->world->rayTest(from, to, results);
-    PyObject *py_results = PyList_New(results.m_hitFractions.size());
-    if (!py_results){ return 0; }
-    for (int i = 0; i < results.m_hitFractions.size(); i++)
+    if (!results.hasHit())
     {
-        PyObject *hit = PyTuple_New(4);
-        if (!hit){ Py_DECREF(py_results); return 0; }
-        PyList_SET_ITEM(py_results, i, hit);
-
-        PyObject *position = state->api->GamutMathDVector3_Create(results.m_hitPointWorld[i].m_floats);
-        if (!position){ Py_DECREF(py_results); return 0; }
-        PyTuple_SET_ITEM(hit, 0, position);
-
-        PyObject *normal = state->api->GamutMathDVector3_Create(results.m_hitNormalWorld[i].m_floats);
-        if (!normal){ Py_DECREF(py_results); return 0; }
-        PyTuple_SET_ITEM(hit, 1, normal);
-
-        Body *body = (Body*)results.m_collisionObjects[i]->getUserPointer();
-        PyTuple_SET_ITEM(hit, 2, body->wrapper);
-        Py_INCREF(body->wrapper);
-
-        PyObject *fraction = PyFloat_FromDouble(results.m_hitFractions[i]);
-        if (PyErr_Occurred()){ Py_DECREF(py_results); return 0; }
-        PyTuple_SET_ITEM(hit, 3, fraction);
+        Py_RETURN_NONE;
     }
-    return py_results;
+
+    PyObject *hit = PyTuple_New(4);
+
+    PyObject *position = state->api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
+    if (!position){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 0, position);
+
+    PyObject *normal = state->api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
+    if (!normal){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 1, normal);
+
+    Body *body = (Body*)results.m_collisionObject->getUserPointer();
+    PyTuple_SET_ITEM(hit, 2, body->wrapper);
+    Py_INCREF(body->wrapper);
+
+    PyObject *fraction = PyFloat_FromDouble(results.m_closestHitFraction);
+    if (PyErr_Occurred()){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 3, fraction);
+
+    return hit;
+}
+
+
+static PyObject *
+World_spherecast(World *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    auto state = get_module_state();
+    double *raw_from = state->api->GamutMathDVector3_GetValuePointer(args[0]);
+    double *raw_to = state->api->GamutMathDVector3_GetValuePointer(args[1]);
+    btVector3 from(raw_from[0], raw_from[1], raw_from[2]);
+    btVector3 to(raw_to[0], raw_to[1], raw_to[2]);
+    int groups = PyLong_AsLong(args[2]);
+    int mask = PyLong_AsLong(args[3]);
+    double radius = PyFloat_AsDouble(args[4]);
+
+    btSphereShape sphere(radius);
+
+    btCollisionWorld::ClosestConvexResultCallback results(from, to);
+    results.m_collisionFilterGroup = groups;
+    results.m_collisionFilterMask = mask;
+
+    btTransform from_t;
+    from_t.setIdentity();
+    from_t.setOrigin(from);
+    btTransform to_t;
+    to_t.setIdentity();
+    to_t.setOrigin(to);
+    self->world->convexSweepTest(&sphere, from_t, to_t, results);
+    if (!results.hasHit())
+    {
+        Py_RETURN_NONE;
+    }
+
+    PyObject *hit = PyTuple_New(4);
+
+    PyObject *position = state->api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
+    if (!position){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 0, position);
+
+    PyObject *normal = state->api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
+    if (!normal){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 1, normal);
+
+    Body *body = (Body*)results.m_hitCollisionObject->getUserPointer();
+    PyTuple_SET_ITEM(hit, 2, body->wrapper);
+    Py_INCREF(body->wrapper);
+
+    PyObject *fraction = PyFloat_FromDouble(results.m_closestHitFraction);
+    if (PyErr_Occurred()){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 3, fraction);
+
+    return hit;
 }
 
 
@@ -248,6 +299,7 @@ static PyMethodDef World_PyMethodDef[] = {
     {"remove_body", (PyCFunction)World_remove_body, METH_O, 0},
     {"simulate", (PyCFunction)World_simulate, METH_O, 0},
     {"raycast", (PyCFunction)World_raycast, METH_FASTCALL, 0},
+    {"spherecast", (PyCFunction)World_spherecast, METH_FASTCALL, 0},
     {0, 0, 0, 0}
 };
 
