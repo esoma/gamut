@@ -12,7 +12,7 @@ import pytest
 
 
 def is_close(a, b):
-    return _isclose(a, b, abs_tol=1e-07)
+    return _isclose(a, b, abs_tol=1e-04)
 
 
 @pytest.mark.parametrize("fixed_time_step", [None, 'abc', 123, 1.0])
