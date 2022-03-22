@@ -11,7 +11,7 @@ import pytest
 
 
 def is_close(a, b):
-    return isclose(a, b, abs_tol=1e-06)
+    return isclose(a, b, abs_tol=1e-05)
 
 
 @pytest.mark.parametrize("ball_restitution, floor_restitution", [
