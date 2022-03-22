@@ -568,8 +568,6 @@ Body_shape_update(Body *self, int groups, int mask)
             btVector3(0, 0, 0)
         );
         info.m_friction = self->body->getFriction();
-        info.m_rollingFriction = self->body->getRollingFriction();
-        info.m_spinningFriction = self->body->getSpinningFriction();
         info.m_restitution = self->body->getRestitution();
         info.m_startWorldTransform = self->body->getWorldTransform();
 
@@ -1108,15 +1106,6 @@ Body_Setter_rolling_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
-    self->body->setRollingFriction(friction);
-    for (
-        auto iter = self->trimesh_bodies.begin();
-        iter != self->trimesh_bodies.end();
-        ++iter
-    )
-    {
-        (*iter)->setRollingFriction(friction);
-    }
     return 0;
 }
 
@@ -1160,15 +1149,6 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
-    self->body->setSpinningFriction(friction);
-    for (
-        auto iter = self->trimesh_bodies.begin();
-        iter != self->trimesh_bodies.end();
-        ++iter
-    )
-    {
-        (*iter)->setSpinningFriction(friction);
-    }
     return 0;
 }
 

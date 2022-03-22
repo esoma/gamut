@@ -75,7 +75,6 @@ def test_bounce() -> None:
             UVector3Array(UVector3(0, 1, 2)),
         ),
     )
-    floor_shape = Plane(0, Vector3(0, 1, 0))
     floor = Body(1, floor_shape, type=BodyType.STATIC)
     floor.restitution = 1
 
@@ -83,17 +82,17 @@ def test_bounce() -> None:
     floor.world = w
     w.simulate(timedelta(seconds=5))
     assert is_close(ball_1.linear_velocity.x, 0)
-    assert is_close(ball_1.linear_velocity.y, 3.271664784004064)
+    assert is_close(ball_1.linear_velocity.y, 3.533403999999998)
     assert is_close(ball_1.linear_velocity.z, 0)
 
     assert is_close(ball_2.linear_velocity.x, 0)
-    assert is_close(ball_2.linear_velocity.y, 3.271664784004064)
+    assert is_close(ball_2.linear_velocity.y, 3.533403999999998)
     assert is_close(ball_2.linear_velocity.z, 0)
 
     reset_world()
     floor.world = w
     floor.restitution = 0
-    w.simulate(timedelta(seconds=5))
+    w.simulate(timedelta(seconds=8))
 
     assert is_close(ball_1.linear_velocity.x, 0)
     assert is_close(ball_1.linear_velocity.y, 0)
@@ -110,9 +109,9 @@ def test_bounce() -> None:
     w.simulate(timedelta(seconds=5))
 
     assert is_close(ball_1.linear_velocity.x, 0)
-    assert is_close(ball_1.linear_velocity.y, 3.271664784004064)
+    assert is_close(ball_1.linear_velocity.y, 3.533403999999998)
     assert is_close(ball_1.linear_velocity.z, 0)
 
     assert is_close(ball_2.linear_velocity.x, 0)
-    assert is_close(ball_2.linear_velocity.y, 3.271664784004064)
+    assert is_close(ball_2.linear_velocity.y, 3.533403999999998)
     assert is_close(ball_2.linear_velocity.z, 0)
