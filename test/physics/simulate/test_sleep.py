@@ -1,7 +1,7 @@
 
 # gamut
-from gamut.geometry import Sphere
-from gamut.math import Vector3
+from gamut.geometry import Composite3d, Mesh, Sphere
+from gamut.math import UVector3, UVector3Array, Vector3, Vector3Array
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -39,6 +39,22 @@ def test_wake_static() -> None:
 def test_cannot_sleep() -> None:
     w = World(timedelta(seconds=1))
     b = Body(1, Sphere(Vector3(0), 1), world=w)
+    b.can_sleep = False
+
+    w.simulate(timedelta(seconds=10))
+    assert not b.is_sleeping
+
+
+def test_cannot_sleep_static() -> None:
+    w = World(timedelta(seconds=1))
+    shape = Composite3d(
+        Sphere(Vector3(0), 1),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+    b = Body(1, shape, world=w, type=BodyType.STATIC)
     b.can_sleep = False
 
     w.simulate(timedelta(seconds=10))

@@ -2,7 +2,7 @@
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh, Plane, RectangularCuboid, Sphere)
-from gamut.math import (BVector3, IVector3, IVector3Array, Matrix4, Vector3,
+from gamut.math import (BVector3, Matrix4, UVector3, UVector3Array, Vector3,
                         Vector3Array)
 from gamut.physics import Body, BodyType, World
 # python
@@ -105,7 +105,6 @@ def test_defaults() -> None:
     assert b.angular_sleep_threshold == 1
     assert b.angular_velocity == Vector3(0)
     assert b.can_sleep
-    assert b.is_enabled
     assert not b.is_sleeping
     assert b.linear_damping == 0
     assert b.linear_freedom == BVector3(True)
@@ -238,21 +237,6 @@ def test_can_sleep(can_sleep: Any) -> None:
     b = Body(1, Sphere(Vector3(0), 1))
     b.can_sleep = can_sleep
     assert b.can_sleep == bool(can_sleep)
-
-
-@pytest.mark.parametrize("is_enabled", [
-    False,
-    True,
-    None,
-    0,
-    1,
-    '123',
-    '',
-])
-def test_is_enabled(is_enabled: Any) -> None:
-    b = Body(1, Sphere(Vector3(0), 1))
-    b.is_enabled = is_enabled
-    assert b.is_enabled == bool(is_enabled)
 
 
 def test_is_sleeping() -> None:
@@ -553,6 +537,28 @@ def test_invalid_shape(shape: Any) -> None:
 
 
 @pytest.mark.parametrize("shape", [
+    Mesh(
+        Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+        UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+    ),
+    Composite3d(
+        Sphere(Vector3(0), 1),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+])
+@pytest.mark.parametrize("body_type", [
+    bt for bt in BodyType if bt != BodyType.STATIC
+])
+def test_initial_shape_static_only(shape: Any, body_type: BodyType) -> None:
+    with pytest.raises(ValueError) as excinfo:
+        Body(1, shape, type=body_type)
+    assert str(excinfo.value) == 'body composed of a shape that must be static'
+
+
+@pytest.mark.parametrize("shape", [
     Sphere(Vector3(0), 1),
     Plane(1, Vector3(0, 1, 0)),
     Cylinder(Vector3(0), 1, 1),
@@ -562,7 +568,7 @@ def test_invalid_shape(shape: Any) -> None:
     ConvexHull(Vector3Array(Vector3(0), Vector3(-1), Vector3(1))),
     Mesh(
         Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
-        IVector3Array(IVector3(0), IVector3(1), IVector3(2))
+        UVector3Array(UVector3(0), UVector3(1), UVector3(2))
     ),
     Composite3d(),
     Composite3d(
@@ -575,14 +581,54 @@ def test_invalid_shape(shape: Any) -> None:
         ConvexHull(Vector3Array(Vector3(0), Vector3(-1), Vector3(1))),
         Mesh(
             Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
-            IVector3Array(IVector3(0), IVector3(1), IVector3(2))
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
     )
 ])
 def test_shape(shape: Any) -> None:
-    b = Body(1, Sphere(Vector3(0), 1))
+    b = Body(1, Sphere(Vector3(0), 1), type=BodyType.STATIC)
     b.shape = shape
     assert b.shape is shape
+
+
+@pytest.mark.parametrize("shape", [
+    Mesh(
+        Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+        UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+    ),
+    Composite3d(
+        Sphere(Vector3(0), 1),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+])
+@pytest.mark.parametrize("body_type", [
+    bt for bt in BodyType if bt != BodyType.STATIC
+])
+def test_shape_static_only(shape: Any, body_type: BodyType) -> None:
+    b = Body(1, Sphere(Vector3(0), 1), type=body_type)
+    with pytest.raises(ValueError) as excinfo:
+        b.shape = shape
+    assert str(excinfo.value) == (
+        'this shape cannot be applied to a non-static body'
+    )
+
+
+def test_shape_change_from_composite_mesh() -> None:
+    shape = Composite3d(
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+    b = Body(1, shape, type=BodyType.STATIC)
+    b.shape = Sphere(Vector3(0), 1)
 
 
 @pytest.mark.parametrize("spinning_friction", [None, 'abc', []])
@@ -652,10 +698,23 @@ def test_invalid_world(world: Any) -> None:
     assert str(excinfo.value) == f'world must be None or {World}'
 
 
-def test_world() -> None:
+@pytest.mark.parametrize("shape", [
+    Sphere(Vector3(0), 1),
+    Composite3d(
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+])
+def test_world(shape: Any) -> None:
     w1 = World(timedelta(seconds=1))
     w2 = World(timedelta(seconds=1))
-    b = Body(1, Sphere(Vector3(0), 1))
+    b = Body(1, shape, type=BodyType.STATIC)
 
     b.world = w1
     assert b.world is w1

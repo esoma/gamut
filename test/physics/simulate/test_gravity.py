@@ -50,14 +50,3 @@ def test_non_dynamic_body_gravity(body_type: BodyType) -> None:
     w.simulate(timedelta(seconds=10))
     assert b.transform == Matrix4(1)
     assert b.linear_velocity == Vector3(0)
-
-
-def test_disabled_body_gravity() -> None:
-    w = World(timedelta(seconds=1))
-    b = Body(1, Sphere(Vector3(0), 1), world=w)
-    b.is_enabled = False
-    b.gravity = Vector3(0, 1, 0)
-
-    w.simulate(timedelta(seconds=10))
-    assert b.transform == Matrix4(1)
-    assert b.linear_velocity == Vector3(0)

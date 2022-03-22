@@ -48,16 +48,6 @@ def test_linear_velocity_non_dynamic(body_type: BodyType) -> None:
     assert b.transform == Matrix4(1)
 
 
-def test_disabled_linear_velocity() -> None:
-    w = World(timedelta(seconds=.1))
-    b = Body(1, Sphere(Vector3(0), 1), world=w)
-    b.is_enabled = False
-    b.linear_velocity = Vector3(1, 2, 3)
-
-    w.simulate(timedelta(seconds=1))
-    assert b.transform == Matrix4(1)
-
-
 def test_no_linear_damping() -> None:
     w = World(timedelta(seconds=1))
     b = Body(1, Sphere(Vector3(0), 1), world=w)
@@ -99,17 +89,6 @@ def test_linear_damping_static() -> None:
 
     w.simulate(timedelta(seconds=10))
     assert b.linear_velocity == Vector3(0, 0, 0)
-
-
-def test_disabled_linear_damping() -> None:
-    w = World(timedelta(seconds=.1))
-    b = Body(1, Sphere(Vector3(0), 1), world=w)
-    b.is_enabled = False
-    b.linear_velocity = Vector3(1, 2, 3)
-    b.linear_damping = .5
-
-    w.simulate(timedelta(seconds=1))
-    assert b.linear_velocity == Vector3(1, 2, 3)
 
 
 def test_linear_freedom() -> None:
