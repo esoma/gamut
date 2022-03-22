@@ -433,11 +433,12 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
         pass
 
     if isinstance(shape, Composite3d):
-        shapes = shape.shapes_flattened
+        shapes = list(shape.shapes_flattened)
     else:
         shapes = [shape]
 
-    shape_imp = Shape()
+    shape_imp = Shape(len(shapes) != 1)
+
     shape_data: list[Any] = []
 
     for sub_shape in shapes:
@@ -489,18 +490,19 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
                 tuple(tuple(p) for p in sub_shape.points)
             ))
         elif isinstance(sub_shape, Mesh):
-            vertices = sub_shape.vertices
+            positions = sub_shape.positions
             triangle_indices = sub_shape.triangle_indices
-            shape_data.append(vertices)
-            shape_data.append(triangle_indices)
+            normals = sub_shape.normals
             shape_data.append(
                 shape_imp.add_mesh((
-                    len(vertices),
-                    ctypes.cast(vertices.pointer, ctypes.c_void_p).value,
+                    len(positions),
+                    ctypes.cast(positions.pointer, ctypes.c_void_p).value,
                     len(triangle_indices),
                     ctypes.cast(
                         triangle_indices.pointer, ctypes.c_void_p
                     ).value,
+                    ctypes.cast(normals.pointer, ctypes.c_void_p).value
+                    if normals else 0,
                 ))
             )
         else:

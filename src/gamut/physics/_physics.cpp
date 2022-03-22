@@ -3,14 +3,117 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <structmember.h>
+// stdlib
+#include <vector>
 // bullet
 #define BT_USE_DOUBLE_PRECISION
 #include "btBulletDynamicsCommon.h"
+#include "BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
+#include "BulletCollision/CollisionShapes/btTriangleShape.h"
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include <iostream>
+// glm
+#include <glm/glm.hpp>
 // gamut
 #include "gamut/math.h"
 
-#define ASSERT(x) if (!x){ std::cout << __FILE__ << ":" << __LINE__ << std::endl; exit(1); }
+#define ASSERT(x) if (!(x)){ std::cout << __FILE__ << ":" << __LINE__ << std::endl; exit(1); }
+
+
+extern ContactAddedCallback gContactAddedCallback;
+
+
+bool
+GamutContactAddedCallback(
+    btManifoldPoint& cp,
+    const btCollisionObjectWrapper* colObj1Wrap,
+    int partId1,
+    int index1,
+    const btCollisionObjectWrapper* colObj0Wrap,
+    int partId0,
+    int index0
+)
+{
+    // this is similar to btAdjustInternalEdgeContacts, except we use real
+    // normal data to correct the normals so that tri meshes do not have
+    // "bumpy" behavior
+
+	if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
+    {
+		return true;
+    }
+
+	auto trimesh = (btBvhTriangleMeshShape*)colObj0Wrap->getCollisionObject()->getCollisionShape();
+    auto *normals = (const glm::dvec3 *)trimesh->getUserPointer();
+    if (!normals){ return true; }
+
+    const auto mesh_interface = (btTriangleIndexVertexArray *)trimesh->getMeshInterface();
+    const auto& mesh_array = mesh_interface->getIndexedMeshArray();
+    const auto& mesh = mesh_array[partId0];
+    const int *indices = (const int *)mesh.m_triangleIndexBase;
+    const int *tri_indexes = &indices[index0 * 3];
+    auto *positions = (const glm::dvec3 *)mesh.m_vertexBase;
+
+    auto *position_0 = &positions[tri_indexes[0]];
+    auto *position_1 = &positions[tri_indexes[1]];
+    auto *position_2 = &positions[tri_indexes[2]];
+
+    auto *normal_0 = &normals[tri_indexes[0]];
+    auto *normal_1 = &normals[tri_indexes[1]];
+    auto *normal_2 = &normals[tri_indexes[2]];
+
+    // https://en.wikipedia.org/wiki/Point-normal_triangle
+    // https://blog.demofox.org/2019/12/07/bezier-triangles/
+    auto b300 = *position_0;
+    auto b030 = *position_1;
+    auto b003 = *position_2;
+    #define P(i) (positions[i - 1])
+    #define N(i) (normals[i - 1])
+    #define w(i, j) (glm::dot(P(j) - P(i), N(i)))
+    auto b012 = (1 / 3.0) * (2.0 * P(3) + P(2) - w(3, 2) * N(3));
+    auto b021 = (1 / 3.0) * (2.0 * P(2) + P(3) - w(2, 3) * N(2));
+    auto b102 = (1 / 3.0) * (2.0 * P(3) + P(1) - w(3, 1) * N(3));
+    auto b201 = (1 / 3.0) * (2.0 * P(1) + P(3) - w(1, 3) * N(1));
+    auto b120 = (1 / 3.0) * (2.0 * P(2) + P(1) - w(2, 1) * N(2));
+    auto b210 = (1 / 3.0) * (2.0 * P(1) + P(2) - w(1, 2) * N(1));
+    auto E = (1 / 6.0) * (b012 + b021 + b102 + b201 + b120 + b210);
+    auto V = (1 / 3.0) * (P(1) + P(2) + P(3));
+    auto b111 = E + .5 * (E - V);
+
+    // interpolate the "real" (smoothed) normal for the intersection point
+    // barycentric
+    auto v0 = b030 - b300;
+    auto v1 = b003 - b300;
+    auto v2 = glm::dvec3(cp.m_localPointB[0], cp.m_localPointB[1], cp.m_localPointB[2]) - b300;
+    auto d00 = glm::dot(v0, v0);
+    auto d01 = glm::dot(v0, v1);
+    auto d11 = glm::dot(v1, v1);
+    auto d20 = glm::dot(v2, v0);
+    auto d21 = glm::dot(v2, v1);
+    auto denom = d00 * d11 - d01 * d01;
+    auto v = (d11 * d20 - d01 * d21) / denom;
+    auto w = (d00 * d21 - d01 * d20) / denom;
+    auto u = 1.0 - v - w;
+    auto final_normal = (
+        (*normal_0) * u +
+        (*normal_1) * v +
+        (*normal_2) * w
+    );
+
+    // correct the normal and reproject the collision point along it
+    cp.m_normalWorldOnB = btVector3(
+        final_normal.x,
+        final_normal.y,
+        final_normal.z
+    );
+    cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
+    cp.m_localPointB = colObj0Wrap->getWorldTransform().invXform(cp.m_positionWorldOnB);
+    return true;
+}
+
+
+// Python Structures
+// ----------------------------------------------------------------------------
 
 
 struct ModuleState
@@ -33,7 +136,10 @@ struct World
 struct Shape
 {
     PyObject_HEAD
-    btCompoundShape *shape;
+    btCollisionShape *shape;
+    bool is_compound;
+    bool must_be_static;
+    std::vector<btBvhTriangleMeshShape*> trimesh_shapes;
 };
 
 
@@ -44,6 +150,7 @@ struct Body
     btDefaultMotionState *motion_state;
     btRigidBody *body;
     Shape *shape;
+    std::vector<btRigidBody*> trimesh_bodies;
 };
 
 
@@ -381,6 +488,49 @@ define_world_type(PyObject *module)
 // ----------------------------------------------------------------------------
 
 
+void
+Body_shape_update(Body *self)
+{
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        delete (*iter)->getMotionState();
+        delete *iter;
+    }
+    for (
+        auto iter = self->shape->trimesh_shapes.begin();
+        iter != self->shape->trimesh_shapes.end();
+        ++iter
+    )
+    {
+        btRigidBody::btRigidBodyConstructionInfo info(
+            0,
+            new btDefaultMotionState(btTransform::getIdentity()),
+            *iter,
+            btVector3(0, 0, 0)
+        );
+        info.m_friction = self->body->getFriction();
+        info.m_rollingFriction = self->body->getRollingFriction();
+        info.m_spinningFriction = self->body->getSpinningFriction();
+        info.m_restitution = self->body->getRestitution();
+        info.m_startWorldTransform = self->body->getWorldTransform();
+
+        auto body = new btRigidBody(info);
+        body->setActivationState(self->body->getActivationState());
+        body->setUserPointer(self);
+        body->setCollisionFlags(
+            btCollisionObject::CF_STATIC_OBJECT |
+            btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK
+        );
+
+        self->trimesh_bodies.push_back(body);
+    }
+}
+
+
 static PyObject *
 Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
@@ -419,6 +569,8 @@ Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     self->shape = shape;
 
     self->body->setUserPointer(self);
+    self->body->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    Body_shape_update(self);
 
     return (PyObject *)self;
 }
@@ -429,6 +581,15 @@ Body___dealloc__(Body *self)
 {
     delete self->body;
     delete self->motion_state;
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        delete (*iter)->getMotionState();
+        delete *iter;
+    }
 
     PyTypeObject *type = Py_TYPE(self);
     type->tp_free(self);
@@ -458,6 +619,14 @@ static PyObject *
 Body_set_enabled(Body *self, PyObject *)
 {
     self->body->setActivationState(ACTIVE_TAG);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setActivationState(ACTIVE_TAG);
+    }
     Py_RETURN_NONE;
 }
 
@@ -466,6 +635,14 @@ static PyObject *
 Body_set_cannot_sleep(Body *self, PyObject *)
 {
     self->body->setActivationState(DISABLE_DEACTIVATION);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setActivationState(DISABLE_DEACTIVATION);
+    }
     Py_RETURN_NONE;
 }
 
@@ -474,6 +651,14 @@ static PyObject *
 Body_set_disabled(Body *self, PyObject *)
 {
     self->body->setActivationState(DISABLE_SIMULATION);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setActivationState(DISABLE_SIMULATION);
+    }
     Py_RETURN_NONE;
 }
 
@@ -506,8 +691,16 @@ Body_set_gravity(Body *self, PyObject *args, void *)
 static PyObject *
 Body_set_shape(Body *self, Shape *shape)
 {
+    if (
+        shape->must_be_static &&
+        !(self->body->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT)
+    )
+    {
+        return PyErr_Format(PyExc_ValueError, "this shape cannot be applied to a non-static body");
+    }
     self->shape = shape;
     self->body->setCollisionShape(shape->shape);
+    Body_shape_update(self);
     Py_RETURN_NONE;
 }
 
@@ -515,7 +708,11 @@ Body_set_shape(Body *self, Shape *shape)
 static PyObject *
 Body_set_to_dynamic(Body *self, PyObject *)
 {
-    self->body->setCollisionFlags(0);
+    if (self->shape->must_be_static)
+    {
+        return PyErr_Format(PyExc_ValueError, "body composed of a shape that must be static");
+    }
+    self->body->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
     Py_RETURN_NONE;
 }
 
@@ -523,14 +720,19 @@ Body_set_to_dynamic(Body *self, PyObject *)
 static PyObject *
 Body_set_to_kinematic(Body *self, PyObject *)
 {
-    self->body->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+    if (self->shape->must_be_static)
+    {
+        return PyErr_Format(PyExc_ValueError, "body composed of a shape that must be static");
+    }
+    self->body->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
     Py_RETURN_NONE;
 }
+
 
 static PyObject *
 Body_set_to_static(Body *self, PyObject *)
 {
-    self->body->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    self->body->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
     self->body->setAngularVelocity(btVector3(0, 0, 0));
     self->body->setLinearVelocity(btVector3(0, 0, 0));
     Py_RETURN_NONE;
@@ -719,6 +921,14 @@ Body_Setter_friction(Body *self, PyObject *value, void *)
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
     self->body->setFriction(friction);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setFriction(friction);
+    }
     return 0;
 }
 
@@ -839,6 +1049,14 @@ Body_Setter_rolling_friction(Body *self, PyObject *value, void *)
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
     self->body->setRollingFriction(friction);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setRollingFriction(friction);
+    }
     return 0;
 }
 
@@ -857,6 +1075,14 @@ Body_Setter_restitution(Body *self, PyObject *value, void *)
     double restitution = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
     self->body->setRestitution(restitution);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setRestitution(restitution);
+    }
     return 0;
 }
 
@@ -875,6 +1101,14 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
     self->body->setSpinningFriction(friction);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setSpinningFriction(friction);
+    }
     return 0;
 }
 
@@ -901,6 +1135,14 @@ Body_Setter_transform(Body *self, PyObject *value, void *)
     transform.setFromOpenGLMatrix(matrix);
     self->motion_state->setWorldTransform(transform);
     self->body->setWorldTransform(transform);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setWorldTransform(transform);
+    }
     return 0;
 }
 
@@ -1050,13 +1292,27 @@ define_body_type(PyObject *module)
 static PyObject *
 Shape___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {NULL};
+    int is_compound;
+    static char *kwlist[] = {
+        "",
+        NULL
+    };
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwds, "", kwlist
+        args, kwds, "p", kwlist,
+        &is_compound
     )){ return 0; }
 
     Shape *self = (Shape*)cls->tp_alloc(cls, 0);
-    self->shape = new btCompoundShape();
+    self->is_compound = is_compound != 0;
+    self->must_be_static = false;
+    if (is_compound != 0)
+    {
+        self->shape = new btCompoundShape();
+    }
+    else
+    {
+        self->shape = 0;
+    }
 
     return (PyObject *)self;
 }
@@ -1065,7 +1321,10 @@ Shape___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 static void
 Shape___dealloc__(Shape *self)
 {
-    delete self->shape;
+    if (self->is_compound)
+    {
+        delete self->shape;
+    }
 
     PyTypeObject *type = Py_TYPE(self);
     type->tp_free(self);
@@ -1181,12 +1440,30 @@ Shape_add_capsule(Shape *self, PyObject *args)
     )){ return 0; }
 
     auto capsule = new btCapsuleShape(radius, height);
-    btTransform transform = btTransform::getIdentity();
-    transform.setOrigin(btVector3(center_x, center_y, center_z));
-    transform.setRotation(btQuaternion(
-        rotation_x, rotation_y, rotation_z, rotation_w
-    ));
-    self->shape->addChildShape(transform, capsule);
+    if (
+        self->is_compound ||
+        center_x != 0 || center_y != 0 || center_z != 0 ||
+        rotation_w != 1 || rotation_x != 0 || rotation_y != 0 || rotation_z != 0
+    )
+    {
+        btTransform transform = btTransform::getIdentity();
+        transform.setOrigin(btVector3(center_x, center_y, center_z));
+        transform.setRotation(btQuaternion(
+            rotation_x, rotation_y, rotation_z, rotation_w
+        ));
+        if (!self->is_compound)
+        {
+            ASSERT(self->shape == 0);
+            self->is_compound = true;
+            self->shape = new btCompoundShape;
+        }
+        ((btCompoundShape*)self->shape)->addChildShape(transform, capsule);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = capsule;
+    }
     return PyCapsule_New(capsule, 0, capsule_capsule_destructor);
 }
 
@@ -1211,12 +1488,30 @@ Shape_add_cone(Shape *self, PyObject *args)
     )){ return 0; }
 
     auto cone = new btConeShape(radius, height);
-    btTransform transform = btTransform::getIdentity();
-    transform.setOrigin(btVector3(center_x, center_y, center_z));
-    transform.setRotation(btQuaternion(
-        rotation_x, rotation_y, rotation_z, rotation_w
-    ));
-    self->shape->addChildShape(transform, cone);
+    if (
+        self->is_compound ||
+        center_x != 0 || center_y != 0 || center_z != 0 ||
+        rotation_w != 1 || rotation_x != 0 || rotation_y != 0 || rotation_z != 0
+    )
+    {
+        btTransform transform = btTransform::getIdentity();
+        transform.setOrigin(btVector3(center_x, center_y, center_z));
+        transform.setRotation(btQuaternion(
+            rotation_x, rotation_y, rotation_z, rotation_w
+        ));
+        if (!self->is_compound)
+        {
+            ASSERT(self->shape == 0);
+            self->is_compound = true;
+            self->shape = new btCompoundShape;
+        }
+        ((btCompoundShape*)self->shape)->addChildShape(transform, cone);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = cone;
+    }
     return PyCapsule_New(cone, 0, cone_capsule_destructor);
 }
 
@@ -1240,7 +1535,16 @@ Shape_add_convex_hull(Shape *self, PyObject *points)
     convex_hull_shape->recalcLocalAabb();
     convex_hull_shape->optimizeConvexHull();
 
-    self->shape->addChildShape(btTransform::getIdentity(), convex_hull_shape);
+    if (self->is_compound)
+    {
+        ((btCompoundShape*)self->shape)->addChildShape(btTransform::getIdentity(), convex_hull_shape);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = convex_hull_shape;
+    }
+
     return PyCapsule_New(convex_hull_shape, 0, convex_hull_capsule_destructor);
 }
 
@@ -1264,15 +1568,31 @@ Shape_add_cylinder(Shape *self, PyObject *args)
         &rotation_w, &rotation_x, &rotation_y, &rotation_z
     )){ return 0; }
 
-    auto cylinder = new btCylinderShape(
-        btVector3(radius, height * .5, radius)
-    );
-    btTransform transform = btTransform::getIdentity();
-    transform.setOrigin(btVector3(center_x, center_y, center_z));
-    transform.setRotation(btQuaternion(
-        rotation_x, rotation_y, rotation_z, rotation_w
-    ));
-    self->shape->addChildShape(transform, cylinder);
+    auto cylinder = new btCylinderShape(btVector3(radius, height * .5, radius));
+    if (
+        self->is_compound ||
+        center_x != 0 || center_y != 0 || center_z != 0 ||
+        rotation_w != 1 || rotation_x != 0 || rotation_y != 0 || rotation_z != 0
+    )
+    {
+        btTransform transform = btTransform::getIdentity();
+        transform.setOrigin(btVector3(center_x, center_y, center_z));
+        transform.setRotation(btQuaternion(
+            rotation_x, rotation_y, rotation_z, rotation_w
+        ));
+        if (!self->is_compound)
+        {
+            ASSERT(self->shape == 0);
+            self->is_compound = true;
+            self->shape = new btCompoundShape;
+        }
+        ((btCompoundShape*)self->shape)->addChildShape(transform, cylinder);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = cylinder;
+    }
     return PyCapsule_New(cylinder, 0, cylinder_capsule_destructor);
 }
 
@@ -1294,7 +1614,15 @@ Shape_add_plane(Shape *self, PyObject *args)
         btVector3(normal_x, normal_y, normal_z),
         distance
     );
-    self->shape->addChildShape(btTransform::getIdentity(), plane);
+    if (self->is_compound)
+    {
+        ((btCompoundShape*)self->shape)->addChildShape(btTransform::getIdentity(), plane);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = plane;
+    }
     return PyCapsule_New(plane, 0, plane_capsule_destructor);
 }
 
@@ -1306,10 +1634,12 @@ Shape_add_mesh(Shape *self, PyObject *args)
     double *vertices = 0;
     int num_triangle_indices;
     int *triangle_indices = 0;
+    double *normals = 0;
     if (!PyArg_ParseTuple(
-        args, "iLiL",
+        args, "iLiLL",
         &num_vertices, &vertices,
-        &num_triangle_indices, &triangle_indices
+        &num_triangle_indices, &triangle_indices,
+        &normals
     )){ return 0; }
 
     auto mesh_interface = new btTriangleIndexVertexArray(
@@ -1321,7 +1651,18 @@ Shape_add_mesh(Shape *self, PyObject *args)
         sizeof(double) * 3
     );
     auto bvh_tri_mesh = new btBvhTriangleMeshShape(mesh_interface, true);
-    self->shape->addChildShape(btTransform::getIdentity(), bvh_tri_mesh);
+    bvh_tri_mesh->setUserPointer(normals);
+
+    if (self->is_compound)
+    {
+        self->trimesh_shapes.push_back(bvh_tri_mesh);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = bvh_tri_mesh;
+    }
+    self->must_be_static = true;
 
     return PyCapsule_New(bvh_tri_mesh, 0, bvh_tri_mesh_capsule_destructor);
 }
@@ -1352,12 +1693,30 @@ Shape_add_rectangular_cuboid(Shape *self, PyObject *args)
         dimensions_y * .5,
         dimensions_z * .5
     ));
-    btTransform transform = btTransform::getIdentity();
-    transform.setOrigin(btVector3(center_x, center_y, center_z));
-    transform.setRotation(btQuaternion(
-        rotation_x, rotation_y, rotation_z, rotation_w
-    ));
-    self->shape->addChildShape(transform, box);
+    if (
+        self->is_compound ||
+        center_x != 0 || center_y != 0 || center_z != 0 ||
+        rotation_w != 1 || rotation_x != 0 || rotation_y != 0 || rotation_z != 0
+    )
+    {
+        btTransform transform = btTransform::getIdentity();
+        transform.setOrigin(btVector3(center_x, center_y, center_z));
+        transform.setRotation(btQuaternion(
+            rotation_x, rotation_y, rotation_z, rotation_w
+        ));
+        if (!self->is_compound)
+        {
+            ASSERT(self->shape == 0);
+            self->is_compound = true;
+            self->shape = new btCompoundShape;
+        }
+        ((btCompoundShape*)self->shape)->addChildShape(transform, box);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = box;
+    }
     return PyCapsule_New(box, 0, box_capsule_destructor);
 }
 
@@ -1377,9 +1736,26 @@ Shape_add_sphere(Shape *self, PyObject *args)
     )){ return 0; }
 
     auto sphere = new btSphereShape(radius);
-    btTransform transform = btTransform::getIdentity();
-    transform.setOrigin(btVector3(center_x, center_y, center_z));
-    self->shape->addChildShape(transform, sphere);
+    if (
+        self->is_compound ||
+        center_x != 0 || center_y != 0 || center_z != 0
+    )
+    {
+        btTransform transform = btTransform::getIdentity();
+        transform.setOrigin(btVector3(center_x, center_y, center_z));
+        if (!self->is_compound)
+        {
+            ASSERT(self->shape == 0);
+            self->is_compound = true;
+            self->shape = new btCompoundShape;
+        }
+        ((btCompoundShape*)self->shape)->addChildShape(transform, sphere);
+    }
+    else
+    {
+        ASSERT(self->shape == 0);
+        self->shape = sphere;
+    }
     return PyCapsule_New(sphere, 0, sphere_capsule_destructor);
 }
 
@@ -1533,6 +1909,8 @@ static struct PyModuleDef module_PyModuleDef = {
 PyMODINIT_FUNC
 PyInit__physics()
 {
+    gContactAddedCallback = GamutContactAddedCallback;
+
     ModuleState *state = 0;
     PyObject *module = PyModule_Create(&module_PyModuleDef);
     if (!module){ goto error; }

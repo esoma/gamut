@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import Mesh
-from gamut.math import (IVector3, IVector3Array, Matrix4, Vector2, Vector3,
+from gamut.math import (Matrix4, UVector3, UVector3Array, Vector2, Vector3,
                         Vector3Array, Vector4)
 # python
 from math import radians
@@ -11,40 +11,63 @@ import pytest
 
 
 def test_hash() -> None:
-    vertices = Vector3Array(Vector3(1, 2, 3))
-    triangle_indexes = IVector3Array(IVector3(0))
-    m1 = Mesh(vertices, triangle_indexes)
-    m2 = Mesh(vertices, triangle_indexes)
+    positions = Vector3Array(Vector3(1, 2, 3))
+    triangle_indexes = UVector3Array(UVector3(0))
+    m1 = Mesh(positions, triangle_indexes)
+    m2 = Mesh(positions, triangle_indexes)
     assert hash(m1) != hash(m2)
 
 
 def test_repr() -> None:
-    m = Mesh(Vector3Array(Vector3(1, 2, 3)), IVector3Array(IVector3(0)))
+    m = Mesh(Vector3Array(Vector3(1, 2, 3)), UVector3Array(UVector3(0)))
     assert repr(m) == '<gamut.geometry.Mesh>'
 
 
-def test_no_vertices() -> None:
+def test_no_positions() -> None:
     with pytest.raises(ValueError) as excinfo:
-        Mesh(Vector3Array(), IVector3Array(IVector3(0)))
-    assert str(excinfo.value) == 'must have at least 1 vertex'
+        Mesh(Vector3Array(), UVector3Array(UVector3(0)))
+    assert str(excinfo.value) == 'must have at least 1 vertex position'
 
 
-@pytest.mark.parametrize("vertices", [
+def test_no_normals() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        Mesh(
+            Vector3Array(Vector3(0)),
+            UVector3Array(UVector3(0)),
+            normals=Vector3Array()
+        )
+    assert str(excinfo.value) == 'must have at least 1 vertex normal'
+
+
+@pytest.mark.parametrize("positions", [
     [None],
     [1],
     ['123'],
     [Vector2(1)],
     [Vector4(1)],
 ])
-def test_vertices_invalid_type(vertices: Any) -> None:
+def test_positions_invalid_type(positions: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Mesh(vertices, [IVector3(0)])
-    assert str(excinfo.value) == 'vertices must be Vector3Array'
+        Mesh(positions, [UVector3(0)])
+    assert str(excinfo.value) == 'positions must be Vector3Array'
+
+
+@pytest.mark.parametrize("normals", [
+    [None],
+    [1],
+    ['123'],
+    [Vector2(1)],
+    [Vector4(1)],
+])
+def test_normals_invalid_type(normals: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Mesh(Vector3Array(Vector3(0)), [UVector3(0)], normals=normals)
+    assert str(excinfo.value) == 'normals must be Vector3Array'
 
 
 def test_no_triangle_indices() -> None:
     with pytest.raises(ValueError) as excinfo:
-        Mesh(Vector3Array(Vector3(0)), IVector3Array())
+        Mesh(Vector3Array(Vector3(0)), UVector3Array())
     assert str(excinfo.value) == 'must have at least 1 triangle'
 
 
@@ -58,37 +81,59 @@ def test_no_triangle_indices() -> None:
 def test_triangle_indices_invalid_type(indices: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Mesh(Vector3Array(Vector3(0)), indices)
-    assert str(excinfo.value) == 'indices must be IVector3Array'
+    assert str(excinfo.value) == 'indices must be UVector3Array'
 
 
-@pytest.mark.parametrize("triangle_indices", [
-    IVector3Array(IVector3(-1, 0, 0)),
-    IVector3Array(IVector3(1, 0, 0)),
+@pytest.mark.parametrize("positions, triangle_indices, normals", [
+    (
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(1, 0, 0)),
+        None
+    ),
+    (
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(1, 0, 0)),
+        Vector3Array(Vector3(0)),
+    ),
+    (
+        Vector3Array(Vector3(0), Vector3(0)),
+        UVector3Array(UVector3(1, 0, 0)),
+        Vector3Array(Vector3(0)),
+    ),
+    (
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(1, 0, 0)),
+        Vector3Array(Vector3(0), Vector3(0)),
+    ),
 ])
-def test_triangle_indices_invalid_value(triangle_indices: Any) -> None:
+def test_triangle_indices_invalid_value(
+    positions: Any,
+    triangle_indices: Any,
+    normals: Any
+) -> None:
     with pytest.raises(ValueError) as excinfo:
-        Mesh(Vector3Array(Vector3(0)), triangle_indices)
+        Mesh(positions, triangle_indices, normals=normals)
     assert (
         str(excinfo.value) ==
         'triangle indices must be between 0 and the number of vertices'
     )
 
 
-@pytest.mark.parametrize("vertices", [
+@pytest.mark.parametrize("positions", [
     Vector3Array(Vector3(0, 1, 2), Vector3(3, 4, 5)),
     Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
 ])
-def test_vertices(vertices: Any) -> None:
-    m = Mesh(vertices, IVector3Array(IVector3(0)))
-    assert m.vertices == vertices
+def test_positions(positions: Any) -> None:
+    m = Mesh(positions, UVector3Array(UVector3(0)))
+    assert m.positions == positions
 
 
 @pytest.mark.parametrize("triangle_indices", [
-    IVector3Array(IVector3(0)),
-    IVector3Array(IVector3(0, 1, 2)),
-    IVector3Array(IVector3(0, 1, 2), IVector3(1, 2, 3), IVector3(2, 3, 0)),
+    UVector3Array(UVector3(0)),
+    UVector3Array(UVector3(0, 1, 2)),
+    UVector3Array(UVector3(0, 1, 2), UVector3(1, 2, 3), UVector3(2, 3, 0)),
 ])
-def test_vertices(triangle_indices: Any) -> None:
+def test_triangle_indices(triangle_indices: Any) -> None:
     m = Mesh(
         Vector3Array(Vector3(0), Vector3(1), Vector3(2), Vector3(3)),
         triangle_indices
@@ -96,11 +141,29 @@ def test_vertices(triangle_indices: Any) -> None:
     assert m.triangle_indices == triangle_indices
 
 
+@pytest.mark.parametrize("normals", [
+    Vector3Array(Vector3(0, 1, 2), Vector3(3, 4, 5)),
+    Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+])
+def test_normals(normals: Any) -> None:
+    m = Mesh(
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(0)),
+        normals=normals
+    )
+    assert m.normals == normals
+
+
 @pytest.mark.parametrize("mesh", [
-    Mesh(Vector3Array(Vector3(0, 1, 2)), IVector3Array(IVector3(0))),
+    Mesh(Vector3Array(Vector3(0, 1, 2)), UVector3Array(UVector3(0))),
     Mesh(
         Vector3Array(Vector3(0, 1, 2), Vector3(3, 4, 5)),
-        IVector3Array(IVector3(0))
+        UVector3Array(UVector3(0))
+    ),
+    Mesh(
+        Vector3Array(Vector3(0, 1, 2), Vector3(3, 4, 5)),
+        UVector3Array(UVector3(0)),
+        normals=Vector3Array(Vector3(0, 1, 2), Vector3(3, 4, 5)),
     ),
 ])
 @pytest.mark.parametrize("transform", [
@@ -115,44 +178,69 @@ def test_vertices(triangle_indices: Any) -> None:
 def test_transform(mesh: Mesh, transform: Matrix4) -> None:
     new_ch = transform @ mesh
     assert new_ch is not mesh
-    assert new_ch.vertices == Vector3Array(*(
-        transform @ v for v in mesh.vertices
+    assert new_ch.positions == Vector3Array(*(
+        transform @ v for v in mesh.positions
     ))
     assert new_ch.triangle_indices == mesh.triangle_indices
+    if mesh.normals is None:
+        assert new_ch.normals is None
+    else:
+        normal_transform = transform.inverse().transpose().to_matrix3()
+        assert new_ch.normals == Vector3Array(*(
+            normal_transform @ v for v in mesh.normals
+        ))
 
 
 def test_equal() -> None:
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) == (
-        Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0)))
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) == (
+        Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0)))
     )
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) != (
-        Mesh(Vector3Array(Vector3(0), Vector3(0)), IVector3Array(IVector3(0)))
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) != (
+        Mesh(Vector3Array(Vector3(0), Vector3(0)), UVector3Array(UVector3(0)))
     )
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) != (
-        Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0), IVector3(0)))
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) != (
+        Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0), UVector3(0)))
     )
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) != (
-        Mesh(Vector3Array(Vector3(1, 0, 0)), IVector3Array(IVector3(0)))
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) != (
+        Mesh(Vector3Array(Vector3(1, 0, 0)), UVector3Array(UVector3(0)))
     )
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) != (
-        Mesh(Vector3Array(Vector3(0, 1, 0)), IVector3Array(IVector3(0)))
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) != (
+        Mesh(Vector3Array(Vector3(0, 1, 0)), UVector3Array(UVector3(0)))
     )
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) != (
-        Mesh(Vector3Array(Vector3(0, 0, 1)), IVector3Array(IVector3(0)))
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) != (
+        Mesh(Vector3Array(Vector3(0, 0, 1)), UVector3Array(UVector3(0)))
     )
-    vertices = Vector3Array(Vector3(0), Vector3(0))
+    positions = Vector3Array(Vector3(0), Vector3(0))
     assert (
-        Mesh(vertices, IVector3Array(IVector3(0))) !=
-        Mesh(vertices, IVector3Array(IVector3(1, 0, 0)))
-    )
-    assert (
-        Mesh(vertices, IVector3Array(IVector3(0))) !=
-        Mesh(vertices, IVector3Array(IVector3(0, 1, 0)))
+        Mesh(positions, UVector3Array(UVector3(0))) !=
+        Mesh(positions, UVector3Array(UVector3(1, 0, 0)))
     )
     assert (
-        Mesh(vertices, IVector3Array(IVector3(0))) !=
-        Mesh(vertices, IVector3Array(IVector3(0, 0, 1)))
+        Mesh(positions, UVector3Array(UVector3(0))) !=
+        Mesh(positions, UVector3Array(UVector3(0, 1, 0)))
     )
-    assert Mesh(Vector3Array(Vector3(0)), IVector3Array(IVector3(0))) != (
+    assert (
+        Mesh(positions, UVector3Array(UVector3(0))) !=
+        Mesh(positions, UVector3Array(UVector3(0, 0, 1)))
+    )
+    assert Mesh(Vector3Array(Vector3(0)), UVector3Array(UVector3(0))) != (
         object()
+    )
+    assert Mesh(
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(0)),
+        normals=Vector3Array(Vector3(0))
+    ) == Mesh(
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(0)),
+        normals=Vector3Array(Vector3(0))
+    )
+    assert Mesh(
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(0)),
+        normals=Vector3Array(Vector3(0))
+    ) != Mesh(
+        Vector3Array(Vector3(0)),
+        UVector3Array(UVector3(0)),
+        normals=Vector3Array(Vector3(1))
     )

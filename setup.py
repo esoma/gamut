@@ -99,7 +99,7 @@ class BuildBullet(Command):
 
 physics = Extension(
     'gamut.physics._physics',
-    include_dirs=['vendor/bullet3/src', 'include'],
+    include_dirs=['vendor/glm', 'vendor/bullet3/src', 'include'],
     library_dirs=[
         'build/bullet3/lib/Release',
     ] if os.name == 'nt' else [
