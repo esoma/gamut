@@ -698,10 +698,23 @@ def test_invalid_world(world: Any) -> None:
     assert str(excinfo.value) == f'world must be None or {World}'
 
 
-def test_world() -> None:
+@pytest.mark.parametrize("shape", [
+    Sphere(Vector3(0), 1),
+    Composite3d(
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+])
+def test_world(shape: Any) -> None:
     w1 = World(timedelta(seconds=1))
     w2 = World(timedelta(seconds=1))
-    b = Body(1, Sphere(Vector3(0), 1))
+    b = Body(1, shape, type=BodyType.STATIC)
 
     b.world = w1
     assert b.world is w1
