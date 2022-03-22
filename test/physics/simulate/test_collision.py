@@ -1,12 +1,17 @@
 
 # gamut
-from gamut.geometry import Plane, Sphere
-from gamut.math import Matrix4, Vector3
+from gamut.geometry import Composite3d, Mesh, Plane, Sphere
+from gamut.math import Matrix4, UVector3, UVector3Array, Vector3, Vector3Array
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
+from math import isclose
 # pytest
 import pytest
+
+
+def is_close(a, b):
+    return isclose(a, b, abs_tol=1e-06)
 
 
 @pytest.mark.parametrize("ball_type", [BodyType.DYNAMIC, BodyType.KINEMATIC])
@@ -117,3 +122,56 @@ def test_no_collision_mask(ball_group_shift: int) -> None:
 
     with pytest.raises(StopIteration):
         next(world_simulation)
+
+
+def test_mesh_collision_normals() -> None:
+    w = World(timedelta(seconds=1 / 120.0))
+    w.gravity = Vector3(0, -9.8, 0)
+
+    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.DYNAMIC)
+    ball.transform = Matrix4(1).translate(Vector3(99, 1.2, 0))
+    ball.linear_velocity = Vector3(-8, 0, 0)
+
+    floor_shape = Composite3d(
+        Mesh(
+            Vector3Array(
+                Vector3(100, 0, 100),
+                Vector3(100, 0, -100),
+                Vector3(-100, 0, -100)
+            ),
+            UVector3Array(UVector3(0, 1, 2)),
+            normals=Vector3Array(
+                Vector3(0, 1, 0),
+                Vector3(0, 1, 0),
+                Vector3(0, 1, 0)
+            )
+        ),
+        Mesh(
+            Vector3Array(
+                Vector3(100, 0, 100),
+                Vector3(-100, 0, 100),
+                Vector3(-100, 0, -100)
+            ),
+            UVector3Array(UVector3(0, 1, 2)),
+            normals=Vector3Array(
+                Vector3(0, 1, 0),
+                Vector3(0, 1, 0),
+                Vector3(0, 1, 0)
+            )
+        ),
+    )
+    floor = Body(1, floor_shape, type=BodyType.STATIC, world=w)
+
+    w.simulate(timedelta(seconds=1))
+    for _ in range(150):
+        for collisions in w.simulate(timedelta(seconds=.1)):
+            assert len(collisions) >= 1
+            for collision in collisions:
+                for contact in collision.contacts:
+                    assert is_close(contact.normal_a.x, 0)
+                    assert is_close(contact.normal_a.y, -1)
+                    assert is_close(contact.normal_a.z, 0)
+                    assert is_close(contact.normal_b.x, 0)
+                    assert is_close(contact.normal_b.y, 1)
+                    assert is_close(contact.normal_b.z, 0)
+            assert is_close(ball.linear_velocity.y, 0)

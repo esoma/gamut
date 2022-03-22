@@ -1106,6 +1106,7 @@ Body_Setter_rolling_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
+    self->body->setRollingFriction(friction);
     return 0;
 }
 
@@ -1149,6 +1150,7 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
     if (PyErr_Occurred()){ return 0; }
+    self->body->setSpinningFriction(friction);
     return 0;
 }
 
