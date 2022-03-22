@@ -17,7 +17,7 @@
 // gamut
 #include "gamut/math.h"
 
-#define ASSERT(x) if (!(x)){ std::cout << __FILE__ << ":" << __LINE__ << std::endl; exit(1); }
+#define ASSERT(x) if (!(x)){ std::cout << "ASSERTION FAILURE: " << __FILE__ << ":" << __LINE__ << std::endl; exit(1); }
 
 
 extern ContactAddedCallback gContactAddedCallback;
@@ -118,7 +118,7 @@ GamutContactAddedCallback(
 
 struct ModuleState
 {
-    struct GamutMathApi *api;
+    struct GamutMathApi *math_api;
 };
 
 
@@ -136,9 +136,19 @@ struct World
 struct Shape
 {
     PyObject_HEAD
+    // the Shape only owns this if is_compound is set, note that we still do
+    // not own the sub-shapes -- in either case they should be held by a
+    // wrapper object using the capsules returned by the shape adding methods
     btCollisionShape *shape;
+    // indicates that shape is a btCompoundShape
     bool is_compound;
+    // indicates that this shape only works with static bodies
     bool must_be_static;
+    // all the trimeshes that exist in the compound shape (only if the shape is
+    // compound, if only composed of a single trimesh this will be empty)
+    //
+    // the Shape does not own these, they are again held externally by the
+    // wrapper using capsules
     std::vector<btBvhTriangleMeshShape*> trimesh_shapes;
 };
 
@@ -146,11 +156,19 @@ struct Shape
 struct Body
 {
     PyObject_HEAD
+    // no reference held -- the wrapper should hold the only reference to this
+    // object
     PyObject *wrapper;
+    // Body has ownership of these
     btDefaultMotionState *motion_state;
     btRigidBody *body;
+    // no reference held -- the shape itself must be maintained externally by
+    // the wrapper
     Shape *shape;
+    // Body has ownership of these
     std::vector<btRigidBody*> trimesh_bodies;
+    // no reference held -- this relationship is maintained by the World
+    World* world;
 };
 
 
@@ -192,6 +210,17 @@ World___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 static void
 World___dealloc__(World *self)
 {
+    const auto& bt_bodies = self->world->getCollisionObjectArray();
+    for (int i = 0; i < bt_bodies.size(); i++)
+    {
+        auto bt_body = bt_bodies[i];
+        auto body = (Body *)bt_body->getUserPointer();
+        // note that multiple bt bodies may share the same Body, so we may have
+        // already set the world to 0 for the same Body
+        ASSERT(body->world == self || body->world == 0);
+        body->world = 0;
+    }
+
     delete self->world;
     delete self->solver;
     delete self->broadphase;
@@ -215,7 +244,17 @@ World_add_body(World *self, PyObject *args)
     Body *body = 0;
     int groups, mask;
     if (!PyArg_ParseTuple(args, "Oii", &body, &groups, &mask)){ return 0; }
+    ASSERT(body->world == 0);
     self->world->addRigidBody(body->body, groups, mask);
+    for (
+        auto iter = body->trimesh_bodies.begin();
+        iter != body->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        self->world->addRigidBody((*iter), groups, mask);
+    }
+    body->world = self;
     Py_RETURN_NONE;
 }
 
@@ -223,7 +262,17 @@ World_add_body(World *self, PyObject *args)
 static PyObject *
 World_remove_body(World *self, Body *body)
 {
+    ASSERT(body->world == self);
+    body->world = 0;
     self->world->removeRigidBody(body->body);
+    for (
+        auto iter = body->trimesh_bodies.begin();
+        iter != body->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        self->world->removeRigidBody((*iter));
+    }
     Py_RETURN_NONE;
 }
 
@@ -271,27 +320,27 @@ World_simulate(World *self, PyObject *args)
             PyObject *contact = PyTuple_New(5);
             if (!contact){ goto error; }
             PyList_SET_ITEM(contacts, j, contact);
-            auto local_position_a = state->api->GamutMathDVector3_Create(
+            auto local_position_a = state->math_api->GamutMathDVector3_Create(
                 point.m_localPointA.m_floats
             );
             if (!local_position_a){ goto error; }
             PyTuple_SET_ITEM(contact, 0, local_position_a);
-            auto world_position_a = state->api->GamutMathDVector3_Create(
+            auto world_position_a = state->math_api->GamutMathDVector3_Create(
                 point.m_positionWorldOnA.m_floats
             );
             if (!world_position_a){ goto error; }
             PyTuple_SET_ITEM(contact, 1, world_position_a);
-            auto local_position_b = state->api->GamutMathDVector3_Create(
+            auto local_position_b = state->math_api->GamutMathDVector3_Create(
                 point.m_localPointB.m_floats
             );
             if (!local_position_b){ goto error; }
             PyTuple_SET_ITEM(contact, 2, local_position_b);
-            auto world_position_b = state->api->GamutMathDVector3_Create(
+            auto world_position_b = state->math_api->GamutMathDVector3_Create(
                 point.m_positionWorldOnB.m_floats
             );
             if (!world_position_b){ goto error; }
             PyTuple_SET_ITEM(contact, 3, world_position_b);
-            auto normal_b = state->api->GamutMathDVector3_Create(
+            auto normal_b = state->math_api->GamutMathDVector3_Create(
                 point.m_normalWorldOnB.m_floats
             );
             if (!normal_b){ goto error; }
@@ -310,8 +359,8 @@ static PyObject *
 World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
 {
     auto state = get_module_state();
-    double *raw_from = state->api->GamutMathDVector3_GetValuePointer(args[0]);
-    double *raw_to = state->api->GamutMathDVector3_GetValuePointer(args[1]);
+    double *raw_from = state->math_api->GamutMathDVector3_GetValuePointer(args[0]);
+    double *raw_to = state->math_api->GamutMathDVector3_GetValuePointer(args[1]);
     btVector3 from(raw_from[0], raw_from[1], raw_from[2]);
     btVector3 to(raw_to[0], raw_to[1], raw_to[2]);
     int groups = PyLong_AsLong(args[2]);
@@ -329,11 +378,11 @@ World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
 
     PyObject *hit = PyTuple_New(4);
 
-    PyObject *position = state->api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
+    PyObject *position = state->math_api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
     if (!position){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 0, position);
 
-    PyObject *normal = state->api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
+    PyObject *normal = state->math_api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
     if (!normal){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 1, normal);
 
@@ -353,8 +402,8 @@ static PyObject *
 World_spherecast(World *self, PyObject *const *args, Py_ssize_t nargs)
 {
     auto state = get_module_state();
-    double *raw_from = state->api->GamutMathDVector3_GetValuePointer(args[0]);
-    double *raw_to = state->api->GamutMathDVector3_GetValuePointer(args[1]);
+    double *raw_from = state->math_api->GamutMathDVector3_GetValuePointer(args[0]);
+    double *raw_to = state->math_api->GamutMathDVector3_GetValuePointer(args[1]);
     btVector3 from(raw_from[0], raw_from[1], raw_from[2]);
     btVector3 to(raw_to[0], raw_to[1], raw_to[2]);
     int groups = PyLong_AsLong(args[2]);
@@ -381,11 +430,11 @@ World_spherecast(World *self, PyObject *const *args, Py_ssize_t nargs)
 
     PyObject *hit = PyTuple_New(4);
 
-    PyObject *position = state->api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
+    PyObject *position = state->math_api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
     if (!position){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 0, position);
 
-    PyObject *normal = state->api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
+    PyObject *normal = state->math_api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
     if (!normal){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 1, normal);
 
@@ -416,7 +465,7 @@ World_Getter_gravity(World *self, void *)
 {
     auto state = get_module_state();
     auto gravity = self->world->getGravity();
-    return state->api->GamutMathDVector3_Create(gravity.m_floats);
+    return state->math_api->GamutMathDVector3_Create(gravity.m_floats);
 }
 
 
@@ -424,7 +473,7 @@ int
 World_Setter_gravity(World *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *gravity = state->api->GamutMathDVector3_GetValuePointer(value);
+    double *gravity = state->math_api->GamutMathDVector3_GetValuePointer(value);
     if (!gravity){ return -1; }
     self->world->setGravity(btVector3(gravity[0], gravity[1], gravity[2]));
     return 0;
@@ -489,7 +538,7 @@ define_world_type(PyObject *module)
 
 
 void
-Body_shape_update(Body *self)
+Body_shape_update(Body *self, int groups, int mask)
 {
     for (
         auto iter = self->trimesh_bodies.begin();
@@ -497,9 +546,15 @@ Body_shape_update(Body *self)
         ++iter
     )
     {
+        if (self->world)
+        {
+            self->world->world->removeRigidBody(*iter);
+        }
         delete (*iter)->getMotionState();
         delete *iter;
     }
+    self->trimesh_bodies.clear();
+
     for (
         auto iter = self->shape->trimesh_shapes.begin();
         iter != self->shape->trimesh_shapes.end();
@@ -519,12 +574,15 @@ Body_shape_update(Body *self)
         info.m_startWorldTransform = self->body->getWorldTransform();
 
         auto body = new btRigidBody(info);
-        body->setActivationState(self->body->getActivationState());
         body->setUserPointer(self);
         body->setCollisionFlags(
             btCollisionObject::CF_STATIC_OBJECT |
             btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK
         );
+        if (self->world)
+        {
+            self->world->world->addRigidBody(body, groups, mask);
+        }
 
         self->trimesh_bodies.push_back(body);
     }
@@ -567,10 +625,13 @@ Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     self->wrapper = wrapper;
     self->body = new btRigidBody(info);
     self->shape = shape;
+    self->world = 0;
 
     self->body->setUserPointer(self);
     self->body->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
-    Body_shape_update(self);
+    // since the body isn't associated with a world yet we can pass in 0 for
+    // the groups and mask
+    Body_shape_update(self, 0, 0);
 
     return (PyObject *)self;
 }
@@ -579,6 +640,10 @@ Body___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 static void
 Body___dealloc__(Body *self)
 {
+    if (self->world)
+    {
+        self->world->world->removeRigidBody(self->body);
+    }
     delete self->body;
     delete self->motion_state;
     for (
@@ -587,6 +652,10 @@ Body___dealloc__(Body *self)
         ++iter
     )
     {
+        if (self->world)
+        {
+            self->world->world->removeRigidBody(*iter);
+        }
         delete (*iter)->getMotionState();
         delete *iter;
     }
@@ -616,7 +685,7 @@ Body_set_mass(Body *self, PyObject *args)
 
 
 static PyObject *
-Body_set_enabled(Body *self, PyObject *)
+Body_set_can_sleep(Body *self, PyObject *)
 {
     self->body->setActivationState(ACTIVE_TAG);
     for (
@@ -648,22 +717,6 @@ Body_set_cannot_sleep(Body *self, PyObject *)
 
 
 static PyObject *
-Body_set_disabled(Body *self, PyObject *)
-{
-    self->body->setActivationState(DISABLE_SIMULATION);
-    for (
-        auto iter = self->trimesh_bodies.begin();
-        iter != self->trimesh_bodies.end();
-        ++iter
-    )
-    {
-        (*iter)->setActivationState(DISABLE_SIMULATION);
-    }
-    Py_RETURN_NONE;
-}
-
-
-static PyObject *
 Body_set_gravity(Body *self, PyObject *args, void *)
 {
     bool is_explicit;
@@ -672,7 +725,7 @@ Body_set_gravity(Body *self, PyObject *args, void *)
         &is_explicit, &value)){ return 0; }
 
     auto state = get_module_state();
-    double *gravity = state->api->GamutMathDVector3_GetValuePointer(value);
+    double *gravity = state->math_api->GamutMathDVector3_GetValuePointer(value);
     if (!gravity){ return 0; }
 
     if (is_explicit)
@@ -689,8 +742,12 @@ Body_set_gravity(Body *self, PyObject *args, void *)
 
 
 static PyObject *
-Body_set_shape(Body *self, Shape *shape)
+Body_set_shape(Body *self, PyObject *const *args, Py_ssize_t nargs)
 {
+    ASSERT(nargs == 3);
+    Shape *shape = (Shape *)args[0];
+    int groups = PyLong_AsLong(args[1]);
+    int mask = PyLong_AsLong(args[2]);
     if (
         shape->must_be_static &&
         !(self->body->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT)
@@ -700,7 +757,7 @@ Body_set_shape(Body *self, Shape *shape)
     }
     self->shape = shape;
     self->body->setCollisionShape(shape->shape);
-    Body_shape_update(self);
+    Body_shape_update(self, groups, mask);
     Py_RETURN_NONE;
 }
 
@@ -712,7 +769,10 @@ Body_set_to_dynamic(Body *self, PyObject *)
     {
         return PyErr_Format(PyExc_ValueError, "body composed of a shape that must be static");
     }
-    self->body->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    auto flags = self->body->getCollisionFlags();
+    flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
+    flags &= ~btCollisionObject::CF_STATIC_OBJECT;
+    self->body->setCollisionFlags(flags);
     Py_RETURN_NONE;
 }
 
@@ -724,7 +784,10 @@ Body_set_to_kinematic(Body *self, PyObject *)
     {
         return PyErr_Format(PyExc_ValueError, "body composed of a shape that must be static");
     }
-    self->body->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    auto flags = self->body->getCollisionFlags();
+    flags |= btCollisionObject::CF_KINEMATIC_OBJECT;
+    flags &= ~btCollisionObject::CF_STATIC_OBJECT;
+    self->body->setCollisionFlags(flags);
     Py_RETURN_NONE;
 }
 
@@ -732,7 +795,10 @@ Body_set_to_kinematic(Body *self, PyObject *)
 static PyObject *
 Body_set_to_static(Body *self, PyObject *)
 {
-    self->body->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    auto flags = self->body->getCollisionFlags();
+    flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
+    flags |= btCollisionObject::CF_STATIC_OBJECT;
+    self->body->setCollisionFlags(flags);
     self->body->setAngularVelocity(btVector3(0, 0, 0));
     self->body->setLinearVelocity(btVector3(0, 0, 0));
     Py_RETURN_NONE;
@@ -755,20 +821,14 @@ static PyMethodDef Body_PyMethodDef[] = {
         0
     },
     {
-        "set_enabled",
-        (PyCFunction)Body_set_enabled,
+        "set_can_sleep",
+        (PyCFunction)Body_set_can_sleep,
         METH_NOARGS,
         0
     },
     {
         "set_cannot_sleep",
         (PyCFunction)Body_set_cannot_sleep,
-        METH_NOARGS,
-        0
-    },
-    {
-        "set_disabled",
-        (PyCFunction)Body_set_disabled,
         METH_NOARGS,
         0
     },
@@ -781,7 +841,7 @@ static PyMethodDef Body_PyMethodDef[] = {
     {
         "set_shape",
         (PyCFunction)Body_set_shape,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
@@ -820,7 +880,7 @@ Body_Getter_angular_damping(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_angular_damping(Body *self, PyObject *value, void *)
 {
     double damping = PyFloat_AsDouble(value);
@@ -840,15 +900,15 @@ Body_Getter_angular_freedom(Body *self, void *)
         angular_factor[1] != 0,
         angular_factor[2] != 0
     };
-    return state->api->GamutMathBVector3_Create(xyz);
+    return state->math_api->GamutMathBVector3_Create(xyz);
 }
 
 
-int
+static int
 Body_Setter_angular_freedom(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    bool *angular_freedom = state->api->GamutMathBVector3_GetValuePointer(value);
+    bool *angular_freedom = state->math_api->GamutMathBVector3_GetValuePointer(value);
     if (!angular_freedom){ return -1; }
     btVector3 angular_factor(
         angular_freedom[0] ? 1 : 0,
@@ -870,7 +930,7 @@ Body_Getter_angular_sleep_threshold(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_angular_sleep_threshold(Body *self, PyObject *value, void *)
 {
     double threshold = PyFloat_AsDouble(value);
@@ -888,15 +948,15 @@ Body_Getter_angular_velocity(Body *self, void *)
 {
     auto state = get_module_state();
     const auto &velocity = self->body->getAngularVelocity();
-    return state->api->GamutMathDVector3_Create(velocity.m_floats);
+    return state->math_api->GamutMathDVector3_Create(velocity.m_floats);
 }
 
 
-int
+static int
 Body_Setter_angular_velocity(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *velocity = state->api->GamutMathDVector3_GetValuePointer(value);
+    double *velocity = state->math_api->GamutMathDVector3_GetValuePointer(value);
     if (!velocity){ return -1; }
     const auto& angular_factor = self->body->getAngularFactor();
     self->body->setAngularVelocity(
@@ -915,7 +975,7 @@ Body_Getter_friction(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
@@ -948,7 +1008,7 @@ Body_Getter_linear_damping(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_linear_damping(Body *self, PyObject *value, void *)
 {
     double damping = PyFloat_AsDouble(value);
@@ -968,15 +1028,15 @@ Body_Getter_linear_freedom(Body *self, void *)
         linear_factor[1] != 0,
         linear_factor[2] != 0
     };
-    return state->api->GamutMathBVector3_Create(xyz);
+    return state->math_api->GamutMathBVector3_Create(xyz);
 }
 
 
-int
+static int
 Body_Setter_linear_freedom(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    bool *linear_freedom = state->api->GamutMathBVector3_GetValuePointer(value);
+    bool *linear_freedom = state->math_api->GamutMathBVector3_GetValuePointer(value);
     if (!linear_freedom){ return -1; }
     btVector3 linear_factor(
         linear_freedom[0] ? 1 : 0,
@@ -998,7 +1058,7 @@ Body_Getter_linear_sleep_threshold(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_linear_sleep_threshold(Body *self, PyObject *value, void *)
 {
     double threshold = PyFloat_AsDouble(value);
@@ -1016,15 +1076,15 @@ Body_Getter_linear_velocity(Body *self, void *)
 {
     auto state = get_module_state();
     const auto& velocity = self->body->getLinearVelocity();
-    return state->api->GamutMathDVector3_Create(velocity.m_floats);
+    return state->math_api->GamutMathDVector3_Create(velocity.m_floats);
 }
 
 
-int
+static int
 Body_Setter_linear_velocity(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *velocity = state->api->GamutMathDVector3_GetValuePointer(value);
+    double *velocity = state->math_api->GamutMathDVector3_GetValuePointer(value);
     if (!velocity){ return -1; }
     const auto& linear_factor = self->body->getLinearFactor();
     self->body->setLinearVelocity(
@@ -1043,7 +1103,7 @@ Body_Getter_rolling_friction(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_rolling_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
@@ -1069,7 +1129,7 @@ Body_Getter_restitution(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_restitution(Body *self, PyObject *value, void *)
 {
     double restitution = PyFloat_AsDouble(value);
@@ -1095,7 +1155,7 @@ Body_Getter_spinning_friction(Body *self, void *)
 }
 
 
-int
+static int
 Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
 {
     double friction = PyFloat_AsDouble(value);
@@ -1120,15 +1180,15 @@ Body_Getter_transform(Body *self, void *)
     btScalar matrix[16];
     btTransform transform = self->body->getWorldTransform();
     transform.getOpenGLMatrix(matrix);
-    return state->api->GamutMathDMatrix4x4_Create(matrix);
+    return state->math_api->GamutMathDMatrix4x4_Create(matrix);
 }
 
 
-int
+static int
 Body_Setter_transform(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *matrix = state->api->GamutMathDMatrix4x4_GetValuePointer(value);
+    double *matrix = state->math_api->GamutMathDMatrix4x4_GetValuePointer(value);
     if (!matrix){ return -1; }
 
     btTransform transform;
@@ -1922,8 +1982,8 @@ PyInit__physics()
     if (!define_body_type(module)){ goto error; }
     if (!define_shape_type(module)){ goto error; }
 
-    state->api = GamutMathApi_Get();
-    if (!state->api){ goto error; }
+    state->math_api = GamutMathApi_Get();
+    if (!state->math_api){ goto error; }
 
     return module;
 error:

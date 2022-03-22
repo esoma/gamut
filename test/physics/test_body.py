@@ -105,7 +105,6 @@ def test_defaults() -> None:
     assert b.angular_sleep_threshold == 1
     assert b.angular_velocity == Vector3(0)
     assert b.can_sleep
-    assert b.is_enabled
     assert not b.is_sleeping
     assert b.linear_damping == 0
     assert b.linear_freedom == BVector3(True)
@@ -238,21 +237,6 @@ def test_can_sleep(can_sleep: Any) -> None:
     b = Body(1, Sphere(Vector3(0), 1))
     b.can_sleep = can_sleep
     assert b.can_sleep == bool(can_sleep)
-
-
-@pytest.mark.parametrize("is_enabled", [
-    False,
-    True,
-    None,
-    0,
-    1,
-    '123',
-    '',
-])
-def test_is_enabled(is_enabled: Any) -> None:
-    b = Body(1, Sphere(Vector3(0), 1))
-    b.is_enabled = is_enabled
-    assert b.is_enabled == bool(is_enabled)
 
 
 def test_is_sleeping() -> None:
@@ -558,6 +542,7 @@ def test_invalid_shape(shape: Any) -> None:
         UVector3Array(UVector3(0), UVector3(1), UVector3(2))
     ),
     Composite3d(
+        Sphere(Vector3(0), 1),
         Mesh(
             Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
@@ -612,6 +597,7 @@ def test_shape(shape: Any) -> None:
         UVector3Array(UVector3(0), UVector3(1), UVector3(2))
     ),
     Composite3d(
+        Sphere(Vector3(0), 1),
         Mesh(
             Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
@@ -628,6 +614,21 @@ def test_shape_static_only(shape: Any, body_type: BodyType) -> None:
     assert str(excinfo.value) == (
         'this shape cannot be applied to a non-static body'
     )
+
+
+def test_shape_change_from_composite_mesh() -> None:
+    shape = Composite3d(
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+    b = Body(1, shape, type=BodyType.STATIC)
+    b.shape = Sphere(Vector3(0), 1)
 
 
 @pytest.mark.parametrize("spinning_friction", [None, 'abc', []])

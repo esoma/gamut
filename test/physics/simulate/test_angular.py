@@ -48,16 +48,6 @@ def test_angular_velocity_non_dynamic(body_type: BodyType) -> None:
     assert b.transform == Matrix4(1)
 
 
-def test_disabled_angular_velocity() -> None:
-    w = World(timedelta(seconds=.1))
-    b = Body(1, Sphere(Vector3(0), 1), world=w)
-    b.is_enabled = False
-    b.angular_velocity = Vector3(pi)
-
-    w.simulate(timedelta(seconds=1))
-    assert b.transform == Matrix4(1)
-
-
 def test_no_angular_damping() -> None:
     w = World(timedelta(seconds=1))
     b = Body(1, Sphere(Vector3(0), 1), world=w)
@@ -106,17 +96,6 @@ def test_angular_damping_static() -> None:
 
     w.simulate(timedelta(seconds=10))
     assert b.angular_velocity == Vector3(0)
-
-
-def test_disabled_angular_damping() -> None:
-    w = World(timedelta(seconds=.1))
-    b = Body(1, Sphere(Vector3(0), 1), world=w)
-    b.is_enabled = False
-    b.angular_velocity = Vector3(1, 2, 3)
-    b.angular_damping = .5
-
-    w.simulate(timedelta(seconds=1))
-    assert b.angular_velocity == Vector3(1, 2, 3)
 
 
 def test_angular_freedom() -> None:

@@ -57,7 +57,6 @@ class Body:
             raise TypeError(f'type must be {BodyType}')
         self._mass = _verify_mass(mass)
 
-        self._is_enabled = True
         self._can_sleep = True
 
         self._shape = shape
@@ -81,13 +80,10 @@ class Body:
         return f'<gamut.physics.Body mass={self.mass} shape={self.shape!r}>'
 
     def _set_state(self) -> None:
-        if self._is_enabled:
-            if self._can_sleep and self._type != BodyType.KINEMATIC:
-                self._imp.set_enabled()
-            else:
-                self._imp.set_cannot_sleep()
+        if self._can_sleep and self._type != BodyType.KINEMATIC:
+            self._imp.set_can_sleep()
         else:
-            self._imp.set_disabled()
+            self._imp.set_cannot_sleep()
 
     @property
     def angular_damping(self) -> float:
@@ -147,15 +143,6 @@ class Body:
     @can_sleep.setter
     def can_sleep(self, value: bool) -> None:
         self._can_sleep = bool(value)
-        self._set_state()
-
-    @property
-    def is_enabled(self) -> bool:
-        return self._is_enabled
-
-    @is_enabled.setter
-    def is_enabled(self, value: bool) -> None:
-        self._is_enabled = bool(value)
         self._set_state()
 
     @property
@@ -328,7 +315,7 @@ class Body:
         # again order is important, the implementation doesn't hold a strong
         # ref to the current shape, so some weirdness could happen if the
         # current shape is deleted prior to setting the new one
-        self._imp.set_shape(self._shape_imp)
+        self._imp.set_shape(self._shape_imp, self._groups, self._mask)
         self._shape = shape
         # we have to recalculate the local inertia by setting the mass
         self._imp.set_mass(
