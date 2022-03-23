@@ -335,6 +335,14 @@ class Body:
         self._imp.spinning_friction = float(value)
 
     @property
+    def tangible(self) -> bool:
+        return self._imp.tangible
+
+    @tangible.setter
+    def tangible(self, value: bool) -> None:
+        self._imp.tangible = bool(value)
+
+    @property
     def transform(self) -> Matrix4:
         return self._imp.transform
 

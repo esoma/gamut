@@ -16,13 +16,22 @@ def is_close(a, b):
 
 @pytest.mark.parametrize("ball_type", [BodyType.DYNAMIC, BodyType.KINEMATIC])
 @pytest.mark.parametrize("floor_type", list(BodyType))
-def test_single_collision(ball_type: BodyType, floor_type: BodyType) -> None:
+@pytest.mark.parametrize("ball_tangible", [True, False])
+@pytest.mark.parametrize("floor_tangible", [True, False])
+def test_single_collision(
+    ball_type: BodyType,
+    floor_type: BodyType,
+    ball_tangible: bool,
+    floor_tangible: bool
+) -> None:
     w = World(timedelta(seconds=1))
 
     ball = Body(1, Sphere(Vector3(0), 1), world=w, type=ball_type)
     ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
+    ball.tangible = ball_tangible
 
     floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=floor_type)
+    floor.tangible = floor_tangible
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)

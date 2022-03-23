@@ -117,6 +117,7 @@ def test_defaults() -> None:
     assert b.restitution == 0
     assert b.rolling_friction == 0
     assert b.spinning_friction == 0
+    assert b.tangible is True
     assert b.transform == Matrix4(1)
     assert b.type == BodyType.DYNAMIC
     assert b.world is None
@@ -657,6 +658,28 @@ def test_invalid_transform_type(transform: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         b.transform = transform
     assert str(excinfo.value) == f'expected DMatrix4x4, got {transform!r}'
+
+
+@pytest.mark.parametrize("shape", [
+    Sphere(Vector3(0), 1),
+    Composite3d(
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+        Mesh(
+            Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
+            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        ),
+    )
+])
+def test_tangible(shape: Any) -> None:
+    b = Body(1, shape, type=BodyType.STATIC)
+    assert b.tangible
+    b.tangible = False
+    assert not b.tangible
+    b.tangible = True
+    assert b.tangible
 
 
 @pytest.mark.parametrize("transform", [
