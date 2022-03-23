@@ -1156,6 +1156,38 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
 
 
 static PyObject *
+Body_Getter_tangible(Body *self, void *)
+{
+    return PyBool_FromLong((self->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) == 0);
+}
+
+
+static int
+Body_Setter_tangible(Body *self, PyObject *value, void *)
+{
+    auto flags = self->body->getCollisionFlags();
+    if (value == Py_True)
+    {
+        flags &= ~btCollisionObject::CF_NO_CONTACT_RESPONSE;
+    }
+    else
+    {
+        flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
+    }
+    self->body->setCollisionFlags(flags);
+    for (
+        auto iter = self->trimesh_bodies.begin();
+        iter != self->trimesh_bodies.end();
+        ++iter
+    )
+    {
+        (*iter)->setCollisionFlags(flags);
+    }
+    return 0;
+}
+
+
+static PyObject *
 Body_Getter_transform(Body *self, void *)
 {
     auto state = get_module_state();
@@ -1272,6 +1304,13 @@ static PyGetSetDef Body_PyGetSetDef[] = {
         "restitution",
         (getter)Body_Getter_restitution,
         (setter)Body_Setter_restitution,
+        0,
+        0
+    },
+    {
+        "tangible",
+        (getter)Body_Getter_tangible,
+        (setter)Body_Setter_tangible,
         0,
         0
     },
