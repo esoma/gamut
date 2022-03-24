@@ -6,8 +6,10 @@ __all__ = [
     'Cone',
     'ConvexHull',
     'Cylinder',
-    'Mesh',
+    'Mesh2d',
+    'Mesh3d',
     'Plane',
+    'Polygon',
     'Quad3d',
     'RectangularCuboid',
     'Shape3dCullable',
@@ -23,8 +25,10 @@ from ._composite3d import Composite3d
 from ._cone import Cone
 from ._convexhull import ConvexHull
 from ._cylinder import Cylinder
-from ._mesh import Mesh
+from ._mesh2d import Mesh2d
+from ._mesh3d import Mesh3d
 from ._plane import Plane
+from ._polygon import Polygon
 from ._protocol import Shape3dCullable, Shape3dPointContainer
 from ._quad3d import Quad3d
 from ._rectangularcuboid import RectangularCuboid

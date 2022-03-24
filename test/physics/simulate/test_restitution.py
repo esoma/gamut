@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import Composite3d, Mesh, Plane, Sphere
+from gamut.geometry import Composite3d, Mesh3d, Plane, Sphere
 from gamut.math import Matrix4, UVector3, UVector3Array, Vector3, Vector3Array
 from gamut.physics import Body, BodyType, World
 # python
@@ -58,7 +58,7 @@ def test_bounce() -> None:
         ball_2.transform = Matrix4(1).translate(Vector3(-5, 10, 5))
 
     floor_shape = Composite3d(
-        Mesh(
+        Mesh3d(
             Vector3Array(
                 Vector3(10, 0, 10),
                 Vector3(10, 0, -10),
@@ -66,7 +66,7 @@ def test_bounce() -> None:
             ),
             UVector3Array(UVector3(0, 1, 2)),
         ),
-        Mesh(
+        Mesh3d(
             Vector3Array(
                 Vector3(10, 0, 10),
                 Vector3(-10, 0, 10),

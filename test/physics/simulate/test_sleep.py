@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import Composite3d, Mesh, Sphere
+from gamut.geometry import Composite3d, Mesh3d, Sphere
 from gamut.math import UVector3, UVector3Array, Vector3, Vector3Array
 from gamut.physics import Body, BodyType, World
 # python
@@ -49,7 +49,7 @@ def test_cannot_sleep_static() -> None:
     w = World(timedelta(seconds=1))
     shape = Composite3d(
         Sphere(Vector3(0), 1),
-        Mesh(
+        Mesh3d(
             Vector3Array(Vector3(0), Vector3(1), Vector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),

@@ -11,7 +11,7 @@ from ._physics import Shape
 from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
-                            Mesh, Plane, RectangularCuboid, Sphere)
+                            Mesh3d, Plane, RectangularCuboid, Sphere)
 from gamut.math import BVector3, Matrix4, Vector3
 # python
 import ctypes
@@ -484,7 +484,7 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
             shape_data.append(shape_imp.add_convex_hull(
                 tuple(tuple(p) for p in sub_shape.points)
             ))
-        elif isinstance(sub_shape, Mesh):
+        elif isinstance(sub_shape, Mesh3d):
             positions = sub_shape.positions
             triangle_indices = sub_shape.triangle_indices
             normals = sub_shape.normals

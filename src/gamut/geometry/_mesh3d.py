@@ -1,13 +1,13 @@
 
 from __future__ import annotations
 
-__all__ = ['Mesh']
+__all__ = ['Mesh3d']
 
 # gamut
 from gamut.math import Matrix4, UVector3Array, Vector3Array
 
 
-class Mesh:
+class Mesh3d:
 
     def __init__(
         self,
@@ -50,8 +50,8 @@ class Mesh:
     def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other: Mesh) -> bool:
-        if not isinstance(other, Mesh):
+    def __eq__(self, other: Mesh3d) -> bool:
+        if not isinstance(other, Mesh3d):
             return False
         return (
             self._positions == other._positions and
@@ -60,9 +60,9 @@ class Mesh:
         )
 
     def __repr__(self) -> str:
-        return f'<gamut.geometry.Mesh>'
+        return f'<gamut.geometry.Mesh3d>'
 
-    def __rmatmul__(self, transform: Matrix4) -> Mesh:
+    def __rmatmul__(self, transform: Matrix4) -> Mesh3d:
         if not isinstance(transform, Matrix4):
             return NotImplemented
 
@@ -73,7 +73,7 @@ class Mesh:
                 normal_transform @ n for n in self._normals
             ))
 
-        return Mesh(
+        return Mesh3d(
             Vector3Array(*(transform @ p for p in self._positions)),
             self._triangle_indices,
             normals=normals
