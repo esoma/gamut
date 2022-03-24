@@ -27,8 +27,8 @@ def msbuild(project):
     ], env=env, shell=True, check=True)
 
 
-def make(directory):
-    run(['make', '-C', directory])
+def make(*args):
+    run(['make', '-C', *args])
 
 
 class GenerateMathCode(Command):
@@ -74,7 +74,7 @@ class BuildBoost(Command):
         if os.name == 'nt':
             msbuild('build/boost-cmake/INSTALL.vcxproj')
         else:
-            make('build/boost-cmake install')
+            make('build/boost-cmake', 'install')
 
 
 class BuildBullet(Command):
@@ -144,12 +144,13 @@ class BuildCgal(Command):
         run([
             'cmake', 'vendor/cgal',
             '-B', build_dir,
+            '-D', 'CMAKE_BUILD_TYPE=Release',
             '-D', f'CMAKE_INSTALL_PREFIX={install_dir}',
         ], check=True)
         if os.name == 'nt':
             msbuild('build/cgal-cmake/INSTALL.vcxproj')
         else:
-            make('build/cgal-cmake install')
+            make('build/cgal-cmake', 'install')
 
 
 physics = Extension(
@@ -191,8 +192,9 @@ geometry_triangulate = Extension(
         'include'
     ],
     sources=['src/gamut/geometry/_triangulate.cpp'],
-    language='c+11',
-    extra_compile_args=coverage_compile_args,
+    language='c++14',
+    extra_compile_args=coverage_compile_args +
+        ([] if os.name == 'nt' else ['-std=c++14']),
     extra_link_args=coverage_links_args,
 )
 
