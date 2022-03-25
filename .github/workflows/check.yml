@@ -31,11 +31,11 @@ jobs:
 
     - name: Cache Check
       run: |
-        git submodule status vendor/boost >> $BOOST_STATUS
-        git submodule status vendor/cgal >> $CGAL_STATUS
-        git submodule status vendor/bullet3 >> $BULLET_STATUS
-        echo "dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $ARTIFACT_NAME
-        python .github/does-dependency-artifact-exist.py ${{ env.ARTIFACT_NAME }} >> $ARTIFACT_EXISTS
+        git submodule status vendor/boost >> $env.BOOST_STATUS
+        git submodule status vendor/cgal >> $env.CGAL_STATUS
+        git submodule status vendor/bullet3 >> $env.BULLET_STATUS
+        echo "dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $env.ARTIFACT_NAME
+        python .github/does-dependency-artifact-exist.py ${{ env.ARTIFACT_NAME }} >> $env.ARTIFACT_EXISTS
 
     - name: Exit Early
       if: env.ARTIFACT_EXISTS == '1'
