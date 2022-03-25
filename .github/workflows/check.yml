@@ -34,7 +34,7 @@ jobs:
         git submodule status vendor/boost >> $BOOST_STATUS
         git submodule status vendor/cgal >> $CGAL_STATUS
         git submodule status vendor/bullet3 >> $BULLET_STATUS
-        echo "dependencies-${{ matrix.os }}-${{ BOOST_STATUS }}-${{ CGAL_STATUS }}-${{ BULLET_STATUS }}" >> $ARTIFACT_NAME
+        echo "dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $ARTIFACT_NAME
         python .github/does-dependency-artifact-exist.py ${{ ARTIFACT_NAME }} >> $ARTIFACT_EXISTS
 
     - name: Exit Early
