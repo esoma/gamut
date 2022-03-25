@@ -43,11 +43,11 @@ jobs:
 
     - name: Generate Artifact Name
       run: |
-        echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-$BOOST_STATUS-$CGAL_STATUS-$BULLET_STATUS" >> $GITHUB_ENV
+        echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $GITHUB_ENV
 
     - name: Check if Artifact Exists
       run: |
-        echo "ARTIFACT_EXISTS=$(python .github/does-dependency-artifact-exist.py $ARTIFACT_NAME)" >> $GITHUB_ENV
+        echo "ARTIFACT_EXISTS=$(python .github/does-dependency-artifact-exist.py ${{ env.ARTIFACT_NAME }})" >> $GITHUB_ENV
 
     - name: Exit Early
       if: env.ARTIFACT_EXISTS == '1'
@@ -146,10 +146,22 @@ jobs:
     - name: Initialize Submodules
       run: |
         git submodule update --init --recursive
-        echo (git submodule status vendor/boost) >> $env:BOOST_STATUS
-        echo (git submodule status vendor/cgal) >> $env:CGAL_STATUS
-        echo (git submodule status vendor/bullet) >> $env:BULLET_STATUS
-        echo (dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}) >> $env:ARTIFACT_NAME
+
+    - name: Get Boost Status
+      run: |
+        echo "BOOST_STATUS=$(git submodule status vendor/boost)" >> $GITHUB_ENV
+
+    - name: Get CGAL Status
+      run: |
+        echo "CGAL_STATUS=$(git submodule status vendor/cgal)" >> $GITHUB_ENV
+
+    - name: Get Bullet Status
+      run: |
+        echo "BULLET_STATUS=$(git submodule status vendor/bullet3)" >> $GITHUB_ENV
+
+    - name: Generate Artifact Name
+      run: |
+        echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $GITHUB_ENV
 
     - uses: actions/download-artifact@v3
       with:
