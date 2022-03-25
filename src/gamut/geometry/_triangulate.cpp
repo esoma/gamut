@@ -65,6 +65,7 @@ struct GlmDVec2Hash
 
 static PyObject *
 triangulate(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+noexcept
 {
     auto state = get_module_state();
 

@@ -178,7 +178,7 @@ math = Extension(
     sources=['src/gamut/math/_math.cpp'],
     language='c++11',
     extra_compile_args=coverage_compile_args +
-        ([] if os.name == 'nt' else ['-std=c++11']),
+        ([] if os.name == 'nt' else ['-std=c++11', '-w']),
     extra_link_args=coverage_links_args,
 )
 
@@ -195,7 +195,8 @@ geometry_triangulate = Extension(
     language='c++14',
     extra_compile_args=coverage_compile_args +
         ([] if os.name == 'nt' else ['-std=c++14']),
-    extra_link_args=coverage_links_args,
+    extra_link_args=coverage_links_args +
+        ([] if os.name == 'nt' else ['-lstdc++']),
 )
 
 
