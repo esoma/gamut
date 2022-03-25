@@ -4,3 +4,9 @@
 [submodule "vendor/glm"]
 	path = vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "vendor/boost"]
+	path = vendor/boost
+	url = https://github.com/boostorg/boost.git
+[submodule "vendor/cgal"]
+	path = vendor/cgal
+	url = https://github.com/CGAL/cgal.git
