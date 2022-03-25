@@ -30,22 +30,27 @@ jobs:
         python -m pip install requests
 
     - name: Get Boost Status
+      shell: bash
       run: |
         echo "BOOST_STATUS=$(git submodule status vendor/boost)" >> $GITHUB_ENV
 
     - name: Get CGAL Status
+      shell: bash
       run: |
         echo "CGAL_STATUS=$(git submodule status vendor/cgal)" >> $GITHUB_ENV
 
     - name: Get Bullet Status
+      shell: bash
       run: |
         echo "BULLET_STATUS=$(git submodule status vendor/bullet3)" >> $GITHUB_ENV
 
     - name: Generate Artifact Name
+      shell: bash
       run: |
         echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $GITHUB_ENV
 
     - name: Check if Artifact Exists
+      shell: bash
       run: |
         echo "ARTIFACT_EXISTS=$(python .github/does-dependency-artifact-exist.py ${{ env.ARTIFACT_NAME }})" >> $GITHUB_ENV
 
