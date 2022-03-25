@@ -17,6 +17,7 @@ repos:
     rev: '5.9.3'
     hooks:
       - id: isort
+        exclude: ^.github/
 -   repo: https://github.com/pycqa/flake8
     rev: '3.9.2'
     hooks:

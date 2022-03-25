@@ -8,8 +8,63 @@ on:
   pull_request:
 
 jobs:
+  dependencies:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    with:
+      python-version: '3.10'
+
+    - name: Get Requests
+      run: |
+        python -m pip install requests
+
+    - name: Cache Check
+      run: |
+        echo (git submodule status vendor/boost) >> $env:BOOST_STATUS
+        echo (git submodule status vendor/cgal) >> $env:CGAL_STATUS
+        echo (git submodule status vendor/bullet) >> $env:BULLET_STATUS
+        echo (dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}) >> $env:ARTIFACT_NAME
+        python .github/does-dependency/artifact-exist.py ${{ env.ARTIFACT_NAME }} >> $env:ARTIFACT_EXISTS
+
+    - name: Exit Early
+      if: env.ARTIFACT_EXISTS == '1'
+      run: exit_with_success
+
+    - name: Initialize Submodules
+      run: |
+        git submodule update --init --recursive
+
+    - name: Build Boost
+      run: |
+        python setup.py build_boost
+
+    - name: Build CGAL
+      run: |
+        python setup.py build_cgal
+
+    - name: Build Bullet
+      run: |
+        python setup.py build_bullet
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+        path: build
+
   test:
 
+    needs: dependencies
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -78,18 +133,15 @@ jobs:
     - name: Initialize Submodules
       run: |
         git submodule update --init --recursive
+        echo (git submodule status vendor/boost) >> $env:BOOST_STATUS
+        echo (git submodule status vendor/cgal) >> $env:CGAL_STATUS
+        echo (git submodule status vendor/bullet) >> $env:BULLET_STATUS
+        echo (dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}) >> $env:ARTIFACT_NAME
 
-    - name: Build Boost
-      run: |
-        python setup.py build_boost
-
-    - name: Build CGAL
-      run: |
-        python setup.py build_cgal
-
-    - name: Build Bullet
-      run: |
-        python setup.py build_bullet
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+        path: build
 
     - name: Build Extensions with coverage
       if: ${{ matrix.os != 'windows-latest' }}
