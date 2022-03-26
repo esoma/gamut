@@ -29,6 +29,9 @@ response = requests.get(
         "Authorization": f'token {os.environ["GITHUB_TOKEN"]}',
     }
 )
+if response.status != 200:
+    print(f'Failed to download: {response.status}.', file=sys.stderr)
+    sys.exit(1)
 
 print(f'Unzipping artifact...', file=sys.stderr)
 os.makedirs(extract_path, exist_ok=True)
