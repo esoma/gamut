@@ -1,6 +1,8 @@
 
 // generated {{ when }} from codegen/math/templates/test_api.cpp
 
+// stdlib
+#include <stddef.h>
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
