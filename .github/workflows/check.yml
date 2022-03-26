@@ -33,9 +33,9 @@ jobs:
     - name: Get Vendor Statuses
       shell: bash
       run: |
-        echo "BOOST_STATUS=$(git submodule status vendor/boost | awk '{print $1})" >> $GITHUB_ENV
-        echo "CGAL_STATUS=$(git submodule status vendor/cgal | awk '{print $1})" >> $GITHUB_ENV
-        echo "BULLET_STATUS=$(git submodule status vendor/bullet3 | awk '{print $1})" >> $GITHUB_ENV
+        echo "BOOST_STATUS=$(git submodule status vendor/boost | awk '{print $1}')" >> $GITHUB_ENV
+        echo "CGAL_STATUS=$(git submodule status vendor/cgal | awk '{print $1}')" >> $GITHUB_ENV
+        echo "BULLET_STATUS=$(git submodule status vendor/bullet3 | awk '{print $1}')" >> $GITHUB_ENV
 
     - name: Generate Artifact Name
       shell: bash
