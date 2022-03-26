@@ -599,70 +599,70 @@ test_GamutMathApi_Get(PyObject *self, PyObject *args)
     TEST_OFFSET(FQuaternionArray_GetValuePointer, 502);
     TEST_OFFSET(FQuaternionArray_GetLength, 503);
 
-    TEST_OFFSET(BArray_GetType, 490);
-    TEST_OFFSET(BArray_Create, 491);
-    TEST_OFFSET(BArray_GetValuePointer, 492);
-    TEST_OFFSET(BArray_GetLength, 493);
+    TEST_OFFSET(BArray_GetType, 504);
+    TEST_OFFSET(BArray_Create, 505);
+    TEST_OFFSET(BArray_GetValuePointer, 506);
+    TEST_OFFSET(BArray_GetLength, 507);
 
-    TEST_OFFSET(DArray_GetType, 494);
-    TEST_OFFSET(DArray_Create, 495);
-    TEST_OFFSET(DArray_GetValuePointer, 496);
-    TEST_OFFSET(DArray_GetLength, 497);
+    TEST_OFFSET(DArray_GetType, 508);
+    TEST_OFFSET(DArray_Create, 509);
+    TEST_OFFSET(DArray_GetValuePointer, 510);
+    TEST_OFFSET(DArray_GetLength, 511);
 
-    TEST_OFFSET(FArray_GetType, 498);
-    TEST_OFFSET(FArray_Create, 499);
-    TEST_OFFSET(FArray_GetValuePointer, 500);
-    TEST_OFFSET(FArray_GetLength, 501);
+    TEST_OFFSET(FArray_GetType, 512);
+    TEST_OFFSET(FArray_Create, 513);
+    TEST_OFFSET(FArray_GetValuePointer, 514);
+    TEST_OFFSET(FArray_GetLength, 515);
 
-    TEST_OFFSET(I8Array_GetType, 502);
-    TEST_OFFSET(I8Array_Create, 503);
-    TEST_OFFSET(I8Array_GetValuePointer, 504);
-    TEST_OFFSET(I8Array_GetLength, 505);
+    TEST_OFFSET(I8Array_GetType, 516);
+    TEST_OFFSET(I8Array_Create, 517);
+    TEST_OFFSET(I8Array_GetValuePointer, 518);
+    TEST_OFFSET(I8Array_GetLength, 519);
 
-    TEST_OFFSET(U8Array_GetType, 506);
-    TEST_OFFSET(U8Array_Create, 507);
-    TEST_OFFSET(U8Array_GetValuePointer, 508);
-    TEST_OFFSET(U8Array_GetLength, 509);
+    TEST_OFFSET(U8Array_GetType, 520);
+    TEST_OFFSET(U8Array_Create, 521);
+    TEST_OFFSET(U8Array_GetValuePointer, 522);
+    TEST_OFFSET(U8Array_GetLength, 523);
 
-    TEST_OFFSET(I16Array_GetType, 510);
-    TEST_OFFSET(I16Array_Create, 511);
-    TEST_OFFSET(I16Array_GetValuePointer, 512);
-    TEST_OFFSET(I16Array_GetLength, 513);
+    TEST_OFFSET(I16Array_GetType, 524);
+    TEST_OFFSET(I16Array_Create, 525);
+    TEST_OFFSET(I16Array_GetValuePointer, 526);
+    TEST_OFFSET(I16Array_GetLength, 527);
 
-    TEST_OFFSET(U16Array_GetType, 514);
-    TEST_OFFSET(U16Array_Create, 515);
-    TEST_OFFSET(U16Array_GetValuePointer, 516);
-    TEST_OFFSET(U16Array_GetLength, 517);
+    TEST_OFFSET(U16Array_GetType, 528);
+    TEST_OFFSET(U16Array_Create, 529);
+    TEST_OFFSET(U16Array_GetValuePointer, 530);
+    TEST_OFFSET(U16Array_GetLength, 531);
 
-    TEST_OFFSET(I32Array_GetType, 518);
-    TEST_OFFSET(I32Array_Create, 519);
-    TEST_OFFSET(I32Array_GetValuePointer, 520);
-    TEST_OFFSET(I32Array_GetLength, 521);
+    TEST_OFFSET(I32Array_GetType, 532);
+    TEST_OFFSET(I32Array_Create, 533);
+    TEST_OFFSET(I32Array_GetValuePointer, 534);
+    TEST_OFFSET(I32Array_GetLength, 535);
 
-    TEST_OFFSET(U32Array_GetType, 522);
-    TEST_OFFSET(U32Array_Create, 523);
-    TEST_OFFSET(U32Array_GetValuePointer, 524);
-    TEST_OFFSET(U32Array_GetLength, 525);
+    TEST_OFFSET(U32Array_GetType, 536);
+    TEST_OFFSET(U32Array_Create, 537);
+    TEST_OFFSET(U32Array_GetValuePointer, 538);
+    TEST_OFFSET(U32Array_GetLength, 539);
 
-    TEST_OFFSET(IArray_GetType, 526);
-    TEST_OFFSET(IArray_Create, 527);
-    TEST_OFFSET(IArray_GetValuePointer, 528);
-    TEST_OFFSET(IArray_GetLength, 529);
+    TEST_OFFSET(IArray_GetType, 540);
+    TEST_OFFSET(IArray_Create, 541);
+    TEST_OFFSET(IArray_GetValuePointer, 542);
+    TEST_OFFSET(IArray_GetLength, 543);
 
-    TEST_OFFSET(UArray_GetType, 530);
-    TEST_OFFSET(UArray_Create, 531);
-    TEST_OFFSET(UArray_GetValuePointer, 532);
-    TEST_OFFSET(UArray_GetLength, 533);
+    TEST_OFFSET(UArray_GetType, 544);
+    TEST_OFFSET(UArray_Create, 545);
+    TEST_OFFSET(UArray_GetValuePointer, 546);
+    TEST_OFFSET(UArray_GetLength, 547);
 
-    TEST_OFFSET(I64Array_GetType, 534);
-    TEST_OFFSET(I64Array_Create, 535);
-    TEST_OFFSET(I64Array_GetValuePointer, 536);
-    TEST_OFFSET(I64Array_GetLength, 537);
+    TEST_OFFSET(I64Array_GetType, 548);
+    TEST_OFFSET(I64Array_Create, 549);
+    TEST_OFFSET(I64Array_GetValuePointer, 550);
+    TEST_OFFSET(I64Array_GetLength, 551);
 
-    TEST_OFFSET(U64Array_GetType, 538);
-    TEST_OFFSET(U64Array_Create, 539);
-    TEST_OFFSET(U64Array_GetValuePointer, 540);
-    TEST_OFFSET(U64Array_GetLength, 541);
+    TEST_OFFSET(U64Array_GetType, 552);
+    TEST_OFFSET(U64Array_Create, 553);
+    TEST_OFFSET(U64Array_GetValuePointer, 554);
+    TEST_OFFSET(U64Array_GetLength, 555);
 
     {% for type in vector_types + matrix_types + quaternion_types + pod_types %}
         {% if type not in pod_types %}

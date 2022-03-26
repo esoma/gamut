@@ -892,7 +892,8 @@ static {{ row_type }} *
 
     auto *result = ({{ row_type }} *)row_cls->tp_alloc(row_cls, 0);
     if (!result){ return 0; }
-    result->glm = new {{ row_type }}Glm(glm::row(*self->glm, index));
+    auto row = glm::row(*self->glm, index);
+    result->glm = new {{ row_type }}Glm(row);
     return result;
 }
 

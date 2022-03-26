@@ -1,5 +1,5 @@
 
-// generated 2022-03-26 20:46:44.492274 from codegen/math/templates/_math.cpp
+// generated 2022-03-26 21:40:50.208578 from codegen/math/templates/_math.cpp
 
 // python
 #define PY_SSIZE_T_CLEAN

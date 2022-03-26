@@ -1,5 +1,5 @@
 
-// generated 2022-03-26 20:46:44.421777 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-26 21:40:50.146077 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_FMATRIX3X3_HPP
 #define GAMUT_MATH_FMATRIX3X3_HPP
@@ -948,7 +948,8 @@ FMatrix3x3_get_row(FMatrix3x3 *self, PyObject *const *args, Py_ssize_t nargs)
 
     auto *result = (FVector3 *)row_cls->tp_alloc(row_cls, 0);
     if (!result){ return 0; }
-    result->glm = new FVector3Glm(glm::row(*self->glm, index));
+    auto row = glm::row(*self->glm, index);
+    result->glm = new FVector3Glm(row);
     return result;
 }
 
