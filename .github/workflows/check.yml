@@ -71,7 +71,11 @@ jobs:
       if: env.ARTIFACT_EXISTS != '1'
       with:
         name: ${{ env.ARTIFACT_NAME }}
-        path: build
+        path:
+            build/boost/include
+            build/bullet3/**/.lib
+            build/bullet3/**/.a
+            build/cgal/include
 
 
   test:

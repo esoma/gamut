@@ -14,5 +14,6 @@ for artifact in response.json()["artifacts"]:
     if artifact["name"] == artifact_name:
         print('Artifact already exists.', file=sys.stderr)
         print('1')
+        sys.exit(0)
 
 print('Artifact does not exist.', file=sys.stderr)
