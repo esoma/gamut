@@ -137,7 +137,8 @@ jobs:
         python -m pytest -c pyproject.toml -n auto --cov=gamut --cov-report=xml --reruns=3 --only-rerun="Not properly terminated"
 
     - name: Codecov
-      uses: codecov/codecov-action@v1.2.1
+      uses: codecov/codecov-action@v2
+
 
   static-analysis:
 
