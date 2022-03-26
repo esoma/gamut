@@ -39,5 +39,5 @@ if response.status_code != 200:
 
 print(f'Unzipping artifact...', file=sys.stderr)
 os.makedirs(extract_path, exist_ok=True)
-zipped_file = ZipFile(BytesIO(response.contents))
+zipped_file = ZipFile(BytesIO(response.content))
 zipped_file.extractall(path=extract_path)
