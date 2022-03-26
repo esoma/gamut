@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 17:47:31.134454 from codegen/math/templates/_modulestate.hpp
+// generated 2022-03-26 21:40:50.200578 from codegen/math/templates/_modulestate.hpp
 
 #ifndef GAMUT_MATH_MODULESTATE_HPP
 #define GAMUT_MATH_MODULESTATE_HPP

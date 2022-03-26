@@ -320,27 +320,27 @@ World_simulate(World *self, PyObject *args)
             PyObject *contact = PyTuple_New(5);
             if (!contact){ goto error; }
             PyList_SET_ITEM(contacts, j, contact);
-            auto local_position_a = state->math_api->GamutMathDVector3_Create(
+            auto local_position_a = state->math_api->DVector3_Create(
                 point.m_localPointA.m_floats
             );
             if (!local_position_a){ goto error; }
             PyTuple_SET_ITEM(contact, 0, local_position_a);
-            auto world_position_a = state->math_api->GamutMathDVector3_Create(
+            auto world_position_a = state->math_api->DVector3_Create(
                 point.m_positionWorldOnA.m_floats
             );
             if (!world_position_a){ goto error; }
             PyTuple_SET_ITEM(contact, 1, world_position_a);
-            auto local_position_b = state->math_api->GamutMathDVector3_Create(
+            auto local_position_b = state->math_api->DVector3_Create(
                 point.m_localPointB.m_floats
             );
             if (!local_position_b){ goto error; }
             PyTuple_SET_ITEM(contact, 2, local_position_b);
-            auto world_position_b = state->math_api->GamutMathDVector3_Create(
+            auto world_position_b = state->math_api->DVector3_Create(
                 point.m_positionWorldOnB.m_floats
             );
             if (!world_position_b){ goto error; }
             PyTuple_SET_ITEM(contact, 3, world_position_b);
-            auto normal_b = state->math_api->GamutMathDVector3_Create(
+            auto normal_b = state->math_api->DVector3_Create(
                 point.m_normalWorldOnB.m_floats
             );
             if (!normal_b){ goto error; }
@@ -359,8 +359,8 @@ static PyObject *
 World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
 {
     auto state = get_module_state();
-    double *raw_from = state->math_api->GamutMathDVector3_GetValuePointer(args[0]);
-    double *raw_to = state->math_api->GamutMathDVector3_GetValuePointer(args[1]);
+    double *raw_from = state->math_api->DVector3_GetValuePointer(args[0]);
+    double *raw_to = state->math_api->DVector3_GetValuePointer(args[1]);
     btVector3 from(raw_from[0], raw_from[1], raw_from[2]);
     btVector3 to(raw_to[0], raw_to[1], raw_to[2]);
     int groups = PyLong_AsLong(args[2]);
@@ -378,11 +378,11 @@ World_raycast(World *self, PyObject *const *args, Py_ssize_t nargs)
 
     PyObject *hit = PyTuple_New(4);
 
-    PyObject *position = state->math_api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
+    PyObject *position = state->math_api->DVector3_Create(results.m_hitPointWorld.m_floats);
     if (!position){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 0, position);
 
-    PyObject *normal = state->math_api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
+    PyObject *normal = state->math_api->DVector3_Create(results.m_hitNormalWorld.m_floats);
     if (!normal){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 1, normal);
 
@@ -402,8 +402,8 @@ static PyObject *
 World_spherecast(World *self, PyObject *const *args, Py_ssize_t nargs)
 {
     auto state = get_module_state();
-    double *raw_from = state->math_api->GamutMathDVector3_GetValuePointer(args[0]);
-    double *raw_to = state->math_api->GamutMathDVector3_GetValuePointer(args[1]);
+    double *raw_from = state->math_api->DVector3_GetValuePointer(args[0]);
+    double *raw_to = state->math_api->DVector3_GetValuePointer(args[1]);
     btVector3 from(raw_from[0], raw_from[1], raw_from[2]);
     btVector3 to(raw_to[0], raw_to[1], raw_to[2]);
     int groups = PyLong_AsLong(args[2]);
@@ -430,11 +430,11 @@ World_spherecast(World *self, PyObject *const *args, Py_ssize_t nargs)
 
     PyObject *hit = PyTuple_New(4);
 
-    PyObject *position = state->math_api->GamutMathDVector3_Create(results.m_hitPointWorld.m_floats);
+    PyObject *position = state->math_api->DVector3_Create(results.m_hitPointWorld.m_floats);
     if (!position){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 0, position);
 
-    PyObject *normal = state->math_api->GamutMathDVector3_Create(results.m_hitNormalWorld.m_floats);
+    PyObject *normal = state->math_api->DVector3_Create(results.m_hitNormalWorld.m_floats);
     if (!normal){ Py_DECREF(hit); return 0; }
     PyTuple_SET_ITEM(hit, 1, normal);
 
@@ -465,7 +465,7 @@ World_Getter_gravity(World *self, void *)
 {
     auto state = get_module_state();
     auto gravity = self->world->getGravity();
-    return state->math_api->GamutMathDVector3_Create(gravity.m_floats);
+    return state->math_api->DVector3_Create(gravity.m_floats);
 }
 
 
@@ -473,7 +473,7 @@ int
 World_Setter_gravity(World *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *gravity = state->math_api->GamutMathDVector3_GetValuePointer(value);
+    double *gravity = state->math_api->DVector3_GetValuePointer(value);
     if (!gravity){ return -1; }
     self->world->setGravity(btVector3(gravity[0], gravity[1], gravity[2]));
     return 0;
@@ -723,7 +723,7 @@ Body_set_gravity(Body *self, PyObject *args, void *)
         &is_explicit, &value)){ return 0; }
 
     auto state = get_module_state();
-    double *gravity = state->math_api->GamutMathDVector3_GetValuePointer(value);
+    double *gravity = state->math_api->DVector3_GetValuePointer(value);
     if (!gravity){ return 0; }
 
     if (is_explicit)
@@ -898,7 +898,7 @@ Body_Getter_angular_freedom(Body *self, void *)
         angular_factor[1] != 0,
         angular_factor[2] != 0
     };
-    return state->math_api->GamutMathBVector3_Create(xyz);
+    return state->math_api->BVector3_Create(xyz);
 }
 
 
@@ -906,7 +906,7 @@ static int
 Body_Setter_angular_freedom(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    bool *angular_freedom = state->math_api->GamutMathBVector3_GetValuePointer(value);
+    bool *angular_freedom = state->math_api->BVector3_GetValuePointer(value);
     if (!angular_freedom){ return -1; }
     btVector3 angular_factor(
         angular_freedom[0] ? 1 : 0,
@@ -946,7 +946,7 @@ Body_Getter_angular_velocity(Body *self, void *)
 {
     auto state = get_module_state();
     const auto &velocity = self->body->getAngularVelocity();
-    return state->math_api->GamutMathDVector3_Create(velocity.m_floats);
+    return state->math_api->DVector3_Create(velocity.m_floats);
 }
 
 
@@ -954,7 +954,7 @@ static int
 Body_Setter_angular_velocity(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *velocity = state->math_api->GamutMathDVector3_GetValuePointer(value);
+    double *velocity = state->math_api->DVector3_GetValuePointer(value);
     if (!velocity){ return -1; }
     const auto& angular_factor = self->body->getAngularFactor();
     self->body->setAngularVelocity(
@@ -1026,7 +1026,7 @@ Body_Getter_linear_freedom(Body *self, void *)
         linear_factor[1] != 0,
         linear_factor[2] != 0
     };
-    return state->math_api->GamutMathBVector3_Create(xyz);
+    return state->math_api->BVector3_Create(xyz);
 }
 
 
@@ -1034,7 +1034,7 @@ static int
 Body_Setter_linear_freedom(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    bool *linear_freedom = state->math_api->GamutMathBVector3_GetValuePointer(value);
+    bool *linear_freedom = state->math_api->BVector3_GetValuePointer(value);
     if (!linear_freedom){ return -1; }
     btVector3 linear_factor(
         linear_freedom[0] ? 1 : 0,
@@ -1074,7 +1074,7 @@ Body_Getter_linear_velocity(Body *self, void *)
 {
     auto state = get_module_state();
     const auto& velocity = self->body->getLinearVelocity();
-    return state->math_api->GamutMathDVector3_Create(velocity.m_floats);
+    return state->math_api->DVector3_Create(velocity.m_floats);
 }
 
 
@@ -1082,7 +1082,7 @@ static int
 Body_Setter_linear_velocity(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *velocity = state->math_api->GamutMathDVector3_GetValuePointer(value);
+    double *velocity = state->math_api->DVector3_GetValuePointer(value);
     if (!velocity){ return -1; }
     const auto& linear_factor = self->body->getLinearFactor();
     self->body->setLinearVelocity(
@@ -1194,7 +1194,7 @@ Body_Getter_transform(Body *self, void *)
     btScalar matrix[16];
     btTransform transform = self->body->getWorldTransform();
     transform.getOpenGLMatrix(matrix);
-    return state->math_api->GamutMathDMatrix4x4_Create(matrix);
+    return state->math_api->DMatrix4x4_Create(matrix);
 }
 
 
@@ -1202,7 +1202,7 @@ static int
 Body_Setter_transform(Body *self, PyObject *value, void *)
 {
     auto state = get_module_state();
-    double *matrix = state->math_api->GamutMathDMatrix4x4_GetValuePointer(value);
+    double *matrix = state->math_api->DMatrix4x4_GetValuePointer(value);
     if (!matrix){ return -1; }
 
     btTransform transform;

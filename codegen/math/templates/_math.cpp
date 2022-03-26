@@ -69,7 +69,7 @@ api_destructor(PyObject *capsule)
 PyMODINIT_FUNC
 PyInit__math()
 {
-    auto api = new GamutMathApi;
+    auto api = new GamutMathApi{ 0 };
     auto api_capsule = PyCapsule_New(
         (void *)api,
         "gamut.math._math._api",
@@ -143,13 +143,13 @@ PyInit__math()
             Py_INCREF(type);
             state->{{ type }}Array_PyTypeObject = type;
         }
-        api->GamutMath{{ type }}_GetType = get_{{ type }}_type;
-        api->GamutMath{{ type }}Array_GetType = get_{{ type }}Array_type;
-        api->GamutMath{{ type }}_Create = create_{{ type }};
-        api->GamutMath{{ type }}Array_Create = create_{{ type }}Array;
-        api->GamutMath{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
-        api->GamutMath{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
-        api->GamutMath{{ type }}Array_GetLength = get_{{ type }}Array_length;
+        api->{{ type }}_GetType = get_{{ type }}_type;
+        api->{{ type }}Array_GetType = get_{{ type }}Array_type;
+        api->{{ type }}_Create = create_{{ type }};
+        api->{{ type }}Array_Create = create_{{ type }}Array;
+        api->{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
+        api->{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
+        api->{{ type }}Array_GetLength = get_{{ type }}Array_length;
     {% endfor %}
     {% for type in matrix_types %}
         {
@@ -164,13 +164,13 @@ PyInit__math()
             Py_INCREF(type);
             state->{{ type }}Array_PyTypeObject = type;
         }
-        api->GamutMath{{ type }}_GetType = get_{{ type }}_type;
-        api->GamutMath{{ type }}Array_GetType = get_{{ type }}Array_type;
-        api->GamutMath{{ type }}_Create = create_{{ type }};
-        api->GamutMath{{ type }}Array_Create = create_{{ type }}Array;
-        api->GamutMath{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
-        api->GamutMath{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
-        api->GamutMath{{ type }}Array_GetLength = get_{{ type }}Array_length;
+        api->{{ type }}_GetType = get_{{ type }}_type;
+        api->{{ type }}Array_GetType = get_{{ type }}Array_type;
+        api->{{ type }}_Create = create_{{ type }};
+        api->{{ type }}Array_Create = create_{{ type }}Array;
+        api->{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
+        api->{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
+        api->{{ type }}Array_GetLength = get_{{ type }}Array_length;
     {% endfor %}
     {% for type in quaternion_types %}
         {
@@ -185,13 +185,13 @@ PyInit__math()
             Py_INCREF(type);
             state->{{ type }}Array_PyTypeObject = type;
         }
-        api->GamutMath{{ type }}_GetType = get_{{ type }}_type;
-        api->GamutMath{{ type }}Array_GetType = get_{{ type }}Array_type;
-        api->GamutMath{{ type }}_Create = create_{{ type }};
-        api->GamutMath{{ type }}Array_Create = create_{{ type }}Array;
-        api->GamutMath{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
-        api->GamutMath{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
-        api->GamutMath{{ type }}Array_GetLength = get_{{ type }}Array_length;
+        api->{{ type }}_GetType = get_{{ type }}_type;
+        api->{{ type }}Array_GetType = get_{{ type }}Array_type;
+        api->{{ type }}_Create = create_{{ type }};
+        api->{{ type }}Array_Create = create_{{ type }}Array;
+        api->{{ type }}_GetValuePointer = get_{{ type }}_value_ptr;
+        api->{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
+        api->{{ type }}Array_GetLength = get_{{ type }}Array_length;
     {% endfor %}
     {% for type in pod_types %}
         {
@@ -200,10 +200,10 @@ PyInit__math()
             Py_INCREF(type);
             state->{{ type }}Array_PyTypeObject = type;
         }
-        api->GamutMath{{ type }}Array_GetType = get_{{ type }}Array_type;
-        api->GamutMath{{ type }}Array_Create = create_{{ type }}Array;
-        api->GamutMath{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
-        api->GamutMath{{ type }}Array_GetLength = get_{{ type }}Array_length;
+        api->{{ type }}Array_GetType = get_{{ type }}Array_type;
+        api->{{ type }}Array_Create = create_{{ type }}Array;
+        api->{{ type }}Array_GetValuePointer = get_{{ type }}Array_value_ptr;
+        api->{{ type }}Array_GetLength = get_{{ type }}Array_length;
     {% endfor %}
 
     if (PyModule_AddObject(module, "_api", api_capsule) < 0){ goto error; }

@@ -1,5 +1,5 @@
 
-// generated 2022-03-19 17:47:31.073955 from codegen/math/templates/_matrix.hpp
+// generated 2022-03-26 21:40:50.139578 from codegen/math/templates/_matrix.hpp
 
 #ifndef GAMUT_MATH_DMATRIX2X3_HPP
 #define GAMUT_MATH_DMATRIX2X3_HPP
@@ -807,7 +807,8 @@ DMatrix2x3_get_row(DMatrix2x3 *self, PyObject *const *args, Py_ssize_t nargs)
 
     auto *result = (DVector2 *)row_cls->tp_alloc(row_cls, 0);
     if (!result){ return 0; }
-    result->glm = new DVector2Glm(glm::row(*self->glm, index));
+    auto row = glm::row(*self->glm, index);
+    result->glm = new DVector2Glm(row);
     return result;
 }
 

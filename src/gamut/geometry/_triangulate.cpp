@@ -72,8 +72,8 @@ noexcept
     Polygon exterior;
     {
         PyObject *py_vertices = args[0];
-        glm::dvec2 *vertices = (glm::dvec2 *)state->math_api->GamutMathDVector2Array_GetValuePointer(py_vertices);
-        size_t vertex_count = state->math_api->GamutMathDVector2Array_GetLength(py_vertices);
+        glm::dvec2 *vertices = (glm::dvec2 *)state->math_api->DVector2Array_GetValuePointer(py_vertices);
+        size_t vertex_count = state->math_api->DVector2Array_GetLength(py_vertices);
         for (size_t v = 0; v < vertex_count; v++)
         {
             exterior.push_back(Point(vertices[v].x, vertices[v].y));
@@ -85,8 +85,8 @@ noexcept
         {
             Polygon& hole = holes[i - 1];
             PyObject *py_vertices = args[i];
-            glm::dvec2 *vertices = (glm::dvec2 *)state->math_api->GamutMathDVector2Array_GetValuePointer(py_vertices);
-            size_t vertex_count = state->math_api->GamutMathDVector2Array_GetLength(py_vertices);
+            glm::dvec2 *vertices = (glm::dvec2 *)state->math_api->DVector2Array_GetValuePointer(py_vertices);
+            size_t vertex_count = state->math_api->DVector2Array_GetLength(py_vertices);
             for (size_t v = 0; v < vertex_count; v++)
             {
                 hole.push_back(Point(vertices[v].x, vertices[v].y));
@@ -175,12 +175,12 @@ noexcept
         }
     }
 
-    auto positions_array = state->math_api->GamutMathDVector2Array_Create(
+    auto positions_array = state->math_api->DVector2Array_Create(
         positions.size(),
         (double *)positions.data()
     );
     if (!positions_array){ return 0; }
-    auto indexes_array = state->math_api->GamutMathUVector3Array_Create(
+    auto indexes_array = state->math_api->UVector3Array_Create(
         indexes.size(),
         (unsigned int *)indexes.data()
     );
