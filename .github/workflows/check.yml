@@ -47,27 +47,28 @@ jobs:
       run: |
         echo "ARTIFACT_EXISTS=$(python .github/does-dependency-artifact-exist.py ${{ env.ARTIFACT_NAME }})" >> $GITHUB_ENV
 
-    - name: Exit Early
-      if: env.ARTIFACT_EXISTS == '1'
-      run: exit_with_success
-
     - name: Initialize Submodules
+      if: env.ARTIFACT_EXISTS != '1'
       run: |
         git submodule update --init --recursive
 
     - name: Build Boost
+      if: env.ARTIFACT_EXISTS != '1'
       run: |
         python setup.py build_boost
 
     - name: Build CGAL
+      if: env.ARTIFACT_EXISTS != '1'
       run: |
         python setup.py build_cgal
 
     - name: Build Bullet
+      if: env.ARTIFACT_EXISTS != '1'
       run: |
         python setup.py build_bullet
 
     - uses: actions/upload-artifact@v3
+      if: env.ARTIFACT_EXISTS != '1'
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: build
