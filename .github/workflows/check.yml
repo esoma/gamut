@@ -43,6 +43,8 @@ jobs:
         echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $GITHUB_ENV
 
     - name: Check if Artifact Exists
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
         python .github/does-artifact-exist.py ${{ env.ARTIFACT_NAME }} $GITHUB_ENV
@@ -167,6 +169,8 @@ jobs:
         echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $GITHUB_ENV
 
     - name: Download Built Dependencies
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
         python .github/download-artifact.py ${{ env.ARTIFACT_NAME }} build
