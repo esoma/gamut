@@ -45,7 +45,7 @@ jobs:
     - name: Check if Artifact Exists
       shell: bash
       run: |
-        echo "ARTIFACT_EXISTS=$(python .github/does-dependency-artifact-exist.py ${{ env.ARTIFACT_NAME }})" >> $GITHUB_ENV
+        echo "ARTIFACT_EXISTS=$(python .github/does-artifact-exist.py ${{ env.ARTIFACT_NAME }})" >> $GITHUB_ENV
 
     - name: Initialize Submodules
       if: env.ARTIFACT_EXISTS != '1'
@@ -163,6 +163,10 @@ jobs:
         echo "ARTIFACT_NAME=dependencies-${{ matrix.os }}-${{ env.BOOST_STATUS }}-${{ env.CGAL_STATUS }}-${{ env.BULLET_STATUS }}" >> $GITHUB_ENV
 
     - name: Download Built Dependencies
+      shell: bash
+      run: |
+        python .github/download-artifact.py ${{ env.ARTIFACT_NAME }} build
+
       uses: dawidd6/action-download-artifact@v2
       with:
         workflow: check.yml
