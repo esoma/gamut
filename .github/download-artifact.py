@@ -11,7 +11,10 @@ extract_path = sys.argv[2]
 print(f'Finding {artifact_name}...', file=sys.stderr)
 
 response = requests.get(
-    'https://api.github.com/repos/esoma/gamut/actions/artifacts'
+    'https://api.github.com/repos/esoma/gamut/actions/artifacts',
+    headers={
+        "Authorization": f'token {os.environ["GITHUB_TOKEN"]}',
+    }
 )
 for artifact in response.json()["artifacts"]:
     if artifact["name"] == artifact_name:

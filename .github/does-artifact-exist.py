@@ -1,5 +1,6 @@
 
 # python
+import os
 import sys
 # requests
 import requests
@@ -9,7 +10,10 @@ github_env = sys.argv[2]
 print(f'Looking for {artifact_name}...', file=sys.stderr)
 
 response = requests.get(
-    'https://api.github.com/repos/esoma/gamut/actions/artifacts'
+    'https://api.github.com/repos/esoma/gamut/actions/artifacts',
+    headers={
+        "Authorization": f'token {os.environ["GITHUB_TOKEN"]}',
+    }
 )
 if response.status_code != 200:
     print(
