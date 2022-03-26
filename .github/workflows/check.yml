@@ -45,7 +45,7 @@ jobs:
     - name: Check if Artifact Exists
       shell: bash
       run: |
-        echo "ARTIFACT_EXISTS=$(python .github/does-artifact-exist.py ${{ env.ARTIFACT_NAME }})" >> $GITHUB_ENV
+        python .github/does-artifact-exist.py ${{ env.ARTIFACT_NAME }} $GITHUB_ENV
 
     - name: Initialize Submodules
       if: env.ARTIFACT_EXISTS != '1'
