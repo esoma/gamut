@@ -1,6 +1,8 @@
 
-// generated 2022-03-26 19:22:11.172476 from codegen/math/templates/test_api.cpp
+// generated 2022-03-26 20:46:44.594774 from codegen/math/templates/test_api.cpp
 
+// stdlib
+#include <stddef.h>
 // python
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
