@@ -85,38 +85,39 @@ typedef size_t (*GamutMathApi_GetArrayLength)(const PyObject *);
 
 struct GamutMathApi
 {
+    const size_t version;
     {% for type in vector_types %}
-        GamutMathApi_GetType GamutMath{{ type }}_GetType;
-        GamutMathApi_GetType GamutMath{{ type }}Array_GetType;
-        GamutMathApi_Create{{ type }} GamutMath{{ type }}_Create;
-        GamutMathApi_Create{{ type }}Array GamutMath{{ type }}Array_Create;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}_GetValuePointer;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}Array_GetValuePointer;
-        GamutMathApi_GetArrayLength GamutMath{{ type }}Array_GetLength;
+        GamutMathApi_GetType {{ type }}_GetType;
+        GamutMathApi_GetType {{ type }}Array_GetType;
+        GamutMathApi_Create{{ type }} {{ type }}_Create;
+        GamutMathApi_Create{{ type }}Array {{ type }}Array_Create;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}_GetValuePointer;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}Array_GetValuePointer;
+        GamutMathApi_GetArrayLength {{ type }}Array_GetLength;
     {% endfor %}
     {% for type in matrix_types %}
-        GamutMathApi_GetType GamutMath{{ type }}_GetType;
-        GamutMathApi_GetType GamutMath{{ type }}Array_GetType;
-        GamutMathApi_Create{{ type }} GamutMath{{ type }}_Create;
-        GamutMathApi_Create{{ type }}Array GamutMath{{ type }}Array_Create;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}_GetValuePointer;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}Array_GetValuePointer;
-        GamutMathApi_GetArrayLength GamutMath{{ type }}Array_GetLength;
+        GamutMathApi_GetType {{ type }}_GetType;
+        GamutMathApi_GetType {{ type }}Array_GetType;
+        GamutMathApi_Create{{ type }} {{ type }}_Create;
+        GamutMathApi_Create{{ type }}Array {{ type }}Array_Create;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}_GetValuePointer;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}Array_GetValuePointer;
+        GamutMathApi_GetArrayLength {{ type }}Array_GetLength;
     {% endfor %}
     {% for type in quaternion_types %}
-        GamutMathApi_GetType GamutMath{{ type }}_GetType;
-        GamutMathApi_GetType GamutMath{{ type }}Array_GetType;
-        GamutMathApi_Create{{ type }} GamutMath{{ type }}_Create;
-        GamutMathApi_Create{{ type }}Array GamutMath{{ type }}Array_Create;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}_GetValuePointer;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}Array_GetValuePointer;
-        GamutMathApi_GetArrayLength GamutMath{{ type }}Array_GetLength;
+        GamutMathApi_GetType {{ type }}_GetType;
+        GamutMathApi_GetType {{ type }}Array_GetType;
+        GamutMathApi_Create{{ type }} {{ type }}_Create;
+        GamutMathApi_Create{{ type }}Array {{ type }}Array_Create;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}_GetValuePointer;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}Array_GetValuePointer;
+        GamutMathApi_GetArrayLength {{ type }}Array_GetLength;
     {% endfor %}
     {% for type in pod_types %}
-        GamutMathApi_GetType GamutMath{{ type }}Array_GetType;
-        GamutMathApi_Create{{ type }}Array GamutMath{{ type }}Array_Create;
-        GamutMathApi_Get{{ type }}ValuePointer GamutMath{{ type }}Array_GetValuePointer;
-        GamutMathApi_GetArrayLength GamutMath{{ type }}Array_GetLength;
+        GamutMathApi_GetType {{ type }}Array_GetType;
+        GamutMathApi_Create{{ type }}Array {{ type }}Array_Create;
+        GamutMathApi_Get{{ type }}ValuePointer {{ type }}Array_GetValuePointer;
+        GamutMathApi_GetArrayLength {{ type }}Array_GetLength;
     {% endfor %}
 };
 
