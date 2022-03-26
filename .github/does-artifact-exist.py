@@ -11,9 +11,9 @@ print(f'Looking for {artifact_name}...', file=sys.stderr)
 response = requests.get(
     'https://api.github.com/repos/esoma/gamut/actions/artifacts'
 )
-if response.status != 200:
+if response.status_code != 200:
     print(
-        f'Unable to check if artifact exists: {response.status}',
+        f'Unable to check if artifact exists: {response.status_code}',
         file=sys.stderr
     )
     sys.exit(1)
