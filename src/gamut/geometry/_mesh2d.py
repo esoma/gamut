@@ -4,7 +4,10 @@ from __future__ import annotations
 __all__ = ['Mesh2d']
 
 # gamut
-from gamut.math import UVector3Array, Vector2Array
+from ._mesh3d import Mesh3d
+# gamut
+from gamut.math import (UVector3Array, Vector2, Vector2Array, Vector3,
+                        Vector3Array)
 
 
 class Mesh2d:
@@ -57,3 +60,57 @@ class Mesh2d:
     @property
     def triangle_indices(self) -> UVector3Array:
         return self._triangle_indices
+
+    def _parse_swizzle(self, name: str) -> tuple[float, str]:
+        if len(name) == 1:
+            name = '+' + name
+        if len(name) != 2:
+            raise ValueError(f'invalid sign/swizzle {name}')
+        if name[0] not in '+-':
+            raise ValueError(f'invalid sign {name[0]}')
+        if name[1] not in 'xy':
+            raise ValueError(f'invalid swizzle {name[1]}')
+        return (-1 if name[0] == '-' else 1, name[1])
+
+
+    def to_mesh3d(
+        self,
+        x: str | float | int = 'x',
+        y: str | float | int = 'y',
+        z: str | float | int = 0,
+    ) -> Mesh3d:
+        if isinstance(x, (float, int)):
+            def get_x(v: Vector2) -> float | int:
+                return x
+        elif isinstance(x, str):
+            x_sign, x_name = self._parse_swizzle(x)
+            def get_x(v: Vector2) -> float:
+                return x_sign * getattr(v, x_name)
+        else:
+            raise TypeError(f'x must be str or float, got {x}')
+
+        if isinstance(y, (float, int)):
+            def get_y(v: Vector2) -> float | int:
+                return y
+        elif isinstance(y, str):
+            y_sign, y_name = self._parse_swizzle(y)
+            def get_y(v: Vector2) -> float:
+                return y_sign * getattr(v, y_name)
+        else:
+            raise TypeError(f'y must be str or float, got {y}')
+
+        if isinstance(z, (float, int)):
+            def get_z(v: Vector2) -> float | int:
+                return z
+        elif isinstance(z, str):
+            z_sign, z_name = self._parse_swizzle(z)
+            def get_z(v: Vector2) -> float:
+                return z_sign * getattr(v, z_name)
+        else:
+            raise TypeError(f'z must be str or float, got {z}')
+
+        positions_3d = Vector3Array(*(
+            Vector3(get_x(p), get_y(p), get_z(p))
+            for p in self._positions
+        ))
+        return Mesh3d(positions_3d, self.triangle_indices)
