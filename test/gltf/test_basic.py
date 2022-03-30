@@ -1586,3 +1586,98 @@ def test_scene(converter: Any) -> None:
     ]
 
     assert gltf.scene == gltf.scenes[1]
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_animation(converter: Any) -> None:
+    data = converter({
+        "buffers": [{
+            "byteLength": 0,
+            "uri": 'data:'
+        }],
+        "bufferViews": [{
+            "buffer": 0,
+            "byteLength": 0
+        }],
+        "accessors": [
+            {
+                "componentType": 5121,
+                "type": 'SCALAR',
+                "count": 1,
+                "bufferView": 0,
+            },
+            {
+                "componentType": 5121,
+                "type": 'SCALAR',
+                "count": 1,
+                "bufferView": 0,
+            }
+        ],
+        "nodes": [{}],
+        "animations": [
+            {
+                "name": 'some-name',
+                "channels": [
+                    {"sampler": 0, "target": {"path": 'translation'}},
+                    {"sampler": 2, "target": {"path": 'rotation'}},
+                    {"sampler": 1, "target": {"path": 'scale'}},
+                    {"sampler": 3, "target": {
+                        "node": 0,
+                        "path": 'weights',
+                    }},
+                ],
+                "samplers": [
+                    {"input": 0, "output": 1},
+                    {"input": 1, "interpolation": 'LINEAR', "output": 0},
+                    {"input": 1, "interpolation": 'STEP', "output": 0},
+                    {"input": 1, "interpolation": 'CUBICSPLINE', "output": 0},
+                ],
+            }
+        ],
+    })
+    gltf = Gltf(data)
+
+    anim = gltf.animations[0]
+    assert anim.name == 'some-name'
+
+    assert len(anim.channels) == 4
+    assert anim.channels[0].sampler == anim.samplers[0]
+    assert anim.channels[0].node is None
+    assert anim.channels[0].path == Gltf.Animation.Channel.Path.TRANSLATION
+
+    assert anim.channels[1].sampler == anim.samplers[2]
+    assert anim.channels[1].node is None
+    assert anim.channels[1].path == Gltf.Animation.Channel.Path.ROTATION
+
+    assert anim.channels[2].sampler == anim.samplers[1]
+    assert anim.channels[2].node is None
+    assert anim.channels[2].path == Gltf.Animation.Channel.Path.SCALE
+
+    assert anim.channels[3].sampler == anim.samplers[3]
+    assert anim.channels[3].node == gltf.nodes[0]
+    assert anim.channels[3].path == Gltf.Animation.Channel.Path.WEIGHTS
+
+    assert len(anim.samplers) == 4
+    assert anim.samplers[0].input == gltf.accessors[0]
+    assert anim.samplers[0].interpolation == (
+        Gltf.Animation.Sampler.Interpolation.LINEAR
+    )
+    assert anim.samplers[0].output == gltf.accessors[1]
+
+    assert anim.samplers[1].input == gltf.accessors[1]
+    assert anim.samplers[1].interpolation == (
+        Gltf.Animation.Sampler.Interpolation.LINEAR
+    )
+    assert anim.samplers[1].output == gltf.accessors[0]
+
+    assert anim.samplers[2].input == gltf.accessors[1]
+    assert anim.samplers[2].interpolation == (
+        Gltf.Animation.Sampler.Interpolation.STEP
+    )
+    assert anim.samplers[2].output == gltf.accessors[0]
+
+    assert anim.samplers[3].input == gltf.accessors[1]
+    assert anim.samplers[3].interpolation == (
+        Gltf.Animation.Sampler.Interpolation.CUBICSPLINE
+    )
+    assert anim.samplers[3].output == gltf.accessors[0]

@@ -160,6 +160,7 @@ def test_box(glb: bool, resources: Path) -> None:
         FVector3(0.5, -0.5, -0.5), FVector3(0.5, 0.5, -0.5)
     )
 
+    assert gltf.animations == []
     assert gltf.cameras == []
     assert gltf.images == []
     assert gltf.samplers == []

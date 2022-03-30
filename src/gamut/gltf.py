@@ -38,6 +38,101 @@ class GltfError(RuntimeError):
         pass
 
 
+class GltfAnimationChannel:
+
+    class Path(Enum):
+        TRANSLATION = 'translation'
+        ROTATION = 'rotation'
+        SCALE = 'scale'
+        WEIGHTS = 'weights'
+
+    def __init__(
+        self,
+        node: GltfNode | None,
+        path: Path,
+        sampler: GltfAnimationSampler
+    ):
+        self.node = node
+        self.path = path
+        self.sampler = sampler
+
+    @classmethod
+    def _parse(
+        cls,
+        gltf: Gltf,
+        samplers: list[Sampler],
+        data: dict
+    ) -> GltfAnimationChannel:
+        sampler = samplers[data["sampler"]]
+        target_data = data["target"]
+
+        target_node_id = target_data.get("node")
+        if target_node_id is None:
+            node = None
+        else:
+            node = gltf.nodes[target_node_id]
+
+        path = cls.Path(target_data["path"])
+
+        return GltfAnimationChannel(node, path, sampler)
+
+
+class GltfAnimationSampler:
+
+    class Interpolation(Enum):
+        LINEAR = 'LINEAR'
+        STEP = 'STEP'
+        CUBICSPLINE = 'CUBICSPLINE'
+
+    def __init__(
+        self,
+        input: GltfAccessor,
+        intepolation: Interpolation,
+        output: GltfAccessor
+    ):
+        self.input = input
+        self.interpolation = intepolation
+        self.output = output
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfAnimationSampler:
+        input = gltf.accessors[data["input"]]
+        output = gltf.accessors[data["output"]]
+        interpolation = cls.Interpolation(
+            data.get("interpolation", 'LINEAR')
+        )
+        return GltfAnimationSampler(input, interpolation, output)
+
+
+class GltfAnimation:
+
+    Channel = GltfAnimationChannel
+    Sampler = GltfAnimationSampler
+
+    def __init__(
+        self,
+        name: str | None,
+        samplers: list[Sampler],
+        channels: list[Channel]
+    ):
+        self.name = name
+        self.samplers = samplers
+        self.channels = channels
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfAnimation:
+        name = data.get("name")
+        samplers = [
+            cls.Sampler._parse(gltf, sampler_data)
+            for sampler_data in data["samplers"]
+        ]
+        channels = [
+            cls.Channel._parse(gltf, samplers, channel_data)
+            for channel_data in data["channels"]
+        ]
+        return GltfAnimation(name, samplers, channels)
+
+
 class GltfAccessor:
 
     def __init__(
@@ -881,6 +976,7 @@ class GltfScene:
 class Gltf:
 
     Accessor = GltfAccessor
+    Animation = GltfAnimation
     Buffer = GltfBuffer
     BufferView = GltfBufferView
     Camera = GltfCamera
@@ -920,6 +1016,7 @@ class Gltf:
         self.nodes: list[GltfNode] = []
         self.scenes: list[GltfScene] = []
         self.scene: GltfScene | None = None
+        self.animations: list[GltfAnimation] = []
 
         glb_args = self._parse_glb_header(file)
         if glb_args is None:
@@ -1017,6 +1114,7 @@ class Gltf:
         self._parse_json_skins(data)
         self._parse_json_nodes(data)
         self._parse_json_scenes(data)
+        self._parse_json_animations(data)
 
         scene_id = data.get("scene")
         if scene_id is not None:
@@ -1124,6 +1222,14 @@ class Gltf:
             return
         for json_scene in json_scenes:
             self.scenes.append(self.Scene._parse(self, json_scene))
+
+    def _parse_json_animations(self, data: dict) -> None:
+        try:
+            json_animations = data["animations"]
+        except KeyError:
+            return
+        for json_animation in json_animations:
+            self.animations.append(self.Animation._parse(self, json_animation))
 
 
 class PartialFile:
