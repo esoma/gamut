@@ -79,14 +79,6 @@ jobs:
       run: |
         git submodule update --init --recursive
 
-    - name: Build Boost
-      run: |
-        python setup.py build_boost
-
-    - name: Build CGAL
-      run: |
-        python setup.py build_cgal
-
     - name: Build Bullet
       run: |
         python setup.py build_bullet

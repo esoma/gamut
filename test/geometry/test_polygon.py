@@ -108,12 +108,12 @@ def test_triangulate() -> None:
         ))
         for i in mesh.triangle_indices
     ) == {
-        (Vector2(0, 0), Vector2(25, 25), Vector2(75, 25)),
-        (Vector2(0, 0), Vector2(75, 25), Vector2(100, 0)),
-        (Vector2(75, 75), Vector2(100, 0), Vector2(100, 100)),
-        (Vector2(75, 25), Vector2(75, 75), Vector2(100, 0)),
-        (Vector2(0, 100), Vector2(75, 75), Vector2(100, 100)),
-        (Vector2(0, 0), Vector2(0, 100), Vector2(25, 25)),
-        (Vector2(0, 100), Vector2(25, 25), Vector2(25, 75)),
-        (Vector2(0, 100), Vector2(25, 75), Vector2(75, 75)),
+        (Vector2(75.0, 25.0), Vector2(100.0, 0.0), Vector2(100.0, 100.0)),
+        (Vector2(0.0, 100.0), Vector2(75.0, 75.0), Vector2(100.0, 100.0)),
+        (Vector2(75.0, 25.0), Vector2(75.0, 75.0), Vector2(100.0, 100.0)),
+        (Vector2(0.0, 0.0), Vector2(25.0, 25.0), Vector2(75.0, 25.0)),
+        (Vector2(0.0, 100.0), Vector2(25.0, 75.0), Vector2(75.0, 75.0)),
+        (Vector2(0.0, 0.0), Vector2(0.0, 100.0), Vector2(25.0, 75.0)),
+        (Vector2(0.0, 0.0), Vector2(25.0, 25.0), Vector2(25.0, 75.0)),
+        (Vector2(0.0, 0.0), Vector2(75.0, 25.0), Vector2(100.0, 0.0))
     }
