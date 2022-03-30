@@ -231,12 +231,17 @@ class Texture:
             assert False
         # we only need to generate mipmaps if we're using a mipmap selection
         # that would actually check the mipmaps
+        self._mipmap_selection = mipmap_selection
         if mipmap_selection != MipmapSelection.NONE:
             glGenerateMipmap(self._gl_target)
         # set the min/max filter parameters
+        self._minify_filter = minify_filter
+        self._magnify_filter = magnify_filter
         glTexParameteri(self._gl_target, GL_TEXTURE_MIN_FILTER, gl_min_filter)
         glTexParameteri(self._gl_target, GL_TEXTURE_MAG_FILTER, gl_mag_filter)
         # set the wrapping parameters
+        self._wrap = wrap
+        self._wrap_color = wrap_color
         for wrap_value, wrap_name in zip(wrap, GL_TEXTURE_WRAP_NAMES):
             glTexParameteri(self._gl_target, wrap_name, wrap_value.value)
         glTexParameterfv(
@@ -245,6 +250,7 @@ class Texture:
             wrap_color.pointer
         )
         # set anisotropy
+        self._anisotropy = anisotropy
         if anisotropy > 1.0 and glInitTextureFilterAnisotropicEXT():
             glTexParameterf(
                 self._gl_target,
@@ -270,8 +276,24 @@ class Texture:
         self._gl_context = release_gl_context(self._gl_context)
 
     @property
+    def anisotropy(self) -> float:
+        return self._anisotropy
+
+    @property
     def components(self) -> TextureComponents:
         return self._components
+
+    @property
+    def magnify_filter(self) -> TextureFilter:
+        return self._magnify_filter
+
+    @property
+    def minify_filter(self) -> TextureFilter:
+        return self._minify_filter
+
+    @property
+    def mipmap_selection(self) -> MipmapSelection:
+        return self._mipmap_selection
 
     @property
     def size(self) -> UVector1 | UVector2 | UVector3:
@@ -284,6 +306,18 @@ class Texture:
     @property
     def type(self) -> TextureType:
         return self._type
+
+    @property
+    def wrap(self) -> (
+        tuple[TextureWrap] |
+        tuple[TextureWrap, TextureWrap] |
+        tuple[TextureWrap, TextureWrap, TextureWrap]
+    ):
+        return self._wrap
+
+    @property
+    def wrap_color(self) -> FVector4:
+        return self._wrap_color
 
 
 def get_texture_gl_target(texture: Texture) -> Any:

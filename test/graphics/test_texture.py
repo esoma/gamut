@@ -268,6 +268,9 @@ class TextureTest:
         assert texture.components == TextureComponents.R
         assert texture.size == size
         assert texture.is_open
+        assert texture.minify_filter == minify_filter
+        assert texture.magnify_filter == magnify_filter
+        assert texture.mipmap_selection == mipmap_selection
 
     @pytest.mark.parametrize("wrap", [
         0, 1,
@@ -340,6 +343,7 @@ class TextureTest:
         assert texture.components == TextureComponents.R
         assert texture.size == size
         assert texture.is_open
+        assert texture.wrap == wrap
 
     @pytest.mark.parametrize("anisotropy", ['abc', object()])
     def test_anisotropy_invalid(self, size: Any, anisotropy: Any) -> None:
@@ -356,13 +360,14 @@ class TextureTest:
     @pytest.mark.parametrize("anisotropy", [-1000, 0, 1.0, 1.5, 16, 999999])
     def test_anisotropy_values(self, size: Any, anisotropy: Any) -> None:
         data = b'\x00' * self.data_multiplier
-        self.create_texture(
+        texture = self.create_texture(
             size,
             TextureComponents.R,
             ctypes.c_int8,
             data,
             anisotropy=anisotropy
         )
+        assert texture.anisotropy == float(anisotropy)
 
     def test_depth_stencil(self, size: Any) -> None:
         data = b'\x00' * c_sizeof(ctypes.c_uint32) * self.data_multiplier
