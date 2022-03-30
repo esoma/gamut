@@ -1,4 +1,5 @@
 
+from __future__ import annotations
 # gamut
 from gamut.gltf import Gltf
 from gamut.graphics import PrimitiveMode

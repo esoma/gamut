@@ -17,14 +17,14 @@ import json
 from pathlib import Path
 import struct
 import sys
-from typing import BinaryIO, Callable, Final
+from typing import BinaryIO, Callable, Final, Union
 from urllib.request import urlopen
 # numpy
 from numpy import frombuffer as np_array_from_buffer
 from numpy import uint8 as np_uint8
 from numpy.lib.stride_tricks import as_strided as np_as_strided
 
-GltfFilePathCallback = Callable[[Path, int | None], memoryview]
+GltfFilePathCallback = Callable[[Path, Union[int, None]], memoryview]
 
 
 def file_path_callback_disallowed(
