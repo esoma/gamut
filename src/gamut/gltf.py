@@ -4,11 +4,14 @@ from __future__ import annotations
 __init__ = ['Gltf']
 
 # gamut
-from gamut.graphics import Image, MipmapSelection, TextureFilter, TextureWrap
+from gamut.graphics import (Image, MipmapSelection, PrimitiveMode, Texture2d,
+                            TextureFilter, TextureWrap)
 import gamut.math
-from gamut.math import FMatrix4, FVector2, UVector2
+from gamut.math import (FArray, FMatrix4, FMatrix4Array, FQuaternion, FVector2,
+                        FVector3, FVector4, UVector2)
 # python
 import ctypes
+from enum import Enum
 from io import BytesIO
 import json
 from pathlib import Path
@@ -371,15 +374,451 @@ class GltfSampler:
         )
 
 
+class GltfTexture:
+
+    def __init__(self, sampler: GltfSampler | None, image: GltfImage):
+        self._sampler = sampler
+        self._image = image
+        self._data: Texture2d | None = None
+
+    def _get_data(self) -> None:
+        assert self._data is None
+        if self._sampler is None:
+            self._data = self._image.data.to_texture()
+        else:
+            self._data = self._image.data.to_texture(
+                self._sampler.mipmap_selection,
+                self._sampler.minify_filter,
+                self._sampler.magnify_filter,
+                self._sampler.wrap
+            )
+
+    @property
+    def data(self) -> Texture2d:
+        if self._data is None:
+            self._get_data()
+        assert self._data is not None
+        return self._data
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfTexture:
+        sampler_index = data.get("sampler")
+        if sampler_index is None:
+            sampler = None
+        else:
+            sampler = gltf.samplers[int(sampler_index)]
+
+        try:
+            image_index = data["source"]
+        except KeyError:
+            raise GltfError('texture without a source not supported')
+        image = gltf.images[int(image_index)]
+
+        return GltfTexture(sampler, image)
+
+
+class GltfMaterialPbrMetallicRoughness:
+
+    def __init__(
+        self,
+        base_color_factor: FVector4,
+        base_color_texture: GltfTexture | None,
+        base_color_texcoord: str | None,
+        metallic_factor: float,
+        roughness_factor: float,
+        metallic_roughness_texture: GltfTexture | None,
+        metallic_roughness_texcoord: str | None
+    ):
+        self.base_color_factor = base_color_factor
+        self.base_color_texture = base_color_texture
+        self.base_color_texcoord = base_color_texcoord
+        self.metallic_factor = metallic_factor
+        self.roughness_factor = roughness_factor
+        self.metallic_roughness_texture = metallic_roughness_texture
+        self.metallic_roughness_texcoord = metallic_roughness_texcoord
+
+    @classmethod
+    def _parse(
+        cls,
+        gltf: Gltf,
+        data: dict
+    ) -> GltfMaterialPbrMetallicRoughness:
+        base_color_factor = FVector4(
+            *data.get("baseColorFactor", FVector4(1.0))
+        )
+
+        base_color_texture_data = data.get("baseColorTexture")
+        if base_color_texture_data is None:
+            base_color_texture = base_color_texcoord = None
+        else:
+            base_color_texture, base_color_texcoord = (
+                _parse_texture_info(gltf, base_color_texture_data)
+            )
+        metallic_factor = float(data.get("metallicFactor", 1.0))
+        roughness_factor = float(data.get("roughnessFactor", 1.0))
+
+        metallic_roughness_texture_data = data.get("metallicRoughnessTexture")
+        if metallic_roughness_texture_data is None:
+            metallic_roughness_texture = metallic_roughness_texcoord = None
+        else:
+            metallic_roughness_texture, metallic_roughness_texcoord = (
+                _parse_texture_info(gltf, metallic_roughness_texture_data)
+            )
+
+        return GltfMaterialPbrMetallicRoughness(
+            base_color_factor,
+            base_color_texture,
+            base_color_texcoord,
+            metallic_factor,
+            roughness_factor,
+            metallic_roughness_texture,
+            metallic_roughness_texcoord
+        )
+
+
+class GltfMaterial:
+
+    class AlphaMode(Enum):
+        OPAQUE = 'OPAQUE'
+        MASK = 'MASK'
+        BLEND = 'BLEND'
+
+    PbrMetallicRoughness = GltfMaterialPbrMetallicRoughness
+
+    def __init__(
+        self,
+        pbr_metallic_roughness: GltfMaterialPbrMetallicRoughness | None,
+        normal_texture: GltfTexture | None,
+        normal_texcoord: str | None,
+        occlusion_texture: GltfTexture | None,
+        occlusion_texcoord: str | None,
+        emissive_texture: GltfTexture | None,
+        emissive_texcoord: str | None,
+        emissive_factor: FVector3,
+        alpha_mode: AlphaMode,
+        alpha_cutoff: float,
+        is_double_sided: bool
+    ):
+        self.pbr_metallic_roughness = pbr_metallic_roughness
+        self.normal_texture = normal_texture
+        self.normal_texcoord = normal_texcoord
+        self.occlusion_texture = occlusion_texture
+        self.occlusion_texcoord = occlusion_texcoord
+        self.emissive_texture = emissive_texture
+        self.emissive_texcoord = emissive_texcoord
+        self.emissive_factor = emissive_factor
+        self.alpha_mode = alpha_mode
+        self.alpha_cutoff = alpha_cutoff
+        self.is_double_sided = is_double_sided
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfMaterial:
+        pbr_metallic_roughness_data = data.get("pbrMetallicRoughness")
+        if pbr_metallic_roughness_data is not None:
+            pbr_metallic_roughness = GltfMaterialPbrMetallicRoughness._parse(
+                gltf,
+                pbr_metallic_roughness_data
+            )
+        else:
+            pbr_metallic_roughness = None
+
+        normal_texture_data = data.get("normalTexture")
+        if normal_texture_data is None:
+            normal_texture = normal_texcoord = None
+        else:
+            normal_texture, normal_texcoord = _parse_texture_info(
+                gltf,
+                normal_texture_data
+            )
+
+        occlusion_texture_data = data.get("occlusionTexture")
+        if occlusion_texture_data is None:
+            occlusion_texture = occlusion_texcoord = None
+        else:
+            occlusion_texture, occlusion_texcoord = _parse_texture_info(
+                gltf,
+                occlusion_texture_data
+            )
+
+        emissive_texture_data = data.get("emissiveTexture")
+        if emissive_texture_data is None:
+            emissive_texture = emissive_texcoord = None
+        else:
+            emissive_texture, emissive_texcoord = _parse_texture_info(
+                gltf,
+                emissive_texture_data
+            )
+        emissive_factor = FVector3(*data.get("emissiveFactor", FVector3(0)))
+
+        alpha_mode = cls.AlphaMode(data.get(
+            "alphaMode",
+            cls.AlphaMode.OPAQUE
+        ))
+        alpha_cutoff = float(data.get("alphaCutoff", 0.5))
+        is_double_sided = bool(data.get("doubleSided"))
+
+        return GltfMaterial(
+            pbr_metallic_roughness,
+            normal_texture,
+            normal_texcoord,
+            occlusion_texture,
+            occlusion_texcoord,
+            emissive_texture,
+            emissive_texcoord,
+            emissive_factor,
+            alpha_mode,
+            alpha_cutoff,
+            is_double_sided,
+        )
+
+
+def _parse_texture_info(gltf: Gltf, data: dict) -> tuple[GltfTexture, str]:
+    texture_index = int(data["index"])
+    texture = gltf.textures[texture_index]
+    texcoord = f'TEXCOORD_{data.get("texCoord", 0)}'
+    return texture, texcoord
+
+
+class GltfMeshPrimitive:
+
+    def __init__(
+        self,
+        attributes: dict[str, GltfAccessor],
+        indices: GltfAccessor | None,
+        material: GltfMaterial | None,
+        mode: PrimitiveMode,
+        targets: dict[str, GltfAccessor] | None
+    ):
+        self.attributes = attributes
+        self.indices = indices
+        self.material = material
+        self.mode = mode
+        self.targets = targets
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfMeshPrimitive:
+        attributes = {
+            k: gltf.accessors[accessor_id]
+            for k, accessor_id in data["attributes"].items()
+        }
+
+        indices_accessor_id = data.get("indices")
+        if indices_accessor_id is None:
+            indices = None
+        else:
+            indices = gltf.accessors[indices_accessor_id]
+
+        material_id = data.get("material")
+        if material_id is None:
+            material = None
+        else:
+            material = gltf.materials[material_id]
+
+        mode = GLTF_PRIMITIVE_MODE_TO_PRIMITIVE_MODE[data.get("mode")]
+
+        raw_targets = data.get("targets")
+        if raw_targets is None:
+            targets = None
+        else:
+            targets = {
+                k: gltf.accessors[accessor_id]
+                for k, accessor_id in raw_targets.items()
+            }
+
+        return GltfMeshPrimitive(
+            attributes,
+            indices,
+            material,
+            mode,
+            targets
+        )
+
+
+class GltfMesh:
+
+    Primitive = GltfMeshPrimitive
+
+    def __init__(
+        self,
+        primitives: tuple[GltfMeshPrimitive],
+        weights: FArray | None
+    ):
+        self.primitives = primitives
+        self.weights = weights
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfMesh:
+        primitives: list[GltfMeshPrimitive] = []
+        for primitive_data in data["primitives"]:
+            primitives.append(GltfMeshPrimitive._parse(gltf, primitive_data))
+
+        try:
+            weights = FArray(*data["weights"])
+        except KeyError:
+            weights = None
+
+        return GltfMesh(tuple(primitives), weights)
+
+
+class GltfSkin:
+
+    def __init__(
+        self,
+        inverse_bind_matrices_accessor: GltfAccessor | None,
+        skeleton_id: int | None,
+        joint_ids: Sequence[int]
+    ):
+        self._inverse_bind_matrices_accessor = inverse_bind_matrices_accessor
+        self._inverse_bind_matrices: FMatrix4Array | None = None
+        self._skeleton_id = skeleton_id
+        self._skeleton: GltfNode | None = None
+        self._joint_ids = joint_ids
+        self.joints: list[GltfNode] = []
+
+    def _get_nodes(self, gltf: Gltf) -> None:
+        if self._skeleton_id is not None:
+            self._skeleton = gltf.nodes[self._skeleton_id]
+        self.joints = [gltf.nodes[i] for i in self._joint_ids]
+
+    @property
+    def inverse_bind_matrices(self) -> FMatrix4Array:
+        if self._inverse_bind_matrices is None:
+            if self._inverse_bind_matrices_accessor is None:
+                self._inverse_bind_matrices = FMatrix4Array(*(
+                    FMatrix4(1) for _ in range(len(self._joint_ids))
+                ))
+            else:
+                array = self._inverse_bind_matrices_accessor.data
+                if not isinstance(array, FMatrix4Array):
+                    raise GltfError('inverse bind matrices are wrong type')
+                self._inverse_bind_matrices = array
+        return self._inverse_bind_matrices
+
+    @property
+    def skeleton(self) -> GltfNode | None:
+        return self._skeleton
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfSkin:
+        inverse_bind_matrices_accessor_id = data.get("inverseBindMatrices")
+        if inverse_bind_matrices_accessor_id is None:
+            inverse_bind_matrices_accessor = None
+        else:
+            inverse_bind_matrices_accessor = gltf.accessors[
+                inverse_bind_matrices_accessor_id
+            ]
+
+        skeleton_id = data.get("skeleton")
+        joint_ids = data["joints"]
+        return GltfSkin(
+            inverse_bind_matrices_accessor,
+            skeleton_id,
+            joint_ids
+        )
+
+
+class GltfNode:
+
+    def __init__(
+        self,
+        camera: GltfCamera | None,
+        children_ids: Sequence[int],
+        skin: GltfSkin | None,
+        mesh: GltfMesh | None,
+        weights: FArray | None,
+        transform: FMatrix4
+    ):
+        self.camera = camera
+        self._children_ids = children_ids
+        self.children: List[GltfNode] = []
+        self.skin = skin
+        self.mesh = mesh
+        self.weights = weights
+        self.transform = transform
+
+    def _get_children(self, gltf: Gltf) -> None:
+        self.children = [gltf.nodes[id] for id in self._children_ids]
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfNode:
+        camera_id = data.get("camera")
+        if camera_id is None:
+            camera = None
+        else:
+            camera = gltf.cameras[int(camera_id)]
+
+        children_ids = data.get("children", [])
+
+        skin_id = data.get("skin")
+        if skin_id is None:
+            skin = None
+        else:
+            skin = gltf.skins[skin_id]
+
+        try:
+            matrix = FMatrix4(*data["matrix"])
+        except KeyError:
+            matrix = FMatrix4(1)
+
+        mesh_id = data.get("mesh")
+        if mesh_id is None:
+            mesh = None
+        else:
+            mesh = gltf.meshes[mesh_id]
+
+        try:
+            rotation = FQuaternion(
+                data["rotation"][-1],
+                *data["rotation"][:-1],
+            )
+        except KeyError:
+            rotation = FQuaternion(1)
+
+        try:
+            scale = FVector3(*data["scale"])
+        except KeyError:
+            scale = FVector3(1)
+
+        try:
+            translation = FVector3(*data["translation"])
+        except KeyError:
+            translation = FVector3(0)
+
+        try:
+            weights = FArray(*data["weights"])
+        except KeyError:
+            weights = None
+
+        if "rotation" in data or "scale" in data or "translation" in data:
+            if "matrix" in data:
+                raise GltfError(
+                    'matrix is exclusive with rotation, scale and translation'
+                )
+            transform = (
+                FMatrix4(1).translate(translation) @
+                rotation.to_matrix4() @
+                FMatrix4(1).scale(scale)
+            )
+        else:
+            transform = matrix
+
+        return GltfNode(camera, children_ids, skin, mesh, weights, transform)
+
+
 class Gltf:
 
     Accessor = GltfAccessor
     Buffer = GltfBuffer
     BufferView = GltfBufferView
     Camera = GltfCamera
-    Image = GltfImage
     Error = GltfError
+    Image = GltfImage
+    Material = GltfMaterial
+    Mesh = GltfMesh
+    Node = GltfNode
     Sampler = GltfSampler
+    Skin = GltfSkin
+    Texture = GltfTexture
 
     def __init__(
         self,
@@ -400,12 +839,22 @@ class Gltf:
         self.cameras: list[GltfCamera] = []
         self.images: list[GltfImage] = []
         self.samplers: list[GltfSampler] = []
+        self.textures: list[GltfTexture] = []
+        self.materials: list[GltfMaterial] = []
+        self.meshes: list[GltfMesh] = []
+        self.skins: list[GltfSkin] = []
+        self.nodes: list[GltfNode] = []
 
         glb_args = self._parse_glb_header(file)
         if glb_args is None:
             self._load_gltf(file)
         else:
             self._load_glb(file, *glb_args)
+
+        for skin in self.skins:
+            skin._get_nodes(self)
+        for node in self.nodes:
+            node._get_children(self)
 
     def _parse_glb_header(self, file: BinaryIO) -> tuple[int, int] | None:
         i = file.tell()
@@ -486,6 +935,11 @@ class Gltf:
         self._parse_json_cameras(data)
         self._parse_json_images(data)
         self._parse_json_samplers(data)
+        self._parse_json_textures(data)
+        self._parse_json_materials(data)
+        self._parse_json_meshes(data)
+        self._parse_json_skins(data)
+        self._parse_json_nodes(data)
 
     def _parse_json_buffers(self, data: dict) -> None:
         try:
@@ -541,6 +995,46 @@ class Gltf:
             return
         for json_sampler in json_samplers:
             self.samplers.append(self.Sampler._parse(json_sampler))
+
+    def _parse_json_textures(self, data: dict) -> None:
+        try:
+            json_textures = data["textures"]
+        except KeyError:
+            return
+        for json_texture in json_textures:
+            self.textures.append(self.Texture._parse(self, json_texture))
+
+    def _parse_json_materials(self, data: dict) -> None:
+        try:
+            json_materials = data["materials"]
+        except KeyError:
+            return
+        for json_material in json_materials:
+            self.materials.append(self.Material._parse(self, json_material))
+
+    def _parse_json_meshes(self, data: dict) -> None:
+        try:
+            json_meshes = data["meshes"]
+        except KeyError:
+            return
+        for json_mesh in json_meshes:
+            self.meshes.append(self.Mesh._parse(self, json_mesh))
+
+    def _parse_json_skins(self, data: dict) -> None:
+        try:
+            json_skins = data["skins"]
+        except KeyError:
+            return
+        for json_skin in json_skins:
+            self.skins.append(self.Skin._parse(self, json_skin))
+
+    def _parse_json_nodes(self, data: dict) -> None:
+        try:
+            json_nodes = data["nodes"]
+        except KeyError:
+            return
+        for json_node in json_nodes:
+            self.nodes.append(self.Node._parse(self, json_node))
 
 
 class PartialFile:
@@ -654,4 +1148,16 @@ GLTF_WRAP_TO_TEXTURE_WRAP: Final = {
     33648: TextureWrap.REPEAT_MIRRORED,
     10497: TextureWrap.REPEAT,
     None: TextureWrap.REPEAT,
+}
+
+
+GLTF_PRIMITIVE_MODE_TO_PRIMITIVE_MODE: Final = {
+    0: PrimitiveMode.POINT,
+    1: PrimitiveMode.LINE,
+    2: PrimitiveMode.LINE_LOOP,
+    3: PrimitiveMode.LINE_STRIP,
+    4: PrimitiveMode.TRIANGLE,
+    5: PrimitiveMode.TRIANGLE_STRIP,
+    6: PrimitiveMode.TRIANGLE_FAN,
+    None: PrimitiveMode.TRIANGLE,
 }

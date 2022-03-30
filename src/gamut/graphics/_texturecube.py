@@ -47,5 +47,9 @@ class TextureCube(Texture):
         assert isinstance(size, UVector2)
         return size
 
+    @property
+    def wrap(self) -> tuple[TextureWrap, TextureWrap]:
+        return super().wrap
+
 
 TextureCube.__module__ = 'gamut.graphics'

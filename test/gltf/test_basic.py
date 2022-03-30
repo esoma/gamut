@@ -1,11 +1,14 @@
 
 # gamut
 from gamut.gltf import Gltf
-from gamut.graphics import Image, MipmapSelection, TextureFilter, TextureWrap
+from gamut.graphics import (Image, MipmapSelection, PrimitiveMode, Texture2d,
+                            TextureFilter, TextureView, TextureWrap)
 import gamut.math
-from gamut.math import FMatrix4, FVector2, UVector2
+from gamut.math import (FArray, FMatrix4, FMatrix4Array, FQuaternion, FVector2,
+                        FVector3, FVector4, UVector2)
 # python
 from base64 import b64encode
+import ctypes
 from io import BytesIO
 import json
 from pathlib import Path
@@ -972,3 +975,541 @@ def test_sampler_wrap_defaults(converter: Any) -> None:
     })
     gltf = Gltf(data)
     assert gltf.samplers[0].wrap == (TextureWrap.REPEAT, TextureWrap.REPEAT)
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_texture_no_source(converter: Any) -> None:
+    data = converter({
+        "textures": [{}],
+    })
+
+    with pytest.raises(Gltf.Error) as ex:
+        gltf = Gltf(data)
+    assert str(ex.value) == 'texture without a source not supported'
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+@pytest.mark.parametrize("file_name, mime_type", [
+    ('gamut_rgba16.png', 'image/png'),
+    ('gamut.jpg', 'image/jpg'),
+])
+def test_texture_no_sampler(
+    resources: Path,
+    file_name: str,
+    mime_type: str,
+    converter: Any
+) -> None:
+    with open(resources / file_name, 'rb') as f:
+        image_bytes = f.read()
+    image = Image(BytesIO(image_bytes))
+    image_b64 = b64encode(image_bytes).decode('utf-8')
+    uri = f'data:;base64,{image_b64}'
+    data = converter({
+        "images": [{
+            "mimeType": mime_type,
+            "uri": uri
+        }],
+        "textures": [{"source": 0}]
+    })
+    gltf = Gltf(data)
+
+    texture = gltf.textures[0].data
+    assert isinstance(texture, Texture2d)
+    assert TextureView(texture, ctypes.c_uint8).bytes == image.to_bytes()
+    assert texture.anisotropy == 1.0
+    assert texture.wrap == (TextureWrap.REPEAT, TextureWrap.REPEAT)
+    assert texture.minify_filter == TextureFilter.NEAREST
+    assert texture.magnify_filter == TextureFilter.NEAREST
+    assert texture.mipmap_selection == MipmapSelection.NONE
+    assert texture.wrap_color == FVector4(0)
+
+
+@pytest.mark.parametrize("gltf_mag_filter, mag_filter", [
+    (9728, TextureFilter.NEAREST),
+    (9729, TextureFilter.LINEAR),
+])
+@pytest.mark.parametrize("gltf_min_filter, min_filter, mipmap", [
+    (9728, TextureFilter.NEAREST, MipmapSelection.NONE),
+    (9729, TextureFilter.LINEAR, MipmapSelection.NONE),
+    (9984, TextureFilter.NEAREST, MipmapSelection.NEAREST),
+    (9985, TextureFilter.LINEAR, MipmapSelection.NEAREST),
+    (9986, TextureFilter.NEAREST, MipmapSelection.LINEAR),
+    (9987, TextureFilter.LINEAR, MipmapSelection.LINEAR),
+])
+@pytest.mark.parametrize("gltf_wrap_s, wrap_s", [
+    (33071, TextureWrap.CLAMP_TO_EDGE),
+    (33648, TextureWrap.REPEAT_MIRRORED),
+    (10497, TextureWrap.REPEAT),
+])
+@pytest.mark.parametrize("gltf_wrap_t, wrap_t", [
+    (33071, TextureWrap.CLAMP_TO_EDGE),
+    (33648, TextureWrap.REPEAT_MIRRORED),
+    (10497, TextureWrap.REPEAT),
+])
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+@pytest.mark.parametrize("file_name, mime_type", [
+    ('gamut_rgba16.png', 'image/png'),
+    ('gamut.jpg', 'image/jpg'),
+])
+def test_texture_with_sampler(
+    gltf_mag_filter: int,
+    mag_filter: TextureFilter,
+    gltf_min_filter: int,
+    min_filter: TextureFilter,
+    mipmap: MipmapSelection,
+    gltf_wrap_s: int,
+    wrap_s: TextureWrap,
+    gltf_wrap_t: int,
+    wrap_t: TextureWrap,
+    resources: Path,
+    file_name: str,
+    mime_type: str,
+    converter: Any
+) -> None:
+    with open(resources / file_name, 'rb') as f:
+        image_bytes = f.read()
+    image = Image(BytesIO(image_bytes))
+    image_b64 = b64encode(image_bytes).decode('utf-8')
+    uri = f'data:;base64,{image_b64}'
+    data = converter({
+        "samplers": [{
+            "magFilter": gltf_mag_filter,
+            "minFilter": gltf_min_filter,
+            "wrapS": gltf_wrap_s,
+            "wrapT": gltf_wrap_t,
+        }],
+        "images": [{
+            "mimeType": mime_type,
+            "uri": uri
+        }],
+        "textures": [{"sampler": 0, "source": 0}]
+    })
+    gltf = Gltf(data)
+
+    texture = gltf.textures[0].data
+    assert isinstance(texture, Texture2d)
+    assert TextureView(texture, ctypes.c_uint8).bytes == image.to_bytes()
+    assert texture.anisotropy == 1.0
+    assert texture.wrap == (wrap_s, wrap_t)
+    assert texture.minify_filter == min_filter
+    assert texture.magnify_filter == mag_filter
+    assert texture.mipmap_selection == mipmap
+    assert texture.wrap_color == FVector4(0)
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_material_empty(converter: Any) -> None:
+    data = converter({
+        "materials": [{}]
+    })
+    gltf = Gltf(data)
+
+    material = gltf.materials[0]
+    assert material.pbr_metallic_roughness is None
+    assert material.normal_texture is None
+    assert material.normal_texcoord is None
+    assert material.occlusion_texture is None
+    assert material.occlusion_texcoord is None
+    assert material.emissive_texture is None
+    assert material.emissive_texcoord is None
+    assert material.emissive_factor == FVector3(0)
+    assert material.alpha_mode == Gltf.Material.AlphaMode.OPAQUE
+    assert material.alpha_cutoff == .5
+    assert not material.is_double_sided
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_material_pbr_metallic_roughness_empty(converter: Any) -> None:
+    data = converter({
+        "materials": [{"pbrMetallicRoughness": {}}]
+    })
+    gltf = Gltf(data)
+
+    material = gltf.materials[0]
+    assert isinstance(
+        material.pbr_metallic_roughness,
+        Gltf.Material.PbrMetallicRoughness
+    )
+    assert material.pbr_metallic_roughness.base_color_factor == FVector4(1.0)
+    assert material.pbr_metallic_roughness.base_color_texture is None
+    assert material.pbr_metallic_roughness.base_color_texcoord is None
+    assert material.pbr_metallic_roughness.metallic_factor == 1.0
+    assert material.pbr_metallic_roughness.roughness_factor == 1.0
+    assert material.pbr_metallic_roughness.metallic_roughness_texture is None
+    assert material.pbr_metallic_roughness.metallic_roughness_texcoord is None
+    assert material.normal_texture is None
+    assert material.normal_texcoord is None
+    assert material.occlusion_texture is None
+    assert material.occlusion_texcoord is None
+    assert material.emissive_texture is None
+    assert material.emissive_texcoord is None
+    assert material.emissive_factor == FVector3(0)
+    assert material.alpha_mode == Gltf.Material.AlphaMode.OPAQUE
+    assert material.alpha_cutoff == .5
+    assert not material.is_double_sided
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_material(resources: Path, converter: Any) -> None:
+    with open(resources / 'gamut.jpg', 'rb') as f:
+        image_bytes = f.read()
+    image = Image(BytesIO(image_bytes))
+    image_b64 = b64encode(image_bytes).decode('utf-8')
+    uri = f'data:;base64,{image_b64}'
+
+    data = converter({
+        "images": [{
+            "mimeType": 'image/jpg',
+            "uri": uri
+        }],
+        "textures": [{"source": 0}],
+        "materials": [{
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [.2, .3, .4, .5],
+                "baseColorTexture": {"index": 0},
+                "metallicFactor": .8,
+                "roughnessFactor": .7,
+                "metallicRoughnessTexture": {"index": 0},
+            },
+            "normalTexture": {"index": 0, "texCoord": 1},
+            "occlusionTexture": {"index": 0, "texCoord": 1},
+            "emissiveTexture": {"index": 0, "texCoord": 1},
+            "emissiveFactor": [.9, .8, .7],
+            "alphaMode": 'MASK',
+            "alphaCutoff": .8,
+            "doubleSided": True,
+        }]
+    })
+    gltf = Gltf(data)
+
+    material = gltf.materials[0]
+    assert isinstance(
+        material.pbr_metallic_roughness,
+        Gltf.Material.PbrMetallicRoughness
+    )
+    assert material.pbr_metallic_roughness.base_color_factor == (
+        FVector4(.2, .3, .4, .5)
+    )
+    assert material.pbr_metallic_roughness.base_color_texture is (
+        gltf.textures[0]
+    )
+    assert material.pbr_metallic_roughness.base_color_texcoord == 'TEXCOORD_0'
+    assert material.pbr_metallic_roughness.metallic_factor == .8
+    assert material.pbr_metallic_roughness.roughness_factor == .7
+    assert material.pbr_metallic_roughness.metallic_roughness_texture is (
+        gltf.textures[0]
+    )
+    assert material.pbr_metallic_roughness.metallic_roughness_texcoord == (
+        'TEXCOORD_0'
+    )
+    assert material.normal_texture is gltf.textures[0]
+    assert material.normal_texcoord == 'TEXCOORD_1'
+    assert material.occlusion_texture is gltf.textures[0]
+    assert material.occlusion_texcoord == 'TEXCOORD_1'
+    assert material.emissive_texture is gltf.textures[0]
+    assert material.emissive_texcoord == 'TEXCOORD_1'
+    assert material.emissive_factor == FVector3(.9, .8, .7)
+    assert material.alpha_mode == Gltf.Material.AlphaMode.MASK
+    assert material.alpha_cutoff == .8
+    assert material.is_double_sided
+
+
+@pytest.mark.parametrize("gltf_mode, primitive_mode", [
+    (0, PrimitiveMode.POINT),
+    (1, PrimitiveMode.LINE),
+    (2, PrimitiveMode.LINE_LOOP),
+    (3, PrimitiveMode.LINE_STRIP),
+    (4, PrimitiveMode.TRIANGLE),
+    (5, PrimitiveMode.TRIANGLE_STRIP),
+    (6, PrimitiveMode.TRIANGLE_FAN),
+    (None, PrimitiveMode.TRIANGLE),
+])
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_mesh(
+    converter: Any,
+    gltf_mode: int,
+    primitive_mode: PrimitiveMode
+) -> None:
+    data = converter({
+        "buffers": [{
+            "byteLength": 0,
+            "uri": 'data:'
+        }],
+        "bufferViews": [{
+            "buffer": 0,
+            "byteLength": 0
+        }],
+        "accessors": [
+            {
+                "componentType": 5126,
+                "type": 'VEC3',
+                "count": 1,
+                "bufferView": 0,
+            },
+            {
+                "componentType": 5126,
+                "type": 'VEC3',
+                "count": 1,
+                "bufferView": 0,
+            },
+            {
+                "componentType": 5121,
+                "type": 'SCALAR',
+                "count": 1,
+                "bufferView": 0,
+            }
+        ],
+        "materials": [{}],
+        "meshes": [
+            {
+                "primitives": [{
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                    },
+                    "indices": 2,
+                    "material": 0,
+                    "mode": gltf_mode,
+                    "targets": {
+                        "POSITION": 1,
+                        "NORMAL": 0,
+                    },
+                }],
+                "weights": [1.0, 2.0, 3.0, 4.0],
+            },
+            {
+                "primitives": [{
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                    },
+                }],
+            }
+        ]
+    })
+    gltf = Gltf(data)
+
+    gltf.meshes[0].primitives[0].attributes == {
+        "POSITION": gltf.accessors[0],
+        "NORMAL": gltf.accessors[1],
+    }
+    gltf.meshes[0].primitives[0].indices == gltf.accessors[2]
+    gltf.meshes[0].primitives[0].material == gltf.materials[0]
+    gltf.meshes[0].primitives[0].mode == primitive_mode
+    gltf.meshes[0].primitives[0].targets == {
+        "POSITION": gltf.accessors[1],
+        "NORMAL": gltf.accessors[0],
+    }
+    gltf.meshes[0].weights == FArray(1.0, 2.0, 3.0, 4.0)
+
+    gltf.meshes[1].primitives[0].attributes == {
+        "POSITION": gltf.accessors[0],
+        "NORMAL": gltf.accessors[1],
+    }
+    gltf.meshes[1].primitives[0].indices is None
+    gltf.meshes[1].primitives[0].material is None
+    gltf.meshes[1].primitives[0].mode == PrimitiveMode.TRIANGLE
+    gltf.meshes[1].primitives[0].targets is None
+    gltf.meshes[1].weights is None
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_skin(converter: Any) -> None:
+    inverse_bind_matrices = FMatrix4Array(
+        FMatrix4(1),
+        FMatrix4(2),
+    )
+    inverse_bind_matrices_bytes = bytes(inverse_bind_matrices)
+    inverse_bind_matrices_b64 = b64encode(
+        inverse_bind_matrices_bytes
+    ).decode('utf-8')
+    uri = f'data:;base64,{inverse_bind_matrices_b64}'
+
+    data = converter({
+        "buffers": [{
+            "byteLength": len(inverse_bind_matrices_bytes),
+            "uri": uri
+        }],
+        "bufferViews": [{
+            "buffer": 0,
+            "byteLength": len(inverse_bind_matrices_bytes)
+        }],
+        "accessors": [
+            {
+                "componentType": 5126,
+                "type": 'MAT4',
+                "count": 2,
+                "bufferView": 0,
+            },
+            {
+                "componentType": 5126,
+                "type": 'VEC3',
+                "count": 1,
+                "bufferView": 0,
+            },
+        ],
+        "nodes": [{}, {}, {}],
+        "skins": [
+            {"joints": [0, 1, 2]},
+            {
+                "inverseBindMatrices": 0,
+                "skeleton": 0,
+                "joints": [1, 2],
+            },
+            {
+                "inverseBindMatrices": 1,
+                "joints": [0, 1, 2],
+            },
+        ],
+    })
+    gltf = Gltf(data)
+
+    assert gltf.skins[0].inverse_bind_matrices == FMatrix4Array(
+        FMatrix4(1),
+        FMatrix4(1),
+        FMatrix4(1),
+    )
+    assert gltf.skins[0].skeleton is None
+    assert gltf.skins[0].joints == [
+        gltf.nodes[0],
+        gltf.nodes[1],
+        gltf.nodes[2]
+    ]
+
+    assert gltf.skins[1].inverse_bind_matrices == FMatrix4Array(
+        FMatrix4(1),
+        FMatrix4(2),
+    )
+    assert gltf.skins[1].skeleton is gltf.nodes[0]
+    assert gltf.skins[1].joints == [
+        gltf.nodes[1],
+        gltf.nodes[2]
+    ]
+
+    with pytest.raises(Gltf.Error) as ex:
+        gltf.skins[2].inverse_bind_matrices
+    assert str(ex.value) == 'inverse bind matrices are wrong type'
+
+    assert gltf.skins[2].skeleton is None
+    assert gltf.skins[2].joints == [
+        gltf.nodes[0],
+        gltf.nodes[1],
+        gltf.nodes[2]
+    ]
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_node(converter: Any) -> None:
+    data = converter({
+        "cameras": [{
+            "type": 'perspective',
+            "perspective": {
+                "aspectRatio": 2,
+                "yfov": .4,
+                "zfar": 10,
+                "znear": 1,
+            },
+        }],
+        "skins": [{"joints": [0]}],
+        "meshes": [{
+            "primitives": [{"attributes": {}}],
+        }],
+        "nodes": [
+            {},
+            {
+                "camera": 0,
+                "children": [0],
+                "skin": 0,
+                "matrix": [
+                    1, 2, 3, 4,
+                    5, 6, 7, 8,
+                    9, 10, 11, 12,
+                    13, 14, 15, 16
+                ],
+                "mesh": 0,
+                "weights": [0, 1, 2, 3],
+            },
+            {"rotation": [1, 2, 3, 4]},
+            {"translation": [1, 2, 3]},
+            {"scale": [1, 2, 3]},
+            {
+                "rotation": [1, 2, 3, 4],
+                "translation": [1, 2, 3],
+                "scale": [1, 2, 3],
+            },
+        ]
+    })
+    gltf = Gltf(data)
+
+    assert gltf.nodes[0].camera is None
+    assert gltf.nodes[0].children == []
+    assert gltf.nodes[0].skin is None
+    assert gltf.nodes[0].mesh is None
+    assert gltf.nodes[0].weights is None
+    assert gltf.nodes[0].transform == FMatrix4(1)
+
+    assert gltf.nodes[1].camera is gltf.cameras[0]
+    assert gltf.nodes[1].children == [gltf.nodes[0]]
+    assert gltf.nodes[1].skin == gltf.skins[0]
+    assert gltf.nodes[1].mesh == gltf.meshes[0]
+    assert gltf.nodes[1].weights == FArray(0, 1, 2, 3)
+    assert gltf.nodes[1].transform == FMatrix4(
+        1, 2, 3, 4,
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16
+    )
+
+    assert gltf.nodes[2].camera is None
+    assert gltf.nodes[2].children == []
+    assert gltf.nodes[2].skin is None
+    assert gltf.nodes[2].mesh is None
+    assert gltf.nodes[2].weights is None
+    assert gltf.nodes[2].transform == FQuaternion(4, 1, 2, 3).to_matrix4()
+
+    assert gltf.nodes[3].camera is None
+    assert gltf.nodes[3].children == []
+    assert gltf.nodes[3].skin is None
+    assert gltf.nodes[3].mesh is None
+    assert gltf.nodes[3].weights is None
+    assert gltf.nodes[3].transform == FMatrix4(1).translate(FVector3(1, 2, 3))
+
+    assert gltf.nodes[4].camera is None
+    assert gltf.nodes[4].children == []
+    assert gltf.nodes[4].skin is None
+    assert gltf.nodes[4].mesh is None
+    assert gltf.nodes[4].weights is None
+    assert gltf.nodes[4].transform == FMatrix4(1).scale(FVector3(1, 2, 3))
+
+    assert gltf.nodes[5].camera is None
+    assert gltf.nodes[5].children == []
+    assert gltf.nodes[5].skin is None
+    assert gltf.nodes[5].mesh is None
+    assert gltf.nodes[5].weights is None
+    assert gltf.nodes[5].transform == (
+        FMatrix4(1).translate(FVector3(1, 2, 3)) @
+        FQuaternion(4, 1, 2, 3).to_matrix4() @
+        FMatrix4(1).scale(FVector3(1, 2, 3))
+    )
+
+@pytest.mark.parametrize("transform_component", [
+    {"rotation": [1, 2, 3, 4]},
+    {"translation": [1, 2, 3]},
+    {"scale": [1, 2, 3]},
+])
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_node_bad_transform(converter: Any, transform_component: dict) -> None:
+    data = converter({
+        "nodes": [
+            {
+                "matrix": [0] * 16,
+                **transform_component
+            },
+        ]
+    })
+
+    with pytest.raises(Gltf.Error) as ex:
+        Gltf(data)
+    assert str(ex.value) == (
+        'matrix is exclusive with rotation, scale and translation'
+    )

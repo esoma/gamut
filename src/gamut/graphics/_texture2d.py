@@ -47,6 +47,10 @@ class Texture2d(Texture):
         assert isinstance(size, UVector2)
         return size
 
+    @property
+    def wrap(self) -> tuple[TextureWrap, TextureWrap]:
+        return super().wrap
+
 
 Texture2d.__module__ = 'gamut.graphics'
 
@@ -87,6 +91,10 @@ class Texture2dArray(Texture):
         size = super().size
         assert isinstance(size, UVector3)
         return size
+
+    @property
+    def wrap(self) -> tuple[TextureWrap, TextureWrap]:
+        return super().wrap
 
 
 Texture2dArray.__module__ = 'gamut.graphics'
