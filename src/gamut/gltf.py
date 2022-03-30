@@ -42,11 +42,13 @@ class GltfAccessor:
 
     def __init__(
         self,
+        name: str | None,
         buffer_view: GltfBufferView | None,
         data_type: Any,
         count: int,
         offset: int
     ):
+        self.name = name
         self._buffer_view = buffer_view
         self._data_type = data_type
         try:
@@ -106,6 +108,8 @@ class GltfAccessor:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfAccessor:
+        name = data.get("name")
+
         data_type = GLTF_DATA_TYPE_TO_DATA_TYPE[(
             data["componentType"],
             data["type"]
@@ -125,18 +129,20 @@ class GltfAccessor:
         if data.get("sparse") is not None:
             raise NotImplementedError('sparse accessors not supported')
 
-        return GltfAccessor(buffer_view, data_type, count, offset)
+        return GltfAccessor(name, buffer_view, data_type, count, offset)
 
 
 class GltfBuffer:
 
     def __init__(
         self,
+        name: str | None,
         file_path_callback: GltfFilePathCallback,
         uri: str | None,
         length: int,
         index: int
     ):
+        self.name = name
         self._file_path_callback = file_path_callback
         self._uri = uri
         self._length = length
@@ -191,23 +197,26 @@ class GltfBuffer:
         data: dict,
         index: int
     ) -> GltfBuffer:
+        name = data.get("name")
         length = int(data["byteLength"])
         try:
             uri = str(data["uri"])
         except KeyError:
             uri = None
-        return GltfBuffer(file_path_callback, uri, length, index)
+        return GltfBuffer(name, file_path_callback, uri, length, index)
 
 
 class GltfBufferView:
 
     def __init__(
         self,
+        name: str | None,
         buffer: GltfBuffer,
         length: int,
         offset: int,
         stride: int | None
     ):
+        self.name = name
         self._buffer = buffer
         self._length = length
         self._offset = offset
@@ -230,6 +239,7 @@ class GltfBufferView:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfBuffer:
+        name = data.get("name")
         buffer_index = data["buffer"]
         buffer = gltf.buffers[buffer_index]
         length = data["byteLength"]
@@ -238,7 +248,7 @@ class GltfBufferView:
             stride = int(data["stride"])
         except KeyError:
             stride = None
-        return GltfBufferView(buffer, length, offset, stride)
+        return GltfBufferView(name, buffer, length, offset, stride)
 
 
 GltfCameraCreateProjection = Callable[[UVector2], FMatrix4]
@@ -246,7 +256,12 @@ GltfCameraCreateProjection = Callable[[UVector2], FMatrix4]
 
 class GltfCamera:
 
-    def __init__(self, create_projection: GltfCameraCreateProjection):
+    def __init__(
+        self,
+        name: str | None,
+        create_projection: GltfCameraCreateProjection
+    ):
+        self.name = name
         self._create_projection = create_projection
 
     def get_projection(self, viewport_size: UVector2) -> FMatrix4:
@@ -262,6 +277,8 @@ class GltfCamera:
 
     @classmethod
     def _parse_orthographic(cls, data: dict) -> GltfCamera:
+        name = data.get("name")
+
         d = data["orthographic"]
         xmag = float(d["xmag"])
         ymag = float(d["ymag"])
@@ -275,10 +292,12 @@ class GltfCamera:
                 size.y * ymag * -.5, size.y * ymag * .5,
                 znear, zfar
             )
-        return GltfCamera(_)
+        return GltfCamera(name, _)
 
     @classmethod
     def _parse_perspective(cls, data: dict) -> GltfCamera:
+        name = data.get("name")
+
         d = data["perspective"]
         try:
             aspect = float(d["aspectRatio"])
@@ -293,17 +312,19 @@ class GltfCamera:
             if l_aspect is None:
                 l_aspect = viewport_size.x / viewport_size.y
             return FMatrix4.perspective(fov, l_aspect, znear, zfar)
-        return GltfCamera(_)
+        return GltfCamera(name, _)
 
 
 class GltfImage:
 
     def __init__(
         self,
+        name: str | None,
         file_path_callback: GltfFilePathCallback,
         uri: str | None,
         buffer_view: GltfBufferView | None
     ):
+        self.name = name
         self._file_path_callback = file_path_callback
         self._uri = uri
         self._buffer_view = buffer_view
@@ -331,6 +352,7 @@ class GltfImage:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfImage:
+        name = data.get("name")
         uri = data.get("uri")
         buffer_view_index = data.get("bufferView")
         buffer_view = None
@@ -340,18 +362,20 @@ class GltfImage:
         if buffer_view_index is not None:
             buffer_view = gltf.buffer_views[int(buffer_view_index)]
 
-        return GltfImage(gltf._file_path_callback, uri, buffer_view)
+        return GltfImage(name, gltf._file_path_callback, uri, buffer_view)
 
 
 class GltfSampler:
 
     def __init__(
         self,
+        name: str | None,
         mipmap_selection: MipmapSelection,
         minify_filter: TextureFilter,
         magnify_filter: TextureFilter,
         wrap: tuple[TextureWrap, TextureWrap]
     ):
+        self.name = name
         self.mipmap_selection = mipmap_selection
         self.minify_filter = minify_filter
         self.magnify_filter = magnify_filter
@@ -359,6 +383,7 @@ class GltfSampler:
 
     @classmethod
     def _parse(cls, data: dict) -> GltfSampler:
+        name = data.get("name")
         magnify_filter = GLTF_MAG_FILTER_TO_TEXTURE_FILTER[data["magFilter"]]
         minify_filter, mipmap_selection = (
             GLTF_MIN_FILTER_TO_TEXTURE_FILTER_MIPMAP_SELECTION[
@@ -368,6 +393,7 @@ class GltfSampler:
         wrap_s = GLTF_WRAP_TO_TEXTURE_WRAP[data.get("wrapS")]
         wrap_t = GLTF_WRAP_TO_TEXTURE_WRAP[data.get("wrapT")]
         return GltfSampler(
+            name,
             mipmap_selection,
             minify_filter, magnify_filter,
             (wrap_s, wrap_t)
@@ -376,7 +402,13 @@ class GltfSampler:
 
 class GltfTexture:
 
-    def __init__(self, sampler: GltfSampler | None, image: GltfImage):
+    def __init__(
+        self,
+        name: str | None,
+        sampler: GltfSampler | None,
+        image: GltfImage
+    ):
+        self.name = name
         self._sampler = sampler
         self._image = image
         self._data: Texture2d | None = None
@@ -402,6 +434,7 @@ class GltfTexture:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfTexture:
+        name = data.get("name")
         sampler_index = data.get("sampler")
         if sampler_index is None:
             sampler = None
@@ -414,7 +447,7 @@ class GltfTexture:
             raise GltfError('texture without a source not supported')
         image = gltf.images[int(image_index)]
 
-        return GltfTexture(sampler, image)
+        return GltfTexture(name, sampler, image)
 
 
 class GltfMaterialPbrMetallicRoughness:
@@ -487,6 +520,7 @@ class GltfMaterial:
 
     def __init__(
         self,
+        name: str | None,
         pbr_metallic_roughness: GltfMaterialPbrMetallicRoughness | None,
         normal_texture: GltfTexture | None,
         normal_texcoord: str | None,
@@ -499,6 +533,7 @@ class GltfMaterial:
         alpha_cutoff: float,
         is_double_sided: bool
     ):
+        self.name = name
         self.pbr_metallic_roughness = pbr_metallic_roughness
         self.normal_texture = normal_texture
         self.normal_texcoord = normal_texcoord
@@ -513,6 +548,8 @@ class GltfMaterial:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfMaterial:
+        name = data.get("name")
+
         pbr_metallic_roughness_data = data.get("pbrMetallicRoughness")
         if pbr_metallic_roughness_data is not None:
             pbr_metallic_roughness = GltfMaterialPbrMetallicRoughness._parse(
@@ -558,6 +595,7 @@ class GltfMaterial:
         is_double_sided = bool(data.get("doubleSided"))
 
         return GltfMaterial(
+            name,
             pbr_metallic_roughness,
             normal_texture,
             normal_texcoord,
@@ -640,14 +678,18 @@ class GltfMesh:
 
     def __init__(
         self,
+        name: str | None,
         primitives: tuple[GltfMeshPrimitive],
         weights: FArray | None
     ):
+        self.name = name
         self.primitives = primitives
         self.weights = weights
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfMesh:
+        name = data.get("name")
+
         primitives: list[GltfMeshPrimitive] = []
         for primitive_data in data["primitives"]:
             primitives.append(GltfMeshPrimitive._parse(gltf, primitive_data))
@@ -657,17 +699,19 @@ class GltfMesh:
         except KeyError:
             weights = None
 
-        return GltfMesh(tuple(primitives), weights)
+        return GltfMesh(name, tuple(primitives), weights)
 
 
 class GltfSkin:
 
     def __init__(
         self,
+        name: str | None,
         inverse_bind_matrices_accessor: GltfAccessor | None,
         skeleton_id: int | None,
         joint_ids: Sequence[int]
     ):
+        self.name = name
         self._inverse_bind_matrices_accessor = inverse_bind_matrices_accessor
         self._inverse_bind_matrices: FMatrix4Array | None = None
         self._skeleton_id = skeleton_id
@@ -700,6 +744,8 @@ class GltfSkin:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfSkin:
+        name = data.get("name")
+
         inverse_bind_matrices_accessor_id = data.get("inverseBindMatrices")
         if inverse_bind_matrices_accessor_id is None:
             inverse_bind_matrices_accessor = None
@@ -711,6 +757,7 @@ class GltfSkin:
         skeleton_id = data.get("skeleton")
         joint_ids = data["joints"]
         return GltfSkin(
+            name,
             inverse_bind_matrices_accessor,
             skeleton_id,
             joint_ids
@@ -721,6 +768,7 @@ class GltfNode:
 
     def __init__(
         self,
+        name: str | None,
         camera: GltfCamera | None,
         children_ids: Sequence[int],
         skin: GltfSkin | None,
@@ -728,6 +776,7 @@ class GltfNode:
         weights: FArray | None,
         transform: FMatrix4
     ):
+        self.name = name
         self.camera = camera
         self._children_ids = children_ids
         self.children: List[GltfNode] = []
@@ -741,6 +790,8 @@ class GltfNode:
 
     @classmethod
     def _parse(cls, gltf: Gltf, data: dict) -> GltfNode:
+        name = data.get("name")
+
         camera_id = data.get("camera")
         if camera_id is None:
             camera = None
@@ -802,7 +853,29 @@ class GltfNode:
         else:
             transform = matrix
 
-        return GltfNode(camera, children_ids, skin, mesh, weights, transform)
+        return GltfNode(
+            name,
+            camera,
+            children_ids,
+            skin,
+            mesh,
+            weights,
+            transform
+        )
+
+
+class GltfScene:
+
+    def __init__(self, name: str | None, nodes: list[GltfNode]):
+        self.name = name
+        self.nodes = nodes
+
+    @classmethod
+    def _parse(cls, gltf: Gltf, data: dict) -> GltfScene:
+        name = data.get("name")
+        node_ids = data.get("nodes", [])
+        nodes = [gltf.nodes[i] for i in node_ids]
+        return GltfScene(name, nodes)
 
 
 class Gltf:
@@ -817,6 +890,7 @@ class Gltf:
     Mesh = GltfMesh
     Node = GltfNode
     Sampler = GltfSampler
+    Scene = GltfScene
     Skin = GltfSkin
     Texture = GltfTexture
 
@@ -844,6 +918,8 @@ class Gltf:
         self.meshes: list[GltfMesh] = []
         self.skins: list[GltfSkin] = []
         self.nodes: list[GltfNode] = []
+        self.scenes: list[GltfScene] = []
+        self.scene: GltfScene | None = None
 
         glb_args = self._parse_glb_header(file)
         if glb_args is None:
@@ -940,6 +1016,11 @@ class Gltf:
         self._parse_json_meshes(data)
         self._parse_json_skins(data)
         self._parse_json_nodes(data)
+        self._parse_json_scenes(data)
+
+        scene_id = data.get("scene")
+        if scene_id is not None:
+            self.scene = self.scenes[scene_id]
 
     def _parse_json_buffers(self, data: dict) -> None:
         try:
@@ -1035,6 +1116,14 @@ class Gltf:
             return
         for json_node in json_nodes:
             self.nodes.append(self.Node._parse(self, json_node))
+
+    def _parse_json_scenes(self, data: dict) -> None:
+        try:
+            json_scenes = data["scenes"]
+        except KeyError:
+            return
+        for json_scene in json_scenes:
+            self.scenes.append(self.Scene._parse(self, json_scene))
 
 
 class PartialFile:

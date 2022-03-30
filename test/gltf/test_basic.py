@@ -1,4 +1,5 @@
 
+from __future__ import annotations
 # gamut
 from gamut.gltf import Gltf
 from gamut.graphics import (Image, MipmapSelection, PrimitiveMode, Texture2d,
@@ -135,6 +136,16 @@ def test_no_data(converter: Any) -> None:
     assert gltf.accessors == []
     assert gltf.buffers == []
     assert gltf.buffer_views == []
+    assert gltf.cameras == []
+    assert gltf.images == []
+    assert gltf.samplers == []
+    assert gltf.textures == []
+    assert gltf.materials == []
+    assert gltf.meshes == []
+    assert gltf.skins == []
+    assert gltf.nodes == []
+    assert gltf.scenes == []
+    assert gltf.scene is None
 
 
 def test_glb_buffer_no_bin() -> None:
@@ -158,6 +169,7 @@ def test_gltf_buffer_bin(expected_data: bytes) -> None:
         {"byteLength": len(expected_data)},
     ]}, bin=b'1234')
     gltf = Gltf(data)
+    assert gltf.buffers[0].name is None
     assert gltf.buffers[0].data == expected_data
 
 
@@ -187,9 +199,10 @@ def test_buffer_data_uri(
     expected_data: bytes,
 ) -> None:
     data = converter({"buffers": [
-        {"byteLength": len(expected_data), "uri": uri},
+        {"name": 'uri-buffer', "byteLength": len(expected_data), "uri": uri},
     ]})
     gltf = Gltf(data)
+    assert gltf.buffers[0].name == 'uri-buffer'
     assert bytes(gltf.buffers[0].data) == expected_data
 
 
@@ -263,12 +276,16 @@ def test_buffer_data_view_get_data(converter: Any) -> None:
     data = converter({
         "buffers": [{"byteLength": 6, "uri": uri}],
         "bufferViews": [
-            {"buffer": 0, "byteLength": 6},
+            {"buffer": 0, "byteLength": 6, "name": 'some-name'},
             {"buffer": 0, "byteLength": 3, "byteOffset": 1},
             {"buffer": 0, "byteLength": 6, "stride": 2},
         ],
     })
     gltf = Gltf(data)
+
+    assert gltf.buffer_views[0].name == 'some-name'
+    assert gltf.buffer_views[1].name is None
+    assert gltf.buffer_views[2].name is None
 
     with pytest.raises(ValueError) as ex:
         gltf.buffer_views[0].get_data(0)
@@ -561,6 +578,7 @@ def test_accessor_of_buffer_view(
             "byteLength": array_byte_length
         }],
         "accessors": [{
+            "name": 'my-name',
             "componentType": gltf_component_type,
             "type": gltf_type,
             "count": len(array),
@@ -571,6 +589,7 @@ def test_accessor_of_buffer_view(
 
     assert isinstance(gltf.accessors[0].data, type(array))
     assert gltf.accessors[0].data == array
+    assert gltf.accessors[0].name == 'my-name'
 
 
 @pytest.mark.parametrize(
@@ -625,6 +644,7 @@ def test_accessor_empty(
         component_type(0),
         component_type(0)
     )
+    assert gltf.accessors[0].name is None
 
 
 @pytest.mark.parametrize("converter", [to_gltf, to_glb])
@@ -718,6 +738,7 @@ def test_ortho_camera(converter: Any) -> None:
     gltf = Gltf(data)
 
     p = gltf.cameras[0].get_projection(UVector2(100, 60))
+    assert gltf.cameras[0].name is None
     assert p == FMatrix4.orthographic(
         -40, 40,
         -36, 36,
@@ -729,6 +750,7 @@ def test_ortho_camera(converter: Any) -> None:
 def test_perspective_camera_well_defined(converter: Any) -> None:
     data = converter({
         "cameras": [{
+            "name": 'some-name',
             "type": 'perspective',
             "perspective": {
                 "aspectRatio": 2,
@@ -741,6 +763,7 @@ def test_perspective_camera_well_defined(converter: Any) -> None:
     gltf = Gltf(data)
 
     p = gltf.cameras[0].get_projection(UVector2(100, 60))
+    assert gltf.cameras[0].name == 'some-name'
     assert p == FMatrix4.perspective(.4, 2, 1, 10)
 
 
@@ -812,12 +835,14 @@ def test_image_data_uri(
     uri = f'data:;base64,{image_b64}'
     data = converter({
         "images": [{
+            "name": 'some-name',
             "mimeType": mime_type,
             "uri": uri
         }],
     })
     gltf = Gltf(data)
 
+    assert gltf.images[0].name == 'some-name'
     assert isinstance(gltf.images[0].data, Image)
     assert gltf.images[0].data.to_bytes() == image.to_bytes()
 
@@ -875,6 +900,7 @@ def test_image_path_uri(
     })
     gltf = Gltf(data, file_path_callback=file_path_callback)
 
+    assert gltf.images[0].name is None
     assert isinstance(gltf.images[0].data, Image)
     assert gltf.images[0].data.to_bytes() == image.to_bytes()
 
@@ -952,6 +978,7 @@ def test_sampler(
 ) -> None:
     data = converter({
         "samplers": [{
+            "name": 'some-name',
             "magFilter": gltf_mag_filter,
             "minFilter": gltf_min_filter,
             "wrapS": gltf_wrap_s,
@@ -959,6 +986,7 @@ def test_sampler(
         }],
     })
     gltf = Gltf(data)
+    assert gltf.samplers[0].name == 'some-name'
     assert gltf.samplers[0].magnify_filter == mag_filter
     assert gltf.samplers[0].minify_filter == min_filter
     assert gltf.samplers[0].mipmap_selection == mipmap
@@ -974,6 +1002,7 @@ def test_sampler_wrap_defaults(converter: Any) -> None:
         }],
     })
     gltf = Gltf(data)
+    assert gltf.samplers[0].name is None
     assert gltf.samplers[0].wrap == (TextureWrap.REPEAT, TextureWrap.REPEAT)
 
 
@@ -1013,6 +1042,7 @@ def test_texture_no_sampler(
     })
     gltf = Gltf(data)
 
+    assert gltf.textures[0].name is None
     texture = gltf.textures[0].data
     assert isinstance(texture, Texture2d)
     assert TextureView(texture, ctypes.c_uint8).bytes == image.to_bytes()
@@ -1082,10 +1112,11 @@ def test_texture_with_sampler(
             "mimeType": mime_type,
             "uri": uri
         }],
-        "textures": [{"sampler": 0, "source": 0}]
+        "textures": [{"sampler": 0, "source": 0, "name": 'some-name'}]
     })
     gltf = Gltf(data)
 
+    assert gltf.textures[0].name == 'some-name'
     texture = gltf.textures[0].data
     assert isinstance(texture, Texture2d)
     assert TextureView(texture, ctypes.c_uint8).bytes == image.to_bytes()
@@ -1105,6 +1136,7 @@ def test_material_empty(converter: Any) -> None:
     gltf = Gltf(data)
 
     material = gltf.materials[0]
+    assert material.name is None
     assert material.pbr_metallic_roughness is None
     assert material.normal_texture is None
     assert material.normal_texcoord is None
@@ -1164,6 +1196,7 @@ def test_material(resources: Path, converter: Any) -> None:
         }],
         "textures": [{"source": 0}],
         "materials": [{
+            "name": 'some-name',
             "pbrMetallicRoughness": {
                 "baseColorFactor": [.2, .3, .4, .5],
                 "baseColorTexture": {"index": 0},
@@ -1183,6 +1216,7 @@ def test_material(resources: Path, converter: Any) -> None:
     gltf = Gltf(data)
 
     material = gltf.materials[0]
+    assert material.name == 'some-name'
     assert isinstance(
         material.pbr_metallic_roughness,
         Gltf.Material.PbrMetallicRoughness
@@ -1262,6 +1296,7 @@ def test_mesh(
         "materials": [{}],
         "meshes": [
             {
+                "name": 'some-name',
                 "primitives": [{
                     "attributes": {
                         "POSITION": 0,
@@ -1289,6 +1324,7 @@ def test_mesh(
     })
     gltf = Gltf(data)
 
+    gltf.meshes[0].name == 'some-name'
     gltf.meshes[0].primitives[0].attributes == {
         "POSITION": gltf.accessors[0],
         "NORMAL": gltf.accessors[1],
@@ -1302,6 +1338,7 @@ def test_mesh(
     }
     gltf.meshes[0].weights == FArray(1.0, 2.0, 3.0, 4.0)
 
+    gltf.meshes[1].name is None
     gltf.meshes[1].primitives[0].attributes == {
         "POSITION": gltf.accessors[0],
         "NORMAL": gltf.accessors[1],
@@ -1352,6 +1389,7 @@ def test_skin(converter: Any) -> None:
         "skins": [
             {"joints": [0, 1, 2]},
             {
+                "name": 'some-name',
                 "inverseBindMatrices": 0,
                 "skeleton": 0,
                 "joints": [1, 2],
@@ -1364,6 +1402,7 @@ def test_skin(converter: Any) -> None:
     })
     gltf = Gltf(data)
 
+    assert gltf.skins[0].name is None
     assert gltf.skins[0].inverse_bind_matrices == FMatrix4Array(
         FMatrix4(1),
         FMatrix4(1),
@@ -1376,6 +1415,7 @@ def test_skin(converter: Any) -> None:
         gltf.nodes[2]
     ]
 
+    assert gltf.skins[1].name == 'some-name'
     assert gltf.skins[1].inverse_bind_matrices == FMatrix4Array(
         FMatrix4(1),
         FMatrix4(2),
@@ -1390,6 +1430,7 @@ def test_skin(converter: Any) -> None:
         gltf.skins[2].inverse_bind_matrices
     assert str(ex.value) == 'inverse bind matrices are wrong type'
 
+    assert gltf.skins[2].name is None
     assert gltf.skins[2].skeleton is None
     assert gltf.skins[2].joints == [
         gltf.nodes[0],
@@ -1417,6 +1458,7 @@ def test_node(converter: Any) -> None:
         "nodes": [
             {},
             {
+                "name": 'some-name',
                 "camera": 0,
                 "children": [0],
                 "skin": 0,
@@ -1441,6 +1483,7 @@ def test_node(converter: Any) -> None:
     })
     gltf = Gltf(data)
 
+    assert gltf.nodes[0].name is None
     assert gltf.nodes[0].camera is None
     assert gltf.nodes[0].children == []
     assert gltf.nodes[0].skin is None
@@ -1448,6 +1491,7 @@ def test_node(converter: Any) -> None:
     assert gltf.nodes[0].weights is None
     assert gltf.nodes[0].transform == FMatrix4(1)
 
+    assert gltf.nodes[1].name == 'some-name'
     assert gltf.nodes[1].camera is gltf.cameras[0]
     assert gltf.nodes[1].children == [gltf.nodes[0]]
     assert gltf.nodes[1].skin == gltf.skins[0]
@@ -1460,6 +1504,7 @@ def test_node(converter: Any) -> None:
         13, 14, 15, 16
     )
 
+    assert gltf.nodes[2].name is None
     assert gltf.nodes[2].camera is None
     assert gltf.nodes[2].children == []
     assert gltf.nodes[2].skin is None
@@ -1467,6 +1512,7 @@ def test_node(converter: Any) -> None:
     assert gltf.nodes[2].weights is None
     assert gltf.nodes[2].transform == FQuaternion(4, 1, 2, 3).to_matrix4()
 
+    assert gltf.nodes[3].name is None
     assert gltf.nodes[3].camera is None
     assert gltf.nodes[3].children == []
     assert gltf.nodes[3].skin is None
@@ -1474,6 +1520,7 @@ def test_node(converter: Any) -> None:
     assert gltf.nodes[3].weights is None
     assert gltf.nodes[3].transform == FMatrix4(1).translate(FVector3(1, 2, 3))
 
+    assert gltf.nodes[4].name is None
     assert gltf.nodes[4].camera is None
     assert gltf.nodes[4].children == []
     assert gltf.nodes[4].skin is None
@@ -1481,6 +1528,7 @@ def test_node(converter: Any) -> None:
     assert gltf.nodes[4].weights is None
     assert gltf.nodes[4].transform == FMatrix4(1).scale(FVector3(1, 2, 3))
 
+    assert gltf.nodes[5].name is None
     assert gltf.nodes[5].camera is None
     assert gltf.nodes[5].children == []
     assert gltf.nodes[5].skin is None
@@ -1513,3 +1561,28 @@ def test_node_bad_transform(converter: Any, transform_component: dict) -> None:
     assert str(ex.value) == (
         'matrix is exclusive with rotation, scale and translation'
     )
+
+
+@pytest.mark.parametrize("converter", [to_gltf, to_glb])
+def test_scene(converter: Any) -> None:
+    data = converter({
+        "nodes": [{}, {}, {}],
+        "scenes": [
+            {},
+            {"name": 'some-name', "nodes": [0, 1, 2]},
+        ],
+        "scene": 1
+    })
+    gltf = Gltf(data)
+
+    assert gltf.scenes[0].name is None
+    assert gltf.scenes[0].nodes == []
+
+    assert gltf.scenes[1].name == 'some-name'
+    assert gltf.scenes[1].nodes == [
+        gltf.nodes[0],
+        gltf.nodes[1],
+        gltf.nodes[2],
+    ]
+
+    assert gltf.scene == gltf.scenes[1]

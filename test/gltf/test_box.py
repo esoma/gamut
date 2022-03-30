@@ -1,16 +1,27 @@
 
 # gamut
 from gamut.gltf import Gltf
-from gamut.math import FVector3, FVector3Array, U16Array
+from gamut.graphics import PrimitiveMode
+from gamut.math import FMatrix4, FVector3, FVector3Array, FVector4, U16Array
 # python
 from pathlib import Path
+# pytest
+import pytest
 
-DIRECTORY = Path(__file__).resolve().parent
 
-
-def test_box() -> None:
-    with open(DIRECTORY / 'Box.glb', 'rb') as f:
-        gltf = Gltf(f)
+@pytest.mark.parametrize("glb", [True, False])
+def test_box(glb: bool, resources: Path) -> None:
+    if glb:
+        with open(resources / 'Box.glb', 'rb') as f:
+            gltf = Gltf(f)
+    else:
+        def file_path_callback(path: Path, length: int | None) -> memoryview:
+            if length is None:
+                length = 0
+            with open(resources / path, 'rb') as f:
+                return memoryview(f.read(length))
+        with open(resources / 'Box.gltf', 'rb') as f:
+            gltf = Gltf(f, file_path_callback=file_path_callback)
 
     assert len(gltf.buffers) == 1
     buffer = gltf.buffers[0]
@@ -147,3 +158,78 @@ def test_box() -> None:
         FVector3(-0.5, -0.5, -0.5), FVector3(-0.5, 0.5, -0.5),
         FVector3(0.5, -0.5, -0.5), FVector3(0.5, 0.5, -0.5)
     )
+
+    assert gltf.cameras == []
+    assert gltf.images == []
+    assert gltf.samplers == []
+    assert gltf.textures == []
+
+    assert len(gltf.materials) == 1
+    material_0 = gltf.materials[0]
+    assert material_0.name == 'Red'
+    assert material_0.pbr_metallic_roughness.base_color_factor == FVector4(
+        0.800000011920929, 0.0, 0.0, 1.0
+    )
+    assert material_0.pbr_metallic_roughness.base_color_texture is None
+    assert material_0.pbr_metallic_roughness.base_color_texcoord is None
+    assert material_0.pbr_metallic_roughness.metallic_factor == 0
+    assert material_0.pbr_metallic_roughness.roughness_factor == 1.0
+    assert material_0.pbr_metallic_roughness.metallic_roughness_texture is None
+    assert (
+        material_0.pbr_metallic_roughness.metallic_roughness_texcoord is None
+    )
+    assert material_0.normal_texture is None
+    assert material_0.normal_texcoord is None
+    assert material_0.occlusion_texture is None
+    assert material_0.occlusion_texcoord is None
+    assert material_0.emissive_texture is None
+    assert material_0.emissive_texcoord is None
+    assert material_0.emissive_factor == FVector3(0)
+    assert material_0.alpha_mode == Gltf.Material.AlphaMode.OPAQUE
+    assert material_0.alpha_cutoff == .5
+    assert not material_0.is_double_sided
+
+    assert len(gltf.meshes) == 1
+    mesh_0 = gltf.meshes[0]
+    assert mesh_0.name == 'Mesh'
+    assert mesh_0.weights is None
+    assert len(mesh_0.primitives) == 1
+    mesh_0_primitive = mesh_0.primitives[0]
+    mesh_0_primitive.attributes == {
+        "NORMAL": accessor_1,
+        "POSITION": accessor_2,
+    }
+    mesh_0_primitive.indices == accessor_0
+    mesh_0_primitive.material == material_0
+    mesh_0_primitive.mode == PrimitiveMode.TRIANGLE
+    mesh_0_primitive.targets is None
+
+    assert gltf.skins == []
+
+    assert len(gltf.nodes) == 2
+    node_0 = gltf.nodes[0]
+    node_1 = gltf.nodes[1]
+    assert node_0.camera is None
+    assert node_0.children == [node_1]
+    assert node_0.skin is None
+    assert node_0.mesh is None
+    assert node_0.weights is None
+    assert node_0.transform == FMatrix4(
+        1, 0, 0, 0,
+        0, 0, -1, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 1
+    )
+
+    assert node_1.camera is None
+    assert node_1.children == []
+    assert node_1.skin is None
+    assert node_1.mesh == mesh_0
+    assert node_1.weights is None
+    assert node_1.transform == FMatrix4(1)
+
+    assert len(gltf.scenes) == 1
+    scene_0 = gltf.scenes[0]
+    assert scene_0.nodes == [node_0]
+
+    assert gltf.scene == scene_0
