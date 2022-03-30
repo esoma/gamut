@@ -1300,15 +1300,15 @@ def test_mesh(
                 "primitives": [{
                     "attributes": {
                         "POSITION": 0,
-                        "NORMAL": 1,
+                        "NORMAL": 1
                     },
                     "indices": 2,
                     "material": 0,
                     "mode": gltf_mode,
-                    "targets": {
-                        "POSITION": 1,
-                        "NORMAL": 0,
-                    },
+                    "targets": [
+                        {"POSITION": 1, "NORMAL": 0},
+                        {"POSITION": 0, "NORMAL": 1},
+                    ],
                 }],
                 "weights": [1.0, 2.0, 3.0, 4.0],
             },
@@ -1332,10 +1332,16 @@ def test_mesh(
     gltf.meshes[0].primitives[0].indices == gltf.accessors[2]
     gltf.meshes[0].primitives[0].material == gltf.materials[0]
     gltf.meshes[0].primitives[0].mode == primitive_mode
-    gltf.meshes[0].primitives[0].targets == {
-        "POSITION": gltf.accessors[1],
-        "NORMAL": gltf.accessors[0],
-    }
+    gltf.meshes[0].primitives[0].targets == [
+        {
+            "POSITION": gltf.accessors[1],
+            "NORMAL": gltf.accessors[0],
+        },
+        {
+            "POSITION": gltf.accessors[0],
+            "NORMAL": gltf.accessors[1],
+        }
+    ]
     gltf.meshes[0].weights == FArray(1.0, 2.0, 3.0, 4.0)
 
     gltf.meshes[1].name is None

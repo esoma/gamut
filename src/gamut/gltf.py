@@ -720,7 +720,7 @@ class GltfMeshPrimitive:
         indices: GltfAccessor | None,
         material: GltfMaterial | None,
         mode: PrimitiveMode,
-        targets: dict[str, GltfAccessor] | None
+        targets: list[dict[str, GltfAccessor]] | None
     ):
         self.attributes = attributes
         self.indices = indices
@@ -753,10 +753,13 @@ class GltfMeshPrimitive:
         if raw_targets is None:
             targets = None
         else:
-            targets = {
-                k: gltf.accessors[accessor_id]
-                for k, accessor_id in raw_targets.items()
-            }
+            targets = [
+                {
+                    k: gltf.accessors[accessor_id]
+                    for k, accessor_id in raw_target.items()
+                }
+                for raw_target in raw_targets
+            ]
 
         return GltfMeshPrimitive(
             attributes,
