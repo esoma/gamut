@@ -49,34 +49,6 @@ class GenerateMathCode(Command):
         generate_math_files(Path('src/gamut/math'), Path('include/gamut'))
 
 
-class BuildBoost(Command):
-
-    description = 'build boost'
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        install_dir = os.path.abspath('build/boost')
-        os.makedirs(install_dir, exist_ok=True)
-        build_dir = 'build/boost-cmake'
-        os.makedirs(build_dir, exist_ok=True)
-        run([
-            'cmake', 'vendor/boost',
-            '-B', build_dir,
-            '-D', 'BOOST_INSTALL_LAYOUT=system',
-            '-D', f'CMAKE_INSTALL_PREFIX={install_dir}',
-        ], check=True)
-        if os.name == 'nt':
-            msbuild('build/boost-cmake/INSTALL.vcxproj')
-        else:
-            make('build/boost-cmake', 'install')
-
-
 class BuildBullet(Command):
 
     description = 'build bullet'
@@ -125,34 +97,6 @@ class BuildBullet(Command):
             make('build/bullet3')
 
 
-class BuildCgal(Command):
-
-    description = 'build bullet'
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        install_dir = os.path.abspath('build/cgal')
-        os.makedirs(install_dir, exist_ok=True)
-        build_dir = 'build/cgal-cmake'
-        os.makedirs(build_dir, exist_ok=True)
-        run([
-            'cmake', 'vendor/cgal',
-            '-B', build_dir,
-            '-D', 'CMAKE_BUILD_TYPE=Release',
-            '-D', f'CMAKE_INSTALL_PREFIX={install_dir}',
-        ], check=True)
-        if os.name == 'nt':
-            msbuild('build/cgal-cmake/INSTALL.vcxproj')
-        else:
-            make('build/cgal-cmake', 'install')
-
-
 physics = Extension(
     'gamut.physics._physics',
     include_dirs=['vendor/glm', 'vendor/bullet3/src', 'include'],
@@ -187,14 +131,14 @@ geometry_triangulate = Extension(
     'gamut.geometry._triangulate',
     include_dirs=[
         'vendor/glm',
-        'build/cgal/include',
-        'build/boost/include',
+        'vendor/CDT/CDT/extras',
+        'vendor/CDT/CDT/include',
         'include'
     ],
     sources=['src/gamut/geometry/_triangulate.cpp'],
-    language='c++14',
+    language='c++11',
     extra_compile_args=coverage_compile_args +
-        ([] if os.name == 'nt' else ['-std=c++14']),
+        ([] if os.name == 'nt' else ['-std=c++11']),
     extra_link_args=coverage_links_args +
         ([] if os.name == 'nt' else ['-lstdc++']),
 )
@@ -212,9 +156,7 @@ test_math_api = Extension(
 
 setup(
     cmdclass={
-        "build_boost": BuildBoost,
         "build_bullet": BuildBullet,
-        "build_cgal": BuildCgal,
         "codegen_math": GenerateMathCode,
     },
     ext_modules=[geometry_triangulate, math, physics, test_math_api]
