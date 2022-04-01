@@ -39,7 +39,10 @@ class Graph(Generic[T, W]):
 
     def _remove_edge(self, a: T, b: T) -> None:
         key = self._get_edge_key(a, b)
-        del self._edges[key]
+        try:
+            del self._edges[key]
+        except KeyError:
+            return
         del self._nodes[a].edges[b]
         del self._nodes[b].edges[a]
 

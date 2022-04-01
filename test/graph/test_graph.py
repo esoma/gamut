@@ -21,10 +21,14 @@ def test_add_unhashable_node() -> None:
 def test_node() -> None:
     g = Graph()
 
+    assert not g.contains_node(None)
+
     g.add_node(None)
     assert list(g.nodes) == [None]
     assert list(g.edges) == []
     assert list(g.get_node_edges(None)) == []
+
+    assert g.contains_node(None)
 
     g.add_node(None)
     assert list(g.nodes) == [None]
@@ -43,15 +47,22 @@ def test_node() -> None:
     assert list(g.get_node_edges(None)) == []
     assert list(g.get_node_edges(1)) == []
 
+    assert not g.contains_node(None)
+
 
 def test_edge() -> None:
     g = Graph()
+
+    assert not g.contains_edge(1, 2)
 
     g.add_edge(1, 2, .5)
     assert set(g.nodes) == {1, 2}
     assert set(g.edges) == {(1, 2, .5)}
     assert list(g.get_node_edges(1)) == [(2, .5)]
     assert list(g.get_node_edges(2)) == [(1, .5)]
+
+    assert g.contains_edge(1, 2)
+    assert g.contains_edge(2, 1)
 
     g.add_edge(1, 2, .8)
     assert set(g.nodes) == {1, 2}
@@ -72,6 +83,15 @@ def test_edge() -> None:
     assert list(g.get_node_edges(1)) == [(3, .2)]
     assert list(g.get_node_edges(2)) == []
     assert list(g.get_node_edges(3)) == [(1, .2)]
+
+    g.remove_edge(3, 1)
+    assert set(g.nodes) == {1, 3}
+    assert list(g.edges) == []
+    assert list(g.get_node_edges(1)) == []
+    assert list(g.get_node_edges(2)) == []
+    assert list(g.get_node_edges(3)) == []
+
+    assert not g.contains_edge(3, 1)
 
     g.remove_edge(3, 1)
     assert set(g.nodes) == {1, 3}
