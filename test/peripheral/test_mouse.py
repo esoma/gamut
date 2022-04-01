@@ -13,14 +13,14 @@ from gamut.peripheral import (Mouse, MouseButton, MouseButtonPressed,
 # python
 import ctypes
 from typing import Optional, Union
+# pytest
+import pytest
 # pysdl2
 from sdl2 import (SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT,
                   SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_Event, SDL_GetWindowID,
                   SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP, SDL_MOUSEMOTION,
                   SDL_MOUSEWHEEL, SDL_MOUSEWHEEL_FLIPPED, SDL_PushEvent,
                   SDL_WINDOWEVENT, SDL_WINDOWEVENT_LEAVE)
-# pytest
-import pytest
 
 
 def send_sdl_mouse_motion_event(

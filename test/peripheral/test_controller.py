@@ -13,12 +13,12 @@ from gamut.peripheral import (Controller, ControllerAxis, ControllerAxisMoved,
 # python
 import ctypes
 from typing import Optional
+# pytest
+import pytest
 # pysdl2
 from sdl2 import (SDL_Event, SDL_JOYAXISMOTION, SDL_JOYBUTTONDOWN,
                   SDL_JOYBUTTONUP, SDL_JoystickClose, SDL_JoystickInstanceID,
                   SDL_JoystickOpen, SDL_PushEvent)
-# pytest
-import pytest
 
 
 def send_sdl_joystick_button_event(

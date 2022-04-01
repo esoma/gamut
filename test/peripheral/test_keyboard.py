@@ -12,14 +12,14 @@ from gamut.peripheral import (Keyboard, KeyboardConnected,
 # python
 import ctypes
 from typing import Final, Optional
+# pytest
+import pytest
 # pysdl2
 # sdl2
 import sdl2
 from sdl2 import (SDL_Event, SDL_GetWindowID, SDL_KEYDOWN, SDL_KEYUP,
                   SDL_PushEvent, SDL_WINDOWEVENT, SDL_WINDOWEVENT_FOCUS_GAINED,
                   SDL_WINDOWEVENT_FOCUS_LOST)
-# pytest
-import pytest
 
 
 def send_sdl_keyboard_key_event(sdl_scancode: int, pressed: bool) -> None:

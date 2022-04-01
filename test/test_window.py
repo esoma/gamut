@@ -7,11 +7,11 @@ from gamut.math import IVector2, UVector2
 # python
 import ctypes
 from typing import Any, Optional
+# pytest
+import pytest
 # pysdl2
 from sdl2 import (SDL_Event, SDL_GetWindowID, SDL_PushEvent, SDL_WINDOWEVENT,
                   SDL_WINDOWEVENT_CLOSE, SDL_WINDOWEVENT_MOVED)
-# pytest
-import pytest
 
 
 def send_sdl_window_event(
