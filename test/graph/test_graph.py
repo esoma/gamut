@@ -49,6 +49,12 @@ def test_node() -> None:
 
     assert not g.contains_node(None)
 
+    g.remove_node(None)
+    assert set(g.nodes) == {1}
+    assert list(g.edges) == []
+    assert list(g.get_node_edges(None)) == []
+    assert list(g.get_node_edges(1)) == []
+
 
 def test_edge() -> None:
     g = Graph()
@@ -104,3 +110,26 @@ def test_edge() -> None:
 def test_get_node_edges_does_not_exist() -> None:
     g = Graph()
     assert list(g.get_node_edges(0)) == []
+
+
+def test_connected_components() -> None:
+    g = Graph()
+
+    g.add_edge(0, 1, 0)
+    g.add_edge(1, 2, 0)
+    g.add_edge(2, 3, 0)
+    g.add_edge(3, 0, 0)
+
+    g.add_edge(10, 11, 0)
+    g.add_edge(11, 12, 0)
+    g.add_edge(12, 13, 0)
+    g.add_edge(13, 10, 0)
+
+    g.add_edge(20, 21, 0)
+    g.add_edge(21, 22, 0)
+    g.add_edge(22, 0, 0)
+
+    islands = [set(i) for i in g.get_connected_components()]
+    assert len(islands) == 2
+    assert {0, 1, 2, 3, 20, 21, 22} in islands
+    assert {10, 11, 12, 13} in islands

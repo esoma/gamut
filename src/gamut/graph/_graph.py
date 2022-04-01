@@ -94,6 +94,25 @@ class Graph(Generic[T, W]):
         except KeyError:
             pass
 
+    def get_connected_components(self) -> Generator[tuple[T, ...], None, None]:
+        islands: dict[T, IdHashSet[T]] = {
+            nv: IdHashSet((nv,))
+            for nv in self._nodes
+        }
+        unique_islands: set[IdHashSet[T]] = set(islands.values())
+        for node in self._nodes.values():
+            island = islands[node.value]
+            for edge_value in node.edges:
+                other_island = islands[edge_value]
+                if island is not other_island:
+                    island |= other_island
+                    islands[edge_value] = island
+                    try:
+                        unique_islands.remove(other_island)
+                    except KeyError:
+                        pass
+        yield from (tuple(island) for island in unique_islands)
+
 
 class Node(Generic[T, W]):
 
@@ -102,3 +121,9 @@ class Node(Generic[T, W]):
     def __init__(self, value: T):
         self.value = value
         self.edges: dict[T, W] = {}
+
+
+class IdHashSet(set[T]):
+
+    def __hash__(self) -> int:
+        return id(self)
