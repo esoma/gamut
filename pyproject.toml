@@ -57,15 +57,49 @@ known_uharfbuzz = 'uharfbuzz'
 known_freetypepy = 'freetype'
 known_pyicu = 'icu'
 known_jinja2 = 'jinja2'
+known_sortedcontainers = 'sortedcontainers'
 
-sections = ['FUTURE', 'LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
-            'FREETYPEPY', 'JINJA2', 'MYPY', 'NUMPY', 'PIL', 'PYICU', 'OPENAL',
-            'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS', 'UHARFBUZZ',
-            'THIRDPARTY']
-no_lines_before = ['LOCALFOLDER', 'FIRSTPARTY', 'STDLIB', 'EVDEV',
-                   'FREETYPEPY', 'JINJA2', 'MYPY', 'NUMPY', 'PIL', 'PYICU',
-                   'OPENAL', 'OPENGL', 'SDL2', 'PYTEST', 'SETUPTOOLS',
-                   'UHARFBUZZ', 'THIRDPARTY']
+sections = [
+    'FUTURE',
+    'LOCALFOLDER',
+    'FIRSTPARTY',
+    'STDLIB',
+    'EVDEV',
+    'FREETYPEPY',
+    'JINJA2',
+    'MYPY',
+    'NUMPY',
+    'OPENAL',
+    'OPENGL',
+    'PIL',
+    'PYICU',
+    'PYTEST',
+    'SDL2',
+    'SETUPTOOLS',
+    'SORTEDCONTAINERS',
+    'UHARFBUZZ',
+    'THIRDPARTY'
+]
+no_lines_before = [
+    'LOCALFOLDER',
+    'FIRSTPARTY',
+    'STDLIB',
+    'EVDEV',
+    'FREETYPEPY',
+    'JINJA2',
+    'MYPY',
+    'NUMPY',
+    'OPENAL',
+    'OPENGL',
+    'PIL',
+    'PYICU',
+    'PYTEST',
+    'SDL2',
+    'SETUPTOOLS',
+    'SORTEDCONTAINERS',
+    'UHARFBUZZ',
+    'THIRDPARTY'
+]
 
 import_heading_localfolder = 'gamut'
 import_heading_evdev = 'evdev'
@@ -83,6 +117,7 @@ import_heading_pytest = 'pytest'
 import_heading_setuptools = 'setuptools'
 import_heading_uharfbuzz = 'uharfbuzz'
 import_heading_jinja2 = 'jinja2'
+import_heading_sortedcontainers = 'sortedcontainers'
 import_heading_thirdparty = 'TODO: add isort heading'
 force_alphabetical_sort_within_sections = true
 force_sort_within_sections = true
