@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['Graph', 'WeightProtocol']
 
 # python
+from copy import copy
 from typing import Generator, Generic, Hashable, Protocol, TypeVar
 
 
@@ -22,6 +23,12 @@ class Graph(Generic[T, W]):
     def __init__(self) -> None:
         self._nodes: dict[T, Node[T, W]] = {}
         self._edges: dict[tuple[T, T], W] = {}
+
+    def __copy__(self) -> Graph:
+        g = Graph()
+        g._nodes = {v: copy(n) for v, n in self._nodes.items()}
+        g._edges = copy(self._edges)
+        return g
 
     def _get_edge_key(self, a: T, b: T) -> tuple(T, T):
         if hash(a) < hash(b):
@@ -121,6 +128,11 @@ class Node(Generic[T, W]):
     def __init__(self, value: T):
         self.value = value
         self.edges: dict[T, W] = {}
+
+    def __copy__(self) -> Node:
+        n = Node(self.value)
+        n.edges = copy(self.edges)
+        return n
 
 
 class IdHashSet(set[T]):
