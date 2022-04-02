@@ -49,19 +49,36 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         end_point: P
     ) -> tuple[P, ...]:
         apex = start_point
-        left, right = set(path[0]) - {apex}
+        for start_i, triangle in enumerate(path[:-1]):
+            next_triangle = path[start_i + 1]
+            if start_point not in next_triangle:
+                left, right = set(triangle) - {apex}
+                break
+        start_i += 1
+
         new_path: list[P] = [apex]
+        tris_between: list[tuple[P, P, P] = []
+
+        def add_to_path(point: P) -> None:
+            current_y = new_path[-1].y
+            for tri in tris_between:
+                if all((p.y == current_y for p in tri)):
+                    continue
+
+
+            new_path.append(point)
 
         try:
-            path_iter = enumerate(path[1:-1])
+            path_iter = enumerate(path[start_i:-1])
             while True:
                 i, triangle = next(path_iter)
+                tris_between.append(triangle)
+
                 area = ((left - apex).cross(right - apex)).y
                 if area < 0:
                     left, right = right, left
                     area = -area
-
-                next_triangle = set(path[i + 2])
+                next_triangle = set(path[i + start_i + 1])
                 assert left in triangle and right in triangle
                 next_points = set(triangle) - {left, right}
                 assert len(next_points) == 1
@@ -71,48 +88,48 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                     assert right not in next_triangle
                     new_area = ((left - apex).cross(next_point - apex)).y
                     if sign(new_area) != sign(area) or new_area <= 0:
-                        new_path.append(left)
+                        add_to_path(left)
                         apex = left
                         while True:
                             left, right = next_triangle - {apex}
                             try:
-                                next_next_triangle = set(path[i + 3])
+                                next_next_triangle = set(path[i + start_i + 2])
                             except IndexError:
                                 raise StopIteration()
                             if (left not in next_next_triangle or
                                 right not in next_next_triangle):
                                 i, _ = next(path_iter)
-                                next_triangle = set(path[i + 2])
+                                next_triangle = set(path[i + start_i + 1])
                                 continue
                             break
                         next(path_iter)
                     else:
                         if ((next_point - apex).cross(right - apex)).y < 0:
-                            new_path.append(right)
+                            add_to_path(right)
                         right = next_point
 
                 else:
                     assert right in next_triangle
                     new_area = ((next_point - apex).cross(right - apex)).y
                     if sign(new_area) != sign(area) or new_area <= 0:
-                        new_path.append(right)
+                        add_to_path(right)
                         apex = right
                         while True:
                             left, right = next_triangle - {apex}
                             try:
-                                next_next_triangle = set(path[i + 3])
+                                next_next_triangle = set(path[i + start_i + 2])
                             except IndexError:
                                 raise StopIteration()
                             if (left not in next_next_triangle or
                                 right not in next_next_triangle):
                                 i, _ = next(path_iter)
-                                next_triangle = set(path[i + 2])
+                                next_triangle = set(path[i + start_i + 1])
                                 continue
                             break
                         next(path_iter)
                     else:
                         if ((left - apex).cross(next_point - apex)).y < 0:
-                            new_path.append(left)
+                            add_to_path(left)
                         left = next_point
         except StopIteration:
             pass

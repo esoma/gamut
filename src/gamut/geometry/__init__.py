@@ -6,6 +6,7 @@ __all__ = [
     'Cone',
     'ConvexHull',
     'Cylinder',
+    'LineSegment2d',
     'Mesh2d',
     'Mesh3d',
     'Plane',
@@ -25,6 +26,7 @@ from ._composite3d import Composite3d
 from ._cone import Cone
 from ._convexhull import ConvexHull
 from ._cylinder import Cylinder
+from ._linesegment2d import LineSegment2d
 from ._mesh2d import Mesh2d
 from ._mesh3d import Mesh3d
 from ._plane import Plane
