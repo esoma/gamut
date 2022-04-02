@@ -4,7 +4,6 @@ from __future__ import annotations
 __all__ = ['SimplePathFinder']
 
 # gamut
-# doorlord
 from ._graph import Graph, WeightProtocol
 # python
 from typing import Generator, Generic, Hashable, TypeVar
@@ -31,7 +30,7 @@ class SimplePathFinder(Generic[T, W]):
     def __iter__(self: M) -> M:
         return self
 
-    def _find(self) -> Generator[tuple[T], None, None]:
+    def _find(self) -> Generator[tuple[T, ...], None, None]:
         if (not self._graph.contains_node(self._start_node) or
             not self._graph.contains_node(self._end_node)):
             return

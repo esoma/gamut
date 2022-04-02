@@ -25,9 +25,9 @@ class Graph(Generic[T, W]):
 
     def _get_edge_key(self, a: T, b: T) -> tuple(T, T):
         if hash(a) < hash(b):
-            return (a, b)
+            return a, b
         else:
-            return (b, a)
+            return b, a
 
     def _add_node(self, value: T) -> Node[T, W]:
         try:
