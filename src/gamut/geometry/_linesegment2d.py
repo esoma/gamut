@@ -4,22 +4,25 @@ from __future__ import annotations
 __all__ = ['LineSegment2d']
 
 # gamut
-from gamut.math import Vector2
+from gamut.math import DVector2, FVector2
+# python
+from typing import Generic, TypeVar
+
+T = TypeVar('T', FVector2, DVector2)
 
 
-class LineSegment2d:
+class LineSegment2d(Generic[T]):
 
-    def __init__(self, a: Vector2, b: Vector2):
-        if not isinstance(a, Vector2):
-            raise TypeError('a must be Vector2')
+    def __init__(self, a: T, b: T):
+        if not isinstance(a, (FVector2, DVector2)):
+            raise TypeError('a must be FVector2 or DVector2')
         self._a = a
 
-        if not isinstance(b, Vector2):
-            raise TypeError('b must be Vector2')
+        if not isinstance(b, type(a)):
+            raise TypeError('b must be the same type as a')
         self._b = b
 
         self._diff = b - a
-
 
     def __hash__(self) -> int:
         return id(self)
@@ -39,11 +42,11 @@ class LineSegment2d:
         )
 
     @property
-    def a(self) -> Vector2:
+    def a(self) -> T:
         return self._a
 
     @property
-    def b(self) -> Vector2:
+    def b(self) -> T:
         return self._b
 
     def get_line_segment_intersection(
@@ -74,5 +77,9 @@ class LineSegment2d:
             return t, s
         return None
 
-    def get_point_along_line(self, t: float) -> Vector2:
+    def get_point_from_a_to_b(self, t: float) -> T:
         return self._a + (t * self._diff)
+
+    def get_point_from_b_to_a(self, t: float) -> T:
+        t = -(t - 1)
+        return self.get_point_from_a_to_b(t)

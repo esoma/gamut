@@ -4,10 +4,8 @@ from __future__ import annotations
 __all__ = ['NavigationMesh3d']
 
 # gamut
-from ._graph import Graph
-from ._simplepathfinder import SimplePathFinder
-# gamut
 from gamut.geometry import LineSegment2d, LineSegment3d
+from gamut.graph import Graph, SimplePathFinder
 from gamut.math import DVector3, FVector3
 # python
 from math import copysign
@@ -95,7 +93,7 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                 intersections.sort(key=lambda i: i[0][0])
                 for (path_time, edge_time), edge in intersections:
                     edge_line = LineSegment3d(*edge)
-                    new_point = edge_line.get_point_along_line(edge_time)
+                    new_point = edge_line.get_point_from_a_to_b(edge_time)
                     new_path.append(type(point)(*new_point))
                     current_y = new_point.y
 

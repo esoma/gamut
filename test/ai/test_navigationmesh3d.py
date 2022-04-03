@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.graph import NavigationMesh3d
+from gamut.ai import NavigationMesh3d
 from gamut.math import Vector3
 # pytest
 import pytest
