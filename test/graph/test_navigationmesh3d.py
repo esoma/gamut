@@ -252,10 +252,12 @@ def test_find_path_string_pull_y() -> None:
             Vector3(1, 0, 1)
         ),
         (
-            Vector3(7, 0, 0),
-            Vector3(8, 0, 0),
             Vector3(8, 0, 1),
+            Vector3(8, 0, 0),
+            Vector3(7, 0, 0),
         )
     )
-    print(path)
+    # python
+    import pprint
+    pprint.pprint(path)
     assert False

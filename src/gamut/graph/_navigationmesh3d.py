@@ -7,6 +7,7 @@ __all__ = ['NavigationMesh3d']
 from ._graph import Graph
 from ._simplepathfinder import SimplePathFinder
 # gamut
+from gamut.geometry import LineSegment2d, LineSegment3d
 from gamut.math import DVector3, FVector3
 # python
 from math import copysign
@@ -48,6 +49,9 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         path: tuple[tuple[P, P, P], ...],
         end_point: P
     ) -> tuple[P, ...]:
+        # it's possible that the start point is in multiple tris along the path
+        # so we find the last tri that contains it and use that as the starting
+        # tri
         apex = start_point
         for start_i, triangle in enumerate(path[:-1]):
             next_triangle = path[start_i + 1]
@@ -57,17 +61,49 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         start_i += 1
 
         new_path: list[P] = [apex]
-        tris_between: list[tuple[P, P, P] = []
-
+        tris_between: list[tuple[P, P, P]] = []
+        # funnel algorithm doesn't account for movement in the y axis, so
+        # when adding a point to the path we draw a line over the tris between
+        # the previous point and the new one, wherever the line intersects a
+        # tri with a different y value we insert those interections as points
+        # between the old point and new point
         def add_to_path(point: P) -> None:
             current_y = new_path[-1].y
+            path_line = LineSegment2d(new_path[-1].xz, point.xz)
             for tri in tris_between:
                 if all((p.y == current_y for p in tri)):
                     continue
+                intersections = [
+                    (intersection, edge)
+                    for intersection, edge in
+                    (
+                        (
+                            path_line.get_line_segment_intersection(
+                                LineSegment2d(edge[0].xz, edge[1].xz)
+                            ),
+                            edge
+                        )
+                        for edge in (
+                            (tri[0], tri[1]),
+                            (tri[1], tri[2]),
+                            (tri[2], tri[0]),
+                        )
+                    )
+                    if intersection is not None
+                    if intersection[0] > 1e-6
+                ]
+                intersections.sort(key=lambda i: i[0][0])
+                for (path_time, edge_time), edge in intersections:
+                    edge_line = LineSegment3d(*edge)
+                    new_point = edge_line.get_point_along_line(edge_time)
+                    new_path.append(type(point)(*new_point))
+                    current_y = new_point.y
 
+                path_line = LineSegment2d(new_path[-1].xz, point.xz)
 
+            tris_between.clear()
             new_path.append(point)
-
+        # funnel algorithm
         try:
             path_iter = enumerate(path[start_i:-1])
             while True:
@@ -134,7 +170,7 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         except StopIteration:
             pass
 
-        new_path.append(end_point)
+        add_to_path(end_point)
 
         return tuple(new_path)
 

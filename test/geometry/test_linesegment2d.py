@@ -76,31 +76,45 @@ def test_equal() -> None:
     ),
 ])
 def test_intersection_none(l1: LineSegment2d, l2: LineSegment2d) -> None:
-    assert l1.intersection(l2) is None
-    assert l2.intersection(l1) is None
+    assert l1.get_line_segment_intersection(l2) is None
+    assert l2.get_line_segment_intersection(l1) is None
 
 
 @pytest.mark.parametrize("l1, l2, intersection", [
     (
         LineSegment2d(Vector2(-5, -5), Vector2(5, 5)),
         LineSegment2d(Vector2(-5, 5), Vector2(5, -5)),
-        Vector2(0)
+        (.5, .5)
     ),
     (
         LineSegment2d(Vector2(-5, -5), Vector2(5, 5)),
         LineSegment2d(Vector2(-5, 5), Vector2(0, 0)),
-        Vector2(0)
+        (.5, 1.0)
     ),
     (
         LineSegment2d(Vector2(-15, -5), Vector2(-5, 5)),
         LineSegment2d(Vector2(-15, 5), Vector2(-5, -5)),
-        Vector2(-10, 0)
+        (.5, .5)
     ),
 ])
 def test_intersection(
     l1: LineSegment2d,
     l2: LineSegment2d,
-    intersection: Vector2
+    intersection: tuple[float, float]
 ) -> None:
-    assert l1.intersection(l2) == intersection
-    assert l2.intersection(l1) == intersection
+    t, s = l1.get_line_segment_intersection(l2)
+    assert intersection[0] == t
+    assert intersection[1] == s
+
+    t, s = l2.get_line_segment_intersection(l1)
+    assert intersection[0] == s
+    assert intersection[1] == t
+
+
+def test_point_along_line() -> None:
+    line = LineSegment2d(Vector2(-5, -5), Vector2(5, 5))
+    assert line.get_point_along_line(0) == Vector2(-5, -5)
+    assert line.get_point_along_line(.25) == Vector2(-2.5, -2.5)
+    assert line.get_point_along_line(.5) == Vector2(0)
+    assert line.get_point_along_line(.75) == Vector2(2.5, 2.5)
+    assert line.get_point_along_line(1) == Vector2(5, 5)

@@ -18,6 +18,9 @@ class LineSegment2d:
             raise TypeError('b must be Vector2')
         self._b = b
 
+        self._diff = b - a
+
+
     def __hash__(self) -> int:
         return id(self)
 
@@ -43,28 +46,33 @@ class LineSegment2d:
     def b(self) -> Vector2:
         return self._b
 
-    def intersection(self, other: LineSegment2d) -> Vector2 | None:
+    def get_line_segment_intersection(
+        self,
+        other: LineSegment2d
+    ) -> tuple[float, float] | None:
         if not isinstance(other, LineSegment2d):
             raise TypeError('other must be LineSegment2d')
-        self_diff = self._a - self._b
-        other_diff = other._a - other._b
 
-        x_diffs = Vector2(self_diff.x, other_diff.x)
-        y_diffs = Vector2(self_diff.y, other_diff.y)
+        self._diff = self._b - self._a
+        other._diff = other._b - other._a
 
-        div = get_vec2_determinant(x_diffs, y_diffs)
+        div = -other._diff.x * self._diff.y + self._diff.x * other._diff.y
         if div == 0:
             return None
-
-        d = Vector2(
-            get_vec2_determinant(self._a, self._b),
-            get_vec2_determinant(other._a, other._b)
+        s = (
+            (-self._diff.y * (self._a.x - other._a.x) +
+            self._diff.x * (self._a.y - other._a.y)) /
+            div
         )
-        return Vector2(
-            get_vec2_determinant(d, x_diffs) / div,
-            get_vec2_determinant(d, y_diffs) / div
+        t = (
+            (other._diff.x * (self._a.y - other._a.y) -
+            other._diff.y * (self._a.x - other._a.x)) /
+            div
         )
 
+        if s >= 0 and s <= 1 and t >= 0 and t <= 1:
+            return t, s
+        return None
 
-def get_vec2_determinant(a: Vector2, b: Vector2) -> float:
-    return a[0] * b[1] - a[1] * b[0]
+    def get_point_along_line(self, t: float) -> Vector2:
+        return self._a + (t * self._diff)
