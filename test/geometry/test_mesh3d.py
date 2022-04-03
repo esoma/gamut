@@ -250,3 +250,24 @@ def test_equal() -> None:
         UVector3Array(UVector3(0)),
         normals=Vector3Array(Vector3(1))
     )
+
+
+def test_raycast() -> None:
+    mesh = Mesh3d(
+        Vector3Array(
+            Vector3(-1, -1, 0),
+            Vector3(1, -1, 0),
+            Vector3(1, 1, 0),
+            Vector3(-1, 1, 0),
+        ),
+        UVector3Array(
+            UVector3(0, 1, 2),
+            UVector3(0, 2, 3),
+        )
+    )
+    result = mesh.raycast(Vector3(-.5, -.5, 1), Vector3(-.5, -.5, -1))
+    assert result is not None
+    assert result.position == Vector3(-.5, -.5, 0)
+    assert result.normal == Vector3(0, 0, 1)
+    assert result.triangle_index == 0
+    assert result.time == .5

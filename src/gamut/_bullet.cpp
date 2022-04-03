@@ -11,6 +11,7 @@
 #include "BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
 #include "BulletCollision/CollisionShapes/btTriangleShape.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include <iostream>
 // glm
 #include <glm/glm.hpp>
@@ -1854,6 +1855,82 @@ Shape_calculate_local_inertia(Shape *self, PyObject *args)
 }
 
 
+struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
+{
+    bool m_hit;
+    btScalar m_hit_fraction;
+    btVector3 m_hit_normal_local;
+    int m_triangle_index;
+
+    ShapeMeshRaycastTriangleCallback(
+        const btVector3& from,
+        const btVector3& to
+    ):
+        btTriangleRaycastCallback(from, to, 0),
+        m_hit(false)
+    {
+    }
+
+    btScalar reportHit(
+        const btVector3& hit_normal_local,
+        btScalar hit_fraction,
+        int part_id,
+        int triangle_index
+    )
+    {
+        // hit is not ealier in the ray than the one currently recorded
+        if (m_hit && hit_fraction > m_hit_fraction){ return 0; }
+        m_hit = true;
+        m_hit_normal_local = hit_normal_local;
+        m_hit_fraction = hit_fraction;
+        m_triangle_index = triangle_index;
+    }
+};
+
+
+static PyObject *
+Shape_mesh_raycast(Shape *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    ASSERT(nargs == 2);
+    auto state = get_module_state();
+
+    auto raw_from = (glm::dvec3 *)state->math_api->DVector3_GetValuePointer(args[0]);
+    auto raw_to = (glm::dvec3 *)state->math_api->DVector3_GetValuePointer(args[1]);
+
+    btVector3 from(raw_from->x, raw_from->y, raw_from->z);
+    btVector3 to(raw_to->x, raw_to->y, raw_to->z);
+
+    ShapeMeshRaycastTriangleCallback results(from, to);
+    auto mesh = (btBvhTriangleMeshShape*)self->shape;
+    mesh->performRaycast(&results, from, to);
+
+    if (!results.m_hit)
+    {
+        Py_RETURN_NONE;
+    }
+
+    PyObject *hit = PyTuple_New(4);
+
+    auto hit_point = *raw_from + (results.m_hit_fraction * (*raw_to - *raw_from));
+    PyObject *position = state->math_api->DVector3_Create((double *)&hit_point);
+    if (!position){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 0, position);
+
+    PyObject *normal = state->math_api->DVector3_Create(results.m_hit_normal_local.m_floats);
+    if (!normal){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 1, normal);
+
+    PyObject *triangle_index = PyLong_FromLong(results.m_triangle_index);
+    PyTuple_SET_ITEM(hit, 2, triangle_index);
+
+    PyObject *fraction = PyFloat_FromDouble(results.m_hit_fraction);
+    if (PyErr_Occurred()){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 3, fraction);
+
+    return hit;
+}
+
+
 static PyMethodDef Shape_PyMethodDef[] = {
     {
         "add_capsule",
@@ -1907,6 +1984,12 @@ static PyMethodDef Shape_PyMethodDef[] = {
         "calculate_local_inertia",
         (PyCFunction)Shape_calculate_local_inertia,
         METH_O,
+        0
+    },
+    {
+        "mesh_raycast",
+        (PyCFunction)Shape_mesh_raycast,
+        METH_FASTCALL,
         0
     },
     {0, 0, 0, 0}
@@ -1976,7 +2059,7 @@ module_free(void* self)
 
 static struct PyModuleDef module_PyModuleDef = {
     PyModuleDef_HEAD_INIT,
-    "gamut.physics._physics",
+    "gamut._bullet",
     0,
     sizeof(struct ModuleState),
     module_methods,
@@ -1988,7 +2071,7 @@ static struct PyModuleDef module_PyModuleDef = {
 
 
 PyMODINIT_FUNC
-PyInit__physics()
+PyInit__bullet()
 {
     gContactAddedCallback = GamutContactAddedCallback;
 

@@ -6,10 +6,10 @@ __all__ = ['Body', 'BodyType']
 # gamut
 from ._groups import ALL_GROUPS as G_ALL_GROUPS
 from ._groups import verify_groups, verify_mask
-from ._physics import Body as BaseBody
-from ._physics import Shape
 from ._world import add_body_to_world, remove_body_from_world, World
 # gamut
+from gamut._bullet import Body as BaseBody
+from gamut._bullet import Shape
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh3d, Plane, RectangularCuboid, Sphere)
 from gamut.math import BVector3, Matrix4, Vector3
