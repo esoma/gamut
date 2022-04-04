@@ -252,7 +252,7 @@ def test_equal() -> None:
     )
 
 
-def test_raycast() -> None:
+def test_raycast_no_normals() -> None:
     mesh = Mesh3d(
         Vector3Array(
             Vector3(-1, -1, 0),
@@ -261,13 +261,102 @@ def test_raycast() -> None:
             Vector3(-1, 1, 0),
         ),
         UVector3Array(
-            UVector3(0, 1, 2),
-            UVector3(0, 2, 3),
+            UVector3(0, 1, 3),
+            UVector3(3, 1, 2),
         )
     )
+
     result = mesh.raycast(Vector3(-.5, -.5, 1), Vector3(-.5, -.5, -1))
     assert result is not None
     assert result.position == Vector3(-.5, -.5, 0)
     assert result.normal == Vector3(0, 0, 1)
     assert result.triangle_index == 0
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(-.5, -.5, -1), Vector3(-.5, -.5, 1))
+    assert result is not None
+    assert result.position == Vector3(-.5, -.5, 0)
+    assert result.normal == Vector3(0, 0, -1)
+    assert result.triangle_index == 0
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(.5, .5, 1), Vector3(.5, .5, -1))
+    assert result is not None
+    assert result.position == Vector3(.5, .5, 0)
+    assert result.normal == Vector3(0, 0, 1)
+    assert result.triangle_index == 1
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(.5, .5, -1), Vector3(.5, .5, 1))
+    assert result is not None
+    assert result.position == Vector3(.5, .5, 0)
+    assert result.normal == Vector3(0, 0, -1)
+    assert result.triangle_index == 1
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(-.75, -.75, 1), Vector3(-.25, -.25, -1))
+    assert result is not None
+    assert result.position == Vector3(-.5, -.5, 0)
+    assert result.normal == Vector3(0, 0, 1)
+    assert result.triangle_index == 0
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(-.5, -.5, 2), Vector3(-.5, -.5, -1))
+    assert result is not None
+    assert result.position == Vector3(-.5, -.5, 0)
+    assert result.normal == Vector3(0, 0, 1)
+    assert result.triangle_index == 0
+    assert result.time == .6666666666666666
+
+
+def test_raycast_normals() -> None:
+    mesh = Mesh3d(
+        Vector3Array(
+            Vector3(-1, -1, 0),
+            Vector3(1, -1, 0),
+            Vector3(1, 1, 0),
+            Vector3(-1, 1, 0),
+        ),
+        UVector3Array(
+            UVector3(0, 1, 3),
+            UVector3(3, 1, 2),
+        ),
+        normals=Vector3Array(
+            Vector3(0, .5, 1).normalize(),
+            Vector3(0, .5, 1).normalize(),
+            Vector3(0, -.5, 1).normalize(),
+            Vector3(0, -.5, 1).normalize(),
+        )
+    )
+
+    result = mesh.raycast(Vector3(-.5, -.5, 1), Vector3(-.5, -.5, -1))
+    assert result is not None
+    assert result.position == Vector3(-.5, -.5, 0)
+    assert result.normal == Vector3(0, 0.242535625036333, 0.9701425001453319)
+    assert result.triangle_index == 0
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(-.5, -.5, -1), Vector3(-.5, -.5, 1))
+    assert result is None
+
+    result = mesh.raycast(Vector3(0, 0, 1), Vector3(0, 0, -1))
+    assert result is not None
+    assert result.position == Vector3(0, 0, 0)
+    assert result.normal == Vector3(0, 0, 1)
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(-1, -1, 1), Vector3(-1, -1, -1))
+    assert result is not None
+    assert result.position == Vector3(-1, -1, 0)
+    assert result.normal == Vector3(0, 0.44721359549995804, 0.8944271909999161)
+    assert result.time == .5
+
+    result = mesh.raycast(Vector3(1, 1, 1), Vector3(1, 1, -1))
+    assert result is not None
+    assert result.position == Vector3(1, 1, 0)
+    assert result.normal == Vector3(
+        0,
+        -0.44721359549995804,
+        0.8944271909999161
+    )
     assert result.time == .5
