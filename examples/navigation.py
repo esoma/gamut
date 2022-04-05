@@ -96,7 +96,9 @@ class App(Application):
                 navmesh_positions[navmesh_indices[(i * 3) + 2]],
             )
         self.path = list(self.navmesh.find_path(
+            FVector3(6, 0, -10),
             (FVector3(6, 0, -10), FVector3(6, 0, -8), FVector3(4, 0, -10)),
+            FVector3(4, 0, 10),
             (FVector3(4, 0, 10), FVector3(6, 0, 10), FVector3(4, 0, 8)),
         ))
         self.cube_position = self.path[0]
@@ -134,13 +136,11 @@ class App(Application):
             triangle_indices = self.navmesh_shape.triangle_indices[
                 result.triangle_index
             ]
-            triangle = {
+            end_triangle = tuple(
                 FVector3(*self.navmesh_shape.positions[i])
                 for i in triangle_indices
-            }
-            start = tuple(triangle)
-            triangle -= {FVector3(*result.position)}
-            end = (FVector3(*result.position), *list(triangle)[:2])
+            )
+            end = FVector3(*result.position)
 
             d_cube_position = DVector3(*self.cube_position)
             result = self.navmesh_shape.raycast(
@@ -151,13 +151,17 @@ class App(Application):
                 triangle_indices = self.navmesh_shape.triangle_indices[
                     result.triangle_index
                 ]
-                triangle = {
+                start_triangle = tuple(
                     FVector3(*self.navmesh_shape.positions[i])
                     for i in triangle_indices
-                }
-                triangle -= {FVector3(*result.position)}
-                start = (FVector3(*result.position), *list(triangle)[:2])
-                path = self.navmesh.find_path(start, end)
+                )
+                start = FVector3(*result.position)
+                path = self.navmesh.find_path(
+                    start,
+                    start_triangle,
+                    end,
+                    end_triangle
+                )
                 if path is not None:
                     self.path = list(path)
 

@@ -19,7 +19,7 @@ def sign(x: float) -> float:
 
 
 def default_calculate_weight(a: tuple[P, P, P], b: tuple[P, P, P]) -> float:
-    return sum((sum(a) / 3) - (sum(b) / 3)) ** 2
+    return (sum(a) / 3).distance(sum(b) / 3)
 
 
 class NavigationMesh3d(Graph[tuple[P, P, P], float]):
@@ -47,16 +47,27 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         path: tuple[tuple[P, P, P], ...],
         end_point: P
     ) -> tuple[P, ...]:
+        print("________________________")
+        # python
+        import pprint
+        pprint.pprint(path)
         # it's possible that the start point is in multiple tris along the path
         # so we find the last tri that contains it and use that as the starting
         # tri
+        print(start_point)
         apex = start_point
+        start_i = 0
+        left, right = set(path[0]) & set(path[1])
+
+        """
         for start_i, triangle in enumerate(path[:-1]):
             next_triangle = path[start_i + 1]
             if start_point not in next_triangle:
+                print(triangle)
                 left, right = set(triangle) - {apex}
                 break
         start_i += 1
+        """
 
         new_path: list[P] = [apex]
         tris_between: list[tuple[P, P, P]] = []
@@ -118,8 +129,15 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                 assert len(next_points) == 1
                 next_point = next(iter(next_points))
 
+                if left in next_triangle and right in next_triangle:
+                    continue
+
+                print("--------------------------")
+                print(left)
+                print(right)
+                print(next_triangle)
+
                 if left in next_triangle:
-                    assert right not in next_triangle
                     new_area = ((left - apex).cross(next_point - apex)).y
                     if sign(new_area) != sign(area) or new_area <= 0:
                         add_to_path(left)
@@ -143,7 +161,6 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                         right = next_point
 
                 else:
-                    assert right in next_triangle
                     new_area = ((next_point - apex).cross(right - apex)).y
                     if sign(new_area) != sign(area) or new_area <= 0:
                         add_to_path(right)
@@ -221,21 +238,38 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
 
     def find_path(
         self,
-        start: tuple[P, P, P],
-        end: tuple[P, P, P]
+        start_point: P,
+        start_triangle: tuple[P, P, P],
+        end_point: P,
+        end_triangle: tuple[P, P, P]
     ) -> tuple[P, ...] | None:
-        start_point = start[0]
-        end_point = end[0]
-        start = self._triangle(*start)
-        end = self._triangle(*end)
+        start_triangle = self._triangle(*start_triangle)
+        end_triangle = self._triangle(*end_triangle)
 
+        """
         temporary_triangles: list[tuple[P, P, P]] = []
-        for new_triangle in (start, end):
+        for new_point, new_triangle in (
+            (start_point, start_triangle),
+            (end_point, end_triangle)
+        ):
             if not self._graph.contains_node(new_triangle):
-                self.add_triangle(*new_triangle)
-                temporary_triangles.append(new_triangle)
-        print("XXXX: ", temporary_triangles)
-        finder = SimplePathFinder(self._graph, start, end)
+                raise ValueError('triangle not in navigation mesh')
+            if new_point in new_triangle:
+                continue
+            for temp_triangle in (
+                self._triangle(new_point, new_triangle[0], new_triangle[1]),
+                self._triangle(new_point, new_triangle[0], new_triangle[2]),
+                self._triangle(new_point, new_triangle[1], new_triangle[2]),
+            ):
+                self.add_triangle(*temp_triangle)
+                temporary_triangles.append(temp_triangle)
+            if new_point is start_point:
+                start_triangle = temp_triangle
+            else:
+                assert new_point is end_point
+                end_triangle = temp_triangle
+        """
+        finder = SimplePathFinder(self._graph, start_triangle, end_triangle)
         try:
             tri_path = next(finder)
         except StopIteration:
@@ -249,7 +283,9 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         else:
             point_path = None
 
+        """
         for temporary_triangle in temporary_triangles:
             self.remove_triangle(*temporary_triangle)
+        """
 
         return point_path
