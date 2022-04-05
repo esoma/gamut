@@ -47,27 +47,12 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         path: tuple[tuple[P, P, P], ...],
         end_point: P
     ) -> tuple[P, ...]:
-        print("________________________")
-        # python
-        import pprint
-        pprint.pprint(path)
-        # it's possible that the start point is in multiple tris along the path
-        # so we find the last tri that contains it and use that as the starting
-        # tri
-        print(start_point)
-        apex = start_point
-        start_i = 0
-        left, right = set(path[0]) & set(path[1])
+        if len(path) == 1:
+            return (start_point, end_point)
 
-        """
-        for start_i, triangle in enumerate(path[:-1]):
-            next_triangle = path[start_i + 1]
-            if start_point not in next_triangle:
-                print(triangle)
-                left, right = set(triangle) - {apex}
-                break
-        start_i += 1
-        """
+        apex = start_point
+        start_i = 1
+        left, right = set(path[0]) & set(path[1])
 
         new_path: list[P] = [apex]
         tris_between: list[tuple[P, P, P]] = []
@@ -114,7 +99,7 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
             new_path.append(point)
         # funnel algorithm
         try:
-            path_iter = enumerate(path[start_i:-1])
+            path_iter = enumerate(path[start_i:])
             while True:
                 i, triangle = next(path_iter)
                 tris_between.append(triangle)
@@ -123,7 +108,12 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                 if area < 0:
                     left, right = right, left
                     area = -area
-                next_triangle = set(path[i + start_i + 1])
+
+                try:
+                    next_triangle = set(path[i + start_i + 1])
+                except IndexError:
+                    next_triangle = {end_point, end_point, end_point}
+
                 assert left in triangle and right in triangle
                 next_points = set(triangle) - {left, right}
                 assert len(next_points) == 1
@@ -132,17 +122,12 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                 if left in next_triangle and right in next_triangle:
                     continue
 
-                print("--------------------------")
-                print(left)
-                print(right)
-                print(next_triangle)
-
                 if left in next_triangle:
                     new_area = ((left - apex).cross(next_point - apex)).y
                     if sign(new_area) != sign(area) or new_area <= 0:
                         add_to_path(left)
                         apex = left
-                        while True:
+                        while i < len(path) - 2:
                             left, right = next_triangle - {apex}
                             try:
                                 next_next_triangle = set(path[i + start_i + 2])
@@ -165,7 +150,7 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                     if sign(new_area) != sign(area) or new_area <= 0:
                         add_to_path(right)
                         apex = right
-                        while True:
+                        while i < len(path) - 2:
                             left, right = next_triangle - {apex}
                             try:
                                 next_next_triangle = set(path[i + start_i + 2])
@@ -246,46 +231,10 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
         start_triangle = self._triangle(*start_triangle)
         end_triangle = self._triangle(*end_triangle)
 
-        """
-        temporary_triangles: list[tuple[P, P, P]] = []
-        for new_point, new_triangle in (
-            (start_point, start_triangle),
-            (end_point, end_triangle)
-        ):
-            if not self._graph.contains_node(new_triangle):
-                raise ValueError('triangle not in navigation mesh')
-            if new_point in new_triangle:
-                continue
-            for temp_triangle in (
-                self._triangle(new_point, new_triangle[0], new_triangle[1]),
-                self._triangle(new_point, new_triangle[0], new_triangle[2]),
-                self._triangle(new_point, new_triangle[1], new_triangle[2]),
-            ):
-                self.add_triangle(*temp_triangle)
-                temporary_triangles.append(temp_triangle)
-            if new_point is start_point:
-                start_triangle = temp_triangle
-            else:
-                assert new_point is end_point
-                end_triangle = temp_triangle
-        """
         finder = SimplePathFinder(self._graph, start_triangle, end_triangle)
         try:
             tri_path = next(finder)
         except StopIteration:
-            tri_path = None
-        if tri_path is not None:
-            point_path = self._string_pull_path(
-                start_point,
-                tri_path,
-                end_point
-            )
-        else:
-            point_path = None
+            return None
 
-        """
-        for temporary_triangle in temporary_triangles:
-            self.remove_triangle(*temporary_triangle)
-        """
-
-        return point_path
+        return self._string_pull_path(start_point, tri_path, end_point)

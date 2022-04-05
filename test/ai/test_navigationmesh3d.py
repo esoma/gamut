@@ -42,7 +42,9 @@ def test_find_basic_path() -> None:
     assert {Vector3(0, 0, 0), Vector3(-1, 0, 0), Vector3(1, 0, 0)} in triangles
 
     path = nm.find_path(
+        Vector3(0, 0, 0),
         (Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(1, 0, 0)),
+        Vector3(1, 0, 1),
         (Vector3(1, 0, 1), Vector3(0, 0, 1), Vector3(1, 0, 0))
     )
     assert path == (Vector3(0, 0, 0), Vector3(1, 0, 1))
@@ -135,7 +137,9 @@ def test_find_path_string_pull(c: Vector3) -> None:
     )
 
     path = nm.find_path(
+        Vector3(1, 0, 0) * c,
         (Vector3(1, 0, 0) * c, Vector3(0, 0, 0) * c, Vector3(0, 0, 1) * c),
+        Vector3(-1, 0, -2) * c,
         (Vector3(-1, 0, -2) * c, Vector3(0, 0, -2) * c, Vector3(-1, 0, -3) * c)
     )
     assert path == (
@@ -246,18 +250,26 @@ def test_find_path_string_pull_y() -> None:
     #    __
     # s_/  \_e
     path = nm.find_path(
+        Vector3(0, 0, 0),
         (
             Vector3(0, 0, 0),
             Vector3(0, 0, 1),
             Vector3(1, 0, 1)
         ),
+        Vector3(8, 0, 1),
         (
             Vector3(8, 0, 1),
             Vector3(8, 0, 0),
             Vector3(7, 0, 0),
         )
     )
-    # python
-    import pprint
-    pprint.pprint(path)
-    assert False
+    assert path == (
+        Vector3(0.0, 0.0, 0.0),
+        Vector3(2.0, 0.0, 0.25),
+        Vector3(2.2857142857142856, 0.2857142857142857, 0.2857142857142857),
+        Vector3(3.0, 1.0, 0.3750000000000001),
+        Vector3(5.0, 1.0, 0.625),
+        Vector3(5.714285714285714, 0.2857142857142857, 0.7142857142857143),
+        Vector3(6.0, 0.0, 0.75),
+        Vector3(8.0, 0.0, 1.0)
+    )
