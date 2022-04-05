@@ -4,6 +4,7 @@ __all__ = [
     'ApplicationEnd',
     'ApplicationEvent',
     'ApplicationStart',
+    'Camera',
     'Timer',
     'TimerExpired',
     'TransformNode',
@@ -24,6 +25,7 @@ warnings.filterwarnings('ignore', 'Using SDL2 binaries from ')
 # gamut
 from ._application import (Application, ApplicationEnd, ApplicationEvent,
                            ApplicationStart)
+from ._camera import Camera
 from ._timer import Timer, TimerExpired
 from ._transformnode import TransformNode
 from ._window import (Window, WindowBufferSynchronization, WindowClose,

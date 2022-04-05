@@ -234,7 +234,7 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
             if not self._graph.contains_node(new_triangle):
                 self.add_triangle(*new_triangle)
                 temporary_triangles.append(new_triangle)
-
+        print("XXXX: ", temporary_triangles)
         finder = SimplePathFinder(self._graph, start, end)
         try:
             tri_path = next(finder)

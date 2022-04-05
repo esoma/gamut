@@ -1,18 +1,20 @@
 
 # gamut
-from gamut import Application, Timer, TimerExpired, TransformNode, Window
+from gamut import (Application, Camera, Timer, TimerExpired, TransformNode,
+                   Window)
 from gamut.ai import NavigationMesh3d
 from gamut.event import Bind
-from gamut.geometry import LineSegment3d, RectangularCuboid
+from gamut.geometry import LineSegment3d, Mesh3d, RectangularCuboid
 from gamut.gltf import Gltf
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
                             execute_shader, FaceCull, PrimitiveMode, Shader,
                             WindowRenderTarget)
-from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector3, UVector2,
-                        Vector3)
+from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector2, FVector3,
+                        UVector1, UVector1Array, UVector2, UVector3Array,
+                        Vector3, Vector3Array)
 from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
-                              MouseConnected, MouseMoved)
+                              MouseButtonPressed, MouseConnected, MouseMoved)
 # python
 import ctypes
 from datetime import timedelta
@@ -45,13 +47,14 @@ class App(Application):
             mouse = self.mice[0]
         except IndexError:
             mouse = (await MouseConnected).mouse
-        mouse.relative = True
 
         self.player_position = FVector3(-20, 10, 20)
         self.player_yaw = -.8
         self.player_pitch = -0.25
         self.player_node: TransformNode[Any] = TransformNode()
-        self.projection = FMatrix4.perspective(radians(45), 1, .1, 100)
+        self.camera = Camera(
+            FMatrix4.perspective(radians(45), 1, .1, 100)
+        )
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
 
@@ -79,6 +82,12 @@ class App(Application):
             Buffer(navmesh_indices),
             ctypes.c_uint16
         )
+        self.navmesh_shape = Mesh3d(
+            Vector3Array(*(Vector3(*v) for v in navmesh_positions)),
+            UVector3Array.from_buffer(
+                UVector1Array(*(UVector1(i) for i in navmesh_indices))
+            )
+        )
         self.navmesh = NavigationMesh3d()
         for i in range(len(navmesh_indices) // 3):
             self.navmesh.add_triangle(
@@ -95,7 +104,7 @@ class App(Application):
         with (
             Bind.on(self.keyboard.Key.escape.Pressed, self.escape),
             Bind.on(Draw, self.draw),
-            Bind.on(MouseMoved, self.mouse_moved)
+            Bind.on(mouse.Button.left.Pressed, self.mouse_click)
         ):
             step_timer = Timer(
                 self,
@@ -113,6 +122,44 @@ class App(Application):
         if mouse_moved.delta is not None:
             self.player_yaw += mouse_moved.delta[0] * .005
             self.player_pitch -= mouse_moved.delta[1] * .005
+
+    async def mouse_click(self, button_pressed: MouseButtonPressed) -> None:
+        clip_position = ((
+            FVector2(*button_pressed.mouse.position) /
+            FVector2(800, 800)
+        ) * 2 - 1) * FVector2(1, -1)
+        ray = self.camera.generate_ray(clip_position)
+        result = self.navmesh_shape.raycast(DVector3(*ray.a), DVector3(*ray.b))
+        if result:
+            triangle_indices = self.navmesh_shape.triangle_indices[
+                result.triangle_index
+            ]
+            triangle = {
+                FVector3(*self.navmesh_shape.positions[i])
+                for i in triangle_indices
+            }
+            start = tuple(triangle)
+            triangle -= {FVector3(*result.position)}
+            end = (FVector3(*result.position), *list(triangle)[:2])
+
+            d_cube_position = DVector3(*self.cube_position)
+            result = self.navmesh_shape.raycast(
+                d_cube_position + DVector3(0, .1, 0),
+                d_cube_position + DVector3(0, -1, 0)
+            )
+            if result:
+                triangle_indices = self.navmesh_shape.triangle_indices[
+                    result.triangle_index
+                ]
+                triangle = {
+                    FVector3(*self.navmesh_shape.positions[i])
+                    for i in triangle_indices
+                }
+                triangle -= {FVector3(*result.position)}
+                start = (FVector3(*result.position), *list(triangle)[:2])
+                path = self.navmesh.find_path(start, end)
+                if path is not None:
+                    self.path = list(path)
 
     async def draw(self, draw: Draw) -> None:
         player_direction = FVector3(
@@ -139,7 +186,7 @@ class App(Application):
         if keys.right.is_pressed or keys.d.is_pressed:
             self.player_position += player_frame_speed * player_cross_direction
 
-        self.player_node.local_transform = FMatrix4.look_at(
+        self.camera.local_transform = FMatrix4.look_at(
             self.player_position,
             self.player_position + player_direction,
             FVector3(0, 1, 0),
@@ -157,8 +204,7 @@ class App(Application):
             PrimitiveMode.TRIANGLE,
             self.navmesh_attributes,
             {
-                "camera_transform":
-                    self.projection @ self.player_node.transform,
+                "camera_transform": self.camera.view_projection_transform,
                 "model_transform": FMatrix4(1),
                 "normal_model_transform": FMatrix3(1),
                 "color": FVector3(1, 1, 1),
@@ -191,8 +237,7 @@ class App(Application):
             PrimitiveMode.TRIANGLE,
             self.cube_attributes,
             {
-                "camera_transform":
-                    self.projection @ self.player_node.transform,
+                "camera_transform": self.camera.view_projection_transform,
                 "model_transform": cube_transform,
                 "normal_model_transform": (
                     cube_transform.inverse().transpose().to_matrix3()

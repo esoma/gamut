@@ -5,7 +5,7 @@ __all__ = ['Mesh3d', 'Mesh3dRaycastHit']
 
 # gamut
 from gamut._bullet import Shape
-from gamut.math import Matrix4, UVector3Array, Vector3Array
+from gamut.math import Matrix4, UVector3Array, Vector3, Vector3Array
 # python
 from ctypes import c_void_p
 from ctypes import cast as c_cast
@@ -112,6 +112,11 @@ class Mesh3d:
         return self._triangle_indices
 
     def raycast(self, start: Vector3, end: Vector3) -> Mesh3dRaycastHit | None:
+        if not isinstance(start, Vector3):
+            raise TypeError('start must be Vector3')
+        if not isinstance(end, Vector3):
+            raise TypeError('end must be Vector3')
+
         bt = self._get_bullet_shape()
         result = bt.mesh_raycast(start, end)
         if result is None:
