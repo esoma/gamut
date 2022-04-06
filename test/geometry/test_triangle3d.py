@@ -61,13 +61,37 @@ def test_invalid_c(a: Any, b: Any, c: Any) -> None:
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_points(vtype: Any) -> None:
-    line = Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
-    assert line.positions == (vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
-    assert line.center == sum((
-        vtype(0, 1, 2),
-        vtype(3, 4, 5),
-        vtype(6, 7, 8)
-    )) / 3
+    for line in [
+        Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8)),
+        Triangle3d(vtype(3, 4, 5), vtype(6, 7, 8), vtype(0, 1, 2)),
+        Triangle3d(vtype(6, 7, 8), vtype(0, 1, 2), vtype(3, 4, 5)),
+    ]:
+        assert line.positions == (
+            vtype(0, 1, 2),
+            vtype(3, 4, 5),
+            vtype(6, 7, 8)
+        )
+        assert line.center == sum((
+            vtype(0, 1, 2),
+            vtype(3, 4, 5),
+            vtype(6, 7, 8)
+        )) / 3
+
+    for line in [
+        Triangle3d(vtype(3, 4, 5), vtype(0, 1, 2), vtype(6, 7, 8)),
+        Triangle3d(vtype(6, 7, 8), vtype(3, 4, 5), vtype(0, 1, 2)),
+        Triangle3d(vtype(0, 1, 2), vtype(6, 7, 8), vtype(3, 4, 5)),
+    ]:
+        assert line.positions == (
+            vtype(0, 1, 2),
+            vtype(6, 7, 8),
+            vtype(3, 4, 5),
+        )
+        assert line.center == sum((
+            vtype(0, 1, 2),
+            vtype(3, 4, 5),
+            vtype(6, 7, 8)
+        )) / 3
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
@@ -94,6 +118,10 @@ def test_equal(vtype: Any) -> None:
     )
     assert (
         Triangle3d(vtype(2), vtype(0), vtype(1)) ==
+        Triangle3d(vtype(1), vtype(2), vtype(0))
+    )
+    assert (
+        Triangle3d(vtype(0), vtype(2), vtype(1)) !=
         Triangle3d(vtype(1), vtype(2), vtype(0))
     )
     assert Triangle3d(vtype(0), vtype(0), vtype(0)) != object()

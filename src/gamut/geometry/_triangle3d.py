@@ -22,6 +22,8 @@ class Triangle3d(Generic[T]):
             raise TypeError('point 2 must be the same type as point 0')
 
         self._positions = (point_0, point_1, point_2)
+        i = sorted(enumerate(self._positions), key=lambda x: x[1])[0][0]
+        self._positions = self._positions[i:] + self._positions[:i]
 
     def __hash__(self) -> int:
         return id(self)
@@ -35,18 +37,7 @@ class Triangle3d(Generic[T]):
     def __eq__(self, other: Triangle3d) -> bool:
         if not isinstance(other, Triangle3d):
             return False
-
-        other_iter = enumerate(other.positions)
-        i, other_point = next(other_iter)
-        for point in (*self.positions, *self.positions):
-            if point == other_point:
-                try:
-                    i, other_point = next(other_iter)
-                except StopIteration:
-                    return True
-            elif i != 0:
-                return False
-        return False
+        return self._positions == other._positions
 
     @property
     def center(self) -> T:
