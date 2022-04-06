@@ -13,18 +13,15 @@ T = TypeVar('T', FVector3, DVector3)
 
 class Triangle3d(Generic[T]):
 
-    def __init__(self, a: T, b: T, c: T):
-        if not isinstance(a, (FVector3, DVector3)):
-            raise TypeError('a must be FVector3 or DVector3')
-        self._a = a
+    def __init__(self, point_0: T, point_1: T, point_2: T, /):
+        if not isinstance(point_0, (FVector3, DVector3)):
+            raise TypeError('point 0 must be FVector3 or DVector3')
+        if not isinstance(point_1, type(point_0)):
+            raise TypeError('point 1 must be the same type as point 0')
+        if not isinstance(point_2, type(point_0)):
+            raise TypeError('point 2 must be the same type as point 0')
 
-        if not isinstance(b, type(a)):
-            raise TypeError('b must be the same type as a')
-        self._b = b
-
-        if not isinstance(c, type(a)):
-            raise TypeError('c must be the same type as a')
-        self._c = c
+        self._positions = (point_0, point_1, point_2)
 
     def __hash__(self) -> int:
         return id(self)
@@ -38,24 +35,23 @@ class Triangle3d(Generic[T]):
     def __eq__(self, other: Triangle3d) -> bool:
         if not isinstance(other, Triangle3d):
             return False
-        return {self._a, self._b, self._c} == {other._a, other._b, other._c}
 
-    @property
-    def a(self) -> T:
-        return self._a
-
-    @property
-    def b(self) -> T:
-        return self._b
-
-    @property
-    def c(self) -> T:
-        return self._c
+        other_iter = enumerate(other.positions)
+        i, other_point = next(other_iter)
+        for point in (*self.positions, *self.positions):
+            if point == other_point:
+                try:
+                    i, other_point = next(other_iter)
+                except StopIteration:
+                    return True
+            elif i != 0:
+                return False
+        return False
 
     @property
     def center(self) -> T:
         return (self._a + self._b + self._c) / 3
 
     @property
-    def points(self) -> tuple[T, T, T]:
-        return self._a, self._b, self._c
+    def positions(self) -> tuple[T, T, T]:
+        return self._positions

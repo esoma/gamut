@@ -1,5 +1,5 @@
 
-// generated {{ when }} from codegen/math/templates/_quaternion.hpp
+// generated from codegen/math/templates/_quaternion.hpp
 
 #ifndef GAMUT_MATH_{{ name.upper() }}_HPP
 #define GAMUT_MATH_{{ name.upper() }}_HPP
