@@ -283,6 +283,10 @@ I16Vector4__richcmp__(I16Vector4 *self, I16Vector4 *other, int op)
                 {
                     Py_RETURN_TRUE;
                 }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
             }
             Py_RETURN_FALSE;
         }
@@ -345,6 +349,10 @@ I16Vector4__richcmp__(I16Vector4 *self, I16Vector4 *other, int op)
                 if ((*self->glm)[i] > (*other->glm)[i])
                 {
                     Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
                 }
             }
             Py_RETURN_FALSE;
