@@ -154,6 +154,7 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
                     else:
                         if ((next_point - apex).cross(right - apex)).y < 0:
                             add_to_path(right)
+                            apex = right
                         right = next_point
 
                 else:
@@ -181,6 +182,7 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
                     else:
                         if ((left - apex).cross(next_point - apex)).y < 0:
                             add_to_path(left)
+                            apex = left
                         left = next_point
         except StopIteration:
             pass
@@ -237,7 +239,4 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
             tri_path = next(finder)
         except StopIteration:
             return None
-        # python
-        import pprint
-        pprint.pprint(tri_path)
         return self._string_pull_path(start_point, tri_path, end_point)

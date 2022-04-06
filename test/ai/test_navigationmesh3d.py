@@ -2,9 +2,11 @@
 # gamut
 from gamut.ai import NavigationMesh3d
 from gamut.geometry import Triangle3d
-from gamut.math import Vector3
+from gamut.gltf import Gltf
+from gamut.math import FVector3, Vector3
 # python
 from math import isclose
+from pathlib import Path
 # pytest
 import pytest
 
@@ -312,3 +314,44 @@ def test_find_path_string_pull_y() -> None:
     )
     assert vector_is_close(path[6], Vector3(6.0, 0.0, 0.75))
     assert vector_is_close(path[7], Vector3(8.0, 0.0, 1.0))
+
+
+def test_find_path_string_pull_bug(resources: Path) -> None:
+    with open(resources / 'navmesh.glb', 'rb') as f:
+        navmesh_gltf = Gltf(f)
+    navmesh_attrs = navmesh_gltf.meshes[0].primitives[0].attributes
+    navmesh_indices = navmesh_gltf.meshes[0].primitives[0].indices.data
+    navmesh_positions = navmesh_attrs["POSITION"].data
+
+    nm = NavigationMesh3d()
+    for i in range(len(navmesh_indices) // 3):
+        nm.add_triangle(Triangle3d(
+            navmesh_positions[navmesh_indices[(i * 3)]],
+            navmesh_positions[navmesh_indices[(i * 3) + 1]],
+            navmesh_positions[navmesh_indices[(i * 3) + 2]],
+        ))
+
+    path = nm.find_path(
+        FVector3(-5.265909194946289, 2.0, 3.866203784942627),
+        Triangle3d(
+            FVector3(-6.0, 2.0, 4.0),
+            FVector3(-4.0, 2.0, 4.0),
+            FVector3(-4.0, 2.0, 1.0)
+        ),
+        FVector3(4.608282566070557, 2.0, -2.154895782470703),
+        Triangle3d(
+            FVector3(4.0, 2.0, -4.0),
+            FVector3(4.0, 2.0, -1.0),
+            FVector3(6.0, 2.0, -4.0)
+        )
+    )
+    assert vector_is_close(
+        path[0],
+        FVector3(-5.265909194946289, 2.0, 3.866203784942627)
+    )
+    assert vector_is_close(path[1], FVector3(-4.0, 2.0, 1.0))
+    assert vector_is_close(path[2], FVector3(4.0, 2.0, -1.0))
+    assert vector_is_close(
+        path[3],
+        FVector3(4.608282566070557, 2.0, -2.154895782470703)
+    )
