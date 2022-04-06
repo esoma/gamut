@@ -1,5 +1,5 @@
 
-// generated 2022-03-26 21:40:50.075079 from codegen/math/templates/_vector.hpp
+// generated from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_BVECTOR4_HPP
 #define GAMUT_MATH_BVECTOR4_HPP
@@ -275,6 +275,32 @@ BVector4__richcmp__(BVector4 *self, BVector4 *other, int op)
 
     switch(op)
     {
+        case Py_LT:
+        {
+            for (BVector4Glm::length_type i = 0; i < 4; i++)
+            {
+                if ((*self->glm)[i] < (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+            }
+            Py_RETURN_FALSE;
+        }
+        case Py_LE:
+        {
+            for (BVector4Glm::length_type i = 0; i < 4; i++)
+            {
+                if ((*self->glm)[i] < (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
+            }
+            Py_RETURN_TRUE;
+        }
         case Py_EQ:
         {
             if ((*self->glm) == (*other->glm))
@@ -296,6 +322,32 @@ BVector4__richcmp__(BVector4 *self, BVector4 *other, int op)
             {
                 Py_RETURN_FALSE;
             }
+        }
+        case Py_GE:
+        {
+            for (BVector4Glm::length_type i = 0; i < 4; i++)
+            {
+                if ((*self->glm)[i] > (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
+            }
+            Py_RETURN_TRUE;
+        }
+        case Py_GT:
+        {
+            for (BVector4Glm::length_type i = 0; i < 4; i++)
+            {
+                if ((*self->glm)[i] > (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+            }
+            Py_RETURN_FALSE;
         }
     }
     Py_RETURN_NOTIMPLEMENTED;

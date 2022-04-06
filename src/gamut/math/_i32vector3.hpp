@@ -1,5 +1,5 @@
 
-// generated 2022-03-26 21:40:50.070577 from codegen/math/templates/_vector.hpp
+// generated from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_I32VECTOR3_HPP
 #define GAMUT_MATH_I32VECTOR3_HPP
@@ -251,6 +251,32 @@ I32Vector3__richcmp__(I32Vector3 *self, I32Vector3 *other, int op)
 
     switch(op)
     {
+        case Py_LT:
+        {
+            for (I32Vector3Glm::length_type i = 0; i < 3; i++)
+            {
+                if ((*self->glm)[i] < (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+            }
+            Py_RETURN_FALSE;
+        }
+        case Py_LE:
+        {
+            for (I32Vector3Glm::length_type i = 0; i < 3; i++)
+            {
+                if ((*self->glm)[i] < (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
+            }
+            Py_RETURN_TRUE;
+        }
         case Py_EQ:
         {
             if ((*self->glm) == (*other->glm))
@@ -272,6 +298,32 @@ I32Vector3__richcmp__(I32Vector3 *self, I32Vector3 *other, int op)
             {
                 Py_RETURN_FALSE;
             }
+        }
+        case Py_GE:
+        {
+            for (I32Vector3Glm::length_type i = 0; i < 3; i++)
+            {
+                if ((*self->glm)[i] > (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
+            }
+            Py_RETURN_TRUE;
+        }
+        case Py_GT:
+        {
+            for (I32Vector3Glm::length_type i = 0; i < 3; i++)
+            {
+                if ((*self->glm)[i] > (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+            }
+            Py_RETURN_FALSE;
         }
     }
     Py_RETURN_NOTIMPLEMENTED;

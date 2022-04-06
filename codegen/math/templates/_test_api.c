@@ -1,5 +1,5 @@
 
-// generated {{ when }} from codegen/math/templates/test_api.cpp
+// generated from codegen/math/templates/test_api.cpp
 
 // stdlib
 #include <stddef.h>

@@ -91,4 +91,12 @@ def test_equal(vtype: Any) -> None:
         Triangle3d(vtype(0), vtype(0), vtype(0)) !=
         Triangle3d(vtype(0), vtype(0), vtype(1, 0, 0))
     )
+    assert (
+        Triangle3d(vtype(0), vtype(1), vtype(2)) ==
+        Triangle3d(vtype(2), vtype(0), vtype(1))
+    )
+    assert (
+        Triangle3d(vtype(2), vtype(0), vtype(1)) ==
+        Triangle3d(vtype(1), vtype(2), vtype(0))
+    )
     assert Triangle3d(vtype(0), vtype(0), vtype(0)) != object()
