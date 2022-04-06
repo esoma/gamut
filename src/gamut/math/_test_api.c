@@ -1,5 +1,5 @@
 
-// generated 2022-03-26 21:40:50.308078 from codegen/math/templates/test_api.cpp
+// generated from codegen/math/templates/test_api.cpp
 
 // stdlib
 #include <stddef.h>

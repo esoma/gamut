@@ -396,17 +396,141 @@ class VectorTest:
         assert 1 != self.array_cls()
         assert object() != self.array_cls()
 
-    def test_comparisons_not_implemented(self) -> None:
-        a = self.cls()
-        b = self.cls()
+    def test_less_than(self) -> None:
+        if self.type == bool:
+            assert self.cls(False) < self.cls(True)
+            assert not (self.cls(True) < self.cls(False))
+            assert not (self.cls(True) < self.cls(True))
+            assert not (self.cls(False) < self.cls(False))
+        else:
+            for i in range(0 if self.unsigned else -100, 100):
+                assert self.cls(i) < self.cls(i + 1)
+                assert not (self.cls(i) < self.cls(i))
+            assert not (self.cls(1) < self.cls(0))
+            for x in range(self.component_count):
+                assert self.cls(*(
+                    i + 1 for i in range(self.component_count)
+                )) < self.cls(*(
+                    i + 2 if i == x else i + 1
+                    for i in range(self.component_count)
+                ))
+                assert not (self.cls(*(
+                    i + 2 if i == x else i + 1
+                    for i in range(self.component_count)
+                )) < self.cls(*(
+                    i + 1 for i in range(self.component_count)
+                )))
+
         with pytest.raises(TypeError):
-            a < b
+            self.cls() < 1
         with pytest.raises(TypeError):
-            a <= b
+            self.cls() < object()
         with pytest.raises(TypeError):
-            a > b
+            1 < self.cls()
         with pytest.raises(TypeError):
-            a >= b
+            object() < self.cls()
+
+    def test_less_than_equal(self) -> None:
+        if self.type == bool:
+            assert self.cls(False) <= self.cls(True)
+            assert not (self.cls(True) <= self.cls(False))
+            assert self.cls(True) <= self.cls(True)
+            assert self.cls(False) <= self.cls(False)
+        else:
+            for i in range(0 if self.unsigned else -100, 100):
+                assert self.cls(i) <= self.cls(i)
+                assert self.cls(i) <= self.cls(i + 1)
+            assert not (self.cls(1) < self.cls(0))
+            for x in range(self.component_count):
+                assert self.cls(*(
+                    i + 1 for i in range(self.component_count)
+                )) <= self.cls(*(
+                    i + 3 if i == x else i + 2
+                    for i in range(self.component_count)
+                ))
+                assert not (self.cls(*(
+                    i + 3 if i == x else i + 2
+                    for i in range(self.component_count)
+                )) <= self.cls(*(
+                    i + 1 for i in range(self.component_count)
+                )))
+
+        with pytest.raises(TypeError):
+            self.cls() <= 1
+        with pytest.raises(TypeError):
+            self.cls() <= object()
+        with pytest.raises(TypeError):
+            1 <= self.cls()
+        with pytest.raises(TypeError):
+            object() <= self.cls()
+
+    def test_greater_than(self) -> None:
+        if self.type == bool:
+            assert not (self.cls(False) > self.cls(True))
+            assert self.cls(True) > self.cls(False)
+            assert not (self.cls(True) > self.cls(True))
+            assert not (self.cls(False) > self.cls(False))
+        else:
+            for i in range(0 if self.unsigned else -100, 100):
+                assert self.cls(i + 1) > self.cls(i)
+                assert not (self.cls(i) > self.cls(i))
+            assert not (self.cls(0) > self.cls(1))
+            for x in range(self.component_count):
+                assert self.cls(*(
+                    i + 2 for i in range(self.component_count)
+                )) > self.cls(*(
+                    i + 1 if i == x else i + 2
+                    for i in range(self.component_count)
+                ))
+                assert not (self.cls(*(
+                    i + 1 if i == x else i + 2
+                    for i in range(self.component_count)
+                )) > self.cls(*(
+                    i + 2 for i in range(self.component_count)
+                )))
+
+        with pytest.raises(TypeError):
+            self.cls() > 1
+        with pytest.raises(TypeError):
+            self.cls() > object()
+        with pytest.raises(TypeError):
+            1 > self.cls()
+        with pytest.raises(TypeError):
+            object() > self.cls()
+
+    def test_greater_than_equal(self) -> None:
+        if self.type == bool:
+            assert not (self.cls(False) >= self.cls(True))
+            assert self.cls(True) >= self.cls(False)
+            assert self.cls(True) >= self.cls(True)
+            assert self.cls(False) >= self.cls(False)
+        else:
+            for i in range(0 if self.unsigned else -100, 100):
+                assert self.cls(i) >= self.cls(i)
+                assert self.cls(i + 1) >= self.cls(i)
+            assert not (self.cls(0) >= self.cls(1))
+            for x in range(self.component_count):
+                assert self.cls(*(
+                    i + 3 for i in range(self.component_count)
+                )) >= self.cls(*(
+                    i + 3 if i == x else i + 2
+                    for i in range(self.component_count)
+                ))
+                assert not (self.cls(*(
+                    i + 1 if i == x else i + 2
+                    for i in range(self.component_count)
+                )) >= self.cls(*(
+                    i + 2 for i in range(self.component_count)
+                )))
+
+        with pytest.raises(TypeError):
+            self.cls() >= 1
+        with pytest.raises(TypeError):
+            self.cls() >= object()
+        with pytest.raises(TypeError):
+            1 >= self.cls()
+        with pytest.raises(TypeError):
+            object() >= self.cls()
 
     def test_array_comparisons_not_implemented(self) -> None:
         a = self.array_cls()

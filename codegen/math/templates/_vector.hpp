@@ -1,5 +1,5 @@
 
-// generated {{ when }} from codegen/math/templates/_vector.hpp
+// generated from codegen/math/templates/_vector.hpp
 
 #ifndef GAMUT_MATH_{{ name.upper() }}_HPP
 #define GAMUT_MATH_{{ name.upper() }}_HPP
@@ -203,6 +203,32 @@ static PyObject *
 
     switch(op)
     {
+        case Py_LT:
+        {
+            for ({{ name }}Glm::length_type i = 0; i < {{ component_count }}; i++)
+            {
+                if ((*self->glm)[i] < (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+            }
+            Py_RETURN_FALSE;
+        }
+        case Py_LE:
+        {
+            for ({{ name }}Glm::length_type i = 0; i < {{ component_count }}; i++)
+            {
+                if ((*self->glm)[i] < (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
+            }
+            Py_RETURN_TRUE;
+        }
         case Py_EQ:
         {
             if ((*self->glm) == (*other->glm))
@@ -224,6 +250,32 @@ static PyObject *
             {
                 Py_RETURN_FALSE;
             }
+        }
+        case Py_GE:
+        {
+            for ({{ name }}Glm::length_type i = 0; i < {{ component_count }}; i++)
+            {
+                if ((*self->glm)[i] > (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
+            }
+            Py_RETURN_TRUE;
+        }
+        case Py_GT:
+        {
+            for ({{ name }}Glm::length_type i = 0; i < {{ component_count }}; i++)
+            {
+                if ((*self->glm)[i] > (*other->glm)[i])
+                {
+                    Py_RETURN_TRUE;
+                }
+            }
+            Py_RETURN_FALSE;
         }
     }
     Py_RETURN_NOTIMPLEMENTED;
