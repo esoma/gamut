@@ -11,6 +11,7 @@
 #include "BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
 #include "BulletCollision/CollisionShapes/btTriangleShape.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include <iostream>
 // glm
 #include <glm/glm.hpp>
@@ -23,35 +24,20 @@
 extern ContactAddedCallback gContactAddedCallback;
 
 
-bool
-GamutContactAddedCallback(
-    btManifoldPoint& cp,
-    const btCollisionObjectWrapper* colObj1Wrap,
-    int partId1,
-    int index1,
-    const btCollisionObjectWrapper* colObj0Wrap,
-    int partId0,
-    int index0
+glm::dvec3
+GamutCalculateTrimeshNormal(
+    btBvhTriangleMeshShape* trimesh,
+    const glm::dvec3 *normals,
+    const glm::dvec3& point,
+    int part_id,
+    int triangle_index
 )
 {
-    // this is similar to btAdjustInternalEdgeContacts, except we use real
-    // normal data to correct the normals so that tri meshes do not have
-    // "bumpy" behavior
-
-	if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
-    {
-		return true;
-    }
-
-	auto trimesh = (btBvhTriangleMeshShape*)colObj0Wrap->getCollisionObject()->getCollisionShape();
-    auto *normals = (const glm::dvec3 *)trimesh->getUserPointer();
-    if (!normals){ return true; }
-
     const auto mesh_interface = (btTriangleIndexVertexArray *)trimesh->getMeshInterface();
     const auto& mesh_array = mesh_interface->getIndexedMeshArray();
-    const auto& mesh = mesh_array[partId0];
+    const auto& mesh = mesh_array[part_id];
     const int *indices = (const int *)mesh.m_triangleIndexBase;
-    const int *tri_indexes = &indices[index0 * 3];
+    const int *tri_indexes = &indices[triangle_index * 3];
     auto *positions = (const glm::dvec3 *)mesh.m_vertexBase;
 
     auto *position_0 = &positions[tri_indexes[0]];
@@ -84,7 +70,7 @@ GamutContactAddedCallback(
     // barycentric
     auto v0 = b030 - b300;
     auto v1 = b003 - b300;
-    auto v2 = glm::dvec3(cp.m_localPointB[0], cp.m_localPointB[1], cp.m_localPointB[2]) - b300;
+    auto v2 = point - b300;
     auto d00 = glm::dot(v0, v0);
     auto d01 = glm::dot(v0, v1);
     auto d11 = glm::dot(v1, v1);
@@ -94,10 +80,44 @@ GamutContactAddedCallback(
     auto v = (d11 * d20 - d01 * d21) / denom;
     auto w = (d00 * d21 - d01 * d20) / denom;
     auto u = 1.0 - v - w;
-    auto final_normal = (
+
+    return glm::normalize(
         (*normal_0) * u +
         (*normal_1) * v +
         (*normal_2) * w
+    );
+}
+
+
+bool
+GamutContactAddedCallback(
+    btManifoldPoint& cp,
+    const btCollisionObjectWrapper* colObj1Wrap,
+    int partId1,
+    int index1,
+    const btCollisionObjectWrapper* colObj0Wrap,
+    int partId0,
+    int index0
+)
+{
+    // this is similar to btAdjustInternalEdgeContacts, except we use real
+    // normal data to correct the normals so that tri meshes do not have
+    // "bumpy" behavior
+
+	if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
+    {
+		return true;
+    }
+
+	auto trimesh = (btBvhTriangleMeshShape*)colObj0Wrap->getCollisionObject()->getCollisionShape();
+    auto *normals = (const glm::dvec3 *)trimesh->getUserPointer();
+    if (!normals){ return true; }
+    auto final_normal = GamutCalculateTrimeshNormal(
+        trimesh,
+        normals,
+        glm::dvec3(cp.m_localPointB[0], cp.m_localPointB[1], cp.m_localPointB[2]),
+        partId0,
+        index0
     );
 
     // correct the normal and reproject the collision point along it
@@ -1854,6 +1874,121 @@ Shape_calculate_local_inertia(Shape *self, PyObject *args)
 }
 
 
+struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
+{
+    btBvhTriangleMeshShape *m_mesh;
+    const glm::dvec3& m_from;
+    const glm::dvec3& m_to;
+    glm::dvec3 m_ray_normal;
+    bool m_hit;
+    glm::dvec3 m_hit_point;
+    btScalar m_hit_fraction;
+    glm::dvec3 m_hit_normal_local;
+    int m_triangle_index;
+
+    ShapeMeshRaycastTriangleCallback(
+        btBvhTriangleMeshShape* mesh,
+        const glm::dvec3& from,
+        const glm::dvec3& to,
+        const btVector3& bt_from,
+        const btVector3& bt_to
+    ):
+        btTriangleRaycastCallback(bt_from, bt_to, 0),
+        m_from(from),
+        m_to(to),
+        m_ray_normal(glm::normalize(from - to)),
+        m_mesh(mesh),
+        m_hit(false)
+    {
+    }
+
+    btScalar reportHit(
+        const btVector3& hit_normal_local,
+        btScalar hit_fraction,
+        int part_id,
+        int triangle_index
+    )
+    {
+        // hit is not ealier in the ray than the one currently recorded
+        if (m_hit && hit_fraction > m_hit_fraction){ return 0; }
+
+        auto hit_point = m_from + (hit_fraction * (m_to - m_from));
+
+        auto *normals = (const glm::dvec3 *)m_mesh->getUserPointer();
+        if (normals)
+        {
+            auto adjusted_normal = GamutCalculateTrimeshNormal(
+                m_mesh,
+                normals,
+                hit_point,
+                part_id,
+                triangle_index
+            );
+            if (glm::dot(m_ray_normal, adjusted_normal) <= 0)
+            {
+                return 0;
+            }
+            m_hit_normal_local = adjusted_normal;
+        }
+        else
+        {
+            m_hit_normal_local = glm::dvec3(
+                hit_normal_local.x(),
+                hit_normal_local.y(),
+                hit_normal_local.z()
+            );
+        }
+        m_hit = true;
+        m_hit_point = hit_point;
+        m_hit_fraction = hit_fraction;
+        m_triangle_index = triangle_index;
+        return hit_fraction;
+    }
+};
+
+
+static PyObject *
+Shape_mesh_raycast(Shape *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    ASSERT(nargs == 2);
+    auto state = get_module_state();
+
+    auto from = (glm::dvec3 *)state->math_api->DVector3_GetValuePointer(args[0]);
+    auto to = (glm::dvec3 *)state->math_api->DVector3_GetValuePointer(args[1]);
+
+    btVector3 bt_from(from->x, from->y, from->z);
+    btVector3 bt_to(to->x, to->y, to->z);
+
+    auto mesh = (btBvhTriangleMeshShape*)self->shape;
+    ShapeMeshRaycastTriangleCallback result(mesh, *from, *to, bt_from, bt_to);
+    mesh->performRaycast(&result, bt_from, bt_to);
+
+    if (!result.m_hit)
+    {
+        Py_RETURN_NONE;
+    }
+
+    PyObject *hit = PyTuple_New(4);
+
+    PyObject *position = state->math_api->DVector3_Create((double *)&result.m_hit_point);
+    if (!position){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 0, position);
+
+    PyObject *normal = state->math_api->DVector3_Create((double *)&result.m_hit_normal_local);
+    if (!normal){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 1, normal);
+
+    PyObject *triangle_index = PyLong_FromLong(result.m_triangle_index);
+    PyTuple_SET_ITEM(hit, 2, triangle_index);
+
+    PyObject *fraction = PyFloat_FromDouble(result.m_hit_fraction);
+    if (PyErr_Occurred()){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 3, fraction);
+
+    return hit;
+}
+
+
 static PyMethodDef Shape_PyMethodDef[] = {
     {
         "add_capsule",
@@ -1907,6 +2042,12 @@ static PyMethodDef Shape_PyMethodDef[] = {
         "calculate_local_inertia",
         (PyCFunction)Shape_calculate_local_inertia,
         METH_O,
+        0
+    },
+    {
+        "mesh_raycast",
+        (PyCFunction)Shape_mesh_raycast,
+        METH_FASTCALL,
         0
     },
     {0, 0, 0, 0}
@@ -1976,7 +2117,7 @@ module_free(void* self)
 
 static struct PyModuleDef module_PyModuleDef = {
     PyModuleDef_HEAD_INIT,
-    "gamut.physics._physics",
+    "gamut._bullet",
     0,
     sizeof(struct ModuleState),
     module_methods,
@@ -1988,7 +2129,7 @@ static struct PyModuleDef module_PyModuleDef = {
 
 
 PyMODINIT_FUNC
-PyInit__physics()
+PyInit__bullet()
 {
     gContactAddedCallback = GamutContactAddedCallback;
 

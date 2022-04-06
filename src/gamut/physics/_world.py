@@ -11,8 +11,8 @@ __all__ = [
 # gamut
 from ._collision import Collision, Contact
 from ._groups import ALL_GROUPS, verify_groups, verify_mask
-from ._physics import World as BaseWorld
 # gamut
+from gamut._bullet import World as BaseWorld
 from gamut.geometry import Sphere
 from gamut.math import Vector3
 # python

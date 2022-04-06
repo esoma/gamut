@@ -97,8 +97,8 @@ class BuildBullet(Command):
             make('build/bullet3')
 
 
-physics = Extension(
-    'gamut.physics._physics',
+bullet = Extension(
+    'gamut._bullet',
     include_dirs=['vendor/glm', 'vendor/bullet3/src', 'include'],
     library_dirs=[
         'build/bullet3/lib/Release',
@@ -108,7 +108,7 @@ physics = Extension(
         'build/bullet3/src/LinearMath',
     ],
     libraries=['BulletDynamics', 'BulletCollision', 'LinearMath'],
-    sources=['src/gamut/physics/_physics.cpp'],
+    sources=['src/gamut/_bullet.cpp'],
     language='c++',
     extra_compile_args=coverage_compile_args,
     extra_link_args=coverage_links_args,
@@ -159,5 +159,5 @@ setup(
         "build_bullet": BuildBullet,
         "codegen_math": GenerateMathCode,
     },
-    ext_modules=[geometry_triangulate, math, physics, test_math_api]
+    ext_modules=[geometry_triangulate, math, bullet, test_math_api]
 )

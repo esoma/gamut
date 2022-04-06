@@ -2,6 +2,8 @@
 from __future__ import annotations
 # gamut
 from gamut.graph import Graph
+# python
+from copy import copy
 # pytest
 import pytest
 
@@ -133,3 +135,48 @@ def test_connected_components() -> None:
     assert len(islands) == 2
     assert {0, 1, 2, 3, 20, 21, 22} in islands
     assert {10, 11, 12, 13} in islands
+
+
+def test_copy() -> None:
+
+    g = Graph()
+
+    empty_copy = copy(g)
+    assert list(g.nodes) == []
+    assert list(g.edges) == []
+
+    g.add_node(1)
+    assert set(g.nodes) == {1}
+    assert list(g.edges) == []
+    assert list(empty_copy.nodes) == []
+    assert list(empty_copy.edges) == []
+
+    g.add_edge(1, 2, 1)
+    assert set(g.nodes) == {1, 2}
+    assert set(g.edges) == {(1, 2, 1)}
+    assert list(empty_copy.nodes) == []
+    assert list(empty_copy.edges) == []
+
+    non_empty_copy = copy(g)
+    assert set(g.nodes) == {1, 2}
+    assert set(g.edges) == {(1, 2, 1)}
+    assert list(empty_copy.nodes) == []
+    assert list(empty_copy.edges) == []
+    assert set(non_empty_copy.nodes) == {1, 2}
+    assert set(non_empty_copy.edges) == {(1, 2, 1)}
+
+    g.remove_edge(1, 2)
+    assert set(g.nodes) == {1, 2}
+    assert list(g.edges) == []
+    assert list(empty_copy.nodes) == []
+    assert list(empty_copy.edges) == []
+    assert set(non_empty_copy.nodes) == {1, 2}
+    assert set(non_empty_copy.edges) == {(1, 2, 1)}
+
+    g.remove_node(1)
+    assert set(g.nodes) == {2}
+    assert list(g.edges) == []
+    assert list(empty_copy.nodes) == []
+    assert list(empty_copy.edges) == []
+    assert set(non_empty_copy.nodes) == {1, 2}
+    assert set(non_empty_copy.edges) == {(1, 2, 1)}
