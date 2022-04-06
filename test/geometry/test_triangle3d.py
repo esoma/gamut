@@ -53,7 +53,7 @@ def test_invalid_b(a: Any, b: Any, c: Any) -> None:
     (FVector3(0), DVector3(0), FVector3(0)),
     (DVector3(0), FVector3(0), DVector3(0)),
 ])
-def test_invalid_b(a: Any, b: Any, c: Any) -> None:
+def test_invalid_c(a: Any, b: Any, c: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Triangle3d(a, b, c)
     assert str(excinfo.value) == 'c must be the same type as a'
