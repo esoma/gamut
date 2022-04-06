@@ -67,6 +67,13 @@ def test_equal(vtype: Any) -> None:
     assert LineSegment2d(vtype(0), vtype(0)) != object()
 
 
+def test_intersection_invalid() -> None:
+    line = LineSegment2d(DVector2(0, 0), DVector2(10, 10))
+    with pytest.raises(TypeError) as ex:
+        line.get_line_segment_intersection(None)
+    assert str(ex.value) == 'other must be LineSegment2d'
+
+
 @pytest.mark.parametrize("l1, l2", [
     (
         LineSegment2d(DVector2(0, 0), DVector2(10, 10)),

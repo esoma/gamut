@@ -104,6 +104,8 @@ class NavigationMesh3d(Graph[tuple[P, P, P], float]):
                 i, triangle = next(path_iter)
                 tris_between.append(triangle)
 
+                if left == apex:
+                    left, right = right, left
                 area = ((left - apex).cross(right - apex)).y
                 if area < 0:
                     left, right = right, left

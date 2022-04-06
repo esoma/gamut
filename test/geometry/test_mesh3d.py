@@ -252,6 +252,29 @@ def test_equal() -> None:
     )
 
 
+@pytest.mark.parametrize("invalid_value", [None, object(), '1'])
+def test_raycast_invalid_start_end(invalid_value: Any) -> None:
+    mesh = Mesh3d(
+        Vector3Array(
+            Vector3(-1, -1, 0),
+            Vector3(1, -1, 0),
+            Vector3(1, 1, 0),
+            Vector3(-1, 1, 0),
+        ),
+        UVector3Array(
+            UVector3(0, 1, 3),
+            UVector3(3, 1, 2),
+        )
+    )
+    with pytest.raises(TypeError) as ex:
+        mesh.raycast(invalid_value, Vector3(0))
+    assert str(ex.value) == 'start must be Vector3'
+
+    with pytest.raises(TypeError) as ex:
+        mesh.raycast(Vector3(0), invalid_value)
+    assert str(ex.value) == 'end must be Vector3'
+
+
 def test_raycast_no_normals() -> None:
     mesh = Mesh3d(
         Vector3Array(

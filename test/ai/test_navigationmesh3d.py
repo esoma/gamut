@@ -2,8 +2,18 @@
 # gamut
 from gamut.ai import NavigationMesh3d
 from gamut.math import Vector3
+# python
+from math import isclose
 # pytest
 import pytest
+
+
+def vector_is_close(a: Vector3, b: Vector3) -> bool:
+    return (
+        isclose(a.x, b.x),
+        isclose(a.y, b.y),
+        isclose(a.z, b.z),
+    )
 
 
 def test_find_basic_path() -> None:
@@ -263,13 +273,17 @@ def test_find_path_string_pull_y() -> None:
             Vector3(7, 0, 0),
         )
     )
-    assert path == (
-        Vector3(0.0, 0.0, 0.0),
-        Vector3(2.0, 0.0, 0.25),
-        Vector3(2.2857142857142856, 0.2857142857142857, 0.2857142857142857),
-        Vector3(3.0, 1.0, 0.3750000000000001),
-        Vector3(5.0, 1.0, 0.625),
-        Vector3(5.714285714285714, 0.2857142857142857, 0.7142857142857143),
-        Vector3(6.0, 0.0, 0.75),
-        Vector3(8.0, 0.0, 1.0)
+    assert vector_is_close(path[0], Vector3(0.0, 0.0, 0.0))
+    assert vector_is_close(path[1], Vector3(2.0, 0.0, 0.25))
+    assert vector_is_close(
+        path[2],
+        Vector3(2.2857142857142856, 0.2857142857142857, 0.2857142857142857)
     )
+    assert vector_is_close(path[3], Vector3(3.0, 1.0, 0.3750000000000001))
+    assert vector_is_close(path[4], Vector3(5.0, 1.0, 0.625))
+    assert vector_is_close(
+        path[5],
+        Vector3(5.714285714285714, 0.2857142857142857, 0.7142857142857143)
+    )
+    assert vector_is_close(path[6], Vector3(6.0, 0.0, 0.75))
+    assert vector_is_close(path[7], Vector3(8.0, 0.0, 1.0))
