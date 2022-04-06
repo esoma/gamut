@@ -29,7 +29,7 @@ class Triangle3d(Generic[T]):
     def __repr__(self) -> str:
         return (
             f'<gamut.geometry.Triangle3d '
-            f'{(tuple(self._a), tuple(self._b), tuple(self._c))}>'
+            f'{tuple(tuple(p) for p in self._positions)}>'
         )
 
     def __eq__(self, other: Triangle3d) -> bool:
@@ -50,7 +50,7 @@ class Triangle3d(Generic[T]):
 
     @property
     def center(self) -> T:
-        return (self._a + self._b + self._c) / 3
+        return sum(self._positions) / 3
 
     @property
     def positions(self) -> tuple[T, T, T]:

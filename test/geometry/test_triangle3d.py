@@ -28,7 +28,7 @@ def test_repr(vtype: Any) -> None:
 def test_invalid_a(a: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Triangle3d(a, DVector3(0), DVector3(0))
-    assert str(excinfo.value) == 'a must be FVector3 or DVector3'
+    assert str(excinfo.value) == 'point 0 must be FVector3 or DVector3'
 
 
 @pytest.mark.parametrize("a, b, c", [
@@ -42,7 +42,7 @@ def test_invalid_a(a: Any) -> None:
 def test_invalid_b(a: Any, b: Any, c: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Triangle3d(a, b, c)
-    assert str(excinfo.value) == 'b must be the same type as a'
+    assert str(excinfo.value) == 'point 1 must be the same type as point 0'
 
 
 @pytest.mark.parametrize("a, c, b", [
@@ -56,16 +56,13 @@ def test_invalid_b(a: Any, b: Any, c: Any) -> None:
 def test_invalid_c(a: Any, b: Any, c: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Triangle3d(a, b, c)
-    assert str(excinfo.value) == 'c must be the same type as a'
+    assert str(excinfo.value) == 'point 2 must be the same type as point 0'
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_points(vtype: Any) -> None:
     line = Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
-    assert line.a == vtype(0, 1, 2)
-    assert line.b == vtype(3, 4, 5)
-    assert line.c == vtype(6, 7, 8)
-    assert line.points == (vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
+    assert line.positions == (vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
     assert line.center == sum((
         vtype(0, 1, 2),
         vtype(3, 4, 5),
