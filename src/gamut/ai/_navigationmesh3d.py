@@ -237,4 +237,7 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
             tri_path = next(finder)
         except StopIteration:
             return None
+        # python
+        import pprint
+        pprint.pprint(tri_path)
         return self._string_pull_path(start_point, tri_path, end_point)
