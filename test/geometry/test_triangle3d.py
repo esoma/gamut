@@ -9,9 +9,10 @@ import pytest
 
 
 def test_hash() -> None:
-    t1 = Triangle3d(DVector3(0), DVector3(1), DVector3(2))
-    t2 = Triangle3d(DVector3(0), DVector3(1), DVector3(2))
-    assert hash(t1) != hash(t2)
+    t = Triangle3d(DVector3(0), DVector3(1), DVector3(2))
+    assert hash(t) == hash(Triangle3d(DVector3(0), DVector3(1), DVector3(2)))
+    assert hash(t) == hash(Triangle3d(DVector3(1), DVector3(2), DVector3(0)))
+    assert hash(t) != hash(Triangle3d(DVector3(1), DVector3(0), DVector3(2)))
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])

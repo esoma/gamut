@@ -26,7 +26,7 @@ class Triangle3d(Generic[T]):
         self._positions = self._positions[i:] + self._positions[:i]
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash(self._positions)
 
     def __repr__(self) -> str:
         return (
