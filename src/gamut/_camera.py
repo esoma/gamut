@@ -47,14 +47,14 @@ class Camera(TransformNode[Any]):
         return self.transform.inverse()
 
     def generate_ray(self, clip_position: FVector2) -> LineSegment3d[FVector3]:
-        inverse_view = self.transform
+        view = self.transform.inverse()
         start = (
-            inverse_view @
+            view @
             (self._inverse_projection @
             FVector4(*clip_position, -1, 1))
         )
         end = (
-            inverse_view @
+            view @
             (self._inverse_projection @
             FVector4(*clip_position, 1, 1))
         )
