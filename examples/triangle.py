@@ -9,6 +9,8 @@ from gamut.math import (FMatrix4, FVector2, FVector2Array, FVector3,
                         FVector3Array, UVector2)
 # python
 from datetime import timedelta
+# examples
+from examplescommon import run_application
 
 
 class Draw(TimerExpired):
@@ -103,5 +105,4 @@ void main()
 
 
 if __name__ == '__main__':
-    app = App()
-    app.run()
+    run_application(App)
