@@ -37,15 +37,16 @@ class App(ExampleApplication):
             ),
         })
 
-    async def draw(self, draw: ExampleApplication.Draw) -> None:
+    async def draw(self, step: ExampleApplication.Step) -> None:
+        self.triangle_transform = self.triangle_transform.rotate(
+            .02,
+            FVector3(0, 0, -1)
+        )
+
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
             depth=0,
-        )
-        self.triangle_transform = self.triangle_transform.rotate(
-            .02,
-            FVector3(0, 0, -1)
         )
         execute_shader(
             self.window_render_target,
