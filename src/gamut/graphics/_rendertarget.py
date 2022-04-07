@@ -13,13 +13,12 @@ __all__ = [
 ]
 
 # gamut
-from ._color import Color
 from ._texture import Texture, TextureComponents
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
 from gamut._window import get_sdl_window_from_window, Window
-from gamut.math import UVector1, UVector2
+from gamut.math import DVector3, FVector4, UVector1, UVector2
 # python
 from ctypes import byref as c_byref
 from ctypes import c_int
@@ -227,11 +226,11 @@ def read_color_from_render_target(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     x: int, y: int,
     width: int, height: int,
-) -> list[list[Color]]:
+) -> list[list[FVector4]]:
     use_render_target(render_target, False, True)
     pixels = glReadPixels(x, y, width, height, GL_RGBA, GL_FLOAT)
     return [
-        [Color(*column) for column in row]
+        [FVector4(*column) for column in row]
         for row in pixels
     ]
 
@@ -271,7 +270,7 @@ def read_stencil_from_render_target(
 def clear_render_target(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     *,
-    color: Optional[Color] = None,
+    color: Optional[FVector3 | DVector3] = None,
     depth: Optional[float] = None,
     stencil: Optional[int] = None
 ) -> None:
@@ -288,7 +287,7 @@ def clear_render_target(
     gl_context = get_gl_context()
     if color is not None:
         gl_context.set_color_mask(True, True, True, True)
-        glClearColor(color.red, color.green, color.blue, 1.0)
+        glClearColor(color.r, color.g, color.b, 1.0)
         mask |= GL_COLOR_BUFFER_BIT
     if depth is not None:
         gl_context.set_depth_mask(True)

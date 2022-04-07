@@ -21,7 +21,6 @@ __all__ = [
 from ._buffer import (BufferView, BufferViewMap,
                       use_buffer_view_as_element_indexes,
                       use_buffer_view_map_with_shader)
-from ._color import Color
 from ._rendertarget import (TextureRenderTarget,
                             TextureRenderTargetDepthStencil, use_render_target,
                             WindowRenderTarget)
@@ -570,7 +569,7 @@ def execute_shader(
     blend_source_alpha: Optional[BlendFactor] = None,
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
-    blend_color: Optional[Color] = None,
+    blend_color: Optional[FVector4 | DVector4] = None,
     color_write: tuple[bool, bool, bool, bool] = (True, True, True, True),
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
@@ -595,7 +594,7 @@ def execute_shader(
     blend_source_alpha: Optional[BlendFactor] = None,
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
-    blend_color: Optional[Color] = None,
+    blend_color: Optional[FVector4 | DVector4] = None,
     color_write: tuple[bool, bool, bool, bool] = (True, True, True, True),
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
@@ -619,7 +618,7 @@ def execute_shader(
     blend_source_alpha: Optional[BlendFactor] = None,
     blend_destination_alpha: Optional[BlendFactor] = None,
     blend_function: BlendFunction = BlendFunction.ADD,
-    blend_color: Optional[Color] = None,
+    blend_color: Optional[FVector4 | DVector4] = None,
     color_write: tuple[bool, bool, bool, bool] = (True, True, True, True),
     depth_test: DepthTest = DepthTest.ALWAYS,
     depth_write: bool = False,
@@ -688,7 +687,7 @@ def execute_shader(
     if blend_destination_alpha is None:
         blend_destination_alpha = blend_destination
     if blend_color is None:
-        blend_color = Color(1, 1, 1, 1)
+        blend_color = FVector4(1)
 
     if (blend_source == BlendFactor.ONE and
         blend_source_alpha == BlendFactor.ONE and

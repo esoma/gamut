@@ -1,10 +1,9 @@
 
 # gamut
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, DepthTest,
-                            execute_shader, PrimitiveMode, Shader,
-                            ShaderExecutionResult, Texture2d,
-                            TextureComponents, TextureRenderTarget,
+                            clear_render_target, DepthTest, execute_shader,
+                            PrimitiveMode, Shader, ShaderExecutionResult,
+                            Texture2d, TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
 from gamut.math import FVector3, FVector3Array, UVector2
@@ -92,7 +91,7 @@ def test_enabled() -> None:
         [texture],
         TextureRenderTargetDepthStencil.DEPTH_STENCIL
     )
-    clear_render_target(render_target, color=Color(0, 0, 0), depth=0)
+    clear_render_target(render_target, color=FVector3(0), depth=0)
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 

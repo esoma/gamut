@@ -1,11 +1,11 @@
 
 # gamut
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader,
-                            PrimitiveMode, read_color_from_render_target,
-                            Shader, Texture2d, TextureComponents,
-                            TextureRenderTarget, WindowRenderTarget)
-from gamut.math import FVector2, FVector2Array, FVector4, UVector2
+                            clear_render_target, execute_shader, PrimitiveMode,
+                            read_color_from_render_target, Shader, Texture2d,
+                            TextureComponents, TextureRenderTarget,
+                            WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector3, FVector4, UVector2
 # python
 import ctypes
 from typing import Final, Union
@@ -35,7 +35,7 @@ void main()
 def draw_fullscreen_quad(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     shader: Shader,
-    color: Color,
+    color: FVector4,
     color_write: tuple[bool, bool, bool, bool],
 ) -> None:
     execute_shader(
@@ -50,7 +50,7 @@ def draw_fullscreen_quad(
                 FVector2(1, -1),
             )), FVector2)
         }), {
-            "color": FVector4(*color),
+            "color": color,
         },
         index_range=(0, 4),
         color_write=color_write,
@@ -68,14 +68,14 @@ def test_mask(red: bool, green: bool, blue: bool, alpha: bool) -> None:
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=Color(0, 0, 0))
+    clear_render_target(render_target, color=FVector3(0, 0, 0))
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
     draw_fullscreen_quad(
         render_target,
         shader,
-        Color(.2, .4, .6, .8),
+        FVector4(.2, .4, .6, .8),
         (red, green, blue, alpha)
     )
 
@@ -93,10 +93,10 @@ def test_mask(red: bool, green: bool, blue: bool, alpha: bool) -> None:
     )
 
     assert all(
-        c.red == pytest.approx(expected_color[0], abs=.01) and
-        c.green == pytest.approx(expected_color[1], abs=.01) and
-        c.blue == pytest.approx(expected_color[2], abs=.01) and
-        c.alpha == pytest.approx(expected_color[3], abs=.01)
+        c.r == pytest.approx(expected_color[0], abs=.01) and
+        c.g == pytest.approx(expected_color[1], abs=.01) and
+        c.b == pytest.approx(expected_color[2], abs=.01) and
+        c.a == pytest.approx(expected_color[3], abs=.01)
         for row in colors
         for c in row
     )
