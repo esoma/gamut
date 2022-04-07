@@ -108,6 +108,11 @@ class StringPuller(Generic[T]):
     ):
         self.start_point = start_point
         self.end_point = end_point
+        # eliminate triangles that truly degenerate to a line or point
+        triangle_path = tuple(
+            tri for tri in triangle_path
+            if len(set(tri.positions)) == 3
+        )
 
         self.path: List[T] = []
         self.triangle_path = triangle_path
@@ -143,8 +148,6 @@ class StringPuller(Generic[T]):
         self.triangle_buffer.append(triangle)
         triangle_positions = set(triangle.positions)
 
-        if self.left == self.apex:
-            self.left, self.right = self.right, self.left
         area = self._get_funnel_area(self.left, self.right)
         if area < 0:
             self.left, self.right = self.right, self.left
@@ -166,8 +169,6 @@ class StringPuller(Generic[T]):
         next_points = triangle_positions - {self.left, self.right}
         assert len(next_points) == 1
         next_point = next(iter(next_points))
-        if self.left in next_triangle and self.right in next_triangle:
-            return
 
         if self.left in next_triangle:
             funnel_left, funnel_right = self.left, next_point
@@ -181,7 +182,7 @@ class StringPuller(Generic[T]):
             line_target_name = "left"
 
         new_area = self._get_funnel_area(funnel_left, funnel_right)
-        if sign(new_area) != sign(area) or new_area <= 0:
+        if sign(new_area) != sign(area) or new_area < 0:
             self._add_to_path(funnel_target)
             self.apex = funnel_target
             while i < len(self.triangle_path) - 1:
