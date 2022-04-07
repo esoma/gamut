@@ -1,14 +1,13 @@
 
 # gamut
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, DepthTest,
-                            execute_shader, PrimitiveMode,
-                            read_color_from_render_target,
+                            clear_render_target, DepthTest, execute_shader,
+                            PrimitiveMode, read_color_from_render_target,
                             read_depth_from_render_target, Shader, Texture2d,
                             TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from gamut.math import FVector2, FVector2Array, FVector4, UVector2
+from gamut.math import FVector2, FVector2Array, FVector3, FVector4, UVector2
 # python
 import ctypes
 from typing import Final, Union
@@ -39,7 +38,7 @@ void main()
 def draw_fullscreen_quad(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     shader: Shader,
-    color: Color,
+    color: FVector4,
     depth: float,
     depth_test: DepthTest,
     depth_write: bool,
@@ -56,7 +55,7 @@ def draw_fullscreen_quad(
                 FVector2(1, -1),
             )), FVector2)
         }), {
-            "color": FVector4(*color),
+            "color": color,
             "depth": ctypes.c_float(depth),
         },
         index_range=(0, 4),
@@ -100,7 +99,7 @@ def test_no_depth_buffer_fail(
         draw_fullscreen_quad(
             render_target,
             shader,
-            Color(1, 1, 1),
+            FVector4(1),
             1.0,
             depth_test,
             depth_write,
@@ -112,12 +111,12 @@ def test_no_depth_buffer_fail(
 
 
 @pytest.mark.parametrize("depth_test, depth_write, expected_color", [
-    (DepthTest.ALWAYS, False, Color(1, 1, 1)),
+    (DepthTest.ALWAYS, False, FVector4(1)),
 ])
 def test_no_depth_buffer_okay(
     depth_test: DepthTest,
     depth_write: bool,
-    expected_color: Color
+    expected_color: FVector4
 ) -> None:
     texture = Texture2d(
         UVector2(10, 10),
@@ -128,13 +127,13 @@ def test_no_depth_buffer_okay(
         [texture],
         TextureRenderTargetDepthStencil.NONE
     )
-    clear_render_target(render_target, color=Color(0, 0, 0))
+    clear_render_target(render_target, color=FVector3(0, 0, 0))
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
     draw_fullscreen_quad(
         render_target,
         shader,
-        Color(1, 1, 1),
+        FVector4(1, 1, 1, 1),
         1.0,
         depth_test,
         depth_write,
@@ -150,27 +149,27 @@ def test_no_depth_buffer_okay(
 
 @pytest.mark.parametrize(
     "depth_test, depth_write, expected_color, expected_depth", [
-    (DepthTest.ALWAYS, False, Color(0, 0, 1), 0.0),
-    (DepthTest.ALWAYS, True, Color(0, 0, 1), -.5),
-    (DepthTest.NEVER, False, Color(0, 0, 0), 0.0),
-    (DepthTest.NEVER, True, Color(0, 0, 0), 0.0),
-    (DepthTest.LESS, False, Color(0, 0, 1), 0.0),
-    (DepthTest.LESS, True, Color(1, 1, 0), -.75),
-    (DepthTest.LESS_EQUAL, False, Color(0, 0, 1), 0.0),
-    (DepthTest.LESS_EQUAL, True, Color(0, 1, 1), -.75),
-    (DepthTest.GREATER, False, Color(0, 1, 0), 0.0),
-    (DepthTest.GREATER, True, Color(1, 1, 1), 1.0),
-    (DepthTest.GREATER_EQUAL, False, Color(.5, .5, .5), 0.0),
-    (DepthTest.GREATER_EQUAL, True, Color(1, 0, 0), 1.0),
-    (DepthTest.EQUAL, False, Color(.5, .5, .5), 0.0),
-    (DepthTest.EQUAL, True, Color(.5, .5, .5), 0.0),
-    (DepthTest.NOT_EQUAL, False, Color(0, 0, 1), 0.0),
-    (DepthTest.NOT_EQUAL, True, Color(.1, .1, .1), -.5),
+    (DepthTest.ALWAYS, False, FVector4(0, 0, 1, 1), 0.0),
+    (DepthTest.ALWAYS, True, FVector4(0, 0, 1, 1), -.5),
+    (DepthTest.NEVER, False, FVector4(0, 0, 0, 1), 0.0),
+    (DepthTest.NEVER, True, FVector4(0, 0, 0, 1), 0.0),
+    (DepthTest.LESS, False, FVector4(0, 0, 1, 1), 0.0),
+    (DepthTest.LESS, True, FVector4(1, 1, 0, 1), -.75),
+    (DepthTest.LESS_EQUAL, False, FVector4(0, 0, 1, 1), 0.0),
+    (DepthTest.LESS_EQUAL, True, FVector4(0, 1, 1, 1), -.75),
+    (DepthTest.GREATER, False, FVector4(0, 1, 0, 1), 0.0),
+    (DepthTest.GREATER, True, FVector4(1, 1, 1, 1), 1.0),
+    (DepthTest.GREATER_EQUAL, False, FVector4(.5, .5, .5, 1), 0.0),
+    (DepthTest.GREATER_EQUAL, True, FVector4(1, 0, 0, 1), 1.0),
+    (DepthTest.EQUAL, False, FVector4(.5, .5, .5, 1), 0.0),
+    (DepthTest.EQUAL, True, FVector4(.5, .5, .5, 1), 0.0),
+    (DepthTest.NOT_EQUAL, False, FVector4(0, 0, 1, 1), 0.0),
+    (DepthTest.NOT_EQUAL, True, FVector4(.1, .1, .1, 1), -.5),
 ])
 def test_basic(
     depth_test: DepthTest,
     depth_write: bool,
-    expected_color: Color,
+    expected_color: FVector4,
     expected_depth: float
 ) -> None:
     texture = Texture2d(
@@ -182,11 +181,11 @@ def test_basic(
         [texture],
         TextureRenderTargetDepthStencil.DEPTH_STENCIL
     )
-    clear_render_target(render_target, color=Color(0, 0, 0), depth=0)
+    clear_render_target(render_target, color=FVector3(0, 0, 0), depth=0)
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
-    def test_draw_fullscreen_quad(color: Color, depth: float) -> None:
+    def test_draw_fullscreen_quad(color: FVector4, depth: float) -> None:
         draw_fullscreen_quad(
             render_target,
             shader,
@@ -195,14 +194,14 @@ def test_basic(
             depth_test,
             depth_write
         )
-    test_draw_fullscreen_quad(Color(1, 1, 1), 1)
-    test_draw_fullscreen_quad(Color(1, 0, 0), 1)
-    test_draw_fullscreen_quad(Color(0, 1, 0), .25)
-    test_draw_fullscreen_quad(Color(.5, .5, .5), 0)
-    test_draw_fullscreen_quad(Color(1, 1, 0), -.75)
-    test_draw_fullscreen_quad(Color(0, 1, 1), -.75)
-    test_draw_fullscreen_quad(Color(.1, .1, .1), -.5)
-    test_draw_fullscreen_quad(Color(0, 0, 1), -.5)
+    test_draw_fullscreen_quad(FVector4(1, 1, 1, 1), 1)
+    test_draw_fullscreen_quad(FVector4(1, 0, 0, 1), 1)
+    test_draw_fullscreen_quad(FVector4(0, 1, 0, 1), .25)
+    test_draw_fullscreen_quad(FVector4(.5, .5, .5, 1), 0)
+    test_draw_fullscreen_quad(FVector4(1, 1, 0, 1), -.75)
+    test_draw_fullscreen_quad(FVector4(0, 1, 1, 1), -.75)
+    test_draw_fullscreen_quad(FVector4(.1, .1, .1, 1), -.5)
+    test_draw_fullscreen_quad(FVector4(0, 0, 1, 1), -.5)
 
     colors = read_color_from_render_target(
         render_target,
@@ -210,10 +209,10 @@ def test_basic(
         *render_target.size
     )
     assert all(
-        c.red == pytest.approx(expected_color.red, abs=.01) and
-        c.green == pytest.approx(expected_color.green, abs=.01) and
-        c.blue == pytest.approx(expected_color.blue, abs=.01) and
-        c.alpha == pytest.approx(expected_color.alpha, abs=.01)
+        c.r == pytest.approx(expected_color.r, abs=.01) and
+        c.g == pytest.approx(expected_color.g, abs=.01) and
+        c.b == pytest.approx(expected_color.b, abs=.01) and
+        c.a == pytest.approx(expected_color.a, abs=.01)
         for row in colors
         for c in row
     )

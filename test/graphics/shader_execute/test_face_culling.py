@@ -1,12 +1,11 @@
 
 # gamut
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader,
-                            FaceCull, PrimitiveMode,
-                            read_color_from_render_target, Shader, Texture2d,
-                            TextureComponents, TextureRenderTarget,
-                            WindowRenderTarget)
-from gamut.math import FVector2, FVector2Array, FVector4, UVector2
+                            clear_render_target, execute_shader, FaceCull,
+                            PrimitiveMode, read_color_from_render_target,
+                            Shader, Texture2d, TextureComponents,
+                            TextureRenderTarget, WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector3, FVector4, UVector2
 # python
 import ctypes
 from typing import Final, Union
@@ -36,7 +35,7 @@ void main()
 def draw_fullscreen_quad(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     shader: Shader,
-    color: Color,
+    color: FVector4,
     front: bool,
     face_cull: FaceCull
 ) -> None:
@@ -55,7 +54,7 @@ def draw_fullscreen_quad(
                 *(reversed(xy) if front else xy)
             )), FVector2)
         }), {
-            "color": FVector4(*color),
+            "color": color,
         },
         index_range=(0, 4),
         face_cull=face_cull
@@ -63,23 +62,23 @@ def draw_fullscreen_quad(
 
 
 @pytest.mark.parametrize("face_cull, expected_color", [
-    (FaceCull.NONE, Color(0, 0, 1)),
-    (FaceCull.FRONT, Color(0, 1, 0)),
-    (FaceCull.BACK, Color(0, 0, 1)),
+    (FaceCull.NONE, FVector4(0, 0, 1, 1)),
+    (FaceCull.FRONT, FVector4(0, 1, 0, 1)),
+    (FaceCull.BACK, FVector4(0, 0, 1, 1)),
 ])
-def test_basic(face_cull: FaceCull, expected_color: Color) -> None:
+def test_basic(face_cull: FaceCull, expected_color: FVector3) -> None:
     texture = Texture2d(
         UVector2(10, 10),
         TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=Color(0, 0, 0))
+    clear_render_target(render_target, color=FVector3(0, 0, 0))
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
     def test_draw_fullscreen_quad(
-        color: Color,
+        color: FVector4,
         front: bool,
         face_cull: FaceCull
     ) -> None:
@@ -90,9 +89,9 @@ def test_basic(face_cull: FaceCull, expected_color: Color) -> None:
             front,
             face_cull,
         )
-    test_draw_fullscreen_quad(Color(1, 0, 0), True, face_cull)
-    test_draw_fullscreen_quad(Color(0, 1, 0), False, face_cull)
-    test_draw_fullscreen_quad(Color(0, 0, 1), True, face_cull)
+    test_draw_fullscreen_quad(FVector4(1, 0, 0, 1), True, face_cull)
+    test_draw_fullscreen_quad(FVector4(0, 1, 0, 1), False, face_cull)
+    test_draw_fullscreen_quad(FVector4(0, 0, 1, 1), True, face_cull)
 
     colors = read_color_from_render_target(
         render_target,
