@@ -20,7 +20,7 @@ class App(ExampleApplication):
 
     async def example_main(self) -> None:
         self.window.title = 'Gamut Physics Example'
-        self.camera_position = FVector3(0, -10, -30)
+        self.camera_position = FVector3(0, 10, 30)
         self.camera_pitch = .2
 
         self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)

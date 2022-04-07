@@ -34,7 +34,7 @@ class ExampleApplication(Application):
         self.window_render_target = WindowRenderTarget(self.window)
 
         self.camera = Camera(FMatrix4.perspective(radians(45), 1, .1, 100))
-        self.camera_position = FVector3(0, 0, -5)
+        self.camera_position = FVector3(0, 0, 5)
         self.camera_pitch = 0
         self.camera_yaw = 0
         self.update_camera_transform()
@@ -89,20 +89,20 @@ class ExampleApplication(Application):
 
         keys = self.keyboard.Key
         if keys.up.is_pressed or keys.w.is_pressed:
-            self.camera_position += speed * direction
-        if keys.down.is_pressed or keys.s.is_pressed:
             self.camera_position -= speed * direction
+        if keys.down.is_pressed or keys.s.is_pressed:
+            self.camera_position += speed * direction
         if keys.left.is_pressed or keys.a.is_pressed:
-            self.camera_position -= speed * cross_direction
-        if keys.right.is_pressed or keys.d.is_pressed:
             self.camera_position += speed * cross_direction
+        if keys.right.is_pressed or keys.d.is_pressed:
+            self.camera_position -= speed * cross_direction
         self.update_camera_transform()
 
     def update_camera_transform(self) -> None:
         self.camera.local_transform = (
-            FMatrix4(1).rotate(self.camera_pitch, FVector3(1, 0, 0)) @
-            FMatrix4(1).rotate(self.camera_yaw, FVector3(0, 1, 0)) @
-            FMatrix4(1).translate(self.camera_position)
+            FMatrix4(1).translate(self.camera_position) @
+            FMatrix4(1).rotate(-self.camera_yaw, FVector3(0, 1, 0)) @
+            FMatrix4(1).rotate(-self.camera_pitch, FVector3(1, 0, 0))
         )
 
     async def step(self, step: Step) -> None:
