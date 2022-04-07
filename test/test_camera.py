@@ -87,10 +87,10 @@ def test_generate_ray() -> None:
         FVector3(0, 1, 0)
     )
     ray = camera.generate_ray(FVector2(0, 0))
-    assert isclose(ray.a.x, -8.742278900797373e-09)
+    assert isclose(ray.a.x, 8.742278900797373e-09)
     assert isclose(ray.a.y, 0)
     assert isclose(ray.a.z, 0.10000000894069672)
-    assert isclose(ray.b.x, -8.742077625356615e-06)
+    assert isclose(ray.b.x, 8.742077625356615e-06)
     assert isclose(ray.b.y, 0)
     assert isclose(ray.b.z, 99.99771118164062)
 

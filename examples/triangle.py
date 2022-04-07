@@ -1,8 +1,7 @@
 
 # gamut
-from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader,
-                            PrimitiveMode, Shader)
+from gamut.graphics import (BufferView, BufferViewMap, clear_render_target,
+                            execute_shader, PrimitiveMode, Shader)
 from gamut.math import (FMatrix4, FVector2, FVector2Array, FVector3,
                         FVector3Array)
 # python
@@ -19,22 +18,16 @@ class App(ExampleApplication):
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
         self.triangle_transform = FMatrix4(1)
         self.triangle_attributes = BufferViewMap({
-            "pos": BufferView(
-                Buffer(FVector2Array(
+            "pos": BufferView.from_array(FVector2Array(
                     FVector2(-.5, -.5),
                     FVector2(0, .5),
                     FVector2(.5, -.5),
-                )),
-                FVector2,
-            ),
-            "color": BufferView(
-                Buffer(FVector3Array(
+            )),
+            "color": BufferView.from_array(FVector3Array(
                     FVector3(1, 0, 0),
                     FVector3(0, 1, 0),
                     FVector3(0, 0, 1),
-                )),
-                FVector3,
-            ),
+            )),
         })
 
     async def draw(self, step: ExampleApplication.Step) -> None:
@@ -45,7 +38,7 @@ class App(ExampleApplication):
 
         clear_render_target(
             self.window_render_target,
-            color=Color(0, 0, 0),
+            color=FVector3(0, 0, 0),
             depth=0,
         )
         execute_shader(

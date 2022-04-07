@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.graphics import (BlendFactor, BufferViewMap, clear_render_target,
-                            Color, execute_shader, PrimitiveMode, Shader)
+                            execute_shader, PrimitiveMode, Shader)
 from gamut.math import FMatrix4, FVector3, FVector4
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
 # python
@@ -32,7 +32,7 @@ class App(ExampleApplication):
     async def draw(self, step: ExampleApplication.Step) -> None:
         clear_render_target(
             self.window_render_target,
-            color=Color(0, 0, 0),
+            color=FVector3(0, 0, 0),
         )
         # '3D' "hello world"
         for texture, (pos, uv) in self.text_buffers.items():

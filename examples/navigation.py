@@ -4,15 +4,14 @@ from gamut.ai import NavigationMesh3d
 from gamut.event import Bind
 from gamut.geometry import LineSegment3d, Mesh3d, RectangularCuboid, Triangle3d
 from gamut.gltf import Gltf
-from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, DepthTest,
-                            execute_shader, FaceCull, PrimitiveMode, Shader)
+from gamut.graphics import (BufferView, BufferViewMap, clear_render_target,
+                            DepthTest, execute_shader, FaceCull, PrimitiveMode,
+                            Shader)
 from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector2, FVector3,
                         UVector1, UVector1Array, UVector3Array, Vector3,
                         Vector3Array)
 from gamut.peripheral import MouseButtonPressed, MouseMoved
 # python
-import ctypes
 from typing import Final
 # examples
 from examplescommon import ExampleApplication, RESOURCES, run_application
@@ -32,13 +31,10 @@ class App(ExampleApplication):
         cube = RectangularCuboid(Vector3(0), Vector3(1))
         cube_positions, cube_normals, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
-            "pos": BufferView(Buffer(cube_positions), DVector3),
-            "norm": BufferView(Buffer(cube_normals), DVector3),
+            "pos": BufferView.from_array(cube_positions),
+            "norm": BufferView.from_array(cube_normals),
         })
-        self.cube_index_buffer_view = BufferView(
-            Buffer(cube_indices),
-            ctypes.c_uint8
-        )
+        self.cube_index_buffer_view = BufferView.from_array(cube_indices)
 
         with open(RESOURCES / 'navmesh.glb', 'rb') as f:
             navmesh_gltf = Gltf(f)
@@ -46,13 +42,10 @@ class App(ExampleApplication):
         navmesh_indices = navmesh_gltf.meshes[0].primitives[0].indices.data
         navmesh_positions = navmesh_attrs["POSITION"].data
         self.navmesh_attributes = BufferViewMap({
-            "pos": BufferView(Buffer(navmesh_positions), FVector3),
-            "norm": BufferView(Buffer(navmesh_attrs["NORMAL"].data), FVector3)
+            "pos": BufferView.from_array(navmesh_positions),
+            "norm": BufferView.from_array(navmesh_attrs["NORMAL"].data)
         })
-        self.navmesh_index_buffer_view = BufferView(
-            Buffer(navmesh_indices),
-            ctypes.c_uint16
-        )
+        self.navmesh_index_buffer_view = BufferView.from_array(navmesh_indices)
         self.navmesh_shape = Mesh3d(
             Vector3Array(*(Vector3(*v) for v in navmesh_positions)),
             UVector3Array.from_buffer(
@@ -133,7 +126,7 @@ class App(ExampleApplication):
     async def draw(self, step: ExampleApplication.Step) -> None:
         clear_render_target(
             self.window_render_target,
-            color=Color(0, 0, 0),
+            color=FVector3(0, 0, 0),
             depth=1
         )
 
