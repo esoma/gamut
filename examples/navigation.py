@@ -1,62 +1,33 @@
 
 # gamut
-from gamut import (Application, Camera, Timer, TimerExpired, TransformNode,
-                   Window)
 from gamut.ai import NavigationMesh3d
 from gamut.event import Bind
 from gamut.geometry import LineSegment3d, Mesh3d, RectangularCuboid, Triangle3d
 from gamut.gltf import Gltf
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
-                            execute_shader, FaceCull, PrimitiveMode, Shader,
-                            WindowRenderTarget)
+                            execute_shader, FaceCull, PrimitiveMode, Shader)
 from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector2, FVector3,
-                        UVector1, UVector1Array, UVector2, UVector3Array,
-                        Vector3, Vector3Array)
-from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
-                              MouseButtonPressed, MouseConnected, MouseMoved)
+                        UVector1, UVector1Array, UVector3Array, Vector3,
+                        Vector3Array)
+from gamut.peripheral import MouseButtonPressed, MouseMoved
 # python
 import ctypes
-from datetime import timedelta
-from math import cos, radians, sin
-from pathlib import Path
-from typing import Any, Final
-
-RESOURCES: Final = Path(__file__).parent / 'resources'
+from typing import Final
+# examples
+from examplescommon import ExampleApplication, RESOURCES, run_application
 
 
-class Draw(TimerExpired):
-    pass
+class App(ExampleApplication):
 
-
-class App(Application):
-
-    async def main(self) -> None:
-        self.window = Window()
+    async def example_main(self) -> None:
         self.window.title = 'Gamut Navigation Example'
-        self.window.resize(UVector2(800, 800))
-        self.window.recenter()
-        self.window.is_visible = True
-        self.window_render_target = WindowRenderTarget(self.window)
+        self.mouse.relative = False
+        self.camera_position = FVector3(-22, 10, 22)
+        self.camera_yaw = .76
+        self.camera_pitch = 0.25
 
-        try:
-            self.keyboard = self.keyboards[0]
-        except IndexError:
-            self.keyboard = (await KeyboardConnected).keyboard
-        try:
-            mouse = self.mice[0]
-        except IndexError:
-            mouse = (await MouseConnected).mouse
-
-        self.player_position = FVector3(-20, 10, 20)
-        self.player_yaw = -.8
-        self.player_pitch = -0.25
-        self.player_node: TransformNode[Any] = TransformNode()
-        self.camera = Camera(
-            FMatrix4.perspective(radians(45), 1, .1, 100)
-        )
-
-        self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
+        self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
         cube = RectangularCuboid(Vector3(0), Vector3(1))
         cube_positions, cube_normals, cube_indices = cube.render()
@@ -111,27 +82,13 @@ class App(Application):
         ))
         self.cube_position = self.path[0]
 
-        with (
-            Bind.on(self.keyboard.Key.escape.Pressed, self.escape),
-            Bind.on(Draw, self.draw),
-            Bind.on(mouse.Button.left.Pressed, self.mouse_click)
-        ):
-            step_timer = Timer(
-                self,
-                timedelta(seconds=1 / 60.0),
-                Draw,
-                repeat=True,
-                fixed=True,
-            )
-            await self.window.Close
-
-    async def escape(self, key_pressed: KeyboardKeyPressed) -> None:
-        self.window.Close().send()
+        self.mouse_press_bind = Bind.on(
+            self.mouse.Button.left.Pressed,
+            self.mouse_click
+        )
 
     async def mouse_moved(self, mouse_moved: MouseMoved) -> None:
-        if mouse_moved.delta is not None:
-            self.player_yaw += mouse_moved.delta[0] * .005
-            self.player_pitch -= mouse_moved.delta[1] * .005
+        pass
 
     async def mouse_click(self, button_pressed: MouseButtonPressed) -> None:
         clip_position = ((
@@ -173,37 +130,7 @@ class App(Application):
                 if path is not None:
                     self.path = list(path)
 
-    async def draw(self, draw: Draw) -> None:
-        player_direction = FVector3(
-            cos(self.player_yaw) * cos(self.player_pitch),
-            sin(self.player_pitch),
-            sin(self.player_yaw) * cos(self.player_pitch)
-        ).normalize()
-        player_cross_direction = player_direction.cross(
-            FVector3(0, 1, 0)
-        ).normalize()
-
-        player_frame_speed = (
-            (draw.when - draw.previous).total_seconds() /
-            (1 / 60.0) *
-            .1
-        )
-        keys = self.keyboard.Key
-        if keys.up.is_pressed or keys.w.is_pressed:
-            self.player_position += player_frame_speed * player_direction
-        if keys.down.is_pressed or keys.s.is_pressed:
-            self.player_position -= player_frame_speed * player_direction
-        if keys.left.is_pressed or keys.a.is_pressed:
-            self.player_position -= player_frame_speed * player_cross_direction
-        if keys.right.is_pressed or keys.d.is_pressed:
-            self.player_position += player_frame_speed * player_cross_direction
-
-        self.camera.local_transform = FMatrix4.look_at(
-            self.player_position,
-            self.player_position + player_direction,
-            FVector3(0, 1, 0),
-        )
-
+    async def draw(self, step: ExampleApplication.Step) -> None:
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
@@ -226,7 +153,7 @@ class App(Application):
             depth_test=DepthTest.LESS,
         )
 
-        cube_movement = (draw.when - draw.previous).total_seconds() * 4
+        cube_movement = (step.when - step.previous).total_seconds() * 4
         while cube_movement and self.path:
             distance = self.cube_position.distance(self.path[0])
             if distance == 0:
@@ -265,7 +192,7 @@ class App(Application):
         self.window.flip_buffer()
 
 
-vertex_shader = b"""
+VERTEX_SHADER: Final = b"""
 #version 140
 in vec3 pos;
 in vec3 norm;
@@ -284,7 +211,7 @@ void main()
 """
 
 
-fragment_shader = b"""
+FRAGMENT_SHADER: Final = b"""
 #version 140
 uniform vec3 color;
 in vec3 normal;
@@ -310,5 +237,4 @@ void main()
 
 
 if __name__ == '__main__':
-    app = App()
-    app.run()
+    run_application(App)

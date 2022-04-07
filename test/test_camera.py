@@ -42,15 +42,21 @@ def test_transforms() -> None:
     )
 
     camera.local_transform = FMatrix4(1).translate(FVector3(1))
+    assert camera.view_transform == camera.transform.inverse()
     assert camera.projection_transform == perspective
-    assert camera.view_projection_transform == perspective @ camera.transform
+    assert camera.view_projection_transform == (
+        perspective @ camera.view_transform
+    )
     assert camera.view_frustum == ViewFrustum3d.from_view_projection_transform(
         camera.view_projection_transform.to_dmatrix()
     )
 
     parent.local_transform = FMatrix4(1).translate(FVector3(1))
+    assert camera.view_transform == camera.transform.inverse()
     assert camera.projection_transform == perspective
-    assert camera.view_projection_transform == perspective @ camera.transform
+    assert camera.view_projection_transform == (
+        perspective @ camera.view_transform
+    )
     assert camera.view_frustum == ViewFrustum3d.from_view_projection_transform(
         camera.view_projection_transform.to_dmatrix()
     )

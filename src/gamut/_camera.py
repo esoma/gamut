@@ -30,7 +30,7 @@ class Camera(TransformNode[Any]):
 
     @property
     def view_projection_transform(self) -> FMatrix4:
-        return self._projection @ self.transform
+        return self._projection @ self.transform.inverse()
 
     @property
     def view_frustum(self) -> ViewFrustum3d:
@@ -44,17 +44,17 @@ class Camera(TransformNode[Any]):
 
     @property
     def view_transform(self) -> FMatrix4:
-        return self.transform
+        return self.transform.inverse()
 
     def generate_ray(self, clip_position: FVector2) -> LineSegment3d[FVector3]:
-        inverse_view = self.transform.inverse()
+        view = self.transform.inverse()
         start = (
-            inverse_view @
+            view @
             (self._inverse_projection @
             FVector4(*clip_position, -1, 1))
         )
         end = (
-            inverse_view @
+            view @
             (self._inverse_projection @
             FVector4(*clip_position, 1, 1))
         )

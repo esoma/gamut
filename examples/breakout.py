@@ -13,14 +13,10 @@ from gamut.peripheral import MouseButtonPressed, MouseConnected, MouseMoved
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
 # python
 from datetime import timedelta
-import gc
-from pathlib import Path
 from random import randrange
-import traceback
 from typing import Final
-import warnings
-
-DIR: Final = Path(__file__).parent
+# examples
+from examplescommon import RESOURCES, run_application
 
 
 class Draw(TimerExpired):
@@ -89,11 +85,11 @@ class App(Application):
         self.listener = Listener(gain=.25)
         self.listener.activate()
         self.speaker = MultiSpeaker()
-        self.boop_sample = Sound(DIR / 'resources/boop.wav').to_sample()
-        self.bwop_sample = Sound(DIR / 'resources/bwop.wav').to_sample()
-        self.lose_sample = Sound(DIR / 'resources/lose.wav').to_sample()
+        self.boop_sample = Sound(RESOURCES / 'boop.wav').to_sample()
+        self.bwop_sample = Sound(RESOURCES / 'bwop.wav').to_sample()
+        self.lose_sample = Sound(RESOURCES / 'lose.wav').to_sample()
 
-        self.face = Face(DIR / 'resources/ArcadeClassic.ttf')
+        self.face = Face(RESOURCES / 'ArcadeClassic.ttf')
         self.small_font = AtlasFont(
             self.face.request_pixel_size(28),
             RenderedGlyphFormat.ALPHA,
@@ -539,11 +535,4 @@ class App(Application):
 
 
 if __name__ == '__main__':
-    app = App()
-    try:
-        app.run()
-    except Exception as ex:
-        traceback.print_exception(ex)
-        warnings.simplefilter('ignore')
-    del app
-    gc.collect()
+    run_application(App)

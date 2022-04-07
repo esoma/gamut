@@ -1,46 +1,19 @@
 
 # gamut
-from gamut import Application, Timer, TimerExpired, TransformNode, Window
-from gamut.event import Bind
 from gamut.graphics import (BlendFactor, BufferViewMap, clear_render_target,
-                            Color, execute_shader, PrimitiveMode, Shader,
-                            WindowRenderTarget)
-from gamut.math import FMatrix4, FVector3, FVector4, UVector2
-from gamut.peripheral import (KeyboardConnected, KeyboardKeyPressed,
-                              MouseConnected, MouseMoved)
+                            Color, execute_shader, PrimitiveMode, Shader)
+from gamut.math import FMatrix4, FVector3, FVector4
 from gamut.text import AtlasFont, Face, RenderedGlyphFormat
 # python
-from datetime import timedelta
-from math import cos, pi, radians, sin
-from pathlib import Path
-from typing import Any, Final
-
-RESOURCES: Final = Path(__file__).parent / 'resources'
+from typing import Final
+# examples
+from examplescommon import ExampleApplication, RESOURCES, run_application
 
 
-class Draw(TimerExpired):
-    pass
+class App(ExampleApplication):
 
-
-class App(Application):
-
-    async def main(self) -> None:
-        self.window = Window()
+    async def example_main(self) -> None:
         self.window.title = 'Gamut Text Example'
-        self.window.resize(UVector2(800, 800))
-        self.window.recenter()
-        self.window.is_visible = True
-        self.window_render_target = WindowRenderTarget(self.window)
-
-        try:
-            self.keyboard = self.keyboards[0]
-        except IndexError:
-            self.keyboard = (await KeyboardConnected).keyboard
-        try:
-            mouse = self.mice[0]
-        except IndexError:
-            mouse = (await MouseConnected).mouse
-        mouse.relative = True
 
         self.ortho_projection = FMatrix4.orthographic(
             0, 800,
@@ -48,13 +21,7 @@ class App(Application):
             -1000, 1000
         )
 
-        self.player_position = FVector3(0, 0, 5)
-        self.player_yaw = -pi / 2
-        self.player_pitch = 0.0
-        self.player_node: TransformNode[Any] = TransformNode()
-        self.projection = FMatrix4.perspective(radians(45), 1, .1, 100)
-
-        self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
+        self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
         face = Face(RESOURCES / 'OpenSans-Regular.ttf')
         font = AtlasFont(
             face.request_pixel_size(height=64),
@@ -62,59 +29,7 @@ class App(Application):
         )
         self.text_buffers = font.buffer_text('hello world')
 
-        with (
-            Bind.on(self.keyboard.Key.escape.Pressed, self.escape),
-            Bind.on(Draw, self.draw),
-            Bind.on(MouseMoved, self.mouse_moved)
-        ):
-            step_timer = Timer(
-                self,
-                timedelta(seconds=1 / 60.0),
-                Draw,
-                repeat=True,
-                fixed=True,
-            )
-            await self.window.Close
-
-    async def escape(self, key_pressed: KeyboardKeyPressed) -> None:
-        self.window.Close().send()
-
-    async def mouse_moved(self, mouse_moved: MouseMoved) -> None:
-        if mouse_moved.delta is not None:
-            self.player_yaw += mouse_moved.delta[0] * .005
-            self.player_pitch -= mouse_moved.delta[1] * .005
-
-    async def draw(self, draw: Draw) -> None:
-        player_direction = FVector3(
-            cos(self.player_yaw) * cos(self.player_pitch),
-            sin(self.player_pitch),
-            sin(self.player_yaw) * cos(self.player_pitch)
-        ).normalize()
-        player_cross_direction = player_direction.cross(
-            FVector3(0, 1, 0)
-        ).normalize()
-
-        player_frame_speed = (
-            (draw.when - draw.previous).total_seconds() /
-            (1 / 60.0) *
-            .1
-        )
-        keys = self.keyboard.Key
-        if keys.up.is_pressed or keys.w.is_pressed:
-            self.player_position += player_frame_speed * player_direction
-        if keys.down.is_pressed or keys.s.is_pressed:
-            self.player_position -= player_frame_speed * player_direction
-        if keys.left.is_pressed or keys.a.is_pressed:
-            self.player_position -= player_frame_speed * player_cross_direction
-        if keys.right.is_pressed or keys.d.is_pressed:
-            self.player_position += player_frame_speed * player_cross_direction
-
-        self.player_node.local_transform = FMatrix4.look_at(
-            self.player_position,
-            self.player_position + player_direction,
-            FVector3(0, 1, 0),
-        )
-
+    async def draw(self, step: ExampleApplication.Step) -> None:
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
@@ -131,7 +46,7 @@ class App(Application):
                 }),
                 {
                     "transform": (
-                        self.projection @ self.player_node.transform @
+                        self.camera.view_projection_transform @
                         FMatrix4(1).translate(
                             FVector3(-1.5, 1, -5),
                         ).scale(
@@ -171,7 +86,7 @@ class App(Application):
         self.window.flip_buffer()
 
 
-vertex_shader = b"""
+VERTEX_SHADER: Final = b"""
 #version 140
 in vec4 pos;
 in vec2 uv;
@@ -185,7 +100,7 @@ void main()
 """
 
 
-fragment_shader = b"""
+FRAGMENT_SHADER: Final = b"""
 #version 140
 in vec2 vertex_uv;
 uniform vec4 color;
@@ -199,5 +114,4 @@ void main()
 
 
 if __name__ == '__main__':
-    app = App()
-    app.run()
+    run_application(App)
