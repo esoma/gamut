@@ -4,7 +4,7 @@ from gamut import (Application, Camera, Timer, TimerExpired, TransformNode,
                    Window)
 from gamut.ai import NavigationMesh3d
 from gamut.event import Bind
-from gamut.geometry import LineSegment3d, Mesh3d, RectangularCuboid
+from gamut.geometry import LineSegment3d, Mesh3d, RectangularCuboid, Triangle3d
 from gamut.gltf import Gltf
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, DepthTest,
@@ -90,16 +90,24 @@ class App(Application):
         )
         self.navmesh = NavigationMesh3d()
         for i in range(len(navmesh_indices) // 3):
-            self.navmesh.add_triangle(
+            self.navmesh.add_triangle(Triangle3d(
                 navmesh_positions[navmesh_indices[(i * 3)]],
                 navmesh_positions[navmesh_indices[(i * 3) + 1]],
                 navmesh_positions[navmesh_indices[(i * 3) + 2]],
-            )
+            ))
         self.path = list(self.navmesh.find_path(
             FVector3(6, 0, -10),
-            (FVector3(6, 0, -10), FVector3(6, 0, -8), FVector3(4, 0, -10)),
+            Triangle3d(
+                FVector3(4, 0, -10),
+                FVector3(6, 0, -8),
+                FVector3(6, 0, -10),
+            ),
             FVector3(4, 0, 10),
-            (FVector3(4, 0, 10), FVector3(6, 0, 10), FVector3(4, 0, 8)),
+            Triangle3d(
+                FVector3(4, 0, 8),
+                FVector3(4, 0, 10),
+                FVector3(6, 0, 10),
+            ),
         ))
         self.cube_position = self.path[0]
 
@@ -136,10 +144,10 @@ class App(Application):
             triangle_indices = self.navmesh_shape.triangle_indices[
                 result.triangle_index
             ]
-            end_triangle = tuple(
+            end_triangle = Triangle3d(*(
                 FVector3(*self.navmesh_shape.positions[i])
                 for i in triangle_indices
-            )
+            ))
             end = FVector3(*result.position)
 
             d_cube_position = DVector3(*self.cube_position)
@@ -151,10 +159,10 @@ class App(Application):
                 triangle_indices = self.navmesh_shape.triangle_indices[
                     result.triangle_index
                 ]
-                start_triangle = tuple(
+                start_triangle = Triangle3d(*(
                     FVector3(*self.navmesh_shape.positions[i])
                     for i in triangle_indices
-                )
+                ))
                 start = FVector3(*result.position)
                 path = self.navmesh.find_path(
                     start,

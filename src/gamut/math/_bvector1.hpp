@@ -198,6 +198,10 @@ BVector1__richcmp__(BVector1 *self, BVector1 *other, int op)
                 {
                     Py_RETURN_TRUE;
                 }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
+                }
             }
             Py_RETURN_FALSE;
         }
@@ -260,6 +264,10 @@ BVector1__richcmp__(BVector1 *self, BVector1 *other, int op)
                 if ((*self->glm)[i] > (*other->glm)[i])
                 {
                     Py_RETURN_TRUE;
+                }
+                if ((*self->glm)[i] != (*other->glm)[i])
+                {
+                    Py_RETURN_FALSE;
                 }
             }
             Py_RETURN_FALSE;

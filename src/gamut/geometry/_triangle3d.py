@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['Triangle3d']
 
 # gamut
+from ._linesegment3d import LineSegment3d
+# gamut
 from gamut.math import DVector3, FVector3
 # python
 from typing import Generic, TypeVar
@@ -46,3 +48,15 @@ class Triangle3d(Generic[T]):
     @property
     def positions(self) -> tuple[T, T, T]:
         return self._positions
+
+    @property
+    def edges(self) -> tuple[
+        LineSegment3d[T],
+        LineSegment3d[T],
+        LineSegment3d[T]
+    ]:
+        return (
+            LineSegment3d(self._positions[0], self._positions[1]),
+            LineSegment3d(self._positions[1], self._positions[2]),
+            LineSegment3d(self._positions[2], self._positions[0]),
+        )

@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import Triangle3d
+from gamut.geometry import LineSegment3d, Triangle3d
 from gamut.math import DVector3, FVector3, Vector4
 # python
 from typing import Any
@@ -61,38 +61,44 @@ def test_invalid_c(a: Any, b: Any, c: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
-def test_points(vtype: Any) -> None:
-    for line in [
+def test_attributes(vtype: Any) -> None:
+    for tri in [
         Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8)),
         Triangle3d(vtype(3, 4, 5), vtype(6, 7, 8), vtype(0, 1, 2)),
         Triangle3d(vtype(6, 7, 8), vtype(0, 1, 2), vtype(3, 4, 5)),
     ]:
-        assert line.positions == (
+        assert tri.positions == (
             vtype(0, 1, 2),
             vtype(3, 4, 5),
             vtype(6, 7, 8)
         )
-        assert line.center == sum((
+        assert tri.center == sum((
             vtype(0, 1, 2),
             vtype(3, 4, 5),
             vtype(6, 7, 8)
         )) / 3
+        assert LineSegment3d(vtype(0, 1, 2), vtype(3, 4, 5)) in tri.edges
+        assert LineSegment3d(vtype(3, 4, 5), vtype(6, 7, 8)) in tri.edges
+        assert LineSegment3d(vtype(6, 7, 8), vtype(0, 1, 2)) in tri.edges
 
-    for line in [
+    for tri in [
         Triangle3d(vtype(3, 4, 5), vtype(0, 1, 2), vtype(6, 7, 8)),
         Triangle3d(vtype(6, 7, 8), vtype(3, 4, 5), vtype(0, 1, 2)),
         Triangle3d(vtype(0, 1, 2), vtype(6, 7, 8), vtype(3, 4, 5)),
     ]:
-        assert line.positions == (
+        assert tri.positions == (
             vtype(0, 1, 2),
             vtype(6, 7, 8),
             vtype(3, 4, 5),
         )
-        assert line.center == sum((
+        assert tri.center == sum((
             vtype(0, 1, 2),
             vtype(3, 4, 5),
             vtype(6, 7, 8)
         )) / 3
+        assert LineSegment3d(vtype(3, 4, 5), vtype(0, 1, 2)) in tri.edges
+        assert LineSegment3d(vtype(0, 1, 2), vtype(6, 7, 8)) in tri.edges
+        assert LineSegment3d(vtype(6, 7, 8), vtype(3, 4, 5)) in tri.edges
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
