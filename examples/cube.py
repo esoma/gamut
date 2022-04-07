@@ -13,10 +13,6 @@ from typing import Final
 from examplescommon import ExampleApplication, RESOURCES, run_application
 
 
-class Draw(TimerExpired):
-    pass
-
-
 class App(ExampleApplication):
 
     async def example_main(self) -> None:
@@ -65,7 +61,7 @@ class App(ExampleApplication):
         )
         self.cube_texture = Image(RESOURCES / 'yee.jpg').to_texture()
 
-    async def draw(self, draw: Draw) -> None:
+    async def draw(self, step: ExampleApplication.Step) -> None:
         self.cube_transform = self.cube_transform.rotate(
             .02,
             FVector3(1, 1, 1)

@@ -81,7 +81,7 @@ class ExampleApplication(Application):
             .1
         )
         direction = FVector3(
-            sin(self.camera_yaw) * cos(self.camera_pitch),
+            sin(-self.camera_yaw) * cos(self.camera_pitch),
             sin(self.camera_pitch),
             cos(self.camera_yaw) * cos(self.camera_pitch),
         ).normalize()
