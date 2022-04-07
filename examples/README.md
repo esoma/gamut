@@ -36,3 +36,8 @@ A very basic physics demo.
 A Breakout style game.
 
 ![](screenshots/breakout.py.png)
+
+## navigation.py
+Demonstration of pathfinding on a 3D mesh.
+
+![](screenshots/navigation.py.png)
