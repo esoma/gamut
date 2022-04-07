@@ -148,6 +148,8 @@ class StringPuller(Generic[T]):
         self.triangle_buffer.append(triangle)
         triangle_positions = set(triangle.positions)
 
+        if self.left == self.apex:
+            self.left, self.right = self.right, self.left
         area = self._get_funnel_area(self.left, self.right)
         if area < 0:
             self.left, self.right = self.right, self.left

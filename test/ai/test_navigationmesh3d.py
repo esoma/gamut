@@ -431,6 +431,7 @@ def test_find_path_string_pull_y() -> None:
             Vector3(8, 0, 0),
         )
     )
+    print(path)
     assert vector_is_close(path[0], Vector3(0.0, 0.0, 0.0))
     assert vector_is_close(path[1], Vector3(2.0, 0.0, 0.25))
     assert vector_is_close(
