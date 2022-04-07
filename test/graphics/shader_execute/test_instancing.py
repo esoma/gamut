@@ -1,12 +1,12 @@
 
 # gamut
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader,
-                            PrimitiveMode, read_color_from_render_target,
-                            Shader, Texture2d, TextureComponents,
-                            TextureRenderTarget, WindowRenderTarget)
+                            clear_render_target, execute_shader, PrimitiveMode,
+                            read_color_from_render_target, Shader, Texture2d,
+                            TextureComponents, TextureRenderTarget,
+                            WindowRenderTarget)
 from gamut.math import (FVector2, FVector2Array, FVector3, FVector3Array,
-                        UVector2)
+                        FVector4, UVector2)
 # python
 import ctypes
 from itertools import permutations
@@ -40,7 +40,7 @@ void main()
 def draw_fullscreen_quads(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     shader: Shader,
-    colors: Sequence[Color],
+    colors: Sequence[FVector3],
 ) -> None:
     execute_shader(
         render_target,
@@ -53,10 +53,10 @@ def draw_fullscreen_quads(
                 FVector2(1, 1),
                 FVector2(1, -1),
             )), FVector2),
-            "instance_color": BufferView(Buffer(FVector3Array(*(
-                FVector3(c.red, c.green, c.blue)
-                for c in colors
-            )) if colors else b''), FVector3, instancing_divisor=1),
+            "instance_color": BufferView(Buffer(
+                FVector3Array(*colors)
+                if colors else b''
+            ), FVector3, instancing_divisor=1),
         }), {
         },
         index_range=(0, 4),
@@ -95,7 +95,7 @@ def test_zero_instances() -> None:
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=Color(0, 0, 0))
+    clear_render_target(render_target, color=FVector3(0, 0, 0))
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
     draw_fullscreen_quads(render_target, shader, [])
 
@@ -105,26 +105,26 @@ def test_zero_instances() -> None:
         *render_target.size
     )
     assert all(
-        c == Color(0, 0, 0)
+        c == FVector4(0, 0, 0, 1)
         for row in read_colors
         for c in row
     )
 
 
 @pytest.mark.parametrize("colors", permutations([
-    Color(1, 1, 1),
-    Color(1, 0, 0),
-    Color(0, 1, 0),
-    Color(0, 0, 1),
+    FVector3(1, 1, 1),
+    FVector3(1, 0, 0),
+    FVector3(0, 1, 0),
+    FVector3(0, 0, 1),
 ]))
-def test_basic(colors: Sequence[Color]) -> None:
+def test_basic(colors: Sequence[FVector3]) -> None:
     texture = Texture2d(
         UVector2(10, 10),
         TextureComponents.RGBA, ctypes.c_uint8,
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=Color(0, 0, 0))
+    clear_render_target(render_target, color=FVector3(0, 0, 0))
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
@@ -136,7 +136,7 @@ def test_basic(colors: Sequence[Color]) -> None:
         *render_target.size
     )
     assert all(
-        c == colors[-1]
+        c == FVector4(*colors[-1], 1)
         for row in read_colors
         for c in row
     )

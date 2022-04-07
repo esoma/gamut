@@ -2,14 +2,13 @@
 # gamut
 from gamut import Window
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, execute_shader,
-                            PrimitiveMode, read_color_from_render_target,
-                            Shader, Texture2d, TextureComponents,
-                            TextureRenderTarget,
+                            clear_render_target, execute_shader, PrimitiveMode,
+                            read_color_from_render_target, Shader, Texture2d,
+                            TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from gamut.math import (FVector2, FVector2Array, FVector4, U8Array, U16Array,
-                        U32Array, UVector2)
+from gamut.math import (FVector2, FVector2Array, FVector3, FVector4, U8Array,
+                        U16Array, U32Array, UVector2)
 # python
 import ctypes
 from pathlib import Path
@@ -264,10 +263,10 @@ def test_missing_attribute(
 @pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
 @pytest.mark.parametrize("primitive_mode", list(PrimitiveMode))
 @pytest.mark.parametrize("color", [
-    Color(1, 1, 1),
-    Color(1, 0, 0),
-    Color(0, 1, 0),
-    Color(0, 0, 1),
+    FVector4(1, 1, 1, 1),
+    FVector4(1, 0, 0, 1),
+    FVector4(0, 1, 0, 1),
+    FVector4(0, 0, 1, 1),
 ])
 @pytest.mark.parametrize("index_type, index_array_type", [
     (None, None),
@@ -278,12 +277,12 @@ def test_missing_attribute(
 def test_basic(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
     primitive_mode: PrimitiveMode,
-    color: Color,
+    color: FVector3,
     index_type: Any,
     index_array_type: Any,
 ) -> None:
     render_target = create_render_target(cls)
-    clear_render_target(render_target, color=Color(0, 0, 0, 0), depth=True)
+    clear_render_target(render_target, color=FVector3(0, 0, 0), depth=True)
 
     index_range: Optional[tuple[int, int]] = None
     index_buffer_view: Optional[BufferView[ctypes.c_uint32]] = None
@@ -325,7 +324,7 @@ def test_basic(
                 FVector2(.9, -.9),
             )), FVector2)
         }), {
-            "color": FVector4(*color)
+            "color": color
         },
         index_range=index_range,
         index_buffer_view=index_buffer_view

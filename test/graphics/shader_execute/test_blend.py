@@ -1,12 +1,11 @@
 
 # gamut
 from gamut.graphics import (BlendFactor, BlendFunction, Buffer, BufferView,
-                            BufferViewMap, clear_render_target, Color,
-                            execute_shader, PrimitiveMode,
-                            read_color_from_render_target, Shader, Texture2d,
-                            TextureComponents, TextureRenderTarget,
-                            WindowRenderTarget)
-from gamut.math import FVector2, FVector2Array, FVector4, UVector2
+                            BufferViewMap, clear_render_target, execute_shader,
+                            PrimitiveMode, read_color_from_render_target,
+                            Shader, Texture2d, TextureComponents,
+                            TextureRenderTarget, WindowRenderTarget)
+from gamut.math import FVector2, FVector2Array, FVector3, FVector4, UVector2
 # python
 import ctypes
 from typing import Final, Optional, Union
@@ -36,13 +35,13 @@ void main()
 def draw_fullscreen_quad(
     render_target: Union[TextureRenderTarget, WindowRenderTarget],
     shader: Shader,
-    color: Color,
+    color: FVector4,
     blend_source: BlendFactor,
     blend_destination: BlendFactor,
     blend_source_alpha: Optional[BlendFactor],
     blend_destination_alpha: Optional[BlendFactor],
     blend_function: BlendFunction,
-    blend_color: Optional[Color],
+    blend_color: Optional[FVector4],
 ) -> None:
     execute_shader(
         render_target,
@@ -56,7 +55,7 @@ def draw_fullscreen_quad(
                 FVector2(1, -1),
             )), FVector2)
         }), {
-            "color": FVector4(*color),
+            "color": color,
         },
         index_range=(0, 4),
         blend_source=blend_source,
@@ -70,38 +69,38 @@ def draw_fullscreen_quad(
 
 def calculate_factor(
     factor: BlendFactor,
-    source_color: Color,
-    destination_color: Color,
-    blend_color: Color
+    source_color: FVector4,
+    destination_color: FVector4,
+    blend_color: FVector4
 ) -> FVector4:
     if factor == BlendFactor.ZERO:
         return FVector4(0)
     elif factor == BlendFactor.ONE:
         return FVector4(1)
     elif factor == BlendFactor.SOURCE_COLOR:
-        return FVector4(*source_color)
+        return source_color
     elif factor == BlendFactor.ONE_MINUS_SOURCE_COLOR:
-        return 1 - FVector4(*source_color)
+        return 1 - source_color
     elif factor == BlendFactor.DESTINATION_COLOR:
-        return FVector4(*destination_color)
+        return destination_color
     elif factor == BlendFactor.ONE_MINUS_DESTINATION_COLOR:
-        return 1 - FVector4(*destination_color)
+        return 1 - destination_color
     elif factor == BlendFactor.SOURCE_ALPHA:
-        return FVector4(source_color.alpha)
+        return FVector4(source_color.a)
     elif factor == BlendFactor.ONE_MINUS_SOURCE_ALPHA:
-        return 1 - FVector4(source_color.alpha)
+        return FVector4(1 - source_color.a)
     elif factor == BlendFactor.DESTINATION_ALPHA:
-        return FVector4(destination_color.alpha)
+        return FVector4(destination_color.a)
     elif factor == BlendFactor.ONE_MINUS_DESTINATION_ALPHA:
-        return 1 - FVector4(destination_color.alpha)
+        return FVector4(1 - destination_color.a)
     elif factor == BlendFactor.BLEND_COLOR:
-        return FVector4(*blend_color)
+        return blend_color
     elif factor == BlendFactor.ONE_MINUS_BLEND_COLOR:
-        return 1 - FVector4(*blend_color)
+        return 1 - blend_color
     elif factor == BlendFactor.BLEND_ALPHA:
-        return FVector4(blend_color.alpha)
+        return blend_color.a
     elif factor == BlendFactor.ONE_MINUS_BLEND_ALPHA:
-        return 1 - FVector4(blend_color.alpha)
+        return FVector4(1 - blend_color.a)
     assert False
 
 
@@ -111,9 +110,9 @@ def test_source_destination_factors(
     blend_source: BlendFactor,
     blend_destination: BlendFactor,
 ) -> None:
-    color = Color(.45, .3, .8, .333)
-    clear_color = Color(.2, .5, .2)
-    blend_color = Color(.8, .7, .6, .5)
+    color = FVector4(.45, .3, .8, .333)
+    clear_color = FVector4(.2, .5, .2, 1)
+    blend_color = FVector4(.8, .7, .6, .5)
 
     texture = Texture2d(
         UVector2(10, 10),
@@ -121,7 +120,7 @@ def test_source_destination_factors(
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=clear_color)
+    clear_render_target(render_target, color=clear_color.rgb)
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
@@ -150,8 +149,8 @@ def test_source_destination_factors(
         blend_color
     )
     expected_color = (
-        (FVector4(*color) * source_factor) +
-        (FVector4(*clear_color) * destination_factor)
+        (color * source_factor) +
+        (clear_color * destination_factor)
     ).clamp(0.0, 1.0)
 
     colors = read_color_from_render_target(
@@ -160,10 +159,10 @@ def test_source_destination_factors(
         *render_target.size
     )
     assert all(
-        c.red == pytest.approx(expected_color[0], abs=.01) and
-        c.green == pytest.approx(expected_color[1], abs=.01) and
-        c.blue == pytest.approx(expected_color[2], abs=.01) and
-        c.alpha == pytest.approx(expected_color[3], abs=.01)
+        c.r == pytest.approx(expected_color[0], abs=.01) and
+        c.g == pytest.approx(expected_color[1], abs=.01) and
+        c.b == pytest.approx(expected_color[2], abs=.01) and
+        c.a == pytest.approx(expected_color[3], abs=.01)
         for row in colors
         for c in row
     )
@@ -175,9 +174,9 @@ def test_source_destination_alpha_factors(
     blend_source: BlendFactor,
     blend_destination: BlendFactor,
 ) -> None:
-    color = Color(.45, .3, .8, .333)
-    clear_color = Color(.2, .5, .2)
-    blend_color = Color(.8, .7, .6, .5)
+    color = FVector4(.45, .3, .8, .333)
+    clear_color = FVector4(.2, .5, .2, 1)
+    blend_color = FVector4(.8, .7, .6, .5)
 
     texture = Texture2d(
         UVector2(10, 10),
@@ -185,7 +184,7 @@ def test_source_destination_alpha_factors(
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=clear_color)
+    clear_render_target(render_target, color=clear_color.rgb)
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
@@ -215,12 +214,12 @@ def test_source_destination_alpha_factors(
     )
     expected_color = (
         FVector4(
-            color.red, color.green, color.blue,
-            color.alpha * source_factor[3]
+            color.r, color.g, color.b,
+            color.a * source_factor[3]
         ) +
         FVector4(
-            clear_color.red, clear_color.green, clear_color.blue,
-            clear_color.alpha * destination_factor[3]
+            clear_color.r, clear_color.g, clear_color.b,
+            clear_color.a * destination_factor[3]
         )
     ).clamp(0.0, 1.0)
 
@@ -230,10 +229,10 @@ def test_source_destination_alpha_factors(
         *render_target.size
     )
     assert all(
-        c.red == pytest.approx(expected_color[0], abs=.01) and
-        c.green == pytest.approx(expected_color[1], abs=.01) and
-        c.blue == pytest.approx(expected_color[2], abs=.01) and
-        c.alpha == pytest.approx(expected_color[3], abs=.01)
+        c.r == pytest.approx(expected_color[0], abs=.01) and
+        c.g == pytest.approx(expected_color[1], abs=.01) and
+        c.b == pytest.approx(expected_color[2], abs=.01) and
+        c.a == pytest.approx(expected_color[3], abs=.01)
         for row in colors
         for c in row
     )
@@ -241,8 +240,8 @@ def test_source_destination_alpha_factors(
 
 @pytest.mark.parametrize("blend_function", list(BlendFunction))
 def test_function(blend_function: BlendFunction,) -> None:
-    color = Color(.45, .3, .8, .333)
-    clear_color = Color(.2, .5, .2)
+    color = FVector4(.45, .3, .8, .333)
+    clear_color = FVector4(.2, .5, .2, 1)
 
     texture = Texture2d(
         UVector2(10, 10),
@@ -250,7 +249,7 @@ def test_function(blend_function: BlendFunction,) -> None:
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=clear_color)
+    clear_render_target(render_target, color=clear_color.rgb)
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
@@ -266,8 +265,8 @@ def test_function(blend_function: BlendFunction,) -> None:
         None,
     )
 
-    source = FVector4(*color)
-    destination = FVector4(*clear_color)
+    source = color
+    destination = clear_color
     if blend_function == BlendFunction.ADD:
         expected_color = source + destination
     elif blend_function == BlendFunction.SUBTRACT:
@@ -292,10 +291,10 @@ def test_function(blend_function: BlendFunction,) -> None:
         *render_target.size
     )
     assert all(
-        c.red == pytest.approx(expected_color[0], abs=.01) and
-        c.green == pytest.approx(expected_color[1], abs=.01) and
-        c.blue == pytest.approx(expected_color[2], abs=.01) and
-        c.alpha == pytest.approx(expected_color[3], abs=.01)
+        c.r == pytest.approx(expected_color[0], abs=.01) and
+        c.g == pytest.approx(expected_color[1], abs=.01) and
+        c.b == pytest.approx(expected_color[2], abs=.01) and
+        c.a == pytest.approx(expected_color[3], abs=.01)
         for row in colors
         for c in row
     )
@@ -308,14 +307,14 @@ def test_default_blend_color() -> None:
         b'\x00' * 10 * 10 * 4
     )
     render_target = TextureRenderTarget([texture])
-    clear_render_target(render_target, color=Color(0, 0, 0))
+    clear_render_target(render_target, color=FVector3(0, 0, 0))
 
     shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
     draw_fullscreen_quad(
         render_target,
         shader,
-        Color(.5, .5, .5, 1),
+        FVector4(.5, .5, .5, 1),
         BlendFactor.BLEND_COLOR,
         BlendFactor.ZERO,
         None,
@@ -323,17 +322,17 @@ def test_default_blend_color() -> None:
         BlendFunction.ADD,
         None,
     )
-    expected_color = Color(.5, .5, .5, 1)
+    expected_color = FVector4(.5, .5, .5, 1)
     colors = read_color_from_render_target(
         render_target,
         0, 0,
         *render_target.size
     )
     assert all(
-        c.red == pytest.approx(expected_color[0], abs=.01) and
-        c.green == pytest.approx(expected_color[1], abs=.01) and
-        c.blue == pytest.approx(expected_color[2], abs=.01) and
-        c.alpha == pytest.approx(expected_color[3], abs=.01)
+        c.r == pytest.approx(expected_color[0], abs=.01) and
+        c.g == pytest.approx(expected_color[1], abs=.01) and
+        c.b == pytest.approx(expected_color[2], abs=.01) and
+        c.a == pytest.approx(expected_color[3], abs=.01)
         for row in colors
         for c in row
     )

@@ -10,7 +10,6 @@ __all__ = [
     'BufferView',
     'BufferViewMap',
     'clear_render_target',
-    'Color',
     'DepthTest',
     'execute_shader',
     'FaceCull',
@@ -47,7 +46,6 @@ __all__ = [
 # gamut
 from ._buffer import (Buffer, BufferFrequency, BufferNature, BufferView,
                       BufferViewMap)
-from ._color import Color
 from ._image import Image, ImageInvalidError
 from ._pack2d import Pack2d, Packed2dItem
 from ._quad import create_quad_position_array, create_quad_uv_array

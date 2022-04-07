@@ -1,14 +1,14 @@
 
 # gamut
 from gamut import Application, Window
-from gamut.graphics import (Buffer, clear_render_target, Color,
+from gamut.graphics import (Buffer, clear_render_target,
                             read_color_from_render_target,
                             read_depth_from_render_target,
                             read_stencil_from_render_target, Texture2d,
                             TextureComponents, TextureRenderTarget,
                             TextureRenderTargetDepthStencil,
                             WindowRenderTarget)
-from gamut.math import UVector2
+from gamut.math import FVector4, UVector2
 # python
 import ctypes
 from ctypes import c_uint
@@ -126,15 +126,15 @@ def create_render_target(
 
 @pytest.mark.parametrize("cls", [TextureRenderTarget, WindowRenderTarget])
 @pytest.mark.parametrize("color", [
-    Color(0, 0, 0, 0),
-    Color(.25, .4, .6, .8),
-    Color(1, 1, 1, 1),
+    FVector4(0, 0, 0, 0),
+    FVector4(.25, .4, .6, .8),
+    FVector4(1, 1, 1, 1),
 ])
 @pytest.mark.parametrize("depth", [-1.0, 0.0, 1.0])
 @pytest.mark.parametrize("stencil", [0, 1])
 def test_clear(
     cls: Union[type[TextureRenderTarget], type[WindowRenderTarget]],
-    color: Color,
+    color: FVector4,
     depth: float,
     stencil: int,
 ) -> None:
@@ -152,10 +152,10 @@ def test_clear(
         *render_target.size
     )
     assert all(
-        c.red == pytest.approx(color[0], abs=.01) and
-        c.green == pytest.approx(color[1], abs=.01) and
-        c.blue == pytest.approx(color[2], abs=.01) and
-        c.alpha == 1.0
+        c.r == pytest.approx(color[0], abs=.01) and
+        c.g == pytest.approx(color[1], abs=.01) and
+        c.b == pytest.approx(color[2], abs=.01) and
+        c.a == 1.0
         for row in colors for c in row
     )
 
