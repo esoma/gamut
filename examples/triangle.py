@@ -1,31 +1,20 @@
 
 # gamut
-from gamut import Application, Timer, TimerExpired, Window
-from gamut.event import Bind
 from gamut.graphics import (Buffer, BufferView, BufferViewMap,
                             clear_render_target, Color, execute_shader,
-                            PrimitiveMode, Shader, WindowRenderTarget)
+                            PrimitiveMode, Shader)
 from gamut.math import (FMatrix4, FVector2, FVector2Array, FVector3,
-                        FVector3Array, UVector2)
+                        FVector3Array)
 # python
-from datetime import timedelta
+from typing import Final
 # examples
-from examplescommon import run_application
+from examplescommon import ExampleApplication, run_application
 
 
-class Draw(TimerExpired):
-    pass
+class App(ExampleApplication):
 
-
-class App(Application):
-
-    async def main(self) -> None:
-        self.window = Window()
+    async def example_main(self) -> None:
         self.window.title = 'Gamut Triangle Example'
-        self.window.resize(UVector2(400, 400))
-        self.window.recenter()
-        self.window.is_visible = True
-        self.window_render_target = WindowRenderTarget(self.window)
 
         self.shader = Shader(vertex=vertex_shader, fragment=fragment_shader)
         self.triangle_transform = FMatrix4(1)
@@ -48,17 +37,7 @@ class App(Application):
             ),
         })
 
-        with Bind.on(Draw, self.draw):
-            step_timer = Timer(
-                self,
-                timedelta(seconds=1 / 60.0),
-                Draw,
-                repeat=True,
-                fixed=True,
-            )
-            await self.window.Close
-
-    async def draw(self, draw: Draw) -> None:
+    async def draw(self, draw: ExampleApplication.Draw) -> None:
         clear_render_target(
             self.window_render_target,
             color=Color(0, 0, 0),
@@ -79,7 +58,7 @@ class App(Application):
         self.window.flip_buffer()
 
 
-vertex_shader = b"""
+vertex_shader: Final = b"""
 #version 140
 in vec2 pos;
 in vec3 color;
@@ -93,7 +72,7 @@ void main()
 """
 
 
-fragment_shader = b"""
+fragment_shader: Final = b"""
 #version 140
 in vec3 vertex_color;
 out vec4 output_color;
