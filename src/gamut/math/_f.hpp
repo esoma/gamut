@@ -377,8 +377,24 @@ FArray_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+FArray_get_component_type(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 0)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 0 arguments, got %zi", nargs);
+        return 0;
+    }
+
+        Py_INCREF(&PyFloat_Type);
+        return (PyObject *)&PyFloat_Type;
+
+}
+
+
 static PyMethodDef FArray_PyMethodDef[] = {
     {"from_buffer", (PyCFunction)FArray_from_buffer, METH_O | METH_CLASS, 0},
+    {"get_component_type", (PyCFunction)FArray_get_component_type, METH_FASTCALL | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
