@@ -1571,8 +1571,25 @@ UVector4Array_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+UVector4Array_get_component_type(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 0)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 0 arguments, got %zi", nargs);
+        return 0;
+    }
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto component_type = module_state->UVector4_PyTypeObject;
+    Py_INCREF(component_type);
+    return (PyObject *)component_type;
+}
+
+
 static PyMethodDef UVector4Array_PyMethodDef[] = {
     {"from_buffer", (PyCFunction)UVector4Array_from_buffer, METH_O | METH_CLASS, 0},
+    {"get_component_type", (PyCFunction)UVector4Array_get_component_type, METH_FASTCALL | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 

@@ -377,8 +377,30 @@ static PyObject *
 }
 
 
+static PyObject *
+{{ name }}Array_get_component_type(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 0)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 0 arguments, got %zi", nargs);
+        return 0;
+    }
+    {% if c_type in ['float', 'double'] %}
+        Py_INCREF(&PyFloat_Type);
+        return (PyObject *)&PyFloat_Type;
+    {% elif c_type == 'bool' %}
+        Py_INCREF(&PyBool_Type);
+        return (PyObject *)&PyBool_Type;
+    {% else %}
+        Py_INCREF(&PyLong_Type);
+        return (PyObject *)&PyLong_Type;
+    {% endif %}
+}
+
+
 static PyMethodDef {{ name }}Array_PyMethodDef[] = {
     {"from_buffer", (PyCFunction){{ name }}Array_from_buffer, METH_O | METH_CLASS, 0},
+    {"get_component_type", (PyCFunction){{ name }}Array_get_component_type, METH_FASTCALL | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 

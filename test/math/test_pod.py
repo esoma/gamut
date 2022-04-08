@@ -256,6 +256,9 @@ class PodTest:
             with pytest.raises(BufferError):
                 self.array_cls.from_buffer(b'\x00')
 
+    def test_array_get_component_type(self) -> None:
+        assert self.array_cls.get_component_type() is self.type
+
 
 class TestB(
     PodTest,

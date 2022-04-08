@@ -377,8 +377,24 @@ IArray_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+IArray_get_component_type(PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs)
+{
+    if (nargs != 0)
+    {
+        PyErr_Format(PyExc_TypeError, "expected 0 arguments, got %zi", nargs);
+        return 0;
+    }
+
+        Py_INCREF(&PyLong_Type);
+        return (PyObject *)&PyLong_Type;
+
+}
+
+
 static PyMethodDef IArray_PyMethodDef[] = {
     {"from_buffer", (PyCFunction)IArray_from_buffer, METH_O | METH_CLASS, 0},
+    {"get_component_type", (PyCFunction)IArray_get_component_type, METH_FASTCALL | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
 
