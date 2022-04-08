@@ -256,6 +256,32 @@ def test_equal(array_type: Any) -> None:
 
 
 @pytest.mark.parametrize("bounding_box", [
+    BoundingBox3d(FVector3Array(FVector3(0))),
+    BoundingBox3d(FVector3Array(FVector3(-1, -1, -1), FVector3(1, 1, 1))),
+    BoundingBox3d(FVector3Array(
+        FVector3(-1000, 0, 67),
+        FVector3(20, -56, 87))
+    ),
+])
+def test_f_contains_point(bounding_box: BoundingBox3d) -> None:
+    assert bounding_box.contains_point(bounding_box.center)
+    for corner in bounding_box.corners:
+        assert bounding_box.contains_point(corner)
+
+    for offset in (
+        FVector3(1, -1, -1),
+        FVector3(-1, 1, -1),
+        FVector3(-1, -1, 1),
+        FVector3(1, 1, -1),
+        FVector3(1, -1, 1),
+        FVector3(-1, 1, 1),
+        FVector3(1, 1, 1),
+    ):
+        assert not bounding_box.contains_point(bounding_box.min - offset)
+        assert not bounding_box.contains_point(bounding_box.max + offset)
+
+
+@pytest.mark.parametrize("bounding_box", [
     BoundingBox3d(DVector3Array(DVector3(0))),
     BoundingBox3d(DVector3Array(DVector3(-1, -1, -1), DVector3(1, 1, 1))),
     BoundingBox3d(DVector3Array(
@@ -263,7 +289,7 @@ def test_equal(array_type: Any) -> None:
         DVector3(20, -56, 87))
     ),
 ])
-def test_contains_point(bounding_box: BoundingBox3d) -> None:
+def test_d_contains_point(bounding_box: BoundingBox3d) -> None:
     assert bounding_box.contains_point(bounding_box.center)
     for corner in bounding_box.corners:
         assert bounding_box.contains_point(corner)
@@ -279,6 +305,16 @@ def test_contains_point(bounding_box: BoundingBox3d) -> None:
     ):
         assert not bounding_box.contains_point(bounding_box.min - offset)
         assert not bounding_box.contains_point(bounding_box.max + offset)
+
+
+def test_contains_point_wrong_type():
+    with pytest.raises(TypeError) as excinfo:
+        BoundingBox3d(FVector3Array(FVector3(0))).contains_point(DVector3(0))
+    assert str(excinfo.value).startswith('point must be FVector3')
+
+    with pytest.raises(TypeError) as excinfo:
+        BoundingBox3d(DVector3Array(DVector3(0))).contains_point(FVector3(0))
+    assert str(excinfo.value).startswith('point must be DVector3')
 
 
 def test_seen_by() -> None:

@@ -106,8 +106,9 @@ class BoundingBox3d(Generic[T, VT, MT]):
         )
 
     def contains_point(self, point: VT) -> bool:
-        if not isinstance(point, (FVector3, DVector3)):
-            raise TypeError('point must be FVector3 or DVector3')
+        expected_type = self._array_type.get_component_type()
+        if not isinstance(point, expected_type):
+            raise TypeError(f'point must be {expected_type.__name__}')
         return (
             all(p >= m for p, m in zip(point, self._min)) and
             all(p <= m for p, m in zip(point, self._max))
