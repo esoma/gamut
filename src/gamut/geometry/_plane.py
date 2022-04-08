@@ -4,19 +4,41 @@ from __future__ import annotations
 __all__ = ['Plane']
 
 # gamut
-from gamut.math import Matrix4, Vector3, Vector4
+from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
+                        FVector4)
+# python
+from typing import Generic, overload, TypeVar
+
+VT = TypeVar('VT', FVector3, DVector3)
+MT = TypeVar('MT', FMatrix4, DMatrix4)
 
 
-class Plane:
+class Plane(Generic[VT, MT]):
 
-    def __init__(self, distance: float, normal: Vector3):
+    @overload
+    def __init__(
+        self: Plane[FVector3, FMatrix4],
+        distance: float,
+        normal: FVector3
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Plane[DVector3, DMatrix4],
+        distance: float,
+        normal: DVector3
+    ):
+        ...
+
+    def __init__(self, distance: float, normal: VT):
         try:
             self._distance = float(distance)
         except (TypeError, ValueError):
             raise TypeError('distance must be float')
 
-        if not isinstance(normal, Vector3):
-            raise TypeError('normal must be Vector3')
+        if not isinstance(normal, (FVector3, DVector3)):
+            raise TypeError('normal must be FVector3 or DVector3')
         self._normal = normal
 
         magnitude = normal.magnitude
@@ -35,7 +57,7 @@ class Plane:
             f'normal=({self._normal.x}, {self._normal.y}, {self._normal.z})>'
         )
 
-    def __eq__(self, other: Plane) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Plane):
             return False
         return (
@@ -43,11 +65,17 @@ class Plane:
             self._distance == other._distance
         )
 
-    def __rmatmul__(self, transform: Matrix4) -> Plane:
-        if not isinstance(transform, Matrix4):
+    def __rmatmul__(self, transform: MT) -> Plane:
+        if not isinstance(transform, (FMatrix4, DMatrix4)):
             return NotImplemented
 
-        p = transform.inverse().transpose() @ Vector4(
+        if isinstance(self._normal, FVector3):
+            vec4_type = FVector4
+        else:
+            assert isinstance(self._normal, DVector3)
+            vec4_type = DVector4
+
+        p = transform.inverse().transpose() @ vec4_type(
             *self._normal,
             self._distance
         )
@@ -58,10 +86,10 @@ class Plane:
         return self._distance
 
     @property
-    def normal(self) -> Vector3:
+    def normal(self) -> VT:
         return self._normal
 
-    def distance_to_point(self, point: Vector3) -> float:
-        if not isinstance(point, Vector3):
-            raise TypeError('point must be Vector3')
+    def distance_to_point(self, point: VT) -> float:
+        if not isinstance(point, type(self._normal)):
+            raise TypeError(f'point must be {type(self._normal).__name__}')
         return self._normal @ point + self._distance
