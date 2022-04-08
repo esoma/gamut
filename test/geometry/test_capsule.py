@@ -109,6 +109,8 @@ def test_default_rotation() -> None:
 
 def test_equal() -> None:
     assert Capsule(DVector3(0), 0, 0) == Capsule(DVector3(0), 0, 0)
+    assert Capsule(FVector3(0), 0, 0) == Capsule(FVector3(0), 0, 0)
+    assert Capsule(DVector3(0), 0, 0) != Capsule(FVector3(0), 0, 0)
     assert Capsule(DVector3(0), 0, 0) != Capsule(
         DVector3(0), 0, 0, rotation=DQuaternion(0)
     )
