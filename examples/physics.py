@@ -1,14 +1,13 @@
 
 # gamut
 from gamut.geometry import Plane, RectangularCuboid
-from gamut.graphics import (Buffer, BufferView, BufferViewMap,
-                            clear_render_target, Color, DepthTest,
-                            execute_shader, FaceCull, PrimitiveMode, Shader)
-from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector3, FVector3Array,
-                        Matrix4, U8Array, Vector3)
+from gamut.graphics import (BufferView, BufferViewMap, clear_render_target,
+                            DepthTest, execute_shader, FaceCull, PrimitiveMode,
+                            Shader)
+from gamut.math import (FMatrix3, FMatrix4, FVector3, FVector3Array, Matrix4,
+                        U8Array, Vector3)
 from gamut.physics import Body, BodyType, World
 # python
-import ctypes
 from datetime import timedelta
 import random
 from typing import Final
@@ -27,43 +26,31 @@ class App(ExampleApplication):
 
         self.plane_transform = FMatrix4(1).scale(FVector3(100, 0, 100))
         self.plane_attributes = BufferViewMap({
-            "pos": BufferView(
-                Buffer(FVector3Array(
+            "pos": BufferView.from_array(FVector3Array(
                     FVector3(-1, 0, -1),
                     FVector3(1, 0, -1),
                     FVector3(1, 0, 1),
                     FVector3(-1, 0, 1),
-                )),
-                FVector3,
-            ),
-            "norm": BufferView(
-                Buffer(FVector3Array(
-                    FVector3(0, 1, 0),
-                    FVector3(0, 1, 0),
-                    FVector3(0, 1, 0),
-                    FVector3(0, 1, 0),
-                )),
-                FVector3,
-            ),
-        })
-        self.plane_index_buffer_view = BufferView(
-            Buffer(U8Array(
-                0, 2, 1,
-                0, 3, 2
             )),
-            ctypes.c_uint8
-        )
+            "norm": BufferView.from_array(FVector3Array(
+                FVector3(0, 1, 0),
+                FVector3(0, 1, 0),
+                FVector3(0, 1, 0),
+                FVector3(0, 1, 0),
+            )),
+        })
+        self.plane_index_buffer_view = BufferView.from_array(U8Array(
+            0, 2, 1,
+            0, 3, 2
+        ))
 
         cube = RectangularCuboid(Vector3(0), Vector3(1))
         cube_positions, cube_normals, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
-            "pos": BufferView(Buffer(cube_positions), DVector3),
-            "norm": BufferView(Buffer(cube_normals), DVector3),
+            "pos": BufferView.from_array(cube_positions),
+            "norm": BufferView.from_array(cube_normals),
         })
-        self.cube_index_buffer_view = BufferView(
-            Buffer(cube_indices),
-            ctypes.c_uint8
-        )
+        self.cube_index_buffer_view = BufferView.from_array(cube_indices)
 
         self.world = World(timedelta(seconds=1 / 60.0))
         self.world.gravity = Vector3(0, -9.8, 0)
@@ -93,7 +80,7 @@ class App(ExampleApplication):
 
         clear_render_target(
             self.window_render_target,
-            color=Color(0, 0, 0),
+            color=FVector3(0, 0, 0),
             depth=1
         )
         execute_shader(

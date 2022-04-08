@@ -14,17 +14,34 @@ __all__ = [
 # gamut
 from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
-from gamut.math import (DMatrix2x2, DMatrix2x3, DMatrix2x4, DMatrix3x2,
-                        DMatrix3x3, DMatrix3x4, DMatrix4x2, DMatrix4x3,
-                        DMatrix4x4, DVector2, DVector3, DVector4, FMatrix2x2,
-                        FMatrix2x3, FMatrix2x4, FMatrix3x2, FMatrix3x3,
-                        FMatrix3x4, FMatrix4x2, FMatrix4x3, FMatrix4x4,
-                        FVector2, FVector3, FVector4, I8Vector2, I8Vector3,
-                        I8Vector4, I16Vector2, I16Vector3, I16Vector4,
-                        I32Vector2, I32Vector3, I32Vector4, IVector2, IVector3,
-                        IVector4, U8Vector2, U8Vector3, U8Vector4, U16Vector2,
-                        U16Vector3, U16Vector4, U32Vector2, U32Vector3,
-                        U32Vector4, U64Vector2, UVector2, UVector3, UVector4)
+from gamut.math import (DArray, DMatrix2x2, DMatrix2x2Array, DMatrix2x3,
+                        DMatrix2x3Array, DMatrix2x4, DMatrix2x4Array,
+                        DMatrix3x2, DMatrix3x2Array, DMatrix3x3,
+                        DMatrix3x3Array, DMatrix3x4, DMatrix3x4Array,
+                        DMatrix4x2, DMatrix4x2Array, DMatrix4x3,
+                        DMatrix4x3Array, DMatrix4x4, DMatrix4x4Array, DVector2,
+                        DVector2Array, DVector3, DVector3Array, DVector4,
+                        DVector4Array, FArray, FMatrix2x2, FMatrix2x2Array,
+                        FMatrix2x3, FMatrix2x3Array, FMatrix2x4,
+                        FMatrix2x4Array, FMatrix3x2, FMatrix3x2Array,
+                        FMatrix3x3, FMatrix3x3Array, FMatrix3x4,
+                        FMatrix3x4Array, FMatrix4x2, FMatrix4x2Array,
+                        FMatrix4x3, FMatrix4x3Array, FMatrix4x4,
+                        FMatrix4x4Array, FVector2, FVector2Array, FVector3,
+                        FVector3Array, FVector4, FVector4Array, I8Array,
+                        I8Vector2, I8Vector2Array, I8Vector3, I8Vector3Array,
+                        I8Vector4, I8Vector4Array, I16Array, I16Vector2,
+                        I16Vector2Array, I16Vector3, I16Vector3Array,
+                        I16Vector4, I16Vector4Array, I32Array, I32Vector2,
+                        I32Vector2Array, I32Vector3, I32Vector3Array,
+                        I32Vector4, I32Vector4Array, IVector2, IVector3,
+                        IVector4, U8Array, U8Vector2, U8Vector2Array,
+                        U8Vector3, U8Vector3Array, U8Vector4, U8Vector4Array,
+                        U16Array, U16Vector2, U16Vector2Array, U16Vector3,
+                        U16Vector3Array, U16Vector4, U16Vector4Array, U32Array,
+                        U32Vector2, U32Vector2Array, U32Vector3,
+                        U32Vector3Array, U32Vector4, U32Vector4Array,
+                        U64Vector2, UVector2, UVector3, UVector4)
 # python
 import ctypes
 from ctypes import POINTER as c_pointer
@@ -33,8 +50,8 @@ from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof
 from enum import Enum
 from struct import unpack as c_unpack
-from typing import (Any, Final, Generator, Generic, Optional, TYPE_CHECKING,
-                    TypeVar, Union)
+from typing import (Any, Final, Generator, Generic, Optional, overload,
+                    TYPE_CHECKING, TypeVar, Union)
 from weakref import ref, WeakKeyDictionary
 # pyopengl
 import OpenGL.GL
@@ -393,6 +410,456 @@ class BufferView(Generic[BVT]):
                 data = self._data_type.from_buffer(chunk) # type: ignore
             yield data # type: ignore
 
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FVector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FVector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: DVector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[DVector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I8Vector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I8Vector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U8Vector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U8Vector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I16Vector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I16Vector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U16Vector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U16Vector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I32Vector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I32Vector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U32Vector2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U32Vector2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FVector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FVector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: DVector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[DVector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I8Vector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I8Vector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U8Vector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U8Vector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I16Vector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I16Vector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U16Vector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U16Vector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I32Vector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I32Vector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U32Vector3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U32Vector3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FVector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FVector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: DVector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[DVector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I8Vector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I8Vector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U8Vector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U8Vector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I16Vector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I16Vector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U16Vector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U16Vector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I32Vector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[I32Vector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U32Vector4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[U32Vector4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix2x2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix2x2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix2x3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix2x3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix2x4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix2x4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix3x2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix3x2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix3x3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix3x3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix3x4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix3x4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix4x2Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix4x2]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix4x3Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix4x3]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FMatrix4x4Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[FMatrix4x4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: FArray,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_float]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: DArray,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_double]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I8Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_int8]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U8Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_uint8]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I16Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_int16]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U16Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_uint16]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: I32Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_int32]:
+        ...
+
+    @overload
+    @classmethod
+    def from_array(
+        cls,
+        array: U32Array,
+        *,
+        instancing_divisor: Optional[int] = None
+    ) -> BufferView[ctypes.c_uint32]:
+        ...
+
+    @classmethod
+    def from_array(
+        cls,
+        array:
+                FVector2Array | DVector2Array |
+                I8Vector2Array | U8Vector2Array |
+                I16Vector2Array | U16Vector2Array |
+                I32Vector2Array | U32Vector2Array |
+                FVector3Array | DVector3Array |
+                I8Vector3Array | U8Vector3Array |
+                I16Vector3Array | U16Vector3Array |
+                I32Vector3Array | U32Vector3Array |
+                FVector4Array | DVector4Array |
+                I8Vector4Array | U8Vector4Array |
+                I16Vector4Array | U16Vector4Array |
+                I32Vector4Array | U32Vector4Array |
+                FMatrix2x2Array | DMatrix2x2Array |
+                FMatrix2x3Array | DMatrix2x3Array |
+                FMatrix2x4Array | DMatrix2x4Array |
+                FMatrix3x2Array | DMatrix3x2Array |
+                FMatrix3x3Array | DMatrix3x3Array |
+                FMatrix3x4Array | DMatrix3x4Array |
+                FMatrix4x2Array | DMatrix4x2Array |
+                FMatrix4x3Array | DMatrix4x3Array |
+                FMatrix4x4Array | DMatrix4x4Array |
+                FArray | DArray |
+                I8Array | U8Array |
+                I16Array | U16Array |
+                I32Array | U32Array,
+        *,
+        instancing_divisor: Optional[int] = None,
+    ) -> BufferView:
+        data_type = ARRAY_TO_BUFFER_VIEW_TYPE[type(array)]
+        buffer = Buffer(array)
+        return BufferView(
+            buffer,
+            data_type,
+            instancing_divisor=instancing_divisor
+        )
+
     @property
     def buffer(self) -> Buffer:
         return self._buffer
@@ -552,6 +1019,60 @@ class GlVertexArray:
             get_gl_context().delete_vertex_array(self._gl)
             self._gl = None
         self._gl_context = release_gl_context(self._gl_context)
+
+
+ARRAY_TO_BUFFER_VIEW_TYPE: Final = {
+    FVector2Array: FVector2,
+    DVector2Array: DVector2,
+    I8Vector2Array: I8Vector2,
+    U8Vector2Array: U8Vector2,
+    I16Vector2Array: I16Vector2,
+    U16Vector2Array: U16Vector2,
+    I32Vector2Array: I32Vector2,
+    U32Vector2Array: U32Vector2,
+    FVector3Array: FVector3,
+    DVector3Array: DVector3,
+    I8Vector3Array: I8Vector3,
+    U8Vector3Array: U8Vector3,
+    I16Vector3Array: I16Vector3,
+    U16Vector3Array: U16Vector3,
+    I32Vector3Array: I32Vector3,
+    U32Vector3Array: U32Vector3,
+    FVector4Array: FVector4,
+    DVector4Array: DVector4,
+    I8Vector4Array: I8Vector4,
+    U8Vector4Array: U8Vector4,
+    I16Vector4Array: I16Vector4,
+    U16Vector4Array: U16Vector4,
+    I32Vector4Array: I32Vector4,
+    U32Vector4Array: U32Vector4,
+    FMatrix2x2Array: FMatrix2x2,
+    DMatrix2x2Array: DMatrix2x2,
+    FMatrix2x3Array: FMatrix2x3,
+    DMatrix2x3Array: DMatrix2x3,
+    FMatrix2x4Array: FMatrix2x4,
+    DMatrix2x4Array: DMatrix2x4,
+    FMatrix3x2Array: FMatrix3x2,
+    DMatrix3x2Array: DMatrix3x2,
+    FMatrix3x3Array: FMatrix3x3,
+    DMatrix3x3Array: DMatrix3x3,
+    FMatrix3x4Array: FMatrix3x4,
+    DMatrix3x4Array: DMatrix3x4,
+    FMatrix4x2Array: FMatrix4x2,
+    DMatrix4x2Array: DMatrix4x2,
+    FMatrix4x3Array: FMatrix4x3,
+    DMatrix4x3Array: DMatrix4x3,
+    FMatrix4x4Array: FMatrix4x4,
+    DMatrix4x4Array: DMatrix4x4,
+    FArray: ctypes.c_float,
+    DArray: ctypes.c_double,
+    I8Array: ctypes.c_int8,
+    U8Array: ctypes.c_uint8,
+    I16Array: ctypes.c_int16,
+    U16Array: ctypes.c_uint16,
+    I32Array: ctypes.c_int32,
+    U32Array: ctypes.c_uint32
+}
 
 
 BUFFER_VIEW_TYPE_TO_VERTEX_ATTRIB_POINTER: Final = {

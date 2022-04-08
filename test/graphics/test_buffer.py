@@ -6,17 +6,33 @@ from gamut._glcontext import get_gl_context
 from gamut.graphics import (Buffer, BufferFrequency, BufferNature, BufferView,
                             BufferViewMap, Shader)
 from gamut.graphics._buffer import use_buffer_view_map_with_shader
-from gamut.math import (DMatrix2x2, DMatrix2x3, DMatrix2x4, DMatrix3x2,
-                        DMatrix3x3, DMatrix3x4, DMatrix4x2, DMatrix4x3,
-                        DMatrix4x4, DVector2, DVector3, DVector4, FMatrix2x2,
-                        FMatrix2x3, FMatrix2x4, FMatrix3x2, FMatrix3x3,
-                        FMatrix3x4, FMatrix4x2, FMatrix4x3, FMatrix4x4,
-                        FVector2, FVector3, FVector4, I8Vector2, I8Vector3,
-                        I8Vector4, I16Vector2, I16Vector3, I16Vector4,
-                        I32Vector2, I32Vector3, I32Vector4, U8Vector2,
-                        U8Vector3, U8Vector4, U16Vector2, U16Vector3,
-                        U16Vector4, U32Vector2, U32Vector3, U32Vector4,
-                        U64Vector2)
+from gamut.math import (DArray, DMatrix2x2, DMatrix2x2Array, DMatrix2x3,
+                        DMatrix2x3Array, DMatrix2x4, DMatrix2x4Array,
+                        DMatrix3x2, DMatrix3x2Array, DMatrix3x3,
+                        DMatrix3x3Array, DMatrix3x4, DMatrix3x4Array,
+                        DMatrix4x2, DMatrix4x2Array, DMatrix4x3,
+                        DMatrix4x3Array, DMatrix4x4, DMatrix4x4Array, DVector2,
+                        DVector2Array, DVector3, DVector3Array, DVector4,
+                        DVector4Array, FArray, FMatrix2x2, FMatrix2x2Array,
+                        FMatrix2x3, FMatrix2x3Array, FMatrix2x4,
+                        FMatrix2x4Array, FMatrix3x2, FMatrix3x2Array,
+                        FMatrix3x3, FMatrix3x3Array, FMatrix3x4,
+                        FMatrix3x4Array, FMatrix4x2, FMatrix4x2Array,
+                        FMatrix4x3, FMatrix4x3Array, FMatrix4x4,
+                        FMatrix4x4Array, FVector2, FVector2Array, FVector3,
+                        FVector3Array, FVector4, FVector4Array, I8Array,
+                        I8Vector2, I8Vector2Array, I8Vector3, I8Vector3Array,
+                        I8Vector4, I8Vector4Array, I16Array, I16Vector2,
+                        I16Vector2Array, I16Vector3, I16Vector3Array,
+                        I16Vector4, I16Vector4Array, I32Array, I32Vector2,
+                        I32Vector2Array, I32Vector3, I32Vector3Array,
+                        I32Vector4, I32Vector4Array, U8Array, U8Vector2,
+                        U8Vector2Array, U8Vector3, U8Vector3Array, U8Vector4,
+                        U8Vector4Array, U16Array, U16Vector2, U16Vector2Array,
+                        U16Vector3, U16Vector3Array, U16Vector4,
+                        U16Vector4Array, U32Array, U32Vector2, U32Vector2Array,
+                        U32Vector3, U32Vector3Array, U32Vector4,
+                        U32Vector4Array, U64Vector2)
 # python
 import ctypes
 import gc
@@ -371,6 +387,73 @@ def test_view_init(data_type: Any) -> None:
     assert view.offset == 0
     assert view.instancing_divisor is None
     assert len(view) == 0
+
+
+@pytest.mark.parametrize("array, data_type", [
+    [FVector2Array(FVector2(-1), FVector2(1)), FVector2],
+    [DVector2Array(DVector2(-1), DVector2(1)), DVector2],
+    [I8Vector2Array(I8Vector2(-1), I8Vector2(1)), I8Vector2],
+    [U8Vector2Array(U8Vector2(0), U8Vector2(1)), U8Vector2],
+    [I16Vector2Array(I16Vector2(-1), I16Vector2(1)), I16Vector2],
+    [U16Vector2Array(U16Vector2(0), U16Vector2(1)), U16Vector2],
+    [I32Vector2Array(I32Vector2(-1), I32Vector2(1)), I32Vector2],
+    [U32Vector2Array(U32Vector2(0), U32Vector2(1)), U32Vector2],
+    [FVector3Array(FVector3(-1), FVector3(1)), FVector3],
+    [DVector3Array(DVector3(-1), DVector3(1)), DVector3],
+    [I8Vector3Array(I8Vector3(-1), I8Vector3(1)), I8Vector3],
+    [U8Vector3Array(U8Vector3(0), U8Vector3(1)), U8Vector3],
+    [I16Vector3Array(I16Vector3(-1), I16Vector3(1)), I16Vector3],
+    [U16Vector3Array(U16Vector3(0), U16Vector3(1)), U16Vector3],
+    [I32Vector3Array(I32Vector3(-1), I32Vector3(1)), I32Vector3],
+    [U32Vector3Array(U32Vector3(0), U32Vector3(1)), U32Vector3],
+    [FVector4Array(FVector4(-1), FVector4(1)), FVector4],
+    [DVector4Array(DVector4(-1), DVector4(1)), DVector4],
+    [I8Vector4Array(I8Vector4(-1), I8Vector4(1)), I8Vector4],
+    [U8Vector4Array(U8Vector4(0), U8Vector4(1)), U8Vector4],
+    [I16Vector4Array(I16Vector4(-1), I16Vector4(1)), I16Vector4],
+    [U16Vector4Array(U16Vector4(0), U16Vector4(1)), U16Vector4],
+    [I32Vector4Array(I32Vector4(-1), I32Vector4(1)), I32Vector4],
+    [U32Vector4Array(U32Vector4(0), U32Vector4(1)), U32Vector4],
+    [FMatrix2x2Array(FMatrix2x2(-1), FMatrix2x2(1)), FMatrix2x2],
+    [DMatrix2x2Array(DMatrix2x2(-1), DMatrix2x2(1)), DMatrix2x2],
+    [FMatrix2x3Array(FMatrix2x3(-1), FMatrix2x3(1)), FMatrix2x3],
+    [DMatrix2x3Array(DMatrix2x3(-1), DMatrix2x3(1)), DMatrix2x3],
+    [FMatrix2x4Array(FMatrix2x4(-1), FMatrix2x4(1)), FMatrix2x4],
+    [DMatrix2x4Array(DMatrix2x4(-1), DMatrix2x4(1)), DMatrix2x4],
+    [FMatrix3x2Array(FMatrix3x2(-1), FMatrix3x2(1)), FMatrix3x2],
+    [DMatrix3x2Array(DMatrix3x2(-1), DMatrix3x2(1)), DMatrix3x2],
+    [FMatrix3x3Array(FMatrix3x3(-1), FMatrix3x3(1)), FMatrix3x3],
+    [DMatrix3x3Array(DMatrix3x3(-1), DMatrix3x3(1)), DMatrix3x3],
+    [FMatrix3x4Array(FMatrix3x4(-1), FMatrix3x4(1)), FMatrix3x4],
+    [DMatrix3x4Array(DMatrix3x4(-1), DMatrix3x4(1)), DMatrix3x4],
+    [FMatrix4x2Array(FMatrix4x2(-1), FMatrix4x2(1)), FMatrix4x2],
+    [DMatrix4x2Array(DMatrix4x2(-1), DMatrix4x2(1)), DMatrix4x2],
+    [FMatrix4x3Array(FMatrix4x3(-1), FMatrix4x3(1)), FMatrix4x3],
+    [DMatrix4x3Array(DMatrix4x3(-1), DMatrix4x3(1)), DMatrix4x3],
+    [FMatrix4x4Array(FMatrix4x4(-1), FMatrix4x4(1)), FMatrix4x4],
+    [DMatrix4x4Array(DMatrix4x4(-1), DMatrix4x4(1)), DMatrix4x4],
+    [FArray(-1, 1), ctypes.c_float],
+    [DArray(-1, 1), ctypes.c_double],
+    [I8Array(-1, 1), ctypes.c_int8],
+    [U8Array(0, 1), ctypes.c_uint8],
+    [I16Array(-1, 1), ctypes.c_int16],
+    [U16Array(0, 1), ctypes.c_uint16],
+    [I32Array(-1, 1), ctypes.c_int32],
+    [U32Array(0, 1), ctypes.c_uint32]
+])
+@pytest.mark.parametrize("instancing_divisor", [None, 1])
+def test_view_from_array(
+    array: Any,
+    data_type: Any,
+    instancing_divisor: Any,
+) -> None:
+    view = BufferView.from_array(array, instancing_divisor=instancing_divisor)
+    assert view.buffer.bytes == bytes(array)
+    assert view.type is data_type
+    assert view.stride == get_size_of(data_type)
+    assert view.offset == 0
+    assert view.instancing_divisor == instancing_divisor
+    assert list(view) == list(array)
 
 
 @pytest.mark.parametrize("data_type", VIEW_DATA_TYPES)
