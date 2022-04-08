@@ -81,7 +81,7 @@ sections = [
     'SETUPTOOLS',
     'SORTEDCONTAINERS',
     'UHARFBUZZ',
-    'TYPING_EXTENSIONS'
+    'TYPING_EXTENSIONS',
     'THIRDPARTY'
 ]
 no_lines_before = [
