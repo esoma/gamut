@@ -57,8 +57,6 @@ __all__ = [
     'Quaternion', 'QuaternionArray',
 ]
 
-from typing_extensions import TypeAlias
-
 # gamut
 from ._math import (BArray, BVector1, BVector1Array, BVector2, BVector2Array,
                     BVector3, BVector3Array, BVector4, BVector4Array, DArray,
@@ -98,6 +96,8 @@ from ._math import (BArray, BVector1, BVector1Array, BVector2, BVector2Array,
                     U64Vector4, U64Vector4Array, UArray, UVector1,
                     UVector1Array, UVector2, UVector2Array, UVector3,
                     UVector3Array, UVector4, UVector4Array)
+# typing_extensions
+from typing_extensions import TypeAlias
 
 Vector1: TypeAlias = DVector1
 Vector2: TypeAlias = DVector2
