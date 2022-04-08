@@ -16,7 +16,7 @@ class Cone(Generic[VT, QT]):
 
     @overload
     def __init__(
-        self: BoundingBox3d[FVector3, FQuaternion],
+        self: Cone[FVector3, FQuaternion],
         center: FVector3,
         radius: float,
         height: float,
@@ -27,7 +27,7 @@ class Cone(Generic[VT, QT]):
 
     @overload
     def __init__(
-        self: BoundingBox3d[DVector3, DQuaternion],
+        self: Cone[DVector3, DQuaternion],
         center: DVector3,
         radius: float,
         height: float,
