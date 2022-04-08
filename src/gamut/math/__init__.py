@@ -96,44 +96,58 @@ from ._math import (BArray, BVector1, BVector1Array, BVector2, BVector2Array,
                     U64Vector4, U64Vector4Array, UArray, UVector1,
                     UVector1Array, UVector2, UVector2Array, UVector3,
                     UVector3Array, UVector4, UVector4Array)
+# python
+from typing import TypeAlias
 
-Vector1 = DVector1
-Vector2 = DVector2
-Vector3 = DVector3
-Vector4 = DVector4
+Vector1: TypeAlias = DVector1
+Vector2: TypeAlias = DVector2
+Vector3: TypeAlias = DVector3
+Vector4: TypeAlias = DVector4
 
-Vector1Array = DVector1Array
-Vector2Array = DVector2Array
-Vector3Array = DVector3Array
-Vector4Array = DVector4Array
+Vector1Array: TypeAlias = DVector1Array
+Vector2Array: TypeAlias = DVector2Array
+Vector3Array: TypeAlias = DVector3Array
+Vector4Array: TypeAlias = DVector4Array
 
-FMatrix2 = FMatrix2x2
-FMatrix3 = FMatrix3x3
-FMatrix4 = FMatrix4x4
+FMatrix2: TypeAlias = FMatrix2x2
+FMatrix3: TypeAlias = FMatrix3x3
+FMatrix4: TypeAlias = FMatrix4x4
 
-FMatrix2Array = FMatrix2x2Array
-FMatrix3Array = FMatrix3x3Array
-FMatrix4Array = FMatrix4x4Array
+FMatrix2Array: TypeAlias = FMatrix2x2Array
+FMatrix3Array: TypeAlias = FMatrix3x3Array
+FMatrix4Array: TypeAlias = FMatrix4x4Array
 
-Matrix2x2 = Matrix2 = DMatrix2 = DMatrix2x2
-Matrix2x3 = DMatrix2x3
-Matrix2x4 = DMatrix2x4
-Matrix3x2 = DMatrix3x2
-Matrix3x3 = Matrix3 = DMatrix3 = DMatrix3x3
-Matrix3x4 = DMatrix3x4
-Matrix4x2 = DMatrix4x2
-Matrix4x3 = DMatrix4x3
-Matrix4x4 = Matrix4 = DMatrix4 = DMatrix4x4
+Matrix2x2: TypeAlias = DMatrix2x2
+Matrix2: TypeAlias = DMatrix2x2
+DMatrix2: TypeAlias = DMatrix2x2
+Matrix2x3: TypeAlias = DMatrix2x3
+Matrix2x4: TypeAlias = DMatrix2x4
+Matrix3x2: TypeAlias = DMatrix3x2
+Matrix3x3: TypeAlias = DMatrix3x3
+Matrix3: TypeAlias = DMatrix3x3
+DMatrix3: TypeAlias = DMatrix3x3
+Matrix3x4: TypeAlias = DMatrix3x4
+Matrix4x2: TypeAlias = DMatrix4x2
+Matrix4x3: TypeAlias = DMatrix4x3
+Matrix4x4: TypeAlias = DMatrix4x4
+Matrix4: TypeAlias = DMatrix4x4
+DMatrix4: TypeAlias = DMatrix4x4
 
-Matrix2x2Array = Matrix2Array = DMatrix2Array = DMatrix2x2Array
-Matrix2x3Array = DMatrix2x3Array
-Matrix2x4Array = DMatrix2x4Array
-Matrix3x2Array = DMatrix3x2Array
-Matrix3x3Array = Matrix3Array = DMatrix3Array = DMatrix3x3Array
-Matrix3x4Array = DMatrix3x4Array
-Matrix4x2Array = DMatrix4x2Array
-Matrix4x3Array = DMatrix4x3Array
-Matrix4x4Array = Matrix4Array = DMatrix4Array = DMatrix4x4Array
+Matrix2x2Array: TypeAlias = DMatrix2x2Array
+Matrix2Array: TypeAlias = DMatrix2x2Array
+DMatrix2Array: TypeAlias = DMatrix2x2Array
+Matrix2x3Array: TypeAlias = DMatrix2x3Array
+Matrix2x4Array: TypeAlias = DMatrix2x4Array
+Matrix3x2Array: TypeAlias = DMatrix3x2Array
+Matrix3x3Array: TypeAlias = DMatrix3x3Array
+Matrix3Array: TypeAlias = DMatrix3x3Array
+DMatrix3Array: TypeAlias = DMatrix3x3Array
+Matrix3x4Array: TypeAlias = DMatrix3x4Array
+Matrix4x2Array: TypeAlias = DMatrix4x2Array
+Matrix4x3Array: TypeAlias = DMatrix4x3Array
+Matrix4x4Array: TypeAlias = DMatrix4x4Array
+Matrix4Array: TypeAlias = DMatrix4x4Array
+DMatrix4Array: TypeAlias = DMatrix4x4Array
 
-Quaternion = DQuaternion
-QuaternionArray = DQuaternionArray
+Quaternion: TypeAlias = DQuaternion
+QuaternionArray: TypeAlias = DQuaternionArray
