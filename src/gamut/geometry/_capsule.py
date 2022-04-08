@@ -25,7 +25,6 @@ class Capsule(Generic[VT, QT]):
     ):
         ...
 
-
     @overload
     def __init__(
         self: BoundingBox3d[DVector3, DQuaternion],

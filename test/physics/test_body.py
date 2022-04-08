@@ -562,6 +562,7 @@ def test_initial_shape_static_only(shape: Any, body_type: BodyType) -> None:
 @pytest.mark.parametrize("shape", [
     Sphere(DVector3(0), 1),
     Plane(1, DVector3(0, 1, 0)),
+    Cylinder(FVector3(0), 1, 1),
     Cylinder(DVector3(0), 1, 1),
     Cone(FVector3(0), 1, 1),
     Cone(DVector3(0), 1, 1),

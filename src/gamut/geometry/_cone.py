@@ -25,7 +25,6 @@ class Cone(Generic[VT, QT]):
     ):
         ...
 
-
     @overload
     def __init__(
         self: BoundingBox3d[DVector3, DQuaternion],
@@ -75,7 +74,7 @@ class Cone(Generic[VT, QT]):
     def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other: Cone) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Cone):
             return False
         return (
