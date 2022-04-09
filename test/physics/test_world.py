@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import Sphere
-from gamut.math import FVector3, Matrix4, Vector3
+from gamut.math import DMatrix4, DVector3, FVector3
 from gamut.physics import Body, RaycastHit, World
 # python
 from datetime import timedelta
@@ -41,21 +41,21 @@ def test_repr() -> None:
 
 def test_default_gravity() -> None:
     w = World(timedelta(seconds=1))
-    assert isinstance(w.gravity, Vector3)
-    assert w.gravity == Vector3(0)
+    assert isinstance(w.gravity, DVector3)
+    assert w.gravity == DVector3(0)
 
 
 @pytest.mark.parametrize("gravity", [
-    Vector3(1, 2, 3),
-    Vector3(4, 5, 6),
-    Vector3(7, 8, 9),
+    DVector3(1, 2, 3),
+    DVector3(4, 5, 6),
+    DVector3(7, 8, 9),
 ])
-def test_gravity_change(gravity: Vector3) -> None:
+def test_gravity_change(gravity: DVector3) -> None:
     w = World(timedelta(seconds=1))
     w.gravity = gravity
     assert w.gravity == gravity
     assert w.gravity is not gravity
-    assert isinstance(w.gravity, Vector3)
+    assert isinstance(w.gravity, DVector3)
 
 
 @pytest.mark.parametrize("gravity", [
@@ -76,7 +76,7 @@ def test_bodies() -> None:
     w = World(timedelta(seconds=1))
     assert not w.bodies
 
-    b1 = Body(1, Sphere(Vector3(0), 1), world=w)
+    b1 = Body(1, Sphere(DVector3(0), 1), world=w)
     assert len(w.bodies) == 1
     assert b1 in w.bodies
 
@@ -118,68 +118,68 @@ def test_invalid_fixed_time_step_value(duration: timedelta) -> None:
 def test_raycast_start_invalid(start: Any) -> None:
     w = World(timedelta(seconds=1))
     with pytest.raises(TypeError):
-        w.raycast(start, Vector3(0))
+        w.raycast(start, DVector3(0))
 
 
 @pytest.mark.parametrize("end", [None, (1, 2, 3), FVector3(1)])
 def test_raycast_end_invalid(end: Any) -> None:
     w = World(timedelta(seconds=1))
     with pytest.raises(TypeError):
-        w.raycast(Vector3(0), end)
+        w.raycast(DVector3(0), end)
 
 
 def test_raycast() -> None:
     w = World(timedelta(seconds=1))
-    b1 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b1.transform = Matrix4(1).translate(Vector3(5, 0, 0))
-    b2 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b2.transform = Matrix4(1).translate(Vector3(-5, 0, 0))
-    b3 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b3.transform = Matrix4(1).translate(Vector3(7, 0, 0))
-    b4 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b4.transform = Matrix4(1).translate(Vector3(12, 0, 0))
+    b1 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b1.transform = DMatrix4(1).translate(DVector3(5, 0, 0))
+    b2 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b2.transform = DMatrix4(1).translate(DVector3(-5, 0, 0))
+    b3 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b3.transform = DMatrix4(1).translate(DVector3(7, 0, 0))
+    b4 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b4.transform = DMatrix4(1).translate(DVector3(12, 0, 0))
 
-    hit = w.raycast(Vector3(0), Vector3(10, 0, 0))
+    hit = w.raycast(DVector3(0), DVector3(10, 0, 0))
     assert isinstance(hit, RaycastHit)
-    assert isinstance(hit.position, Vector3)
-    assert hit.position == Vector3(4, 0, 0)
-    assert isinstance(hit.normal, Vector3)
-    assert hit.normal == Vector3(-1, 0, 0)
+    assert isinstance(hit.position, DVector3)
+    assert hit.position == DVector3(4, 0, 0)
+    assert isinstance(hit.normal, DVector3)
+    assert hit.normal == DVector3(-1, 0, 0)
     assert hit.body is b1
     assert hit.time == 0.4
 
-    hit = w.raycast(Vector3(10, 0, 0), Vector3(0))
+    hit = w.raycast(DVector3(10, 0, 0), DVector3(0))
     assert isinstance(hit, RaycastHit)
-    assert isinstance(hit.position, Vector3)
-    assert hit.position == Vector3(8, 0, 0)
-    assert isinstance(hit.normal, Vector3)
-    assert hit.normal == Vector3(1, 0, 0)
+    assert isinstance(hit.position, DVector3)
+    assert hit.position == DVector3(8, 0, 0)
+    assert isinstance(hit.normal, DVector3)
+    assert hit.normal == DVector3(1, 0, 0)
     assert hit.body is b3
     assert hit.time == 0.2
 
 
 def test_raycast_sphere() -> None:
     w = World(timedelta(seconds=1))
-    b1 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b1.transform = Matrix4(1).translate(Vector3(5, 0, 0))
-    b2 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b2.transform = Matrix4(1).translate(Vector3(-5, 0, 0))
-    b3 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b3.transform = Matrix4(1).translate(Vector3(7, 0, 0))
-    b4 = Body(1, Sphere(Vector3(0), 1), world=w)
-    b4.transform = Matrix4(1).translate(Vector3(13, 0, 0))
+    b1 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b1.transform = DMatrix4(1).translate(DVector3(5, 0, 0))
+    b2 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b2.transform = DMatrix4(1).translate(DVector3(-5, 0, 0))
+    b3 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b3.transform = DMatrix4(1).translate(DVector3(7, 0, 0))
+    b4 = Body(1, Sphere(DVector3(0), 1), world=w)
+    b4.transform = DMatrix4(1).translate(DVector3(13, 0, 0))
 
     hit = w.raycast(
-        Vector3(0, 0, 1.5),
-        Vector3(10, 0, 1.5),
-        shape=Sphere(Vector3(0), 1)
+        DVector3(0, 0, 1.5),
+        DVector3(10, 0, 1.5),
+        shape=Sphere(DVector3(0), 1)
     )
     assert isinstance(hit, RaycastHit)
-    assert isinstance(hit.position, Vector3)
+    assert isinstance(hit.position, DVector3)
     assert is_close(hit.position.x, 4.338153699186215)
     assert is_close(hit.position.y, 0)
     assert is_close(hit.position.z, 0.7496395627894177)
-    assert isinstance(hit.normal, Vector3)
+    assert isinstance(hit.normal, DVector3)
     assert is_close(hit.normal.x, -0.6618463008137848)
     assert is_close(hit.normal.y, 0)
     assert is_close(hit.normal.z, 0.7496395627894177)
@@ -187,14 +187,14 @@ def test_raycast_sphere() -> None:
     assert is_close(hit.time, 0.3675670948413434)
 
     hit = w.raycast(
-        Vector3(10, 0, 0),
-        Vector3(0),
-        shape=Sphere(Vector3(0), 1)
+        DVector3(10, 0, 0),
+        DVector3(0),
+        shape=Sphere(DVector3(0), 1)
     )
     assert isinstance(hit, RaycastHit)
-    assert isinstance(hit.position, Vector3)
-    assert hit.position == Vector3(8, 0, 0)
-    assert isinstance(hit.normal, Vector3)
-    assert hit.normal == Vector3(1, 0, 0)
+    assert isinstance(hit.position, DVector3)
+    assert hit.position == DVector3(8, 0, 0)
+    assert isinstance(hit.normal, DVector3)
+    assert hit.normal == DVector3(1, 0, 0)
     assert hit.body is b3
     assert is_close(hit.time, 0.09992300362041014)

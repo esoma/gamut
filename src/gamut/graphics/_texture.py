@@ -25,6 +25,7 @@ from gamut._glcontext import (get_gl_context, release_gl_context,
                               require_gl_context)
 from gamut.math import FVector4, UVector1, UVector2, UVector3
 # python
+# DVector4
 import ctypes
 from ctypes import c_uint32
 from ctypes import sizeof as c_sizeof

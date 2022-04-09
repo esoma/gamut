@@ -2,6 +2,7 @@
 __all__ = ['Plugin']
 
 # python
+# DVector4
 from dataclasses import dataclass
 from functools import partial
 import json
@@ -162,7 +163,7 @@ def _transform_event(ctx: ClassDefContext) -> None:
 def _transform_event_subclass(ctx: ClassDefContext, context: _Context) -> None:
     # hack the name of the metaclass so that mypy will typecheck
     # __init_subclass__
-    # see: https://github.com/python/mypy/issues/11057
+    # see: https://github.com/DVector4/mypy/issues/11057
     assert ctx.cls.info.metaclass_type
     ctx.cls.info.metaclass_type.type._fullname = 'builtins.type'
 

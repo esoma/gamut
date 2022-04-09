@@ -13,7 +13,6 @@ __all__ = [
     'U32Vector1', 'U32Vector2', 'U32Vector3', 'U32Vector4',
     'UVector1', 'UVector2', 'UVector3', 'UVector4',
     'U64Vector1', 'U64Vector2', 'U64Vector3', 'U64Vector4',
-    'Vector1', 'Vector2', 'Vector3', 'Vector4',
     'FMatrix2x2', 'FMatrix2x3', 'FMatrix2x4',
     'FMatrix3x2', 'FMatrix3x3', 'FMatrix3x4',
     'FMatrix4x2', 'FMatrix4x3', 'FMatrix4x4',
@@ -22,14 +21,10 @@ __all__ = [
     'DMatrix4x2', 'DMatrix4x3', 'DMatrix4x4',
     'FMatrix2', 'FMatrix3', 'FMatrix4',
     'DMatrix2', 'DMatrix3', 'DMatrix4',
-    'Matrix2x2', 'Matrix2x3', 'Matrix2x4',
-    'Matrix3x2', 'Matrix3x3', 'Matrix3x4',
-    'Matrix4x2', 'Matrix4x3', 'Matrix4x4',
-    'Matrix2', 'Matrix3', 'Matrix4',
     'DMatrix2x2Array', 'DMatrix2x3Array', 'DMatrix2x4Array',
     'DMatrix3x2Array', 'DMatrix3x3Array', 'DMatrix3x4Array',
     'DMatrix4x2Array', 'DMatrix4x3Array', 'DMatrix4x4Array',
-    'DVector2Array', 'DVector3Array', 'DVector4Array',
+    'DVector1Array', 'DVector2Array', 'DVector3Array', 'DVector4Array',
     'FMatrix2x2Array', 'FMatrix2x3Array', 'FMatrix2x4Array',
     'FMatrix3x2Array', 'FMatrix3x3Array', 'FMatrix3x4Array',
     'FMatrix4x2Array', 'FMatrix4x3Array', 'FMatrix4x4Array',
@@ -54,7 +49,6 @@ __all__ = [
     'I64Array', 'U64Array',
     'FQuaternion', 'FQuaternionArray',
     'DQuaternion', 'DQuaternionArray',
-    'Quaternion', 'QuaternionArray',
 ]
 
 # gamut
@@ -99,16 +93,6 @@ from ._math import (BArray, BVector1, BVector1Array, BVector2, BVector2Array,
 # typing_extensions
 from typing_extensions import TypeAlias
 
-Vector1: TypeAlias = DVector1
-Vector2: TypeAlias = DVector2
-Vector3: TypeAlias = DVector3
-Vector4: TypeAlias = DVector4
-
-Vector1Array: TypeAlias = DVector1Array
-Vector2Array: TypeAlias = DVector2Array
-Vector3Array: TypeAlias = DVector3Array
-Vector4Array: TypeAlias = DVector4Array
-
 FMatrix2: TypeAlias = FMatrix2x2
 FMatrix3: TypeAlias = FMatrix3x3
 FMatrix4: TypeAlias = FMatrix4x4
@@ -117,37 +101,10 @@ FMatrix2Array: TypeAlias = FMatrix2x2Array
 FMatrix3Array: TypeAlias = FMatrix3x3Array
 FMatrix4Array: TypeAlias = FMatrix4x4Array
 
-Matrix2x2: TypeAlias = DMatrix2x2
-Matrix2: TypeAlias = DMatrix2x2
 DMatrix2: TypeAlias = DMatrix2x2
-Matrix2x3: TypeAlias = DMatrix2x3
-Matrix2x4: TypeAlias = DMatrix2x4
-Matrix3x2: TypeAlias = DMatrix3x2
-Matrix3x3: TypeAlias = DMatrix3x3
-Matrix3: TypeAlias = DMatrix3x3
 DMatrix3: TypeAlias = DMatrix3x3
-Matrix3x4: TypeAlias = DMatrix3x4
-Matrix4x2: TypeAlias = DMatrix4x2
-Matrix4x3: TypeAlias = DMatrix4x3
-Matrix4x4: TypeAlias = DMatrix4x4
-Matrix4: TypeAlias = DMatrix4x4
 DMatrix4: TypeAlias = DMatrix4x4
 
-Matrix2x2Array: TypeAlias = DMatrix2x2Array
-Matrix2Array: TypeAlias = DMatrix2x2Array
 DMatrix2Array: TypeAlias = DMatrix2x2Array
-Matrix2x3Array: TypeAlias = DMatrix2x3Array
-Matrix2x4Array: TypeAlias = DMatrix2x4Array
-Matrix3x2Array: TypeAlias = DMatrix3x2Array
-Matrix3x3Array: TypeAlias = DMatrix3x3Array
-Matrix3Array: TypeAlias = DMatrix3x3Array
 DMatrix3Array: TypeAlias = DMatrix3x3Array
-Matrix3x4Array: TypeAlias = DMatrix3x4Array
-Matrix4x2Array: TypeAlias = DMatrix4x2Array
-Matrix4x3Array: TypeAlias = DMatrix4x3Array
-Matrix4x4Array: TypeAlias = DMatrix4x4Array
-Matrix4Array: TypeAlias = DMatrix4x4Array
 DMatrix4Array: TypeAlias = DMatrix4x4Array
-
-Quaternion: TypeAlias = DQuaternion
-QuaternionArray: TypeAlias = DQuaternionArray

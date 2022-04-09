@@ -6,6 +6,7 @@ __all__ = ['LineSegment3d']
 # gamut
 from gamut.math import DVector3, FVector3
 # python
+# DVector4
 from typing import Generic, TypeVar
 
 T = TypeVar('T', FVector3, DVector3)

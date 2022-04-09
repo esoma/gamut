@@ -26,6 +26,7 @@ from gamut._sdl import (sdl_event_callback_map, SDL_MOUSE_KEY,
 from gamut._window import get_window_from_sdl_id, Window
 from gamut.math import IVector2
 # python
+# DVector4
 from typing import Any, Optional, TYPE_CHECKING, Union
 from weakref import ref
 # pysdl2

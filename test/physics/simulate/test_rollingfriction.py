@@ -1,7 +1,8 @@
 
 # gamut
 from gamut.geometry import Composite3d, Mesh3d, Plane, Sphere
-from gamut.math import Matrix4, UVector3, UVector3Array, Vector3, Vector3Array
+from gamut.math import (DMatrix4, DVector3, DVector3Array, UVector3,
+                        UVector3Array)
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -24,14 +25,14 @@ def test_no_rolling_friction(
     floor_friction: float
 ) -> None:
     w = World(timedelta(seconds=1 / 60.0))
-    w.gravity = Vector3(0, -1, 0)
+    w.gravity = DVector3(0, -1, 0)
 
-    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.DYNAMIC)
-    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
+    ball = Body(1, Sphere(DVector3(0), 1), world=w, type=BodyType.DYNAMIC)
+    ball.transform = DMatrix4(1).translate(DVector3(0, 1, 0))
     ball.rolling_friction = ball_rolling_friction
-    ball.angular_velocity = Vector3(1, 0, 0)
+    ball.angular_velocity = DVector3(1, 0, 0)
 
-    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, DVector3(0, 1, 0)), world=w, type=BodyType.STATIC)
     floor.friction = floor_friction
 
     w.simulate(timedelta(seconds=5))
@@ -50,32 +51,38 @@ def test_rolling_friction() -> None:
         nonlocal ball_2
         nonlocal w
         w = World(timedelta(seconds=1 / 60.0))
-        w.gravity = Vector3(0, -1, 0)
+        w.gravity = DVector3(0, -1, 0)
 
-        ball_1 = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.DYNAMIC)
+        ball_1 = Body(
+            1,
+            Sphere(DVector3(0), 1), world=w, type=BodyType.DYNAMIC
+        )
         ball_1.rolling_friction = .5
-        ball_1.transform = Matrix4(1).translate(Vector3(5, 1.1, -5))
-        ball_1.angular_velocity = Vector3(1, 0, 0)
+        ball_1.transform = DMatrix4(1).translate(DVector3(5, 1.1, -5))
+        ball_1.angular_velocity = DVector3(1, 0, 0)
 
-        ball_2 = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.DYNAMIC)
+        ball_2 = Body(
+            1,
+            Sphere(DVector3(0), 1), world=w, type=BodyType.DYNAMIC
+        )
         ball_2.rolling_friction = .5
-        ball_2.transform = Matrix4(1).translate(Vector3(-5, 1.1, 5))
-        ball_2.angular_velocity = Vector3(1, 0, 0)
+        ball_2.transform = DMatrix4(1).translate(DVector3(-5, 1.1, 5))
+        ball_2.angular_velocity = DVector3(1, 0, 0)
 
     floor_shape = Composite3d(
         Mesh3d(
-            Vector3Array(
-                Vector3(10, 0, 10),
-                Vector3(10, 0, -10),
-                Vector3(-10, 0, -10)
+            DVector3Array(
+                DVector3(10, 0, 10),
+                DVector3(10, 0, -10),
+                DVector3(-10, 0, -10)
             ),
             UVector3Array(UVector3(0, 1, 2)),
         ),
         Mesh3d(
-            Vector3Array(
-                Vector3(10, 0, 10),
-                Vector3(-10, 0, 10),
-                Vector3(-10, 0, -10)
+            DVector3Array(
+                DVector3(10, 0, 10),
+                DVector3(-10, 0, 10),
+                DVector3(-10, 0, -10)
             ),
             UVector3Array(UVector3(0, 1, 2)),
         ),

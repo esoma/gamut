@@ -20,6 +20,7 @@ from gamut._glcontext import (get_gl_context, release_gl_context,
 from gamut._window import get_sdl_window_from_window, Window
 from gamut.math import DVector3, FVector4, UVector1, UVector2
 # python
+# DVector4
 from ctypes import byref as c_byref
 from ctypes import c_int
 from enum import Enum

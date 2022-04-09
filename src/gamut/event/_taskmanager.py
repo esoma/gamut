@@ -6,6 +6,7 @@ __all__ = ['TaskManager', 'TaskManagerIgnoredException']
 # gamut
 from ._task import Task, TaskStatus
 # python
+# DVector4
 from collections import deque
 from typing import Any, ClassVar, final, Optional, TypeVar
 

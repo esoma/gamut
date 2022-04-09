@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.math import IVector2, UVector2, Vector2
+from gamut.math import DVector2, IVector2, UVector2
 from gamut.text import (BreakChunk, Face, Font, PositionedGlyph,
                         RenderedGlyphFormat)
 # python
@@ -95,7 +95,7 @@ def test_layout_text_no_wrap(max_line_size: Optional[int]) -> None:
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, Vector2)
+        assert isinstance(glyph.position, DVector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 11
@@ -147,7 +147,7 @@ def test_layout_text_wrap(
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, Vector2)
+        assert isinstance(glyph.position, DVector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4
@@ -185,7 +185,7 @@ def test_layout_text_wrap_force(
     ) -> None:
         assert glyph.character == character
         assert glyph.glyph_index == glyph_index
-        assert isinstance(glyph.position, Vector2)
+        assert isinstance(glyph.position, DVector2)
         assert glyph.position.x == pytest.approx(x, abs=1e-1)
         assert glyph.position.y == pytest.approx(y, abs=1e-1)
     assert len(positioned_glyphs) == 4

@@ -1,10 +1,10 @@
 
 # gamut
 from gamut.geometry import Mesh3d
-from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
-                        FVector3Array, U8Vector3, U8Vector3Array, U16Vector3,
-                        U16Vector3Array, U32Vector3, U32Vector3Array, UVector3,
-                        UVector3Array, Vector2, Vector4)
+from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, DVector4,
+                        FMatrix4, FVector3, FVector3Array, U8Vector3,
+                        U8Vector3Array, U16Vector3, U16Vector3Array,
+                        U32Vector3, U32Vector3Array, UVector3, UVector3Array)
 # python
 from math import radians
 from typing import Any
@@ -45,8 +45,8 @@ def test_no_normals() -> None:
     [None],
     [1],
     ['123'],
-    [Vector2(1)],
-    [Vector4(1)],
+    [DVector2(1)],
+    [DVector4(1)],
 ])
 def test_positions_invalid_type(positions: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
@@ -60,8 +60,8 @@ def test_positions_invalid_type(positions: Any) -> None:
     [None],
     [1],
     ['123'],
-    [Vector2(1)],
-    [Vector4(1)],
+    [DVector2(1)],
+    [DVector4(1)],
 ])
 def test_normals_invalid_type(normals: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
@@ -97,8 +97,8 @@ def test_no_triangle_indices() -> None:
     [None],
     [1],
     ['123'],
-    [Vector2(1)],
-    [Vector4(1)],
+    [DVector2(1)],
+    [DVector4(1)],
 ])
 def test_triangle_indices_invalid_type(indices: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
@@ -257,7 +257,7 @@ def test_f_transform(mesh: Mesh3d, transform: FMatrix4) -> None:
     Mesh3d(FVector3Array(FVector3(0, 1, 2)), UVector3Array(UVector3(0))),
     Mesh3d(DVector3Array(DVector3(0, 1, 2)), UVector3Array(UVector3(0))),
 ])
-@pytest.mark.parametrize("transform", [None, 123, Vector4(1), Vector2(1)])
+@pytest.mark.parametrize("transform", [None, 123, DVector4(1), DVector2(1)])
 def test_transform_invalid(
     mesh: Mesh3d,
     transform: Any

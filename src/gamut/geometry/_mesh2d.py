@@ -11,6 +11,7 @@ from gamut.math import (DMatrix4, DVector2Array, DVector3, DVector3Array,
                         U8Vector3Array, U16Vector3Array, U32Vector3Array,
                         UVector3Array)
 # python
+# DVector4
 from typing import Generic, overload, TypeVar
 
 VT = TypeVar('VT', FVector3Array, DVector3Array)

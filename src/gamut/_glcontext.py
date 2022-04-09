@@ -11,6 +11,7 @@ __all__ = [
 # gamut
 from ._sdl import sdl_event_callback_map
 # python
+# DVector4
 from ctypes import byref as c_byref
 from queue import Empty as QueueEmpty
 from queue import Queue

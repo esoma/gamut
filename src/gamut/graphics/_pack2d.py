@@ -6,6 +6,7 @@ __all__ = ['Pack2d', 'Packed2dItem']
 # gamut
 from gamut.math import UVector2
 # python
+# DVector4
 from typing import Optional
 
 

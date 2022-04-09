@@ -8,6 +8,7 @@ from ._texture import (MipmapSelection, TextureComponents, TextureFilter,
 # gamut
 from gamut.math import FVector4, UVector2
 # python
+# DVector4
 from ctypes import c_uint8
 from pathlib import Path
 from typing import BinaryIO, Final, Union
@@ -58,7 +59,7 @@ class Image:
         if convert_mode in ['I', 'F']:
             # I and F should convert to L, but pillow has some isues with this,
             # so we must to it manually
-            # https://github.com/python-pillow/Pillow/issues/3011
+            # https://github.com/DVector4-pillow/Pillow/issues/3011
             self._pil = PilImageMath.eval(
                 'image >> 8',
                 image=self._pil.convert('I')

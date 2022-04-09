@@ -9,6 +9,7 @@ from ._triangulate import triangulate_d, triangulate_f
 # gamut
 from gamut.math import DVector2Array, FVector2Array, UVector3Array
 # python
+# DVector4
 from typing import Generic, overload, TypeVar
 
 T = TypeVar('T', FVector2Array, DVector2Array)

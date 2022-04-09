@@ -8,6 +8,7 @@ from ._future import Future
 from ._task import Task
 from ._taskmanager import TaskManager
 # python
+# DVector4
 import inspect
 from typing import (Any, Callable, ClassVar, Generator, Generic, get_origin,
                     Optional, overload, Type, TypeVar, Union)
@@ -15,7 +16,7 @@ from weakref import WeakSet
 
 # there is a lot of hackery going on in this set of classes regarding the
 # typing system, see:
-# see: https://github.com/python/typing/issues/715
+# see: https://github.com/DVector4/typing/issues/715
 
 # roughly, all these type ignores and strange use of TypeVars are because we
 # know that the only class using EventType is Event

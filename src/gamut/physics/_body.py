@@ -12,8 +12,9 @@ from gamut._bullet import Body as BaseBody
 from gamut._bullet import Shape
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh3d, Plane, RectangularCuboid, Sphere)
-from gamut.math import BVector3, Matrix4, Vector3
+from gamut.math import BVector3, DMatrix4, DVector3
 # python
+# DVector4
 from enum import auto, Enum
 from typing import Any, Final, Union
 from weakref import ref, WeakKeyDictionary
@@ -67,9 +68,9 @@ class Body:
         )
         self.type = self._type
 
-        self._kinematic_angular_velocity = Vector3(0)
-        self._kinematic_linear_velocity = Vector3(0)
-        self._gravity: Vector3 | None = None
+        self._kinematic_angular_velocity = DVector3(0)
+        self._kinematic_linear_velocity = DVector3(0)
+        self._gravity: DVector3 | None = None
         self._groups = verify_groups(groups)
         self._mask = verify_mask(mask)
         self._world = None
@@ -121,17 +122,17 @@ class Body:
         self._imp.angular_sleep_threshold = value
 
     @property
-    def angular_velocity(self) -> Vector3:
+    def angular_velocity(self) -> DVector3:
         if self._type == BodyType.DYNAMIC:
             return self._imp.angular_velocity
         elif self._type == BodyType.KINEMATIC:
             return self._kinematic_angular_velocity
         else:
             assert self._type == BodyType.STATIC
-            return Vector3(0)
+            return DVector3(0)
 
     @angular_velocity.setter
-    def angular_velocity(self, value: Vector3) -> None:
+    def angular_velocity(self, value: DVector3) -> None:
         self._imp.angular_velocity = value
         self._kinematic_angular_velocity = value
 
@@ -185,17 +186,17 @@ class Body:
         self._imp.linear_sleep_threshold = value
 
     @property
-    def linear_velocity(self) -> Vector3:
+    def linear_velocity(self) -> DVector3:
         if self._type == BodyType.DYNAMIC:
             return self._imp.linear_velocity
         elif self._type == BodyType.KINEMATIC:
             return self._kinematic_linear_velocity
         else:
             assert self._type == BodyType.STATIC
-            return Vector3(0)
+            return DVector3(0)
 
     @linear_velocity.setter
-    def linear_velocity(self, value: Vector3) -> None:
+    def linear_velocity(self, value: DVector3) -> None:
         self._imp.linear_velocity = value
         self._kinematic_linear_velocity = value
 
@@ -212,18 +213,18 @@ class Body:
         self._imp.friction = value
 
     @property
-    def gravity(self) -> Vector3 | None:
+    def gravity(self) -> DVector3 | None:
         return self._gravity
 
     @gravity.setter
-    def gravity(self, value: Vector3 | None) -> None:
+    def gravity(self, value: DVector3 | None) -> None:
         is_explicit = value is not None
         if value is None:
             world = self.world
             if world:
                 gravity = world.gravity
             else:
-                gravity = Vector3(0)
+                gravity = DVector3(0)
         else:
             gravity = value
         self._imp.set_gravity((is_explicit, gravity))
@@ -266,7 +267,7 @@ class Body:
             _mass_to_implementation_mass(self._mass, self._type)
         )
 
-    def raycast(self, start: Vector3, end: Vector3) -> RaycastHit | None:
+    def raycast(self, start: DVector3, end: DVector3) -> RaycastHit | None:
         world = self.world
         if world is None:
             raise RuntimeError('body must be in a world')
@@ -342,11 +343,11 @@ class Body:
         self._imp.tangible = bool(value)
 
     @property
-    def transform(self) -> Matrix4:
+    def transform(self) -> DMatrix4:
         return self._imp.transform
 
     @transform.setter
-    def transform(self, value: Matrix4) -> None:
+    def transform(self, value: DMatrix4) -> None:
         self._imp.transform = value
 
     @property

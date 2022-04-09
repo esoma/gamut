@@ -6,8 +6,9 @@ __all__ = ['Shape3dCullable', 'Shape3dPointContainer']
 # gamut
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
-from gamut.math import Vector3
+from gamut.math import DVector3
 # python
+# DVector4
 from typing import Protocol, runtime_checkable
 
 
@@ -21,5 +22,5 @@ class Shape3dCullable(Protocol):
 @runtime_checkable
 class Shape3dPointContainer(Protocol):
 
-    def contains_point(self, point: Vector3) -> bool:
+    def contains_point(self, point: DVector3) -> bool:
         ...

@@ -8,6 +8,7 @@ from ._plane import Plane
 # gamut
 from gamut.math import DMatrix4, DVector3, FMatrix4, FVector3
 # python
+# DVector4
 from typing import Generic, overload, TypeVar
 
 VT = TypeVar('VT', FVector3, DVector3)

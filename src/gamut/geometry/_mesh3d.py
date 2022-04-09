@@ -9,6 +9,7 @@ from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
                         FVector3Array, IVector3, IVector3Array, U8Vector3Array,
                         U16Vector3Array, U32Vector3Array, UVector3Array)
 # python
+# DVector4
 from ctypes import c_void_p
 from ctypes import cast as c_cast
 from typing import Generic, overload, TypeVar

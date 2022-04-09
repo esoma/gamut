@@ -10,6 +10,7 @@ import gamut.math
 from gamut.math import (FArray, FMatrix4, FMatrix4Array, FQuaternion, FVector2,
                         FVector3, FVector4, UVector2)
 # python
+# DVector4
 import ctypes
 from enum import Enum
 from io import BytesIO

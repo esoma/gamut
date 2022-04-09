@@ -11,9 +11,10 @@ from ._font import Font
 from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
                             create_quad_uv_array, Pack2d, PrimitiveMode,
                             Texture2d, TextureComponents)
-from gamut.math import (FMatrix4, FVector2, FVector3, FVector4, FVector4Array,
-                        IVector2, UVector2, Vector2)
+from gamut.math import (DVector2, FMatrix4, FVector2, FVector3, FVector4,
+                        FVector4Array, IVector2, UVector2)
 # python
+# DVector4
 from ctypes import c_uint8
 from typing import Final, Iterable, Optional, Union
 from weakref import ref
@@ -143,7 +144,7 @@ class AtlasFont(Font):
         positioned_glyphs: Iterable[PositionedGlyph],
     ) -> dict[
         Texture2d,
-        tuple[BufferView[Vector4], BufferView[Vector2]]
+        tuple[BufferView[DVector4], BufferView[DVector2]]
     ]:
         # iterate over all the positioned glyphs once so we can make sure all
         # glyphs have been rendered to the atlas before continuing
@@ -198,7 +199,7 @@ class AtlasFont(Font):
         max_line_size: Optional[int] = None
     ) -> dict[
         Texture2d,
-        tuple[BufferView[Vector4], BufferView[Vector2]]
+        tuple[BufferView[DVector4], BufferView[DVector2]]
     ]:
         return self.buffer_positioned_glyphs(self.layout_text(
             text,
@@ -281,11 +282,11 @@ class AtlasGlyph:
         return self._size
 
     @property
-    def uv(self) -> tuple[Vector2, Vector2]:
-        tex_size = Vector2(*self.font.texture_size)
-        position = Vector2(*self._position)
+    def uv(self) -> tuple[DVector2, DVector2]:
+        tex_size = DVector2(*self.font.texture_size)
+        position = DVector2(*self._position)
         top_left = position / tex_size
-        bottom_right = (position + Vector2(*self._size)) / tex_size
+        bottom_right = (position + DVector2(*self._size)) / tex_size
         return top_left, bottom_right
 
     def transform_with_position(self, positioned: PositionedGlyph) -> FMatrix4:

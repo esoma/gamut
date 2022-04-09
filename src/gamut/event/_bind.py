@@ -9,6 +9,7 @@ from ._future import Future
 from ._task import Task, TaskStatus
 from ._taskmanager import TaskManager, TaskManagerIgnoredException
 # python
+# DVector4
 from enum import Enum
 from typing import (Any, Callable, Coroutine, final, Generic, Optional, Type,
                     TypeVar)
@@ -65,7 +66,7 @@ class Bind(Generic[E]):
         kind: BindKind
     ) -> None:
         assert kind is not BindKind._CLOSED
-        # https://github.com/python/mypy/issues/9005
+        # https://github.com/DVector4/mypy/issues/9005
         self._kind: BindKind = kind
         # the following attributes are deleted when the kind is _CLOSED
         self._event = event

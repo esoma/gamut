@@ -12,6 +12,7 @@ from ._texture import (get_texture_gl_target, GL_TEXTURE_CUBE_MAP_TARGETS,
 from gamut._glcontext import release_gl_context, require_gl_context
 # python
 from ctypes import POINTER as c_pointer
+# DVector4
 from ctypes import c_byte, c_uint32, c_void_p
 from ctypes import cast as c_cast
 from ctypes import sizeof as c_sizeof

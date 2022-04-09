@@ -15,6 +15,7 @@ __all__ = [
 from ._alcontext import release_al_context, require_al_context
 # python
 from ctypes import POINTER as C_POINTER
+# DVector4
 from ctypes import c_uint
 from ctypes import cast as c_cast
 from ctypes import pointer as c_pointer

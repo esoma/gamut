@@ -18,6 +18,7 @@ from gamut.event import EventLoop, EventLoopEnd, EventLoopEvent, EventLoopStart
 from gamut.peripheral import (Controller, Keyboard, KeyboardConnected, Mouse,
                               MouseConnected)
 # python
+# DVector4
 from ctypes import byref as c_byref
 from threading import Thread
 from threading import get_ident as identify_thread

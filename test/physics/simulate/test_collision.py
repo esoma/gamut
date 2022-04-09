@@ -1,7 +1,8 @@
 
 # gamut
 from gamut.geometry import Composite3d, Mesh3d, Plane, Sphere
-from gamut.math import Matrix4, UVector3, UVector3Array, Vector3, Vector3Array
+from gamut.math import (DMatrix4, DVector3, DVector3Array, UVector3,
+                        UVector3Array)
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -26,11 +27,11 @@ def test_single_collision(
 ) -> None:
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=ball_type)
-    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
+    ball = Body(1, Sphere(DVector3(0), 1), world=w, type=ball_type)
+    ball.transform = DMatrix4(1).translate(DVector3(0, 1, 0))
     ball.tangible = ball_tangible
 
-    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=floor_type)
+    floor = Body(1, Plane(0, DVector3(0, 1, 0)), world=w, type=floor_type)
     floor.tangible = floor_tangible
 
     world_simulation = w.simulate(timedelta(seconds=1))
@@ -45,19 +46,19 @@ def test_single_collision(
     contact = collision.contacts[0]
 
     if collision.body_a is ball:
-        assert contact.local_position_a == Vector3(0, -1, 0)
-        assert contact.world_position_a == Vector3(0, 0, 0)
-        assert contact.normal_a == Vector3(0, -1, 0)
-        assert contact.local_position_b == Vector3(0, 0, 0)
-        assert contact.world_position_b == Vector3(0, 0, 0)
-        assert contact.normal_b == Vector3(0, 1, 0)
+        assert contact.local_position_a == DVector3(0, -1, 0)
+        assert contact.world_position_a == DVector3(0, 0, 0)
+        assert contact.normal_a == DVector3(0, -1, 0)
+        assert contact.local_position_b == DVector3(0, 0, 0)
+        assert contact.world_position_b == DVector3(0, 0, 0)
+        assert contact.normal_b == DVector3(0, 1, 0)
     else:
-        assert contact.local_position_b == Vector3(0, -1, 0)
-        assert contact.world_position_b == Vector3(0, 0, 0)
-        assert contact.normal_b == Vector3(0, -1, 0)
-        assert contact.local_position_a == Vector3(0, 0, 0)
-        assert contact.world_position_a == Vector3(0, 0, 0)
-        assert contact.normal_a == Vector3(0, 1, 0)
+        assert contact.local_position_b == DVector3(0, -1, 0)
+        assert contact.world_position_b == DVector3(0, 0, 0)
+        assert contact.normal_b == DVector3(0, -1, 0)
+        assert contact.local_position_a == DVector3(0, 0, 0)
+        assert contact.world_position_a == DVector3(0, 0, 0)
+        assert contact.normal_a == DVector3(0, 1, 0)
 
     with pytest.raises(StopIteration):
         next(world_simulation)
@@ -70,13 +71,13 @@ def test_lots_of_collisions() -> None:
         for z in range(100):
             ball = Body(
                 1,
-                Sphere(Vector3(0), .25),
+                Sphere(DVector3(0), .25),
                 world=w,
                 type=BodyType.KINEMATIC
             )
-            ball.transform = Matrix4(1).translate(Vector3(x, .25, z))
+            ball.transform = DMatrix4(1).translate(DVector3(x, .25, z))
 
-    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, DVector3(0, 1, 0)), world=w, type=BodyType.STATIC)
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
     assert len(collisions) == 10000
@@ -85,10 +86,10 @@ def test_lots_of_collisions() -> None:
 def test_no_collision_distance() -> None:
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(Vector3(0), 1), world=w)
-    ball.transform = Matrix4(1).translate(Vector3(0, 1.1, 0))
+    ball = Body(1, Sphere(DVector3(0), 1), world=w)
+    ball.transform = DMatrix4(1).translate(DVector3(0, 1.1, 0))
 
-    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, DVector3(0, 1, 0)), world=w, type=BodyType.STATIC)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
@@ -101,10 +102,10 @@ def test_no_collision_distance() -> None:
 def test_no_collision_both_static() -> None:
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.STATIC)
-    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
+    ball = Body(1, Sphere(DVector3(0), 1), world=w, type=BodyType.STATIC)
+    ball.transform = DMatrix4(1).translate(DVector3(0, 1, 0))
 
-    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, type=BodyType.STATIC)
+    floor = Body(1, Plane(0, DVector3(0, 1, 0)), world=w, type=BodyType.STATIC)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
@@ -120,10 +121,10 @@ def test_no_collision_mask(ball_group_shift: int) -> None:
 
     w = World(timedelta(seconds=1))
 
-    ball = Body(1, Sphere(Vector3(0), 1), world=w, groups=ball_group)
-    ball.transform = Matrix4(1).translate(Vector3(0, 1, 0))
+    ball = Body(1, Sphere(DVector3(0), 1), world=w, groups=ball_group)
+    ball.transform = DMatrix4(1).translate(DVector3(0, 1, 0))
 
-    floor = Body(1, Plane(0, Vector3(0, 1, 0)), world=w, mask=~ball_group)
+    floor = Body(1, Plane(0, DVector3(0, 1, 0)), world=w, mask=~ball_group)
 
     world_simulation = w.simulate(timedelta(seconds=1))
     collisions = next(world_simulation)
@@ -135,37 +136,37 @@ def test_no_collision_mask(ball_group_shift: int) -> None:
 
 def test_mesh_collision_normals() -> None:
     w = World(timedelta(seconds=1 / 120.0))
-    w.gravity = Vector3(0, -9.8, 0)
+    w.gravity = DVector3(0, -9.8, 0)
 
-    ball = Body(1, Sphere(Vector3(0), 1), world=w, type=BodyType.DYNAMIC)
-    ball.transform = Matrix4(1).translate(Vector3(99, 1.2, 0))
-    ball.linear_velocity = Vector3(-8, 0, 0)
+    ball = Body(1, Sphere(DVector3(0), 1), world=w, type=BodyType.DYNAMIC)
+    ball.transform = DMatrix4(1).translate(DVector3(99, 1.2, 0))
+    ball.linear_velocity = DVector3(-8, 0, 0)
 
     floor_shape = Composite3d(
         Mesh3d(
-            Vector3Array(
-                Vector3(100, 0, 100),
-                Vector3(100, 0, -100),
-                Vector3(-100, 0, -100)
+            DVector3Array(
+                DVector3(100, 0, 100),
+                DVector3(100, 0, -100),
+                DVector3(-100, 0, -100)
             ),
             UVector3Array(UVector3(0, 1, 2)),
-            normals=Vector3Array(
-                Vector3(0, 1, 0),
-                Vector3(0, 1, 0),
-                Vector3(0, 1, 0)
+            normals=DVector3Array(
+                DVector3(0, 1, 0),
+                DVector3(0, 1, 0),
+                DVector3(0, 1, 0)
             )
         ),
         Mesh3d(
-            Vector3Array(
-                Vector3(100, 0, 100),
-                Vector3(-100, 0, 100),
-                Vector3(-100, 0, -100)
+            DVector3Array(
+                DVector3(100, 0, 100),
+                DVector3(-100, 0, 100),
+                DVector3(-100, 0, -100)
             ),
             UVector3Array(UVector3(0, 1, 2)),
-            normals=Vector3Array(
-                Vector3(0, 1, 0),
-                Vector3(0, 1, 0),
-                Vector3(0, 1, 0)
+            normals=DVector3Array(
+                DVector3(0, 1, 0),
+                DVector3(0, 1, 0),
+                DVector3(0, 1, 0)
             )
         ),
     )

@@ -30,8 +30,7 @@ from gamut.math import (BVector1, BVector1Array, BVector2, BVector2Array,
                         U64Vector3, U64Vector3Array, U64Vector4,
                         U64Vector4Array, UVector1, UVector1Array, UVector2,
                         UVector2Array, UVector3, UVector3Array, UVector4,
-                        UVector4Array, Vector2, Vector2Array, Vector3,
-                        Vector3Array, Vector4, Vector4Array)
+                        UVector4Array)
 # python
 import ctypes
 import itertools
@@ -47,16 +46,6 @@ import pytest
 
 def isclose(a, b):
     return _isclose(a, b, rel_tol=1e-06)
-
-
-def test_alias():
-    assert Vector2 is DVector2
-    assert Vector3 is DVector3
-    assert Vector4 is DVector4
-
-    assert Vector2Array is DVector2Array
-    assert Vector3Array is DVector3Array
-    assert Vector4Array is DVector4Array
 
 
 class VectorTest:

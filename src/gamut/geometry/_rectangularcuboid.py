@@ -7,6 +7,7 @@ __all__ = ['RectangularCuboid']
 from gamut.math import (DQuaternion, DVector3, DVector3Array, FQuaternion,
                         FVector3, FVector3Array, U8Array)
 # python
+# DVector4
 from typing import Generic, overload, TypeVar
 
 AT = TypeVar('AT', FVector3Array, DVector3Array)

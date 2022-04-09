@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['Graph', 'WeightProtocol']
 
 # python
+# DVector4
 from copy import copy
 from typing import Generator, Generic, Hashable, Protocol, TypeVar
 

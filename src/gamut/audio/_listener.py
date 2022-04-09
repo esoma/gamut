@@ -6,8 +6,9 @@ __all__ = ['Listener']
 # gamut
 from ._alcontext import release_al_context, require_al_context
 # gamut
-from gamut.math import FVector3, Vector3
+from gamut.math import DVector3, FVector3
 # python
+# DVector4
 from ctypes import c_float
 from typing import Optional
 from weakref import ref
@@ -23,11 +24,11 @@ class Listener:
     def __init__(
         self,
         *,
-        position: Vector3 = Vector3(0),
-        velocity: Vector3 = Vector3(0),
+        position: DVector3 = DVector3(0),
+        velocity: DVector3 = DVector3(0),
         gain: float = 1.0,
-        direction: Vector3 = Vector3(0, 0, -1),
-        up: Vector3 = Vector3(0, 1, 0),
+        direction: DVector3 = DVector3(0, 0, -1),
+        up: DVector3 = DVector3(0, 1, 0),
     ):
         self._al_context = require_al_context()
 
@@ -100,49 +101,49 @@ class Listener:
         return active_listener()
 
     @property
-    def position(self) -> Vector3:
+    def position(self) -> DVector3:
         return self._position
 
     @position.setter
-    def position(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def position(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._position = value
         if self.get_active() is self:
             self._update_position()
 
     @property
-    def velocity(self) -> Vector3:
+    def velocity(self) -> DVector3:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def velocity(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._velocity = value
         if self.get_active() is self:
             self._update_velocity()
 
     @property
-    def direction(self) -> Vector3:
+    def direction(self) -> DVector3:
         return self._direction
 
     @direction.setter
-    def direction(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def direction(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._direction = value
         if self.get_active() is self:
             self._update_orientation()
 
     @property
-    def up(self) -> Vector3:
+    def up(self) -> DVector3:
         return self._up
 
     @up.setter
-    def up(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def up(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._up = value
         if self.get_active() is self:
             self._update_orientation()
