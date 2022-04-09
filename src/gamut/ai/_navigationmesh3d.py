@@ -8,7 +8,6 @@ from gamut.geometry import LineSegment2d, Triangle3d
 from gamut.graph import Graph, SimplePathFinder
 from gamut.math import DVector3, FVector3
 # python
-# DVector4
 from math import copysign
 from typing import Callable, Generator, Generic, TypeVar
 

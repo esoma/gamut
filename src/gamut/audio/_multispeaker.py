@@ -10,7 +10,6 @@ from ._speaker import Speaker, SpeakerState
 # gamut
 from gamut.math import DVector3
 # python
-# DVector4
 from math import pi
 
 

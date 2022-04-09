@@ -14,7 +14,6 @@ from ._break import break_never, BreakMethod
 # gamut
 from gamut.math import DVector2, IVector2, UVector2
 # python
-# DVector4
 from abc import ABC, abstractmethod
 from enum import Enum
 from io import BytesIO

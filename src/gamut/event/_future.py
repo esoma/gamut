@@ -4,7 +4,6 @@ from __future__ import annotations
 __all__ = ['Future']
 
 # python
-# DVector4
 from typing import final, Generator, Generic, Hashable, TypeVar
 from warnings import warn
 

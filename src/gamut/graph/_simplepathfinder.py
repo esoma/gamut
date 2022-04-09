@@ -6,7 +6,6 @@ __all__ = ['SimplePathFinder']
 # gamut
 from ._graph import Graph, WeightProtocol
 # python
-# DVector4
 from typing import Generator, Generic, Hashable, TypeVar
 # sortedcontainers
 from sortedcontainers import SortedList

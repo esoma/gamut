@@ -9,7 +9,6 @@ from ._viewfrustum3d import ViewFrustum3d
 from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
                         FVector3Array)
 # python
-# DVector4
 from typing import Any, Generic, overload, TypeVar
 
 VT = TypeVar('VT', FVector3, DVector3)

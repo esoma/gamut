@@ -4,7 +4,6 @@ from __future__ import annotations
 __all__ = ['BreakChunk', 'BreakMethod', 'break_never', 'break_line_icu']
 
 # python
-# DVector4
 from typing import Callable, Final, Generator
 
 try:

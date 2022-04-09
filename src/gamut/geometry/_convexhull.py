@@ -6,7 +6,6 @@ __all__ = ['ConvexHull']
 # gamut
 from gamut.math import DMatrix4, DVector3Array, FMatrix4, FVector3Array
 # python
-# DVector4
 from typing import Generic, overload, TypeVar
 
 AT = TypeVar('AT', FVector3Array, DVector3Array)

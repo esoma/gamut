@@ -43,7 +43,6 @@ from gamut.math import (DArray, DMatrix2x2, DMatrix2x2Array, DMatrix2x3,
                         U32Vector3Array, U32Vector4, U32Vector4Array,
                         U64Vector2, UVector2, UVector3, UVector4)
 # python
-# DVector4
 import ctypes
 from ctypes import POINTER as c_pointer
 from ctypes import c_byte, c_void_p

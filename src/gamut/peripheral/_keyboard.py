@@ -23,7 +23,6 @@ from gamut._sdl import (sdl_event_callback_map, SDL_KEYBOARD_KEY,
                         sdl_window_event_callback_map)
 from gamut._window import get_window_from_sdl_id, Window
 # python
-# DVector4
 import platform
 from typing import Any, ClassVar, Final, Optional, TYPE_CHECKING
 from weakref import ref

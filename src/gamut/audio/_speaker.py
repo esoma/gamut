@@ -12,7 +12,6 @@ from ._source import (consume_stream_buffer, get_sample_al_buffer,
 # gamut
 from gamut.math import DVector3, FVector3
 # python
-# DVector4
 from ctypes import c_int, c_uint
 from ctypes import pointer as c_pointer
 from enum import Enum

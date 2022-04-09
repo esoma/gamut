@@ -2,7 +2,6 @@
 __all__ = ['ALL_GROUPS', 'verify_groups', 'verify_mask']
 
 # python
-# DVector4
 import struct
 from typing import Final
 

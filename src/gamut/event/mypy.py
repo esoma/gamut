@@ -2,7 +2,6 @@
 __all__ = ['Plugin']
 
 # python
-# DVector4
 from dataclasses import dataclass
 from functools import partial
 import json

@@ -11,7 +11,6 @@ __all__ = [
 ]
 
 # python
-# DVector4
 from ctypes import c_char, c_char_p, c_int, c_ubyte, c_void_p
 from threading import Lock
 import time

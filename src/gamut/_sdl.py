@@ -11,7 +11,6 @@ __all__ = [
 # gamut
 from gamut.event import Event
 # python
-# DVector4
 from typing import Any, Callable, Final, Optional, TYPE_CHECKING
 # pysdl2
 from sdl2 import SDL_WINDOWEVENT

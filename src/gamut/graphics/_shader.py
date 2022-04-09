@@ -49,7 +49,6 @@ from gamut.math import (BArray, DArray, DMatrix2x2, DMatrix2x2Array,
                         U32Vector3, U32Vector3Array, U32Vector4,
                         U32Vector4Array)
 # python
-# DVector4
 import ctypes
 from ctypes import c_void_p
 from enum import Enum

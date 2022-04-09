@@ -16,7 +16,6 @@ from gamut._bullet import World as BaseWorld
 from gamut.geometry import Sphere
 from gamut.math import DVector3
 # python
-# DVector4
 from datetime import timedelta
 from math import floor
 from typing import Any, TYPE_CHECKING

@@ -6,7 +6,6 @@ __all__ = ['plugin']
 # gamut
 from .event.mypy import Plugin as EventPlugin
 # python
-# DVector4
 from typing import Callable
 # mypy
 from mypy.plugin import AttributeContext

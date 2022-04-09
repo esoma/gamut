@@ -8,7 +8,6 @@ from ._texture import (MipmapSelection, TextureComponents, TextureFilter,
 # gamut
 from gamut.math import FVector4, UVector2
 # python
-# DVector4
 from ctypes import c_uint8
 from pathlib import Path
 from typing import BinaryIO, Final, Union

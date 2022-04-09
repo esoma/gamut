@@ -9,7 +9,6 @@ from ._future import Future
 from ._task import Task, TaskStatus
 from ._taskmanager import TaskManager, TaskManagerIgnoredException
 # python
-# DVector4
 from enum import Enum
 from typing import (Any, Callable, Coroutine, final, Generic, Optional, Type,
                     TypeVar)

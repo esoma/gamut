@@ -8,7 +8,6 @@ from ._alcontext import release_al_context, require_al_context
 # gamut
 from gamut.math import DVector3, FVector3
 # python
-# DVector4
 from ctypes import c_float
 from typing import Optional
 from weakref import ref

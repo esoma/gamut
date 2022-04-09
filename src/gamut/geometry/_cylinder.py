@@ -6,7 +6,6 @@ __all__ = ['Cylinder']
 # gamut
 from gamut.math import DQuaternion, DVector3, FQuaternion, FVector3
 # python
-# DVector4
 from typing import Generic, overload, TypeVar
 
 VT = TypeVar('VT', FVector3, DVector3)

@@ -8,7 +8,6 @@ from ._future import Future
 from ._task import Task
 from ._taskmanager import TaskManager
 # python
-# DVector4
 import inspect
 from typing import (Any, Callable, ClassVar, Generator, Generic, get_origin,
                     Optional, overload, Type, TypeVar, Union)

@@ -14,7 +14,6 @@ from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh3d, Plane, RectangularCuboid, Sphere)
 from gamut.math import BVector3, DMatrix4, DVector3
 # python
-# DVector4
 from enum import auto, Enum
 from typing import Any, Final, Union
 from weakref import ref, WeakKeyDictionary

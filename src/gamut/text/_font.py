@@ -9,7 +9,6 @@ from ._break import break_never, BreakMethod
 from ._face import (Face, FontSize, PositionedGlyph, RenderedGlyph,
                     RenderedGlyphFormat)
 # python
-# DVector4
 from typing import Generator, Optional, Union
 
 

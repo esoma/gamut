@@ -6,7 +6,6 @@ __all__ = ['TransformNode']
 # gamut
 from gamut.math import FMatrix4
 # python
-# DVector4
 from collections import deque
 from typing import Any, Callable, Generic, Optional, TypeVar
 from weakref import ref

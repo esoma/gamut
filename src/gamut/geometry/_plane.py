@@ -7,7 +7,6 @@ __all__ = ['Plane']
 from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
                         FVector4)
 # python
-# DVector4
 from typing import Generic, overload, TypeVar
 
 VT = TypeVar('VT', FVector3, DVector3)

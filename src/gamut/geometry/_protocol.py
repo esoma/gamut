@@ -8,7 +8,6 @@ from ._viewfrustum3d import ViewFrustum3d
 # gamut
 from gamut.math import DVector3
 # python
-# DVector4
 from typing import Protocol, runtime_checkable
 
 

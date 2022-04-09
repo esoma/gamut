@@ -14,7 +14,6 @@ from gamut.graphics import (Buffer, BufferView, create_quad_position_array,
 from gamut.math import (DVector2, FMatrix4, FVector2, FVector3, FVector4,
                         FVector4Array, IVector2, UVector2)
 # python
-# DVector4
 from ctypes import c_uint8
 from typing import Final, Iterable, Optional, Union
 from weakref import ref

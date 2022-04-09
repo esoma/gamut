@@ -5,7 +5,6 @@ __all__ = ['Sound']
 # gamut
 from ._source import Sample, Stream
 # python
-# DVector4
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import BinaryIO, Optional, Union

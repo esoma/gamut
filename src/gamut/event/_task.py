@@ -6,7 +6,6 @@ __all__ = ['Task', 'TaskStatus']
 # gamut
 from ._future import Future
 # python
-# DVector4
 from enum import Enum
 from typing import Any, Coroutine, final, Generic, Iterable, Optional, TypeVar
 from warnings import warn

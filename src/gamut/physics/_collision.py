@@ -6,7 +6,6 @@ __all__ = ['Collision', 'Contact']
 # gamut
 from gamut.math import DVector3
 # python
-# DVector4
 from datetime import timedelta
 from typing import TYPE_CHECKING
 

@@ -22,7 +22,6 @@ from gamut.event import Bind
 from gamut.event import Event as _Event
 from gamut.math import IVector2, UVector2
 # python
-# DVector4
 from ctypes import byref as c_byref
 from ctypes import c_int
 from enum import Enum

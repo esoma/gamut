@@ -20,7 +20,6 @@ from ._peripheral import (Peripheral, PeripheralConnected,
 # gamut
 from gamut._sdl import sdl_event_callback_map
 # python
-# DVector4
 from typing import Any, Optional, Sequence, TYPE_CHECKING
 from weakref import ref
 # pysdl2

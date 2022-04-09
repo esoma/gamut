@@ -4,7 +4,6 @@ __all__ = ['Timer', 'TimerExpired']
 # gamut
 from gamut.event import Event, EventLoop
 # python
-# DVector4
 from datetime import datetime, timedelta
 from threading import Thread
 from time import sleep

@@ -4,7 +4,6 @@ from __future__ import annotations
 __all__ = ['character_normally_rendered']
 
 # python
-# DVector4
 from unicodedata import category as unicode_category
 
 
