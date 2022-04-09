@@ -65,7 +65,7 @@ class Bind(Generic[E]):
         kind: BindKind
     ) -> None:
         assert kind is not BindKind._CLOSED
-        # https://github.com/DVector4/mypy/issues/9005
+        # https://github.com/python/mypy/issues/9005
         self._kind: BindKind = kind
         # the following attributes are deleted when the kind is _CLOSED
         self._event = event
