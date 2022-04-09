@@ -22,7 +22,9 @@ def test_point_container() -> None:
 def test_sphere() -> None:
     s1 = Sphere(DVector3(1, 2, 3), 4)
     s2 = Sphere(DVector3(1, 2, 3), 4)
-    assert hash(s1) != hash(s2)
+    assert hash(s1) == hash(s2)
+    s3 = Sphere(FVector3(1, 2, 3), 4)
+    assert hash(s1) != hash(s3)
 
 
 def test_repr() -> None:

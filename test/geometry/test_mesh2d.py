@@ -13,11 +13,11 @@ import pytest
 
 
 def test_hash() -> None:
-    positions = DVector2Array(DVector2(1, 2))
-    triangle_indexes = UVector3Array(UVector3(0))
-    m1 = Mesh2d(positions, triangle_indexes)
-    m2 = Mesh2d(positions, triangle_indexes)
-    assert hash(m1) != hash(m2)
+    m1 = Mesh2d(DVector2Array(DVector2(1, 2)), UVector3Array(UVector3(0)))
+    m2 = Mesh2d(DVector2Array(DVector2(1, 2)), UVector3Array(UVector3(0)))
+    assert hash(m1) == hash(m2)
+    m3 = Mesh2d(DVector2Array(DVector2(1, 2)), U8Vector3Array(U8Vector3(0)))
+    assert hash(m1) != hash(m3)
 
 
 def test_repr() -> None:

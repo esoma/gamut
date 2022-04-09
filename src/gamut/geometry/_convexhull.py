@@ -40,7 +40,7 @@ class ConvexHull(Generic[AT, MT]):
         self._bt_capsule: Any = None
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash(self._points)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ConvexHull):

@@ -54,7 +54,7 @@ class Polygon(Generic[T]):
                     )
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash((self._exterior, self._holes))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Polygon):

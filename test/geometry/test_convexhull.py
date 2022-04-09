@@ -11,10 +11,11 @@ import pytest
 
 
 def test_hash() -> None:
-    array = DVector3Array(DVector3(1, 2, 3))
-    c1 = ConvexHull(array)
-    c2 = ConvexHull(array)
-    assert hash(c1) != hash(c2)
+    c1 = ConvexHull(DVector3Array(DVector3(1, 2, 3)))
+    c2 = ConvexHull(DVector3Array(DVector3(1, 2, 3)))
+    assert hash(c1) == hash(c2)
+    c3 = ConvexHull(DVector3Array(DVector3(3, 2, 1)))
+    assert hash(c1) != hash(c3)
 
 
 def test_repr() -> None:

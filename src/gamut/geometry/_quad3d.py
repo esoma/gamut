@@ -50,6 +50,9 @@ class Quad3d(Generic[VT, AT, MT]):
         else:
             self._points = DVector3Array(point_0, point_1, point_2, point_3)
 
+    def __hash__(self) -> int:
+        return hash(self._points)
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Quad3d):
             return False

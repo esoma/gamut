@@ -13,7 +13,9 @@ import pytest
 def test_hash() -> None:
     p1 = Plane(10, DVector3(.3, .7, 0))
     p2 = Plane(10, DVector3(.3, .7, 0))
-    assert hash(p1) != hash(p2)
+    assert hash(p1) == hash(p2)
+    p3 = Plane(10, FVector3(.3, .7, 0))
+    assert hash(p1) != hash(p3)
 
 
 def test_repr() -> None:

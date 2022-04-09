@@ -13,7 +13,9 @@ import pytest
 def test_hash() -> None:
     c1 = Composite3d()
     c2 = Composite3d()
-    assert hash(c1) != hash(c2)
+    assert hash(c1) == hash(c2)
+    c3 = Composite3d(Sphere(DVector3(0), 1))
+    assert hash(c1) != hash(c3)
 
 
 def test_cullable() -> None:

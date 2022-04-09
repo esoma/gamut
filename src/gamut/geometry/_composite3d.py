@@ -23,7 +23,7 @@ class Composite3d(Generic[S]):
         self._bt_data: list[Any] = []
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash(self._shapes)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Composite3d):

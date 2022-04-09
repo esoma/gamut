@@ -53,7 +53,7 @@ class Plane(Generic[VT, MT]):
         self._bt_capsule: Any = None
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash((self._distance, self._normal))
 
     def __repr__(self) -> str:
         return (

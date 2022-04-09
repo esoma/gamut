@@ -10,6 +10,17 @@ from typing import Any
 import pytest
 
 
+def test_hash() -> None:
+    planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
+    f1 = ViewFrustum3d(*planes)
+    planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
+    f2 = ViewFrustum3d(*planes)
+    assert hash(f1) == hash(f2)
+    planes = [Plane(i, FVector3(1, 2, 3)) for i in range(6)]
+    f3 = ViewFrustum3d(*planes)
+    assert hash(f1) != hash(f3)
+
+
 def test_repr() -> None:
     planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
     frustum = ViewFrustum3d(*planes)

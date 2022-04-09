@@ -11,7 +11,9 @@ import pytest
 def test_hash() -> None:
     l1 = LineSegment3d(DVector3(0), DVector3(1))
     l2 = LineSegment3d(DVector3(0), DVector3(1))
-    assert hash(l1) != hash(l2)
+    assert hash(l1) == hash(l2)
+    l3 = LineSegment3d(FVector3(0), FVector3(1))
+    assert hash(l1) != hash(l3)
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
