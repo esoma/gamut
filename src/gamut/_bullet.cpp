@@ -1822,6 +1822,45 @@ Shape_add_rectangular_cuboid(Shape *self, PyObject *args)
 }
 
 
+static PyObject *
+Shape_add_shape(Shape *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    ASSERT(nargs == 1);
+    ASSERT(self->is_compound);
+
+    Shape *other = (Shape *)args[0];
+    if (other->is_compound)
+    {
+        auto other_compound_shape = (btCompoundShape*)self->shape;
+        for (int i = 0; i < other_compound_shape->getNumChildShapes(); i++)
+        {
+            ((btCompoundShape*)self->shape)->addChildShape(
+                other_compound_shape->getChildTransform(i),
+                other_compound_shape->getChildShape(i)
+            );
+        }
+    }
+    else
+    {
+        if (other->shape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
+        {
+            self->trimesh_shapes.push_back((btBvhTriangleMeshShape*)other->shape);
+        }
+        else
+        {
+            btTransform transform = btTransform::getIdentity();
+            ((btCompoundShape*)self->shape)->addChildShape(transform, other->shape);
+        }
+    }
+    if (other->must_be_static)
+    {
+        self->must_be_static = true;
+    }
+
+    Py_INCREF(other);
+    return (PyObject *)other;
+}
+
 
 static PyObject *
 Shape_add_sphere(Shape *self, PyObject *args)
@@ -1950,17 +1989,30 @@ struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
 static PyObject *
 Shape_mesh_raycast(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    ASSERT(nargs == 2);
+    ASSERT(nargs == 6);
     auto state = get_module_state();
 
-    auto from = (glm::dvec3 *)state->math_api->DVector3_GetValuePointer(args[0]);
-    auto to = (glm::dvec3 *)state->math_api->DVector3_GetValuePointer(args[1]);
+    auto from_x = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    auto from_y = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    auto from_z = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    auto to_x = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
+    auto to_y = PyFloat_AsDouble(args[4]);
+    ASSERT(!PyErr_Occurred());
+    auto to_z = PyFloat_AsDouble(args[5]);
+    ASSERT(!PyErr_Occurred());
 
-    btVector3 bt_from(from->x, from->y, from->z);
-    btVector3 bt_to(to->x, to->y, to->z);
+    glm::dvec3 from(from_x, from_y, from_z);
+    glm::dvec3 to(to_x, to_y, to_z);
+
+    btVector3 bt_from(from.x, from.y, from.z);
+    btVector3 bt_to(to.x, to.y, to.z);
 
     auto mesh = (btBvhTriangleMeshShape*)self->shape;
-    ShapeMeshRaycastTriangleCallback result(mesh, *from, *to, bt_from, bt_to);
+    ShapeMeshRaycastTriangleCallback result(mesh, from, to, bt_from, bt_to);
     mesh->performRaycast(&result, bt_from, bt_to);
 
     if (!result.m_hit)
@@ -1968,22 +2020,40 @@ Shape_mesh_raycast(Shape *self, PyObject *const *args, Py_ssize_t nargs)
         Py_RETURN_NONE;
     }
 
-    PyObject *hit = PyTuple_New(4);
+    PyObject *hit = PyTuple_New(8);
+    if (!hit){ return 0; }
 
-    PyObject *position = state->math_api->DVector3_Create((double *)&result.m_hit_point);
-    if (!position){ Py_DECREF(hit); return 0; }
-    PyTuple_SET_ITEM(hit, 0, position);
+    PyObject *position_x = PyFloat_FromDouble(result.m_hit_point.x);
+    if (!position_x){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 0, position_x);
 
-    PyObject *normal = state->math_api->DVector3_Create((double *)&result.m_hit_normal_local);
-    if (!normal){ Py_DECREF(hit); return 0; }
-    PyTuple_SET_ITEM(hit, 1, normal);
+    PyObject *position_y = PyFloat_FromDouble(result.m_hit_point.y);
+    if (!position_y){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 1, position_y);
+
+    PyObject *position_z = PyFloat_FromDouble(result.m_hit_point.z);
+    if (!position_z){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 2, position_z);
+
+    PyObject *normal_x = PyFloat_FromDouble(result.m_hit_normal_local.x);
+    if (!normal_x){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 3, normal_x);
+
+    PyObject *normal_y = PyFloat_FromDouble(result.m_hit_normal_local.y);
+    if (!normal_y){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 4, normal_y);
+
+    PyObject *normal_z = PyFloat_FromDouble(result.m_hit_normal_local.z);
+    if (!normal_z){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 5, normal_z);
 
     PyObject *triangle_index = PyLong_FromLong(result.m_triangle_index);
-    PyTuple_SET_ITEM(hit, 2, triangle_index);
+    if (!triangle_index){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 6, triangle_index);
 
     PyObject *fraction = PyFloat_FromDouble(result.m_hit_fraction);
-    if (PyErr_Occurred()){ Py_DECREF(hit); return 0; }
-    PyTuple_SET_ITEM(hit, 3, fraction);
+    if (!fraction){ Py_DECREF(hit); return 0; }
+    PyTuple_SET_ITEM(hit, 7, fraction);
 
     return hit;
 }
@@ -2036,6 +2106,12 @@ static PyMethodDef Shape_PyMethodDef[] = {
         "add_sphere",
         (PyCFunction)Shape_add_sphere,
         METH_O,
+        0
+    },
+    {
+        "add_shape",
+        (PyCFunction)Shape_add_shape,
+        METH_FASTCALL,
         0
     },
     {

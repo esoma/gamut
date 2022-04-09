@@ -14,7 +14,6 @@ from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh3d, Plane, RectangularCuboid, Sphere)
 from gamut.math import BVector3, Matrix4, Vector3
 # python
-import ctypes
 from enum import auto, Enum
 from typing import Any, Final, Union
 from weakref import ref, WeakKeyDictionary
@@ -430,6 +429,12 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
     if isinstance(shape, Composite3d):
         shapes = list(shape.shapes_flattened)
     else:
+        try:
+            get_bullet_shape = shape._get_bullet_shape
+        except AttributeError:
+            get_bullet_shape = None
+        if get_bullet_shape is not None:
+            return get_bullet_shape()
         shapes = [shape]
 
     shape_imp = Shape(len(shapes) != 1)
@@ -485,21 +490,9 @@ def _get_shape_implementation(shape: BodyShape) -> Shape:
                 tuple(tuple(p) for p in sub_shape.points)
             ))
         elif isinstance(sub_shape, Mesh3d):
-            positions = sub_shape.positions
-            triangle_indices = sub_shape.triangle_indices
-            normals = sub_shape.normals
-            shape_data.append(
-                shape_imp.add_mesh((
-                    len(positions),
-                    ctypes.cast(positions.pointer, ctypes.c_void_p).value,
-                    len(triangle_indices),
-                    ctypes.cast(
-                        triangle_indices.pointer, ctypes.c_void_p
-                    ).value,
-                    ctypes.cast(normals.pointer, ctypes.c_void_p).value
-                    if normals else 0,
-                ))
-            )
+            shape_data.append(shape_imp.add_shape(
+                sub_shape._get_bullet_shape()
+            ))
         else:
             raise TypeError(f'invalid shape: {sub_shape}')
 
