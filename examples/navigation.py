@@ -7,9 +7,8 @@ from gamut.gltf import Gltf
 from gamut.graphics import (BufferView, BufferViewMap, clear_render_target,
                             DepthTest, execute_shader, FaceCull, PrimitiveMode,
                             Shader)
-from gamut.math import (DVector3, FMatrix3, FMatrix4, FVector2, FVector3,
-                        UVector1, UVector1Array, UVector3Array, Vector3,
-                        Vector3Array)
+from gamut.math import (DVector3, DVector3Array, FMatrix3, FMatrix4, FVector2,
+                        FVector3, UVector1, UVector1Array, UVector3Array)
 from gamut.peripheral import MouseButtonPressed, MouseMoved
 # python
 from typing import Final
@@ -28,7 +27,7 @@ class App(ExampleApplication):
 
         self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
-        cube = RectangularCuboid(Vector3(0), Vector3(1))
+        cube = RectangularCuboid(DVector3(0), DVector3(1))
         cube_positions, cube_normals, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
             "pos": BufferView.from_array(cube_positions),
@@ -47,7 +46,7 @@ class App(ExampleApplication):
         })
         self.navmesh_index_buffer_view = BufferView.from_array(navmesh_indices)
         self.navmesh_shape = Mesh3d(
-            Vector3Array(*(Vector3(*v) for v in navmesh_positions)),
+            DVector3Array(*(DVector3(*v) for v in navmesh_positions)),
             UVector3Array.from_buffer(
                 UVector1Array(*(UVector1(i) for i in navmesh_indices))
             )

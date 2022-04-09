@@ -6,6 +6,7 @@ __all__ = ['Sphere']
 # gamut
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
+from gamut._bullet import Shape
 from gamut.math import DMatrix4, DVector3, FMatrix4, FVector3
 # python
 from typing import Any, Generic, overload, TypeVar
@@ -42,6 +43,9 @@ class Sphere(Generic[VT, MT]):
         except (TypeError, ValueError):
             raise TypeError('radius must be float')
 
+        self._bt: Shape | None = None
+        self._bt_capsule: Any = None
+
     def __hash__(self) -> int:
         return id(self)
 
@@ -73,6 +77,20 @@ class Sphere(Generic[VT, MT]):
             transform @ self._center,
             self._radius * max_scale,
         )
+
+    def _get_bullet_shape(self) -> Shape:
+        if self._bt is None:
+            try:
+                self._bt = Shape(False)
+                self._bt_capsule = self._bt.add_sphere(
+                    self._radius,
+                    *self._center,
+                )
+            except BaseException:
+                self._bt = None
+                self._bt_capsule = None
+                raise
+        return self._bt
 
     @property
     def center(self) -> VT:

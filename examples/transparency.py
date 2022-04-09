@@ -6,6 +6,7 @@ from gamut.graphics import (BlendFactor, BufferView, BufferViewMap,
 from gamut.math import (FMatrix4, FVector2, FVector2Array, FVector3,
                         FVector3Array, U8Array)
 # python
+import ctypes
 from typing import Final
 # examples
 from examplescommon import ExampleApplication, RESOURCES, run_application

@@ -6,9 +6,10 @@ __all__ = ['Composite3d']
 # gamut
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
+from gamut._bullet import Shape
 from gamut.math import DMatrix4, DVector3, FMatrix4, FVector3
 # python
-from typing import Generator, Generic, TypeVar
+from typing import Any, Generator, Generic, TypeVar
 
 S = TypeVar('S')
 
@@ -17,6 +18,9 @@ class Composite3d(Generic[S]):
 
     def __init__(self, *shapes: S):
         self._shapes = tuple(shapes)
+
+        self._bt: Shape | None = None
+        self._bt_data: list[Any] = []
 
     def __hash__(self) -> int:
         return id(self)
@@ -42,8 +46,26 @@ class Composite3d(Generic[S]):
     def __rmatmul__(self, transform: FMatrix4 | DMatrix4) -> Composite3d[S]:
         if not isinstance(transform, (FMatrix4, DMatrix4)):
             return NotImplemented
-
         return Composite3d(*(transform @ s for s in self._shapes))
+
+    def _get_bullet_shape(self) -> Shape:
+        if self._bt is None:
+            try:
+                shapes = list(self.shapes_flattened)
+                self._bt = Shape(len(shapes) != 1)
+                for shape in shapes:
+                    try:
+                        get_bullet_shape = shape._get_bullet_shape
+                    except AttributeError:
+                        raise TypeError(f'invalid shape: {shape}') from None
+                    self._bt_data.append(self._bt.add_shape(
+                        get_bullet_shape()
+                    ))
+            except BaseException:
+                self._bt = None
+                self._bt_data = []
+                raise
+        return self._bt
 
     @property
     def shapes(self) -> tuple[S, ...]:

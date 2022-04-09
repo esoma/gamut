@@ -4,8 +4,8 @@ from gamut.geometry import Plane, RectangularCuboid
 from gamut.graphics import (BufferView, BufferViewMap, clear_render_target,
                             DepthTest, execute_shader, FaceCull, PrimitiveMode,
                             Shader)
-from gamut.math import (FMatrix3, FMatrix4, FVector3, FVector3Array, Matrix4,
-                        U8Array, Vector3)
+from gamut.math import (DMatrix4, DVector3, FMatrix3, FMatrix4, FVector3,
+                        FVector3Array, U8Array)
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -44,7 +44,7 @@ class App(ExampleApplication):
             0, 3, 2
         ))
 
-        cube = RectangularCuboid(Vector3(0), Vector3(1))
+        cube = RectangularCuboid(DVector3(0), DVector3(1))
         cube_positions, cube_normals, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
             "pos": BufferView.from_array(cube_positions),
@@ -53,10 +53,10 @@ class App(ExampleApplication):
         self.cube_index_buffer_view = BufferView.from_array(cube_indices)
 
         self.world = World(timedelta(seconds=1 / 60.0))
-        self.world.gravity = Vector3(0, -9.8, 0)
+        self.world.gravity = DVector3(0, -9.8, 0)
         plane = Body(
             1,
-            Plane(0, Vector3(0, 1, 0)),
+            Plane(0, DVector3(0, 1, 0)),
             world=self.world,
             type=BodyType.STATIC
         )
@@ -65,8 +65,8 @@ class App(ExampleApplication):
         self.bodies = []
         for _ in range(50):
             body = Body(1, cube, world=self.world)
-            body.transform = Matrix4(1).translate(
-                Vector3(
+            body.transform = DMatrix4(1).translate(
+                DVector3(
                     random.uniform(-2, 2),
                     random.uniform(1, 3),
                     random.uniform(-2, 2)
