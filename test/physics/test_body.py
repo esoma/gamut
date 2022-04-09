@@ -2,8 +2,9 @@
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh3d, Plane, RectangularCuboid, Sphere)
-from gamut.math import (BVector3, DVector3, FVector3, Matrix4, UVector3,
-                        UVector3Array, Vector3Array)
+from gamut.math import (BVector3, DVector3, DVector3Array, FVector3,
+                        FVector3Array, Matrix4, U8Vector3, U8Vector3Array,
+                        U16Vector3, U16Vector3Array, UVector3, UVector3Array)
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -539,13 +540,13 @@ def test_invalid_shape(shape: Any) -> None:
 
 @pytest.mark.parametrize("shape", [
     Mesh3d(
-        Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+        DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
         UVector3Array(UVector3(0), UVector3(1), UVector3(2))
     ),
     Composite3d(
         Sphere(DVector3(0), 1),
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
     )
@@ -560,6 +561,7 @@ def test_initial_shape_static_only(shape: Any, body_type: BodyType) -> None:
 
 
 @pytest.mark.parametrize("shape", [
+    Sphere(FVector3(0), 1),
     Sphere(DVector3(0), 1),
     Plane(1, FVector3(0, 1, 0)),
     Plane(1, DVector3(0, 1, 0)),
@@ -569,11 +571,19 @@ def test_initial_shape_static_only(shape: Any, body_type: BodyType) -> None:
     Cone(DVector3(0), 1, 1),
     Capsule(FVector3(0), 1, 1),
     Capsule(DVector3(0), 1, 1),
+    RectangularCuboid(FVector3(0), FVector3(1)),
     RectangularCuboid(DVector3(0), DVector3(1)),
-    ConvexHull(Vector3Array(DVector3(0), DVector3(-1), DVector3(1))),
+    ConvexHull(FVector3Array(FVector3(0), FVector3(-1), FVector3(1))),
+    ConvexHull(DVector3Array(DVector3(0), DVector3(-1), DVector3(1))),
     Mesh3d(
-        Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
-        UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+        FVector3Array(FVector3(0), FVector3(1), FVector3(2)),
+        U8Vector3Array(U8Vector3(0), U8Vector3(1), U8Vector3(2)),
+        normals=FVector3Array(FVector3(0), FVector3(1), FVector3(2)),
+    ),
+    Mesh3d(
+        DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
+        UVector3Array(UVector3(0), UVector3(1), UVector3(2)),
+        normals=DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
     ),
     Composite3d(),
     Composite3d(
@@ -583,9 +593,9 @@ def test_initial_shape_static_only(shape: Any, body_type: BodyType) -> None:
         Cone(DVector3(0), 1, 1),
         Capsule(DVector3(0), 1, 1),
         RectangularCuboid(DVector3(0), DVector3(1)),
-        ConvexHull(Vector3Array(DVector3(0), DVector3(-1), DVector3(1))),
+        ConvexHull(DVector3Array(DVector3(0), DVector3(-1), DVector3(1))),
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
     )
@@ -598,13 +608,18 @@ def test_shape(shape: Any) -> None:
 
 @pytest.mark.parametrize("shape", [
     Mesh3d(
-        Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+        FVector3Array(FVector3(0), FVector3(1), FVector3(2)),
+        U8Vector3Array(U8Vector3(0), U8Vector3(1), U8Vector3(2)),
+        normals=FVector3Array(FVector3(0), FVector3(1), FVector3(2)),
+    ),
+    Mesh3d(
+        DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
         UVector3Array(UVector3(0), UVector3(1), UVector3(2))
     ),
     Composite3d(
         Sphere(DVector3(0), 1),
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
     )
@@ -624,12 +639,12 @@ def test_shape_static_only(shape: Any, body_type: BodyType) -> None:
 def test_shape_change_from_composite_mesh() -> None:
     shape = Composite3d(
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
-            UVector3Array(UVector3(0), UVector3(1), UVector3(2))
+            FVector3Array(FVector3(0), FVector3(1), FVector3(2)),
+            U16Vector3Array(U16Vector3(0), U16Vector3(1), U16Vector3(2))
         ),
     )
     b = Body(1, shape, type=BodyType.STATIC)
@@ -668,11 +683,11 @@ def test_invalid_transform_type(transform: Any) -> None:
     Sphere(DVector3(0), 1),
     Composite3d(
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
     )
@@ -729,11 +744,11 @@ def test_invalid_world(world: Any) -> None:
     Sphere(DVector3(0), 1),
     Composite3d(
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
         Mesh3d(
-            Vector3Array(DVector3(0), DVector3(1), DVector3(2)),
+            DVector3Array(DVector3(0), DVector3(1), DVector3(2)),
             UVector3Array(UVector3(0), UVector3(1), UVector3(2))
         ),
     )

@@ -6,7 +6,7 @@ __all__ = ['Composite3d']
 # gamut
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
-from gamut.math import Matrix4, Vector3
+from gamut.math import DMatrix4, DVector3, FMatrix4, FVector3
 # python
 from typing import Generator, Generic, TypeVar
 
@@ -21,7 +21,7 @@ class Composite3d(Generic[S]):
     def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other: Composite3d) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Composite3d):
             return False
         if len(self._shapes) != len(other._shapes):
@@ -39,8 +39,8 @@ class Composite3d(Generic[S]):
         shape_reprs = ', '.join(repr(s) for s in self._shapes)
         return f'<gamut.geometry.Composite3d ({shape_reprs})>'
 
-    def __rmatmul__(self, transform: Matrix4) -> Composite3d:
-        if not isinstance(transform, Matrix4):
+    def __rmatmul__(self, transform: FMatrix4 | DMatrix4) -> Composite3d[S]:
+        if not isinstance(transform, (FMatrix4, DMatrix4)):
             return NotImplemented
 
         return Composite3d(*(transform @ s for s in self._shapes))
@@ -57,7 +57,7 @@ class Composite3d(Generic[S]):
             else:
                 yield shape
 
-    def contains_point(self, point: Vector3) -> bool:
+    def contains_point(self, point: FVector3 | DVector3) -> bool:
         for shape in self._shapes:
             try:
                 f = shape.contains_point

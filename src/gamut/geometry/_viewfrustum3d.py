@@ -6,19 +6,24 @@ __all__ = ['ViewFrustum3d']
 # gamut
 from ._plane import Plane
 # gamut
-from gamut.math import Matrix4
+from gamut.math import DMatrix4, DVector3, FMatrix4, FVector3
+# python
+from typing import Generic, overload, TypeVar
+
+VT = TypeVar('VT', FVector3, DVector3)
+MT = TypeVar('MT', FMatrix4, DMatrix4)
 
 
-class ViewFrustum3d:
+class ViewFrustum3d(Generic[VT, MT]):
 
     def __init__(
         self,
-        near_plane: Plane,
-        far_plane: Plane,
-        left_plane: Plane,
-        right_plane: Plane,
-        bottom_plane: Plane,
-        top_plane: Plane,
+        near_plane: Plane[VT, MT],
+        far_plane: Plane[VT, MT],
+        left_plane: Plane[VT, MT],
+        right_plane: Plane[VT, MT],
+        bottom_plane: Plane[VT, MT],
+        top_plane: Plane[VT, MT],
     ):
         if not isinstance(near_plane, Plane):
             raise TypeError('near plane must be Plane')
@@ -48,10 +53,26 @@ class ViewFrustum3d:
             top_plane,
         )
 
+    @overload
     @classmethod
-    def from_view_projection_transform(self, transform: Matrix4) -> Plane:
-        if not isinstance(transform, Matrix4):
-            raise TypeError('transform must be Matrix4')
+    def from_view_projection_transform(
+        cls,
+        transform: FMatrix4
+    ) -> ViewFrustum3d[FVector3, FMatrix4]:
+        ...
+
+    @overload
+    @classmethod
+    def from_view_projection_transform(
+        cls,
+        transform: DMatrix4
+    ) -> ViewFrustum3d[DVector3, DMatrix4]:
+        ...
+
+    @classmethod
+    def from_view_projection_transform(cls, transform: MT) -> ViewFrustum3d:
+        if not isinstance(transform, (FMatrix4, DMatrix4)):
+            raise TypeError('transform must be FMatrix4 or DMatrix4')
         r = [transform.get_row(i) for i in range(4)]
         return ViewFrustum3d(
             # near
@@ -86,7 +107,7 @@ class ViewFrustum3d:
             ),
         )
 
-    def __eq__(self, other: ViewFrustum3d) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, ViewFrustum3d):
             return False
         return all(p1 == p2 for p1, p2 in zip(self._planes, other._planes))
@@ -102,36 +123,42 @@ class ViewFrustum3d:
             f'top_plane={self._top_plane}>'
         )
 
-    def __rmatmul__(self, transform: Matrix4) -> Plane:
-        if not isinstance(transform, Matrix4):
+    def __rmatmul__(self, transform: MT) -> ViewFrustum3d[VT, MT]:
+        if not isinstance(transform, (FMatrix4, DMatrix4)):
             return NotImplemented
-
         return ViewFrustum3d(*(transform @ p for p in self._planes))
 
     @property
-    def near_plane(self) -> Plane:
+    def near_plane(self) -> Plane[VT, MT]:
         return self._near_plane
 
     @property
-    def far_plane(self) -> Plane:
+    def far_plane(self) -> Plane[VT, MT]:
         return self._far_plane
 
     @property
-    def left_plane(self) -> Plane:
+    def left_plane(self) -> Plane[VT, MT]:
         return self._left_plane
 
     @property
-    def right_plane(self) -> Plane:
+    def right_plane(self) -> Plane[VT, MT]:
         return self._right_plane
 
     @property
-    def top_plane(self) -> Plane:
+    def top_plane(self) -> Plane[VT, MT]:
         return self._top_plane
 
     @property
-    def bottom_plane(self) -> Plane:
+    def bottom_plane(self) -> Plane[VT, MT]:
         return self._bottom_plane
 
     @property
-    def planes(self) -> tuple[Plane, Plane, Plane, Plane, Plane, Plane]:
+    def planes(self) -> tuple[
+        Plane[VT, MT],
+        Plane[VT, MT],
+        Plane[VT, MT],
+        Plane[VT, MT],
+        Plane[VT, MT],
+        Plane[VT, MT]
+    ]:
         return self._planes

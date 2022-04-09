@@ -4,37 +4,70 @@ from __future__ import annotations
 __all__ = ['RectangularCuboid']
 
 # gamut
-from gamut.math import Quaternion, U8Array, Vector3, Vector3Array
+from gamut.math import (DQuaternion, DVector3, DVector3Array, FQuaternion,
+                        FVector3, FVector3Array, U8Array)
+# python
+from typing import Generic, overload, TypeVar
+
+AT = TypeVar('AT', FVector3Array, DVector3Array)
+VT = TypeVar('VT', FVector3, DVector3)
+QT = TypeVar('QT', FQuaternion, DQuaternion)
 
 
-class RectangularCuboid:
+class RectangularCuboid(Generic[VT, QT, AT]):
+
+    @overload
+    def __init__(
+        self: RectangularCuboid[FVector3, FQuaternion, FVector3Array],
+        center: FVector3,
+        dimensions: FVector3,
+        *,
+        rotation: FQuaternion | None = None
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: RectangularCuboid[DVector3, DQuaternion, DVector3Array],
+        center: DVector3,
+        dimensions: DVector3,
+        *,
+        rotation: DQuaternion | None = None
+    ):
+        ...
 
     def __init__(
         self,
-        center: Vector3,
-        dimensions: Vector3,
+        center: VT,
+        dimensions: VT,
         *,
-        rotation: Quaternion | None = None
+        rotation: QT | None = None
     ):
-        if not isinstance(center, Vector3):
-            raise TypeError('center must be Vector3')
+        is_double = isinstance(center, DVector3)
+        if not is_double and not isinstance(center, FVector3):
+            raise TypeError('center must be FVector3 or DVector3')
         self._center = center
 
-        if not isinstance(dimensions, Vector3):
-            raise TypeError('dimensions must be Vector3')
+        if not isinstance(dimensions, type(center)):
+            raise TypeError(f'dimensions must be {type(center).__name__}')
         self._dimensions = dimensions
 
-        if rotation is None:
-            self._rotation = Quaternion(1)
+        if is_double:
+            quat_type = DQuaternion
         else:
-            if not isinstance(rotation, Quaternion):
-                raise TypeError('rotation must be Quaternion')
+            quat_type = FQuaternion
+
+        if rotation is None:
+            self._rotation = quat_type(1)
+        else:
+            if not isinstance(rotation, quat_type):
+                raise TypeError(f'rotation must be {quat_type.__name__}')
             self._rotation = rotation
 
     def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other: RectangularCuboid) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, RectangularCuboid):
             return False
         return (
@@ -54,70 +87,78 @@ class RectangularCuboid:
         )
 
     @property
-    def center(self) -> Vector3:
+    def center(self) -> VT:
         return self._center
 
     @property
-    def dimensions(self) -> Vector3:
+    def dimensions(self) -> VT:
         return self._dimensions
 
     @property
-    def rotation(self) -> Quaternion:
+    def rotation(self) -> QT:
         return self._rotation
 
-    def render(self) -> tuple[Vector3Array, Vector3Array, U8Array]:
+    def render(self) -> tuple[AT, AT, U8Array]:
+        if isinstance(self._center, DVector3):
+            array_type = DVector3Array
+            vector_type = DVector3
+        else:
+            assert isinstance(self._center, FVector3)
+            array_type = FVector3Array
+            vector_type = FVector3
+
         half_dimensions = self._dimensions * .5
-        positions = Vector3Array(
+        positions = array_type(
             # top
-            self._center + half_dimensions * Vector3(1, 1, 1),
-            self._center + half_dimensions * Vector3(1, 1, -1),
-            self._center + half_dimensions * Vector3(-1, 1, -1),
-            self._center + half_dimensions * Vector3(-1, 1, 1),
+            self._center + half_dimensions * vector_type(1, 1, 1),
+            self._center + half_dimensions * vector_type(1, 1, -1),
+            self._center + half_dimensions * vector_type(-1, 1, -1),
+            self._center + half_dimensions * vector_type(-1, 1, 1),
             # bottom
-            self._center + half_dimensions * Vector3(-1, -1, -1),
-            self._center + half_dimensions * Vector3(1, -1, -1),
-            self._center + half_dimensions * Vector3(1, -1, 1),
-            self._center + half_dimensions * Vector3(-1, -1, 1),
+            self._center + half_dimensions * vector_type(-1, -1, -1),
+            self._center + half_dimensions * vector_type(1, -1, -1),
+            self._center + half_dimensions * vector_type(1, -1, 1),
+            self._center + half_dimensions * vector_type(-1, -1, 1),
             # right
-            self._center + half_dimensions * Vector3(1, -1, 1),
-            self._center + half_dimensions * Vector3(1, -1, -1),
-            self._center + half_dimensions * Vector3(1, 1, -1),
-            self._center + half_dimensions * Vector3(1, 1, 1),
+            self._center + half_dimensions * vector_type(1, -1, 1),
+            self._center + half_dimensions * vector_type(1, -1, -1),
+            self._center + half_dimensions * vector_type(1, 1, -1),
+            self._center + half_dimensions * vector_type(1, 1, 1),
             # left
-            self._center + half_dimensions * Vector3(-1, 1, -1),
-            self._center + half_dimensions * Vector3(-1, -1, -1),
-            self._center + half_dimensions * Vector3(-1, -1, 1),
-            self._center + half_dimensions * Vector3(-1, 1, 1),
+            self._center + half_dimensions * vector_type(-1, 1, -1),
+            self._center + half_dimensions * vector_type(-1, -1, -1),
+            self._center + half_dimensions * vector_type(-1, -1, 1),
+            self._center + half_dimensions * vector_type(-1, 1, 1),
             # front
-            self._center + half_dimensions * Vector3(1, -1, 1),
-            self._center + half_dimensions * Vector3(1, 1, 1),
-            self._center + half_dimensions * Vector3(-1, 1, 1),
-            self._center + half_dimensions * Vector3(-1, -1, 1),
+            self._center + half_dimensions * vector_type(1, -1, 1),
+            self._center + half_dimensions * vector_type(1, 1, 1),
+            self._center + half_dimensions * vector_type(-1, 1, 1),
+            self._center + half_dimensions * vector_type(-1, -1, 1),
             # back
-            self._center + half_dimensions * Vector3(1, 1, -1),
-            self._center + half_dimensions * Vector3(1, -1, -1),
-            self._center + half_dimensions * Vector3(-1, -1, -1),
-            self._center + half_dimensions * Vector3(-1, 1, -1),
+            self._center + half_dimensions * vector_type(1, 1, -1),
+            self._center + half_dimensions * vector_type(1, -1, -1),
+            self._center + half_dimensions * vector_type(-1, -1, -1),
+            self._center + half_dimensions * vector_type(-1, 1, -1),
         )
-        normals = Vector3Array(
+        normals = array_type(
             # top
-            Vector3(0, 1, 0), Vector3(0, 1, 0),
-            Vector3(0, 1, 0), Vector3(0, 1, 0),
+            vector_type(0, 1, 0), vector_type(0, 1, 0),
+            vector_type(0, 1, 0), vector_type(0, 1, 0),
             # bottom
-            Vector3(0, -1, 0), Vector3(0, -1, 0),
-            Vector3(0, -1, 0), Vector3(0, -1, 0),
+            vector_type(0, -1, 0), vector_type(0, -1, 0),
+            vector_type(0, -1, 0), vector_type(0, -1, 0),
             # right
-            Vector3(1, 0, 0), Vector3(1, 0, 0),
-            Vector3(1, 0, 0), Vector3(1, 0, 0),
+            vector_type(1, 0, 0), vector_type(1, 0, 0),
+            vector_type(1, 0, 0), vector_type(1, 0, 0),
             # left
-            Vector3(-1, 0, 0), Vector3(-1, 0, 0),
-            Vector3(-1, 0, 0), Vector3(-1, 0, 0),
+            vector_type(-1, 0, 0), vector_type(-1, 0, 0),
+            vector_type(-1, 0, 0), vector_type(-1, 0, 0),
             # front
-            Vector3(0, 0, 1), Vector3(0, 0, 1),
-            Vector3(0, 0, 1), Vector3(0, 0, 1),
+            vector_type(0, 0, 1), vector_type(0, 0, 1),
+            vector_type(0, 0, 1), vector_type(0, 0, 1),
             # back
-            Vector3(0, 0, -1), Vector3(0, 0, -1),
-            Vector3(0, 0, -1), Vector3(0, 0, -1),
+            vector_type(0, 0, -1), vector_type(0, 0, -1),
+            vector_type(0, 0, -1), vector_type(0, 0, -1),
         )
         indices = U8Array(
             # top

@@ -20,7 +20,74 @@ static ModuleState *get_module_state();
 
 
 static PyObject *
-triangulate(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+triangulate_f(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+noexcept
+{
+    auto state = get_module_state();
+
+    CDT::Triangulation<float> cdt;
+    std::vector<CDT::V2d<float>> vertices;
+    std::vector<CDT::Edge> edges;
+
+    CDT::VertInd index_offset = 0;
+    for (Py_ssize_t i = 0; i < nargs; i++)
+    {
+        PyObject *py_positions = args[i];
+        glm::fvec2 *positions = (glm::fvec2 *)state->math_api->FVector2Array_GetValuePointer(py_positions);
+        size_t position_count = state->math_api->FVector2Array_GetLength(py_positions);
+        for (size_t v = 0; v < position_count; v++)
+        {
+            vertices.push_back(CDT::V2d<float>{positions[v].x, positions[v].y});
+            if (v == position_count - 1)
+            {
+                edges.push_back(CDT::Edge(index_offset + v, index_offset));
+            }
+            else
+            {
+                edges.push_back(CDT::Edge(index_offset + v, index_offset + v + 1));
+            }
+        }
+        index_offset = vertices.size();
+    }
+
+    cdt.insertVertices(vertices);
+    cdt.insertEdges(edges);
+    cdt.eraseOuterTrianglesAndHoles();
+
+    auto positions_array = state->math_api->FVector2Array_Create(
+        cdt.vertices.size(),
+        (float *)cdt.vertices.data()
+    );
+    if (!positions_array){ return 0; }
+
+    std::vector<glm::uvec3> indexes;
+    for (
+        auto iter = cdt.triangles.begin();
+        iter != cdt.triangles.end();
+        ++iter
+    )
+    {
+        indexes.push_back(glm::uvec3(
+            iter->vertices[0],
+            iter->vertices[1],
+            iter->vertices[2]
+        ));
+    }
+    auto indexes_array = state->math_api->UVector3Array_Create(
+        indexes.size(),
+        (unsigned int *)indexes.data()
+    );
+    if (!indexes_array)
+    {
+        Py_DECREF(positions_array);
+        return 0;
+    }
+    return PyTuple_Pack(2, positions_array, indexes_array);
+}
+
+
+static PyObject *
+triangulate_d(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
 noexcept
 {
     auto state = get_module_state();
@@ -87,7 +154,8 @@ noexcept
 
 
 static PyMethodDef module_PyMethodDef[] = {
-    {"triangulate", (PyCFunction)triangulate, METH_FASTCALL, 0},
+    {"triangulate_f", (PyCFunction)triangulate_f, METH_FASTCALL, 0},
+    {"triangulate_d", (PyCFunction)triangulate_d, METH_FASTCALL, 0},
     {0, 0, 0, 0}
 };
 

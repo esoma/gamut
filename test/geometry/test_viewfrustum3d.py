@@ -1,7 +1,8 @@
 
 # gamut
 from gamut.geometry import Plane, ViewFrustum3d
-from gamut.math import Matrix4, Vector2, Vector3, Vector4
+from gamut.math import (DMatrix4, DVector2, DVector3, DVector4, FMatrix4,
+                        FVector3)
 # python
 from math import radians
 from typing import Any
@@ -10,7 +11,7 @@ import pytest
 
 
 def test_repr() -> None:
-    planes = [Plane(i, Vector3(1, 2, 3)) for i in range(6)]
+    planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
     frustum = ViewFrustum3d(*planes)
     assert (
         repr(frustum) ==
@@ -32,12 +33,12 @@ def test_repr() -> None:
 ])
 def test_invalid_plane(plane: Any, name: str) -> None:
     kwargs = {
-        "near_plane": Plane(0, Vector3(0, 1, 0)),
-        "far_plane": Plane(0, Vector3(0, 1, 0)),
-        "left_plane": Plane(0, Vector3(0, 1, 0)),
-        "right_plane": Plane(0, Vector3(0, 1, 0)),
-        "bottom_plane": Plane(0, Vector3(0, 1, 0)),
-        "top_plane": Plane(0, Vector3(0, 1, 0)),
+        "near_plane": Plane(0, DVector3(0, 1, 0)),
+        "far_plane": Plane(0, DVector3(0, 1, 0)),
+        "left_plane": Plane(0, DVector3(0, 1, 0)),
+        "right_plane": Plane(0, DVector3(0, 1, 0)),
+        "bottom_plane": Plane(0, DVector3(0, 1, 0)),
+        "top_plane": Plane(0, DVector3(0, 1, 0)),
     }
     kwargs[name] = plane
     with pytest.raises(TypeError) as excinfo:
@@ -45,8 +46,11 @@ def test_invalid_plane(plane: Any, name: str) -> None:
     assert str(excinfo.value) == f'{name.replace("_", " ")} must be Plane'
 
 
-def test_planes() -> None:
-    planes = [Plane(i, Vector3(1, 2, 3)) for i in range(6)]
+@pytest.mark.parametrize("planes", [
+    [Plane(i, FVector3(1, 2, 3)) for i in range(6)],
+    [Plane(i, DVector3(1, 2, 3)) for i in range(6)],
+])
+def test_planes(planes: list[Plane]) -> None:
     frustum = ViewFrustum3d(*planes)
     assert frustum.near_plane is planes[0]
     assert frustum.planes[0] is planes[0]
@@ -64,16 +68,16 @@ def test_planes() -> None:
 
 
 @pytest.mark.parametrize("transform", [
-    Matrix4(1).translate(Vector3(1, 0, 0)),
-    Matrix4(1).translate(Vector3(0, 1, 0)),
-    Matrix4(1).translate(Vector3(0, 0, 1)),
-    Matrix4(1).rotate(radians(90), Vector3(1, 0, 0)),
-    Matrix4(1).rotate(radians(90), Vector3(0, 1, 0)),
-    Matrix4(1).rotate(radians(90), Vector3(0, 0, 1)),
-    Matrix4(1).scale(Vector3(2, 3, 4)),
+    DMatrix4(1).translate(DVector3(1, 0, 0)),
+    DMatrix4(1).translate(DVector3(0, 1, 0)),
+    DMatrix4(1).translate(DVector3(0, 0, 1)),
+    DMatrix4(1).rotate(radians(90), DVector3(1, 0, 0)),
+    DMatrix4(1).rotate(radians(90), DVector3(0, 1, 0)),
+    DMatrix4(1).rotate(radians(90), DVector3(0, 0, 1)),
+    DMatrix4(1).scale(DVector3(2, 3, 4)),
 ])
-def test_transform(transform: Matrix4) -> None:
-    planes = [Plane(i, Vector3(1, 2, 3)) for i in range(6)]
+def test_transform(transform: DMatrix4) -> None:
+    planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
     frustum = ViewFrustum3d(*planes)
     new_frustum = transform @ frustum
     assert new_frustum is not frustum
@@ -83,9 +87,9 @@ def test_transform(transform: Matrix4) -> None:
         assert new_plane == transform @ original_plane
 
 
-@pytest.mark.parametrize("transform", [None, 123, Vector4(1), Vector2(1)])
+@pytest.mark.parametrize("transform", [None, 123, DVector4(1), DVector2(1)])
 def test_transform_invalid(transform: Any) -> None:
-    planes = [Plane(i, Vector3(1, 2, 3)) for i in range(6)]
+    planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
     frustum = ViewFrustum3d(*planes)
     with pytest.raises(TypeError) as excinfo:
         transform @ frustum
@@ -93,17 +97,19 @@ def test_transform_invalid(transform: Any) -> None:
 
 
 def test_equal() -> None:
-    planes = [Plane(i, Vector3(1, 2, 3)) for i in range(6)]
+    planes = [Plane(i, DVector3(1, 2, 3)) for i in range(6)]
     assert ViewFrustum3d(*planes) == ViewFrustum3d(*planes)
     assert ViewFrustum3d(*planes) != ViewFrustum3d(*reversed(planes))
     assert ViewFrustum3d(*planes) != object()
 
 
 @pytest.mark.parametrize("transform", [
-    Matrix4(1),
-    Matrix4.perspective(radians(45), 1, .1, 10),
+    FMatrix4(1),
+    FMatrix4.perspective(radians(45), 1, .1, 10),
+    DMatrix4(1),
+    DMatrix4.perspective(radians(45), 1, .1, 10),
 ])
-def test_from_view_projection_transform(transform: Matrix4) -> None:
+def test_from_view_projection_transform(transform: Any) -> None:
     frustum = ViewFrustum3d.from_view_projection_transform(transform)
     rows = [transform.get_row(i) for i in range(4)]
     assert frustum.near_plane == Plane(
@@ -130,3 +136,10 @@ def test_from_view_projection_transform(transform: Matrix4) -> None:
         rows[3].w - rows[1].w,
         rows[3].xyz - rows[1].xyz
     )
+
+
+@pytest.mark.parametrize("transform", [None, 0, 'hello'])
+def test_from_view_projection_transform_invalid_type(transform: Any) -> None:
+    with pytest.raises(TypeError) as ex:
+        ViewFrustum3d.from_view_projection_transform(transform)
+    assert str(ex.value) == 'transform must be FMatrix4 or DMatrix4'
