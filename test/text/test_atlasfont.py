@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.graphics import BufferView, Texture2d
-from gamut.math import FVector2, FVector4, IVector2, UVector2, Vector2
+from gamut.math import DVector2, FVector2, FVector4, IVector2, UVector2
 from gamut.text import AtlasFont, AtlasGlyph, Face, RenderedGlyphFormat
 # python
 import gc
@@ -77,12 +77,12 @@ def test_get(file: str, character: str, format: RenderedGlyphFormat) -> None:
     assert atlas_glyph.size != atlas_glyph_size
 
     uv_top_left, uv_bottom_right = atlas_glyph.uv
-    assert isinstance(uv_top_left, Vector2)
-    assert isinstance(uv_bottom_right, Vector2)
+    assert isinstance(uv_top_left, DVector2)
+    assert isinstance(uv_bottom_right, DVector2)
     assert atlas_glyph.uv[0] is not uv_top_left
     assert atlas_glyph.uv[1] is not uv_bottom_right
-    uv_top_left += Vector2(1, 1)
-    uv_bottom_right += Vector2(1, 1)
+    uv_top_left += DVector2(1, 1)
+    uv_bottom_right += DVector2(1, 1)
     assert atlas_glyph.uv[0] != uv_top_left
     assert atlas_glyph.uv[1] != uv_bottom_right
 

@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import LineSegment3d, Triangle3d
-from gamut.math import DVector3, FVector3, Vector4
+from gamut.math import DVector3, DVector4, FVector3
 # python
 from typing import Any
 # pytest
@@ -25,7 +25,7 @@ def test_repr(vtype: Any) -> None:
     )
 
 
-@pytest.mark.parametrize("a", [None, 'x', object(), Vector4(1)])
+@pytest.mark.parametrize("a", [None, 'x', object(), DVector4(1)])
 def test_invalid_a(a: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Triangle3d(a, DVector3(0), DVector3(0))
@@ -36,7 +36,7 @@ def test_invalid_a(a: Any) -> None:
     (DVector3(0), None, DVector3(0)),
     (DVector3(0), 'x', DVector3(0)),
     (DVector3(0), object(), DVector3(0)),
-    (DVector3(0), Vector4(1), DVector3(0)),
+    (DVector3(0), DVector4(1), DVector3(0)),
     (FVector3(0), DVector3(0), FVector3(0)),
     (DVector3(0), FVector3(0), DVector3(0)),
 ])
@@ -50,7 +50,7 @@ def test_invalid_b(a: Any, b: Any, c: Any) -> None:
     (DVector3(0), None, DVector3(0)),
     (DVector3(0), 'x', DVector3(0)),
     (DVector3(0), object(), DVector3(0)),
-    (DVector3(0), Vector4(1), DVector3(0)),
+    (DVector3(0), DVector4(1), DVector3(0)),
     (FVector3(0), DVector3(0), FVector3(0)),
     (DVector3(0), FVector3(0), DVector3(0)),
 ])

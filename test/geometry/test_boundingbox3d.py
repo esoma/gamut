@@ -2,8 +2,8 @@
 # gamut
 from gamut.geometry import (BoundingBox3d, Plane, Shape3dCullable,
                             Shape3dPointContainer, Sphere, ViewFrustum3d)
-from gamut.math import (DMatrix4, DVector3, DVector3Array, DVector4, FMatrix4,
-                        FVector3, FVector3Array, FVector4, Vector2, Vector4)
+from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, DVector4,
+                        FMatrix4, FVector3, FVector3Array, FVector4)
 # python
 from math import radians
 from typing import Any
@@ -49,8 +49,8 @@ def test_no_points(points: Any) -> None:
     [DVector3(1)],
     [1],
     ['123'],
-    [Vector2(1)],
-    [Vector4(1)],
+    [DVector2(1)],
+    [DVector4(1)],
 ])
 def test_points_invalid_type(points: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
@@ -198,7 +198,7 @@ def test_d_transform(bounding_box: BoundingBox3d, transform: DMatrix4) -> None:
     BoundingBox3d(FVector3Array(FVector3(0))),
     BoundingBox3d(DVector3Array(DVector3(0))),
 ])
-@pytest.mark.parametrize("transform", [None, 123, Vector4(1), Vector2(1)])
+@pytest.mark.parametrize("transform", [None, 123, DVector4(1), DVector2(1)])
 def test_transform_invalid(
     bounding_box: BoundingBox3d,
     transform: Any

@@ -1,8 +1,8 @@
 
 # gamut
 from gamut.geometry import Capsule
-from gamut.math import (DQuaternion, DVector3, FQuaternion, FVector3, Vector2,
-                        Vector4)
+from gamut.math import (DQuaternion, DVector2, DVector3, DVector4, FQuaternion,
+                        FVector3)
 # python
 from typing import Any
 # pytest
@@ -41,14 +41,20 @@ def test_invalid_height(height: Any) -> None:
     assert str(excinfo.value) == 'height must be float'
 
 
-@pytest.mark.parametrize("center", [None, '123', 123, Vector4(1), Vector2(1)])
+@pytest.mark.parametrize("center", [
+    None,
+    '123',
+    123,
+    DVector4(1),
+    DVector2(1)
+])
 def test_invalid_center(center: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Capsule(center, 0, 0)
     assert str(excinfo.value) == 'center must be FVector3 or DVector3'
 
 
-@pytest.mark.parametrize("rotation", ['123', 123, DVector3(1), Vector2(1)])
+@pytest.mark.parametrize("rotation", ['123', 123, DVector3(1), DVector2(1)])
 def test_invalid_rotation(rotation: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Capsule(DVector3(0), 0, 0, rotation=rotation)

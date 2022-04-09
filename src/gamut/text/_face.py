@@ -12,7 +12,7 @@ __all__ = [
 # gamut
 from ._break import break_never, BreakMethod
 # gamut
-from gamut.math import IVector2, UVector2, Vector2
+from gamut.math import DVector2, IVector2, UVector2
 # python
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -178,7 +178,7 @@ class Face:
                 chunk_glyphs.append(PositionedGlyph(
                     c,
                     info.codepoint,
-                    Vector2(
+                    DVector2(
                         pen_position_x + (pos.x_offset / 64.0),
                         pen_position_y + (pos.y_offset / 64.0),
                     ),
@@ -190,7 +190,7 @@ class Face:
                     pen_position_x = 0.0
                 else:
                     for chunk_glyph in chunk_glyphs:
-                        chunk_glyph.position = Vector2(
+                        chunk_glyph.position = DVector2(
                             chunk_glyph.position[0] - chunk_pen_position_x,
                             chunk_glyph.position[1] + size._line_size[1]
                         )
@@ -220,7 +220,7 @@ class PositionedGlyph:
         self,
         character: str,
         glyph_index: int,
-        position: Vector2,
+        position: DVector2,
     ):
         self.character = character
         self.glyph_index = glyph_index

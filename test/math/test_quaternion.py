@@ -2,8 +2,7 @@
 # gamut
 from gamut.math import (DMatrix3x3, DMatrix4x4, DQuaternion, DQuaternionArray,
                         DVector3, DVector4, FMatrix3x3, FMatrix4x4,
-                        FQuaternion, FQuaternionArray, FVector3, FVector4,
-                        Quaternion, QuaternionArray)
+                        FQuaternion, FQuaternionArray, FVector3, FVector4)
 # python
 import ctypes
 from math import inf
@@ -18,11 +17,6 @@ import pytest
 
 def isclose(a, b):
     return _isclose(a, b, abs_tol=1e-6)
-
-
-def test_alias():
-    assert Quaternion is DQuaternion
-    assert QuaternionArray is DQuaternionArray
 
 
 class QuaternionTest:

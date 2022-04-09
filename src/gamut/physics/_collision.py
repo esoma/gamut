@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ['Collision', 'Contact']
 
 # gamut
-from gamut.math import Vector3
+from gamut.math import DVector3
 # python
 from datetime import timedelta
 from typing import TYPE_CHECKING
@@ -55,12 +55,12 @@ class Contact:
 
     def __init__(
         self,
-        local_position_a: Vector3,
-        world_position_a: Vector3,
-        normal_a: Vector3,
-        local_position_b: Vector3,
-        world_position_b: Vector3,
-        normal_b: Vector3
+        local_position_a: DVector3,
+        world_position_a: DVector3,
+        normal_a: DVector3,
+        local_position_b: DVector3,
+        world_position_b: DVector3,
+        normal_b: DVector3
     ):
         self._local_position_a = local_position_a
         self._world_position_a = world_position_a
@@ -76,25 +76,25 @@ class Contact:
         )
 
     @property
-    def local_position_a(self) -> Vector3:
+    def local_position_a(self) -> DVector3:
         return self._local_position_a
 
     @property
-    def world_position_a(self) -> Vector3:
+    def world_position_a(self) -> DVector3:
         return self._world_position_a
 
     @property
-    def normal_a(self) -> Vector3:
+    def normal_a(self) -> DVector3:
         return self._normal_a
 
     @property
-    def local_position_b(self) -> Vector3:
+    def local_position_b(self) -> DVector3:
         return self._local_position_b
 
     @property
-    def world_position_b(self) -> Vector3:
+    def world_position_b(self) -> DVector3:
         return self._world_position_b
 
     @property
-    def normal_b(self) -> Vector3:
+    def normal_b(self) -> DVector3:
         return self._normal_b

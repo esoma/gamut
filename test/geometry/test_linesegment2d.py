@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import LineSegment2d
-from gamut.math import DVector2, FVector2, Vector3
+from gamut.math import DVector2, DVector3, FVector2
 # python
 from typing import Any
 # pytest
@@ -22,7 +22,7 @@ def test_repr(vtype: Any) -> None:
         f'<gamut.geometry.LineSegment2d (0.0, 1.0) to (2.0, 3.0)>'
     )
 
-@pytest.mark.parametrize("a", [None, 'x', object(), Vector3(1)])
+@pytest.mark.parametrize("a", [None, 'x', object(), DVector3(1)])
 def test_invalid_a(a: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         LineSegment2d(a, DVector2(0))
@@ -33,7 +33,7 @@ def test_invalid_a(a: Any) -> None:
     (DVector2(0), None),
     (DVector2(0), 'x'),
     (DVector2(0), object()),
-    (DVector2(0), Vector3(1)),
+    (DVector2(0), DVector3(1)),
     (FVector2(0), DVector2(0)),
     (DVector2(0), FVector2(0)),
 ])

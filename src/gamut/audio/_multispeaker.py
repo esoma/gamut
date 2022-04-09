@@ -8,7 +8,7 @@ __all__ = ['MultiSpeaker']
 from ._source import Sample
 from ._speaker import Speaker, SpeakerState
 # gamut
-from gamut.math import Vector3
+from gamut.math import DVector3
 # python
 from math import pi
 
@@ -18,14 +18,14 @@ class MultiSpeaker:
     def __init__(
         self,
         *,
-        position: Vector3 = Vector3(0),
-        velocity: Vector3 = Vector3(0),
+        position: DVector3 = DVector3(0),
+        velocity: DVector3 = DVector3(0),
         min_gain: float = 0.0,
         gain: float = 1.0,
         max_gain: float = 1.0,
         is_relative: bool = False,
         pitch: float = 1.0,
-        direction: Vector3 = Vector3(0),
+        direction: DVector3 = DVector3(0),
         inner_cone_angle: float = 2 * pi,
         outer_cone_angle: float = 2 * pi,
         outer_cone_gain: float = 0.0,
@@ -80,25 +80,25 @@ class MultiSpeaker:
             speaker.stop()
 
     @property
-    def position(self) -> Vector3:
+    def position(self) -> DVector3:
         return self._position
 
     @position.setter
-    def position(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def position(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._position = value
         for speaker in self._speakers:
             speaker.position = self._position
 
     @property
-    def velocity(self) -> Vector3:
+    def velocity(self) -> DVector3:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def velocity(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._velocity = value
         for speaker in self._speakers:
             speaker.velocity = self._velocity
@@ -154,13 +154,13 @@ class MultiSpeaker:
             speaker.pitch = self._pitch
 
     @property
-    def direction(self) -> Vector3:
+    def direction(self) -> DVector3:
         return self._direction
 
     @direction.setter
-    def direction(self, value: Vector3) -> None:
-        if not isinstance(value, Vector3):
-            raise TypeError(f'expected Vector3, got {value!r}')
+    def direction(self, value: DVector3) -> None:
+        if not isinstance(value, DVector3):
+            raise TypeError(f'expected DVector3, got {value!r}')
         self._direction = value
         for speaker in self._speakers:
             speaker.direction = self._direction

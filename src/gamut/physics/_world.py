@@ -14,7 +14,7 @@ from ._groups import ALL_GROUPS, verify_groups, verify_mask
 # gamut
 from gamut._bullet import World as BaseWorld
 from gamut.geometry import Sphere
-from gamut.math import Vector3
+from gamut.math import DVector3
 # python
 from datetime import timedelta
 from math import floor
@@ -29,8 +29,8 @@ class RaycastHit:
 
     def __init__(
         self,
-        position: Vector3,
-        normal: Vector3,
+        position: DVector3,
+        normal: DVector3,
         body: Body,
         time: float
     ):
@@ -78,17 +78,17 @@ class World:
 
     def raycast(
         self,
-        start: Vector3,
-        end: Vector3,
+        start: DVector3,
+        end: DVector3,
         *,
         shape: Sphere | None = None,
         groups: int = ALL_GROUPS,
         mask: int = ALL_GROUPS
     ) -> RaycastHit | None:
-        if not isinstance(start, Vector3):
-            raise TypeError(f'start must be Vector3, got {start!r}')
-        if not isinstance(end, Vector3):
-            raise TypeError(f'end must be Vector3, got {end!r}')
+        if not isinstance(start, DVector3):
+            raise TypeError(f'start must be DVector3, got {start!r}')
+        if not isinstance(end, DVector3):
+            raise TypeError(f'end must be DVector3, got {end!r}')
         groups = verify_groups(groups)
         mask = verify_mask(mask)
 
@@ -114,11 +114,11 @@ class World:
         return list(self._bodies)
 
     @property
-    def gravity(self) -> Vector3:
+    def gravity(self) -> DVector3:
         return self._imp.gravity
 
     @gravity.setter
-    def gravity(self, value: Vector3) -> None:
+    def gravity(self, value: DVector3) -> None:
         self._imp.gravity = value
 
     @property
@@ -175,7 +175,7 @@ class WorldSimulation:
                         Contact(
                             cc[0],
                             cc[1],
-                            cc[4] * Vector3(-1),
+                            cc[4] * DVector3(-1),
                             cc[2],
                             cc[3],
                             cc[4],

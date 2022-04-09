@@ -2,7 +2,7 @@
 # gamut
 from gamut.audio import Listener
 from gamut.audio._alcontext import AlContext
-from gamut.math import Vector3
+from gamut.math import DVector3
 # python
 import gc
 from typing import Any
@@ -12,16 +12,16 @@ import pytest
 
 def test_initialize_defaults(loopback_al_context: AlContext) -> None:
     listener = Listener()
-    assert isinstance(listener.position, Vector3)
-    assert listener.position == Vector3(0, 0, 0)
-    assert isinstance(listener.velocity, Vector3)
-    assert listener.velocity == Vector3(0, 0, 0)
+    assert isinstance(listener.position, DVector3)
+    assert listener.position == DVector3(0, 0, 0)
+    assert isinstance(listener.velocity, DVector3)
+    assert listener.velocity == DVector3(0, 0, 0)
     assert isinstance(listener.gain, float)
     assert listener.gain == 1.0
-    assert isinstance(listener.direction, Vector3)
-    assert listener.direction == Vector3(0, 0, -1)
-    assert isinstance(listener.up, Vector3)
-    assert listener.up == Vector3(0, 1, 0)
+    assert isinstance(listener.direction, DVector3)
+    assert listener.direction == DVector3(0, 0, -1)
+    assert isinstance(listener.up, DVector3)
+    assert listener.up == DVector3(0, 1, 0)
 
 
 def test_activate_deactivate(loopback_al_context: AlContext) -> None:
@@ -49,18 +49,18 @@ def test_activate_deactivate(loopback_al_context: AlContext) -> None:
 
 
 @pytest.mark.parametrize("position", [
-    Vector3(1, 2, 3),
-    Vector3(4, 5, 6),
-    Vector3(-1, -2, -3),
+    DVector3(1, 2, 3),
+    DVector3(4, 5, 6),
+    DVector3(-1, -2, -3),
 ])
 def test_position(loopback_al_context: AlContext, position: Any) -> None:
     listener = Listener()
 
     listener.position = position
-    assert isinstance(listener.position, Vector3)
+    assert isinstance(listener.position, DVector3)
     assert listener.position == position
 
-    position += Vector3(1)
+    position += DVector3(1)
     assert listener.position != position
 
     listener.activate()
@@ -78,18 +78,18 @@ def test_position_invalid_type(
 
 
 @pytest.mark.parametrize("velocity", [
-    Vector3(1, 2, 3),
-    Vector3(4, 5, 6),
-    Vector3(-1, -2, -3),
+    DVector3(1, 2, 3),
+    DVector3(4, 5, 6),
+    DVector3(-1, -2, -3),
 ])
 def test_velocity(loopback_al_context: AlContext, velocity: Any) -> None:
     listener = Listener()
 
     listener.velocity = velocity
-    assert isinstance(listener.velocity, Vector3)
+    assert isinstance(listener.velocity, DVector3)
     assert listener.velocity == velocity
 
-    velocity += Vector3(1)
+    velocity += DVector3(1)
     assert listener.velocity != velocity
 
     listener.activate()
@@ -107,18 +107,18 @@ def test_velocity_invalid_type(
 
 
 @pytest.mark.parametrize("direction", [
-    Vector3(1, 2, 3),
-    Vector3(4, 5, 6),
-    Vector3(-1, -2, -3),
+    DVector3(1, 2, 3),
+    DVector3(4, 5, 6),
+    DVector3(-1, -2, -3),
 ])
 def test_direction(loopback_al_context: AlContext, direction: Any) -> None:
     listener = Listener()
 
     listener.direction = direction
-    assert isinstance(listener.direction, Vector3)
+    assert isinstance(listener.direction, DVector3)
     assert listener.direction == direction
 
-    direction += Vector3(1)
+    direction += DVector3(1)
     assert listener.direction != direction
 
     listener.activate()
@@ -136,18 +136,18 @@ def test_direction_invalid_type(
 
 
 @pytest.mark.parametrize("up", [
-    Vector3(1, 2, 3),
-    Vector3(4, 5, 6),
-    Vector3(-1, -2, -3),
+    DVector3(1, 2, 3),
+    DVector3(4, 5, 6),
+    DVector3(-1, -2, -3),
 ])
 def test_up(loopback_al_context: AlContext, up: Any) -> None:
     listener = Listener()
 
     listener.up = up
-    assert isinstance(listener.up, Vector3)
+    assert isinstance(listener.up, DVector3)
     assert listener.up == up
 
-    up += Vector3(1)
+    up += DVector3(1)
     assert listener.up != up
 
     listener.activate()

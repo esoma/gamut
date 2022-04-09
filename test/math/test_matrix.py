@@ -16,13 +16,7 @@ from gamut.math import (DMatrix2, DMatrix2Array, DMatrix2x2, DMatrix2x2Array,
                         FMatrix4Array, FMatrix4x2, FMatrix4x2Array, FMatrix4x3,
                         FMatrix4x3Array, FMatrix4x4, FMatrix4x4Array,
                         FQuaternion, FVector2, FVector2Array, FVector3,
-                        FVector3Array, FVector4, FVector4Array, Matrix2,
-                        Matrix2Array, Matrix2x2, Matrix2x2Array, Matrix2x3,
-                        Matrix2x3Array, Matrix2x4, Matrix2x4Array, Matrix3,
-                        Matrix3Array, Matrix3x2, Matrix3x2Array, Matrix3x3,
-                        Matrix3x3Array, Matrix3x4, Matrix3x4Array, Matrix4,
-                        Matrix4Array, Matrix4x2, Matrix4x2Array, Matrix4x3,
-                        Matrix4x3Array, Matrix4x4, Matrix4x4Array)
+                        FVector3Array, FVector4, FVector4Array)
 # python
 import ctypes
 from math import inf
@@ -54,34 +48,6 @@ def test_alias():
     assert DMatrix2Array is DMatrix2x2Array
     assert DMatrix3Array is DMatrix3x3Array
     assert DMatrix4Array is DMatrix4x4Array
-
-    assert Matrix2 is DMatrix2x2
-    assert Matrix3 is DMatrix3x3
-    assert Matrix4 is DMatrix4x4
-
-    assert Matrix2Array is DMatrix2x2Array
-    assert Matrix3Array is DMatrix3x3Array
-    assert Matrix4Array is DMatrix4x4Array
-
-    assert Matrix2x2 is DMatrix2x2
-    assert Matrix2x3 is DMatrix2x3
-    assert Matrix2x4 is DMatrix2x4
-    assert Matrix3x2 is DMatrix3x2
-    assert Matrix3x3 is DMatrix3x3
-    assert Matrix3x4 is DMatrix3x4
-    assert Matrix4x2 is DMatrix4x2
-    assert Matrix4x3 is DMatrix4x3
-    assert Matrix4x4 is DMatrix4x4
-
-    assert Matrix2x2Array is DMatrix2x2Array
-    assert Matrix2x3Array is DMatrix2x3Array
-    assert Matrix2x4Array is DMatrix2x4Array
-    assert Matrix3x2Array is DMatrix3x2Array
-    assert Matrix3x3Array is DMatrix3x3Array
-    assert Matrix3x4Array is DMatrix3x4Array
-    assert Matrix4x2Array is DMatrix4x2Array
-    assert Matrix4x3Array is DMatrix4x3Array
-    assert Matrix4x4Array is DMatrix4x4Array
 
 
 class MatrixTest:

@@ -2,9 +2,9 @@
 # gamut
 from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
                             Mesh3d, Plane, RectangularCuboid, Sphere)
-from gamut.math import (BVector3, DVector3, DVector3Array, FVector3,
-                        FVector3Array, Matrix4, U8Vector3, U8Vector3Array,
-                        U16Vector3, U16Vector3Array, UVector3, UVector3Array)
+from gamut.math import (BVector3, DMatrix4, DVector3, DVector3Array, FVector3,
+                        FVector3Array, U8Vector3, U8Vector3Array, U16Vector3,
+                        U16Vector3Array, UVector3, UVector3Array)
 from gamut.physics import Body, BodyType, World
 # python
 from datetime import timedelta
@@ -119,7 +119,7 @@ def test_defaults() -> None:
     assert b.rolling_friction == 0
     assert b.spinning_friction == 0
     assert b.tangible is True
-    assert b.transform == Matrix4(1)
+    assert b.transform == DMatrix4(1)
     assert b.type == BodyType.DYNAMIC
     assert b.world is None
 
@@ -702,19 +702,19 @@ def test_tangible(shape: Any) -> None:
 
 
 @pytest.mark.parametrize("transform", [
-    Matrix4(1),
-    Matrix4(
+    DMatrix4(1),
+    DMatrix4(
         1, 2, 3, 0,
         5, 6, 7, 0,
         9, 10, 11, 0,
         13, 14, 15, 1
     ),
 ])
-def test_transform(transform: Matrix4) -> None:
+def test_transform(transform: DMatrix4) -> None:
     b = Body(1, Sphere(DVector3(0), 1))
     b.transform = transform
     assert b.transform == transform
-    assert isinstance(b.transform, Matrix4)
+    assert isinstance(b.transform, DMatrix4)
 
 
 @pytest.mark.parametrize("type", [None, 'abc', []])

@@ -1,8 +1,8 @@
 
 # gamut
 from gamut.geometry import Plane
-from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
-                        FVector4, Vector2)
+from gamut.math import (DMatrix4, DVector2, DVector3, DVector4, FMatrix4,
+                        FVector3, FVector4)
 # python
 from math import radians
 from typing import Any
@@ -32,7 +32,13 @@ def test_invalid_distance(distance: Any) -> None:
     assert str(excinfo.value) == 'distance must be float'
 
 
-@pytest.mark.parametrize("normal", [None, '123', 123, DVector4(1), Vector2(1)])
+@pytest.mark.parametrize("normal", [
+    None,
+    '123',
+    123,
+    DVector4(1),
+    DVector2(1)
+])
 def test_invalid_normal_type(normal: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Plane(1, normal)
@@ -123,7 +129,7 @@ def test_f_transform(plane: Plane, transform: Any) -> None:
     assert new_plane.normal.z == pytest.approx(p.z / magnitude)
 
 
-@pytest.mark.parametrize("transform", [None, 123, DVector4(1), Vector2(1)])
+@pytest.mark.parametrize("transform", [None, 123, DVector4(1), DVector2(1)])
 def test_transform_invalid(transform: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         transform @ Plane(1, DVector3(0, 1, 0))
@@ -174,7 +180,7 @@ def test_f_distance_to_point(plane: Plane, point: FVector3) -> None:
     )
 
 
-@pytest.mark.parametrize("point", [None, '123', 123, DVector4(1), Vector2(1)])
+@pytest.mark.parametrize("point", [None, '123', 123, DVector4(1), DVector2(1)])
 def test_distance_to_point_invalid(point: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         Plane(1, DVector3(0, 1, 0)).distance_to_point(point)

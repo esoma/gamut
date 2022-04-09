@@ -2,7 +2,7 @@
 # gamut
 from gamut.audio import Sample, Speaker, SpeakerState, Stream
 from gamut.audio._alcontext import AlContext, LOOP_BACK_FREQUENCY
-from gamut.math import Vector3
+from gamut.math import DVector3
 # python
 from math import pi
 from typing import Any, Optional, Union
@@ -18,10 +18,10 @@ def test_initialize_defaults(
     source = create_source(source_type)
     with Speaker(source) as speaker:
         assert speaker.source is source
-        assert isinstance(speaker.position, Vector3)
-        assert speaker.position == Vector3(0, 0, 0)
-        assert isinstance(speaker.velocity, Vector3)
-        assert speaker.velocity == Vector3(0, 0, 0)
+        assert isinstance(speaker.position, DVector3)
+        assert speaker.position == DVector3(0, 0, 0)
+        assert isinstance(speaker.velocity, DVector3)
+        assert speaker.velocity == DVector3(0, 0, 0)
         assert isinstance(speaker.min_gain, float)
         assert speaker.min_gain == 0.0
         assert isinstance(speaker.gain, float)
@@ -34,8 +34,8 @@ def test_initialize_defaults(
         assert not speaker.loop
         assert isinstance(speaker.pitch, float)
         assert speaker.pitch == 1.0
-        assert isinstance(speaker.direction, Vector3)
-        assert speaker.direction == Vector3(0, 0, 0)
+        assert isinstance(speaker.direction, DVector3)
+        assert speaker.direction == DVector3(0, 0, 0)
         assert isinstance(speaker.inner_cone_angle, float)
         assert speaker.inner_cone_angle == 2 * pi
         assert isinstance(speaker.outer_cone_angle, float)
@@ -114,7 +114,7 @@ def test_close(
     assert str(excinfo.value) == 'speaker is closed'
 
     with pytest.raises(RuntimeError) as excinfo:
-        speaker.position = Vector3()
+        speaker.position = DVector3()
     assert str(excinfo.value) == 'speaker is closed'
 
     with pytest.raises(RuntimeError) as excinfo:
@@ -122,7 +122,7 @@ def test_close(
     assert str(excinfo.value) == 'speaker is closed'
 
     with pytest.raises(RuntimeError) as excinfo:
-        speaker.velocity = Vector3()
+        speaker.velocity = DVector3()
     assert str(excinfo.value) == 'speaker is closed'
 
     with pytest.raises(RuntimeError) as excinfo:
@@ -178,7 +178,7 @@ def test_close(
     assert str(excinfo.value) == 'speaker is closed'
 
     with pytest.raises(RuntimeError) as excinfo:
-        speaker.direction = Vector3()
+        speaker.direction = DVector3()
     assert str(excinfo.value) == 'speaker is closed'
 
     with pytest.raises(RuntimeError) as excinfo:
@@ -218,8 +218,8 @@ def test_invalid_source_type(
 
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 @pytest.mark.parametrize("position", [
-    Vector3(1, 2, 3),
-    Vector3(-1, -2, -3)
+    DVector3(1, 2, 3),
+    DVector3(-1, -2, -3)
 ])
 def test_position(
     loopback_al_context: AlContext,
@@ -228,10 +228,10 @@ def test_position(
 ) -> None:
     with Speaker(create_source(source_type)) as speaker:
         speaker.position = position
-        assert isinstance(speaker.position, Vector3)
+        assert isinstance(speaker.position, DVector3)
         assert speaker.position == position
 
-        position += Vector3(1)
+        position += DVector3(1)
         assert speaker.position != position
 
 
@@ -255,7 +255,7 @@ def test_position_stereo(loopback_al_context: AlContext) -> None:
     source = Sample(2, 8, 44100, b'')
     with Speaker(source) as speaker:
         with pytest.warns(UserWarning) as warnings:
-                speaker.position = Vector3(1)
+                speaker.position = DVector3(1)
         assert len(warnings) == 1
         assert warnings[0].message.args[0] == ( # type: ignore
             f'{source} has more than 1 channel, it will be '
@@ -265,8 +265,8 @@ def test_position_stereo(loopback_al_context: AlContext) -> None:
 
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 @pytest.mark.parametrize("velocity", [
-    Vector3(1, 2, 3),
-    Vector3(-1, -2, -3)
+    DVector3(1, 2, 3),
+    DVector3(-1, -2, -3)
 ])
 def test_velocity(
     loopback_al_context: AlContext,
@@ -275,10 +275,10 @@ def test_velocity(
 ) -> None:
     with Speaker(create_source(source_type)) as speaker:
         speaker.velocity = velocity
-        assert isinstance(speaker.velocity, Vector3)
+        assert isinstance(speaker.velocity, DVector3)
         assert speaker.velocity == velocity
 
-        velocity += Vector3(1)
+        velocity += DVector3(1)
         assert speaker.velocity != velocity
 
 
@@ -302,7 +302,7 @@ def test_velocity_stereo(loopback_al_context: AlContext) -> None:
     source = Sample(2, 8, 44100, b'')
     with Speaker(source) as speaker:
         with pytest.warns(UserWarning) as warnings:
-                speaker.velocity = Vector3(1)
+                speaker.velocity = DVector3(1)
         assert len(warnings) == 1
         assert warnings[0].message.args[0] == ( # type: ignore
             f'{source} has more than 1 channel, it will be '
@@ -312,8 +312,8 @@ def test_velocity_stereo(loopback_al_context: AlContext) -> None:
 
 @pytest.mark.parametrize("source_type", [Sample, Stream])
 @pytest.mark.parametrize("direction", [
-    Vector3(1, 2, 3),
-    Vector3(-1, -2, -3)
+    DVector3(1, 2, 3),
+    DVector3(-1, -2, -3)
 ])
 def test_direction(
     loopback_al_context: AlContext,
@@ -322,10 +322,10 @@ def test_direction(
 ) -> None:
     with Speaker(create_source(source_type)) as speaker:
         speaker.direction = direction
-        assert isinstance(speaker.direction, Vector3)
+        assert isinstance(speaker.direction, DVector3)
         assert speaker.direction == direction
 
-        direction += Vector3(1)
+        direction += DVector3(1)
         assert speaker.direction != direction
 
 
@@ -348,7 +348,7 @@ def test_direction_stereo(loopback_al_context: AlContext) -> None:
     source = Sample(2, 8, 44100, b'')
     with Speaker(source) as speaker:
         with pytest.warns(UserWarning) as warnings:
-                speaker.direction = Vector3(1)
+                speaker.direction = DVector3(1)
         assert len(warnings) == 1
         assert warnings[0].message.args[0] == ( # type: ignore
             f'{source} has more than 1 channel, it will be '

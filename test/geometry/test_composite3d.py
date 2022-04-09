@@ -2,7 +2,7 @@
 # gamut
 from gamut.geometry import (Composite3d, Plane, Shape3dCullable,
                             Shape3dPointContainer, Sphere, ViewFrustum3d)
-from gamut.math import Matrix4, Vector2, Vector3, Vector4
+from gamut.math import DMatrix4, DVector2, DVector3, DVector4
 # python
 from math import radians
 from typing import Any
@@ -61,18 +61,18 @@ def test_shapes_flattened():
 
 @pytest.mark.parametrize("composite", [
     Composite3d(),
-    Composite3d(Sphere(Vector3(0), 0), Sphere(Vector3(0), 0)),
+    Composite3d(Sphere(DVector3(0), 0), Sphere(DVector3(0), 0)),
 ])
 @pytest.mark.parametrize("transform", [
-    Matrix4(1).translate(Vector3(1, 0, 0)),
-    Matrix4(1).translate(Vector3(0, 1, 0)),
-    Matrix4(1).translate(Vector3(0, 0, 1)),
-    Matrix4(1).rotate(radians(90), Vector3(1, 0, 0)),
-    Matrix4(1).rotate(radians(90), Vector3(0, 1, 0)),
-    Matrix4(1).rotate(radians(90), Vector3(0, 0, 1)),
-    Matrix4(1).scale(Vector3(2, 3, 4)),
+    DMatrix4(1).translate(DVector3(1, 0, 0)),
+    DMatrix4(1).translate(DVector3(0, 1, 0)),
+    DMatrix4(1).translate(DVector3(0, 0, 1)),
+    DMatrix4(1).rotate(radians(90), DVector3(1, 0, 0)),
+    DMatrix4(1).rotate(radians(90), DVector3(0, 1, 0)),
+    DMatrix4(1).rotate(radians(90), DVector3(0, 0, 1)),
+    DMatrix4(1).scale(DVector3(2, 3, 4)),
 ])
-def test_transform(composite: Composite3d, transform: Matrix4) -> None:
+def test_transform(composite: Composite3d, transform: DMatrix4) -> None:
     new_composite = transform @ composite
     assert new_composite is not composite
 
@@ -84,11 +84,11 @@ def test_transform(composite: Composite3d, transform: Matrix4) -> None:
 def test_transform_shape_not_implemented() -> None:
     composite = Composite3d(None)
     with pytest.raises(TypeError) as excinfo:
-        Matrix4(1) @ composite
+        DMatrix4(1) @ composite
     assert str(excinfo.value).startswith('unsupported operand type(s) for @:')
 
 
-@pytest.mark.parametrize("transform", [None, 123, Vector4(1), Vector2(1)])
+@pytest.mark.parametrize("transform", [None, 123, DVector4(1), DVector2(1)])
 def test_transform_invalid(transform: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
         transform @ Composite3d()
@@ -111,34 +111,34 @@ def test_equal() -> None:
 def test_contains_point() -> None:
     class Contains123:
         def contains_point(self, point):
-            return point == Vector3(1, 2, 3)
+            return point == DVector3(1, 2, 3)
 
-    assert not Composite3d().contains_point(Vector3(0))
-    assert not Composite3d().contains_point(Vector3(1, 2, 3))
-    assert not Composite3d(None).contains_point(Vector3(0))
-    assert not Composite3d(None).contains_point(Vector3(1, 2, 3))
-    assert not Composite3d(Contains123()).contains_point(Vector3(0))
-    assert Composite3d(Contains123()).contains_point(Vector3(1, 2, 3))
-    assert Composite3d(None, Contains123()).contains_point(Vector3(1, 2, 3))
+    assert not Composite3d().contains_point(DVector3(0))
+    assert not Composite3d().contains_point(DVector3(1, 2, 3))
+    assert not Composite3d(None).contains_point(DVector3(0))
+    assert not Composite3d(None).contains_point(DVector3(1, 2, 3))
+    assert not Composite3d(Contains123()).contains_point(DVector3(0))
+    assert Composite3d(Contains123()).contains_point(DVector3(1, 2, 3))
+    assert Composite3d(None, Contains123()).contains_point(DVector3(1, 2, 3))
 
 
 def test_seen_by() -> None:
     frustum_a = ViewFrustum3d(
-        Plane(-1, Vector3(0, 0, 1)),
-        Plane(10, Vector3(0, 0, -1)),
-        Plane(5, Vector3(1, 0, 0)),
-        Plane(5, Vector3(-1, 0, 0)),
-        Plane(5, Vector3(0, 1, 0)),
-        Plane(5, Vector3(0, -1, 0)),
+        Plane(-1, DVector3(0, 0, 1)),
+        Plane(10, DVector3(0, 0, -1)),
+        Plane(5, DVector3(1, 0, 0)),
+        Plane(5, DVector3(-1, 0, 0)),
+        Plane(5, DVector3(0, 1, 0)),
+        Plane(5, DVector3(0, -1, 0)),
     )
 
     frustum_b = ViewFrustum3d(
-        Plane(-1, Vector3(0, 0, 1)),
-        Plane(10, Vector3(0, 0, -1)),
-        Plane(5, Vector3(1, 0, 0)),
-        Plane(5, Vector3(-1, 0, 0)),
-        Plane(5, Vector3(0, 1, 0)),
-        Plane(5, Vector3(0, -1, 0)),
+        Plane(-1, DVector3(0, 0, 1)),
+        Plane(10, DVector3(0, 0, -1)),
+        Plane(5, DVector3(1, 0, 0)),
+        Plane(5, DVector3(-1, 0, 0)),
+        Plane(5, DVector3(0, 1, 0)),
+        Plane(5, DVector3(0, -1, 0)),
     )
 
     class SeenByFrustumA:
