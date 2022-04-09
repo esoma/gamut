@@ -1522,23 +1522,27 @@ sphere_capsule_destructor(PyObject *capsule)
 
 
 static PyObject *
-Shape_add_capsule(Shape *self, PyObject *args)
+Shape_add_capsule(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    double radius = 0;
-    double height = 0;
-    double center_x = 0;
-    double center_y = 0;
-    double center_z = 0;
-    double rotation_w = 0;
-    double rotation_x = 0;
-    double rotation_y = 0;
-    double rotation_z = 0;
-    if (!PyArg_ParseTuple(
-        args, "ddddddddd",
-        &radius, &height,
-        &center_x, &center_y, &center_z,
-        &rotation_w, &rotation_x, &rotation_y, &rotation_z
-    )){ return 0; }
+    ASSERT(nargs == 9);
+    double radius = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    double height = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    double center_x = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    double center_y = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
+    double center_z = PyFloat_AsDouble(args[4]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_w = PyFloat_AsDouble(args[5]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_x = PyFloat_AsDouble(args[6]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_y = PyFloat_AsDouble(args[7]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_z = PyFloat_AsDouble(args[8]);
+    ASSERT(!PyErr_Occurred());
 
     auto capsule = new btCapsuleShape(radius, height);
     if (
@@ -1570,23 +1574,27 @@ Shape_add_capsule(Shape *self, PyObject *args)
 
 
 static PyObject *
-Shape_add_cone(Shape *self, PyObject *args)
+Shape_add_cone(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    double radius = 0;
-    double height = 0;
-    double center_x = 0;
-    double center_y = 0;
-    double center_z = 0;
-    double rotation_w = 0;
-    double rotation_x = 0;
-    double rotation_y = 0;
-    double rotation_z = 0;
-    if (!PyArg_ParseTuple(
-        args, "ddddddddd",
-        &radius, &height,
-        &center_x, &center_y, &center_z,
-        &rotation_w, &rotation_x, &rotation_y, &rotation_z
-    )){ return 0; }
+    ASSERT(nargs == 9);
+    double radius = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    double height = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    double center_x = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    double center_y = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
+    double center_z = PyFloat_AsDouble(args[4]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_w = PyFloat_AsDouble(args[5]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_x = PyFloat_AsDouble(args[6]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_y = PyFloat_AsDouble(args[7]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_z = PyFloat_AsDouble(args[8]);
+    ASSERT(!PyErr_Occurred());
 
     auto cone = new btConeShape(radius, height);
     if (
@@ -1618,20 +1626,39 @@ Shape_add_cone(Shape *self, PyObject *args)
 
 
 static PyObject *
-Shape_add_convex_hull(Shape *self, PyObject *points)
+Shape_add_convex_hull(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    auto convex_hull_shape = new btConvexHullShape();
+    auto state = get_module_state();
+    ASSERT(nargs == 1);
+    PyObject *points = args[0];
 
-    size_t point_count = PyTuple_GET_SIZE(points);
-    for (size_t i = 0; i < point_count; i++)
+    auto convex_hull_shape = new btConvexHullShape();
+    if (Py_TYPE(points) == state->math_api->FVector3Array_GetType())
     {
-        auto point = PyTuple_GET_ITEM(points, i);
-        double x, y, z;
-        if (!PyArg_ParseTuple(
-            point, "ddd",
-            &x, &y, &z
-        )){ return 0; }
-        convex_hull_shape->addPoint(btVector3(x, y, z), false);
+        auto point_count = state->math_api->FVector3Array_GetLength(points);
+        auto c_points = (glm::fvec3*)state->math_api->FVector3Array_GetValuePointer(points);
+        for (size_t i = 0; i < point_count; i++)
+        {
+            convex_hull_shape->addPoint(btVector3(
+                c_points[i].x,
+                c_points[i].y,
+                c_points[i].z
+            ), false);
+        }
+    }
+    else
+    {
+        ASSERT(Py_TYPE(points) == state->math_api->DVector3Array_GetType());
+        auto point_count = state->math_api->DVector3Array_GetLength(points);
+        auto c_points = (glm::dvec3*)state->math_api->DVector3Array_GetValuePointer(points);
+        for (size_t i = 0; i < point_count; i++)
+        {
+            convex_hull_shape->addPoint(btVector3(
+                c_points[i].x,
+                c_points[i].y,
+                c_points[i].z
+            ), false);
+        }
     }
     convex_hull_shape->recalcLocalAabb();
     convex_hull_shape->optimizeConvexHull();
@@ -1651,23 +1678,27 @@ Shape_add_convex_hull(Shape *self, PyObject *points)
 
 
 static PyObject *
-Shape_add_cylinder(Shape *self, PyObject *args)
+Shape_add_cylinder(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    double radius = 0;
-    double height = 0;
-    double center_x = 0;
-    double center_y = 0;
-    double center_z = 0;
-    double rotation_w = 0;
-    double rotation_x = 0;
-    double rotation_y = 0;
-    double rotation_z = 0;
-    if (!PyArg_ParseTuple(
-        args, "ddddddddd",
-        &radius, &height,
-        &center_x, &center_y, &center_z,
-        &rotation_w, &rotation_x, &rotation_y, &rotation_z
-    )){ return 0; }
+    ASSERT(nargs == 9);
+    double radius = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    double height = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    double center_x = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    double center_y = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
+    double center_z = PyFloat_AsDouble(args[4]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_w = PyFloat_AsDouble(args[5]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_x = PyFloat_AsDouble(args[6]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_y = PyFloat_AsDouble(args[7]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_z = PyFloat_AsDouble(args[8]);
+    ASSERT(!PyErr_Occurred());
 
     auto cylinder = new btCylinderShape(btVector3(radius, height * .5, radius));
     if (
@@ -1699,17 +1730,16 @@ Shape_add_cylinder(Shape *self, PyObject *args)
 
 
 static PyObject *
-Shape_add_plane(Shape *self, PyObject *args)
+Shape_add_plane(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    double distance = 0;
-    double normal_x = 0;
-    double normal_y = 0;
-    double normal_z = 0;
-    if (!PyArg_ParseTuple(
-        args, "dddd",
-        &distance,
-        &normal_x, &normal_y, &normal_z
-    )){ return 0; }
+    ASSERT(nargs == 4);
+    double distance = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    double normal_x = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    double normal_y = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    double normal_z = PyFloat_AsDouble(args[3]);
 
     auto plane = new btStaticPlaneShape(
         btVector3(normal_x, normal_y, normal_z),
@@ -1770,24 +1800,29 @@ Shape_add_mesh(Shape *self, PyObject *args)
 
 
 static PyObject *
-Shape_add_rectangular_cuboid(Shape *self, PyObject *args)
+Shape_add_rectangular_cuboid(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    double center_x = 0;
-    double center_y = 0;
-    double center_z = 0;
-    double dimensions_x = 0;
-    double dimensions_y = 0;
-    double dimensions_z = 0;
-    double rotation_w = 0;
-    double rotation_x = 0;
-    double rotation_y = 0;
-    double rotation_z = 0;
-    if (!PyArg_ParseTuple(
-        args, "dddddddddd",
-        &center_x, &center_y, &center_z,
-        &dimensions_x, &dimensions_y, &dimensions_z,
-        &rotation_w, &rotation_x, &rotation_y, &rotation_z
-    )){ return 0; }
+    ASSERT(nargs == 10);
+    double center_x = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    double center_y = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    double center_z = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    double dimensions_x = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
+    double dimensions_y = PyFloat_AsDouble(args[4]);
+    ASSERT(!PyErr_Occurred());
+    double dimensions_z = PyFloat_AsDouble(args[5]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_w = PyFloat_AsDouble(args[6]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_x = PyFloat_AsDouble(args[7]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_y = PyFloat_AsDouble(args[8]);
+    ASSERT(!PyErr_Occurred());
+    double rotation_z = PyFloat_AsDouble(args[9]);
+    ASSERT(!PyErr_Occurred());
 
     auto box = new btBoxShape(btVector3(
         dimensions_x * .5,
@@ -1863,17 +1898,17 @@ Shape_add_shape(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 
 
 static PyObject *
-Shape_add_sphere(Shape *self, PyObject *args)
+Shape_add_sphere(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    double radius = 0;
-    double center_x = 0;
-    double center_y = 0;
-    double center_z = 0;
-    if (!PyArg_ParseTuple(
-        args, "dddd",
-        &radius,
-        &center_x, &center_y, &center_z
-    )){ return 0; }
+    ASSERT(nargs == 4);
+    double radius = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    double center_x = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    double center_y = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    double center_z = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
 
     auto sphere = new btSphereShape(radius);
     if (
@@ -2063,31 +2098,31 @@ static PyMethodDef Shape_PyMethodDef[] = {
     {
         "add_capsule",
         (PyCFunction)Shape_add_capsule,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
         "add_cone",
         (PyCFunction)Shape_add_cone,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
         "add_convex_hull",
         (PyCFunction)Shape_add_convex_hull,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
         "add_cylinder",
         (PyCFunction)Shape_add_cylinder,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
         "add_plane",
         (PyCFunction)Shape_add_plane,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
@@ -2099,13 +2134,13 @@ static PyMethodDef Shape_PyMethodDef[] = {
     {
         "add_rectangular_cuboid",
         (PyCFunction)Shape_add_rectangular_cuboid,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {
         "add_sphere",
         (PyCFunction)Shape_add_sphere,
-        METH_O,
+        METH_FASTCALL,
         0
     },
     {

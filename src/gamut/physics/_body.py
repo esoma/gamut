@@ -15,8 +15,8 @@ from gamut.geometry import (Capsule, Composite3d, Cone, ConvexHull, Cylinder,
 from gamut.math import BVector3, DMatrix4, DVector3
 # python
 from enum import auto, Enum
-from typing import Any, Final, Union
-from weakref import ref, WeakKeyDictionary
+from typing import Final, Union
+from weakref import ref
 
 BodyShape = Union[
     Capsule,
@@ -25,6 +25,7 @@ BodyShape = Union[
     ConvexHull,
     Cylinder,
     Plane,
+    Mesh3d,
     RectangularCuboid,
     Sphere
 ]
@@ -412,89 +413,9 @@ def _verify_mass(value: float) -> float:
     return value
 
 
-_shape_imps: WeakKeyDictionary[
-    BodyShape,
-    tuple[Shape, tuple[Any, ...]]
-] = WeakKeyDictionary()
-
-
 def _get_shape_implementation(shape: BodyShape) -> Shape:
     try:
-        return _shape_imps[shape][0]
-    except TypeError:
-        raise TypeError(f'invalid shape: {shape}')
-    except KeyError:
-        pass
-
-    if isinstance(shape, Composite3d):
-        shapes = list(shape.shapes_flattened)
-    else:
-        try:
-            get_bullet_shape = shape._get_bullet_shape
-        except AttributeError:
-            get_bullet_shape = None
-        if get_bullet_shape is not None:
-            return get_bullet_shape()
-        shapes = [shape]
-
-    shape_imp = Shape(len(shapes) != 1)
-
-    shape_data: list[Any] = []
-
-    for sub_shape in shapes:
-        if isinstance(sub_shape, Sphere):
-            shape_data.append(
-                shape_imp.add_sphere((sub_shape.radius, *sub_shape.center))
-            )
-        elif isinstance(sub_shape, Plane):
-            shape_data.append(
-                shape_imp.add_plane((sub_shape.distance, *sub_shape.normal))
-            )
-        elif isinstance(sub_shape, Cylinder):
-            shape_data.append(
-                shape_imp.add_cylinder((
-                    sub_shape.radius,
-                    sub_shape.height,
-                    *sub_shape.center,
-                    *sub_shape.rotation
-                ))
-            )
-        elif isinstance(sub_shape, RectangularCuboid):
-            shape_data.append(
-                shape_imp.add_rectangular_cuboid((
-                    *sub_shape.center,
-                    *sub_shape.dimensions,
-                    *sub_shape.rotation
-                ))
-            )
-        elif isinstance(sub_shape, Capsule):
-            shape_data.append(
-                shape_imp.add_capsule((
-                    sub_shape.radius,
-                    sub_shape.height,
-                    *sub_shape.center,
-                    *sub_shape.rotation
-                ))
-            )
-        elif isinstance(sub_shape, Cone):
-            shape_data.append(
-                shape_imp.add_cone((
-                    sub_shape.radius,
-                    sub_shape.height,
-                    *sub_shape.center,
-                    *sub_shape.rotation
-                ))
-            )
-        elif isinstance(sub_shape, ConvexHull):
-            shape_data.append(shape_imp.add_convex_hull(
-                tuple(tuple(p) for p in sub_shape.points)
-            ))
-        elif isinstance(sub_shape, Mesh3d):
-            shape_data.append(shape_imp.add_shape(
-                sub_shape._get_bullet_shape()
-            ))
-        else:
-            raise TypeError(f'invalid shape: {sub_shape}')
-
-    _shape_imps[shape] = (shape_imp, tuple(shape_data))
-    return shape_imp
+        get_bullet_shape = shape._get_bullet_shape
+    except AttributeError:
+        raise TypeError(f'invalid shape: {shape}') from None
+    return get_bullet_shape()

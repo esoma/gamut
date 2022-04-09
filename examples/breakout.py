@@ -4,7 +4,7 @@ from gamut import Application, Timer, TimerExpired, Window
 from gamut.audio import Listener, MultiSpeaker, Sound
 from gamut.event import Bind
 from gamut.graphics import (BlendFactor, Buffer, BufferFrequency, BufferView,
-                            BufferViewMap, clear_render_target, Color,
+                            BufferViewMap, clear_render_target,
                             create_quad_position_array, execute_shader,
                             PrimitiveMode, Shader, WindowRenderTarget)
 from gamut.math import (FMatrix4, FVector2, FVector3, FVector4, FVector4Array,
@@ -472,7 +472,7 @@ class App(Application):
 
     async def draw(self, draw: Draw) -> None:
         self.step_physics(draw.when - draw.previous)
-        clear_render_target(self.window_render_target, color=Color(0, 0, 0))
+        clear_render_target(self.window_render_target, color=FVector3(0, 0, 0))
         # draw the bricks
         execute_shader(
             self.window_render_target,

@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['Cone']
 
 # gamut
+from gamut._bullet import Shape
 from gamut.math import DQuaternion, DVector3, FQuaternion, FVector3
 # python
 from typing import Generic, overload, TypeVar
@@ -71,6 +72,9 @@ class Cone(Generic[VT, QT]):
                 raise TypeError(f'rotation must be {quat_type.__name__}')
             self._rotation = rotation
 
+        self._bt: Shape | None = None
+        self._bt_capsule: Any = None
+
     def __hash__(self) -> int:
         return id(self)
 
@@ -92,6 +96,22 @@ class Cone(Generic[VT, QT]):
             f'rotation=({self._rotation.w}, {self._rotation.x}, '
             f'{self._rotation.y}, {self._rotation.z})>'
         )
+
+    def _get_bullet_shape(self) -> Shape:
+        if self._bt is None:
+            try:
+                self._bt = Shape(False)
+                self._bt_capsule = self._bt.add_cone(
+                    self._radius,
+                    self._height,
+                    *self._center,
+                    *self._rotation
+                )
+            except BaseException:
+                self._bt = None
+                self._bt_capsule = None
+                raise
+        return self._bt
 
     @property
     def center(self) -> VT:

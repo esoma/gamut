@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['ConvexHull']
 
 # gamut
+from gamut._bullet import Shape
 from gamut.math import DMatrix4, DVector3Array, FMatrix4, FVector3Array
 # python
 from typing import Generic, overload, TypeVar
@@ -35,6 +36,9 @@ class ConvexHull(Generic[AT, MT]):
             raise ValueError('must have at least 1 point')
         self._points = points
 
+        self._bt: Shape | None = None
+        self._bt_capsule: Any = None
+
     def __hash__(self) -> int:
         return id(self)
 
@@ -53,6 +57,17 @@ class ConvexHull(Generic[AT, MT]):
         return ConvexHull(type(self.points)(*(
             transform @ c for c in self._points
         )))
+
+    def _get_bullet_shape(self) -> Shape:
+        if self._bt is None:
+            try:
+                self._bt = Shape(False)
+                self._bt_capsule = self._bt.add_convex_hull(self._points)
+            except BaseException:
+                self._bt = None
+                self._bt_capsule = None
+                raise
+        return self._bt
 
     @property
     def points(self) -> AT:

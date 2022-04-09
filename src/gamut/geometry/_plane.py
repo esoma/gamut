@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['Plane']
 
 # gamut
+from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
                         FVector4)
 # python
@@ -48,6 +49,9 @@ class Plane(Generic[VT, MT]):
         except ZeroDivisionError:
             raise ValueError('invalid normal')
 
+        self._bt: Shape | None = None
+        self._bt_capsule: Any = None
+
     def __hash__(self) -> int:
         return id(self)
 
@@ -80,6 +84,20 @@ class Plane(Generic[VT, MT]):
             self._distance
         )
         return Plane(p.w, p.xyz)
+
+    def _get_bullet_shape(self) -> Shape:
+        if self._bt is None:
+            try:
+                self._bt = Shape(False)
+                self._bt_capsule = self._bt.add_plane(
+                    self._distance,
+                    *self._normal
+                )
+            except BaseException:
+                self._bt = None
+                self._bt_capsule = None
+                raise
+        return self._bt
 
     @property
     def distance(self) -> float:
