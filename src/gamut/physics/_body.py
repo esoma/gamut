@@ -335,12 +335,12 @@ class Body:
         self._imp.spinning_friction = float(value)
 
     @property
-    def tangible(self) -> bool:
-        return self._imp.tangible
+    def is_tangible(self) -> bool:
+        return self._imp.is_tangible
 
-    @tangible.setter
-    def tangible(self, value: bool) -> None:
-        self._imp.tangible = bool(value)
+    @is_tangible.setter
+    def is_tangible(self, value: bool) -> None:
+        self._imp.is_tangible = bool(value)
 
     @property
     def transform(self) -> DMatrix4:

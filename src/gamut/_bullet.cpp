@@ -1176,14 +1176,14 @@ Body_Setter_spinning_friction(Body *self, PyObject *value, void *)
 
 
 static PyObject *
-Body_Getter_tangible(Body *self, void *)
+Body_Getter_is_tangible(Body *self, void *)
 {
     return PyBool_FromLong((self->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) == 0);
 }
 
 
 static int
-Body_Setter_tangible(Body *self, PyObject *value, void *)
+Body_Setter_is_tangible(Body *self, PyObject *value, void *)
 {
     auto flags = self->body->getCollisionFlags();
     if (value == Py_True)
@@ -1328,9 +1328,9 @@ static PyGetSetDef Body_PyGetSetDef[] = {
         0
     },
     {
-        "tangible",
-        (getter)Body_Getter_tangible,
-        (setter)Body_Setter_tangible,
+        "is_tangible",
+        (getter)Body_Getter_is_tangible,
+        (setter)Body_Setter_is_tangible,
         0,
         0
     },

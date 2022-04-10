@@ -20,7 +20,7 @@ class App(ExampleApplication):
 
     async def example_main(self) -> None:
         self.window.title = 'Gamut Navigation Example'
-        self.mouse.relative = False
+        self.mouse.is_relative = False
         self.camera_position = FVector3(-22, 10, 22)
         self.camera_yaw = .76
         self.camera_pitch = 0.25

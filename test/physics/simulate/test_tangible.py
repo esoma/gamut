@@ -57,7 +57,7 @@ def test_intangible(ball_tangible: bool, floor_tangible: bool) -> None:
 
     ball = Body(1, Sphere(DVector3(0), 1), world=w, type=BodyType.DYNAMIC)
     ball.transform = DMatrix4(1).translate(DVector3(0, 10, 0))
-    ball.tangible = ball_tangible
+    ball.is_tangible = ball_tangible
 
     floor_shape = Composite3d(
         Mesh3d(
@@ -78,7 +78,7 @@ def test_intangible(ball_tangible: bool, floor_tangible: bool) -> None:
         ),
     )
     floor = Body(1, floor_shape, type=BodyType.STATIC, world=w)
-    floor.tangible = floor_tangible
+    floor.is_tangible = floor_tangible
 
     w.simulate(timedelta(seconds=10))
     assert ball.transform[3].y < 0

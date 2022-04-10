@@ -47,7 +47,7 @@ class ExampleApplication(Application):
             self.mouse = self.mice[0]
         except IndexError:
             self.mouse = (await MouseConnected).mouse
-        self.mouse.relative = True
+        self.mouse.is_relative = True
 
         await self.example_main()
 

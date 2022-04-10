@@ -86,7 +86,7 @@ class TestMouse(TestPeripheral):
 
 def test_defaults() -> None:
     mouse = Mouse('test')
-    assert mouse.relative is False
+    assert mouse.is_relative is False
     assert mouse.position is None
     assert mouse.window is None
     assert mouse.Button.left.is_pressed is False
@@ -98,11 +98,11 @@ def test_defaults() -> None:
 
 def test_relative() -> None:
     mouse = Mouse('test')
-    assert mouse.relative is False
-    mouse.relative = True
-    assert mouse.relative is True
-    mouse.relative = False
-    assert mouse.relative is False
+    assert mouse.is_relative is False
+    mouse.is_relative = True
+    assert mouse.is_relative is True
+    mouse.is_relative = False
+    assert mouse.is_relative is False
 
 
 @pytest.mark.parametrize("name", ['', 'test', 'Primary'])
