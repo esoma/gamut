@@ -5,7 +5,8 @@ __all__ = ['RectangularCuboid']
 
 # gamut
 from gamut._bullet import Shape
-from gamut.math import (DQuaternion, DVector3, DVector3Array, FQuaternion,
+from gamut.math import (DQuaternion, DVector2, DVector2Array, DVector3,
+                        DVector3Array, FQuaternion, FVector2, FVector2Array,
                         FVector3, FVector3Array, U8Array)
 # python
 from typing import Generic, overload, TypeVar
@@ -13,13 +14,19 @@ from typing import Generic, overload, TypeVar
 AT = TypeVar('AT', FVector3Array, DVector3Array)
 VT = TypeVar('VT', FVector3, DVector3)
 QT = TypeVar('QT', FQuaternion, DQuaternion)
+UT = TypeVar('UT', FVector2Array, DVector2Array)
 
 
-class RectangularCuboid(Generic[VT, QT, AT]):
+class RectangularCuboid(Generic[VT, QT, AT, UT]):
 
     @overload
     def __init__(
-        self: RectangularCuboid[FVector3, FQuaternion, FVector3Array],
+        self: RectangularCuboid[
+            FVector3,
+            FQuaternion,
+            FVector3Array,
+            FVector2Array
+        ],
         center: FVector3,
         dimensions: FVector3,
         *,
@@ -29,7 +36,12 @@ class RectangularCuboid(Generic[VT, QT, AT]):
 
     @overload
     def __init__(
-        self: RectangularCuboid[DVector3, DQuaternion, DVector3Array],
+        self: RectangularCuboid[
+            DVector3,
+            DQuaternion,
+            DVector3Array,
+            DVector2Array
+        ],
         center: DVector3,
         dimensions: DVector3,
         *,
@@ -117,14 +129,18 @@ class RectangularCuboid(Generic[VT, QT, AT]):
     def rotation(self) -> QT:
         return self._rotation
 
-    def render(self) -> tuple[AT, AT, U8Array]:
+    def render(self) -> tuple[AT, AT, UT, U8Array]:
         if isinstance(self._center, DVector3):
             array_type = DVector3Array
             vector_type = DVector3
+            uarray_type = DVector2Array
+            uv_type = DVector2
         else:
             assert isinstance(self._center, FVector3)
             array_type = FVector3Array
             vector_type = FVector3
+            uarray_type = FVector2Array
+            uv_type = FVector2
 
         half_dimensions = self._dimensions * .5
         positions = array_type(
@@ -179,6 +195,20 @@ class RectangularCuboid(Generic[VT, QT, AT]):
             vector_type(0, 0, -1), vector_type(0, 0, -1),
             vector_type(0, 0, -1), vector_type(0, 0, -1),
         )
+        uvs = uarray_type(
+            # top
+            uv_type(1, 1), uv_type(1, 0), uv_type(0, 0), uv_type(0, 1),
+            # bottom
+            uv_type(-1, 1), uv_type(0, 1), uv_type(0, 0), uv_type(-1, 0),
+            # right
+            uv_type(-1, 1), uv_type(0, 1), uv_type(0, 0), uv_type(-1, 0),
+            # left
+            uv_type(-1, 0), uv_type(-1, 1), uv_type(0, 1), uv_type(0, 0),
+            # front
+            uv_type(1, 1), uv_type(1, 0), uv_type(0, 0), uv_type(0, 1),
+            # back
+            uv_type(-1, 0), uv_type(-1, 1), uv_type(0, 1), uv_type(0, 0),
+        )
         indices = U8Array(
             # top
             0, 1, 2, 2, 3, 0,
@@ -193,4 +223,4 @@ class RectangularCuboid(Generic[VT, QT, AT]):
             # back
             20, 21, 22, 22, 23, 20,
         )
-        return positions, normals, indices
+        return positions, normals, uvs, indices

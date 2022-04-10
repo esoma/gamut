@@ -1,9 +1,9 @@
 
 # gamut
 from gamut.geometry import RectangularCuboid
-from gamut.math import (DQuaternion, DVector2, DVector3, DVector3Array,
-                        DVector4, FQuaternion, FVector3, FVector3Array,
-                        U8Array)
+from gamut.math import (DQuaternion, DVector2, DVector2Array, DVector3,
+                        DVector3Array, DVector4, FQuaternion, FVector2Array,
+                        FVector3, FVector3Array, U8Array)
 # python
 from typing import Any
 # pytest
@@ -139,15 +139,17 @@ def test_equal() -> None:
 
 def test_d_render() -> None:
     rc = RectangularCuboid(DVector3(0), DVector3(1))
-    positions, normals, indices = rc.render()
+    positions, normals, uvs, indices = rc.render()
     assert isinstance(positions, DVector3Array)
     assert isinstance(normals, DVector3Array)
+    assert isinstance(uvs, DVector2Array)
     assert isinstance(indices, U8Array)
 
 
 def test_f_render() -> None:
     rc = RectangularCuboid(FVector3(0), FVector3(1))
-    positions, normals, indices = rc.render()
+    positions, normals, uvs, indices = rc.render()
     assert isinstance(positions, FVector3Array)
     assert isinstance(normals, FVector3Array)
+    assert isinstance(uvs, FVector2Array)
     assert isinstance(indices, U8Array)
