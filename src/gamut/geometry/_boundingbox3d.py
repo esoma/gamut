@@ -55,6 +55,9 @@ class BoundingBox3d(Generic[T, VT, MT]):
         else:
             self._min = self._max = points[0]
 
+    def __hash__(self) -> int:
+        return hash((self._min, self._max))
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, BoundingBox3d):
             return False

@@ -69,7 +69,7 @@ class RectangularCuboid(Generic[VT, QT, AT]):
         self._bt_capsule: Any = None
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash((self._center, self._dimensions, self._rotation))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, RectangularCuboid):

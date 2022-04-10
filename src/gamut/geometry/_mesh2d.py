@@ -60,7 +60,7 @@ class Mesh2d(Generic[VT, IT]):
                 )
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash((self._positions, self._triangle_indices))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Mesh2d):

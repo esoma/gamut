@@ -21,7 +21,13 @@ def test_hash() -> None:
         DVector3(4, 5, 6),
         rotation=DQuaternion(7, 8, 9, 10)
     )
-    assert hash(c1) != hash(c2)
+    assert hash(c1) == hash(c2)
+    c3 = RectangularCuboid(
+        FVector3(1, 2, 3),
+        FVector3(4, 5, 6),
+        rotation=FQuaternion(7, 8, 9, 10)
+    )
+    assert hash(c1) != hash(c3)
 
 
 def test_repr() -> None:

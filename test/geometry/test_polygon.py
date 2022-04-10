@@ -10,10 +10,11 @@ import pytest
 
 
 def test_hash() -> None:
-    exterior = DVector2Array()
-    p1 = Polygon(exterior)
-    p2 = Polygon(exterior)
-    assert hash(p1) != hash(p2)
+    p1 = Polygon(DVector2Array())
+    p2 = Polygon(DVector2Array())
+    assert hash(p1) == hash(p2)
+    p3 = Polygon(FVector2Array())
+    assert hash(p1) == hash(p3)
 
 
 def test_repr() -> None:

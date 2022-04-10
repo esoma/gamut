@@ -103,7 +103,7 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
         self._bt_mesh_data: Any = None
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash((self._positions, self._triangle_indices, self._normals))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Mesh3d):

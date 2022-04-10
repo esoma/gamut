@@ -107,6 +107,9 @@ class ViewFrustum3d(Generic[VT, MT]):
             ),
         )
 
+    def __hash__(self) -> int:
+        return hash(self._planes)
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ViewFrustum3d):
             return False

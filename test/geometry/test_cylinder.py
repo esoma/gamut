@@ -12,7 +12,10 @@ import pytest
 def test_hash() -> None:
     c1 = Cylinder(DVector3(1, 2, 3), 4, 5, rotation=DQuaternion(6, 7, 8, 9))
     c2 = Cylinder(DVector3(1, 2, 3), 4, 5, rotation=DQuaternion(6, 7, 8, 9))
-    assert hash(c1) != hash(c2)
+    assert hash(c1) == hash(c2)
+    c3 = Cylinder(FVector3(1, 2, 3), 4, 5, rotation=FQuaternion(6, 7, 8, 9))
+    assert hash(c1) != hash(c3)
+
 
 @pytest.mark.parametrize("cylinder", [
     Cylinder(

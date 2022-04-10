@@ -25,7 +25,7 @@ class LineSegment2d(Generic[T]):
         self._diff = b - a
 
     def __hash__(self) -> int:
-        return id(self)
+        return hash((self._a, self._b))
 
     def __repr__(self) -> str:
         return (
@@ -36,10 +36,7 @@ class LineSegment2d(Generic[T]):
     def __eq__(self, other: LineSegment2d) -> bool:
         if not isinstance(other, LineSegment2d):
             return False
-        return (
-            (self._a == other._a and self._b == other._b) or
-            (self._a == other._b and self._b == other._a)
-        )
+        return self._a == other._a and self._b == other._b
 
     @property
     def a(self) -> T:

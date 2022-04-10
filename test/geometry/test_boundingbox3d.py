@@ -25,6 +25,14 @@ def test_point_container() -> None:
     )
 
 
+def test_hash() -> None:
+    bb1 = BoundingBox3d(FVector3Array(FVector3(1, 2, 3), FVector3(4, 5, 6)))
+    bb2 = BoundingBox3d(FVector3Array(FVector3(1, 2, 3), FVector3(4, 5, 6)))
+    assert hash(bb1) == hash(bb2)
+    bb3 = BoundingBox3d(DVector3Array(DVector3(1, 2, 3), DVector3(4, 5, 6)))
+    assert hash(bb1) != hash(bb3)
+
+
 @pytest.mark.parametrize("bounding_box", [
     BoundingBox3d(FVector3Array(FVector3(1, 2, 3), FVector3(4, 5, 6))),
     BoundingBox3d(DVector3Array(DVector3(1, 2, 3), DVector3(4, 5, 6)))

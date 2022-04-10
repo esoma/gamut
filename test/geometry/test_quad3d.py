@@ -17,6 +17,29 @@ def test_cullable() -> None:
     )
 
 
+def test_hash() -> None:
+    q1 = Quad3d(
+        DVector3(0, 1, 2),
+        DVector3(3, 4, 5),
+        DVector3(6, 7, 8),
+        DVector3(9, 10, 11)
+    )
+    q2 = Quad3d(
+        DVector3(0, 1, 2),
+        DVector3(3, 4, 5),
+        DVector3(6, 7, 8),
+        DVector3(9, 10, 11)
+    )
+    assert hash(q1) == hash(q2)
+    q3 = Quad3d(
+        DVector3(1, 1, 2),
+        DVector3(3, 4, 5),
+        DVector3(6, 7, 8),
+        DVector3(9, 10, 11)
+    )
+    assert hash(q1) != hash(q3)
+
+
 def test_repr() -> None:
     quad = Quad3d(
         DVector3(0, 1, 2),
