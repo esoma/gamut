@@ -118,7 +118,7 @@ def test_defaults() -> None:
     assert b.restitution == 0
     assert b.rolling_friction == 0
     assert b.spinning_friction == 0
-    assert b.tangible is True
+    assert b.is_tangible is True
     assert b.transform == DMatrix4(1)
     assert b.type == BodyType.DYNAMIC
     assert b.world is None
@@ -694,11 +694,11 @@ def test_invalid_transform_type(transform: Any) -> None:
 ])
 def test_tangible(shape: Any) -> None:
     b = Body(1, shape, type=BodyType.STATIC)
-    assert b.tangible
-    b.tangible = False
-    assert not b.tangible
-    b.tangible = True
-    assert b.tangible
+    assert b.is_tangible
+    b.is_tangible = False
+    assert not b.is_tangible
+    b.is_tangible = True
+    assert b.is_tangible
 
 
 @pytest.mark.parametrize("transform", [

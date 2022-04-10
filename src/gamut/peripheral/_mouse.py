@@ -265,11 +265,11 @@ class Mouse(Peripheral):
         return f'<gamut.peripheral.Mouse {self._name!r}>'
 
     @property
-    def relative(self) -> bool:
+    def is_relative(self) -> bool:
         return bool(SDL_GetRelativeMouseMode() == SDL_TRUE)
 
-    @relative.setter
-    def relative(self, value: bool) -> None:
+    @is_relative.setter
+    def is_relative(self, value: bool) -> None:
         if SDL_SetRelativeMouseMode(SDL_TRUE if value else SDL_FALSE) == -1:
             raise RuntimeError('relative mode is not supported')
 
