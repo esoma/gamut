@@ -16,7 +16,7 @@ def test_hash() -> None:
     m1 = Mesh3d(DVector3Array(DVector3(1, 2, 3)), UVector3Array(UVector3(0)))
     m2 = Mesh3d(DVector3Array(DVector3(1, 2, 3)), UVector3Array(UVector3(0)))
     assert hash(m1) == hash(m2)
-    m3 = Mesh3d(DVector3Array(DVector3(1, 2, 3)), U8Vector3Array(U8Vector3(0)))
+    m3 = Mesh3d(DVector3Array(DVector3(2, 2, 3)), UVector3Array(UVector3(0)))
     assert hash(m1) != hash(m3)
 
 
