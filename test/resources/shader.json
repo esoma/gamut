@@ -1,0 +1,14 @@
+{
+    "vertex": {
+        "code_type": "external",
+        "code": "shader.vertex.glsl"
+    },
+    "geometry": {
+        "code_type": "external",
+        "code": "shader.geometry.glsl"
+    },
+    "fragment": {
+        "code_type": "external",
+        "code": "shader.fragment.glsl"
+    }
+}
