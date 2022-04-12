@@ -20,16 +20,13 @@ class ShaderCodePreprocessor:
 
         while True:
             include_line = re.search(
-                r'^#include\s+((<.+>)|(".+"))$',
+                r'^#include\s+((<.+>)|(".+"))(?=\r?\n)',
                 code_u,
                 re.MULTILINE
             )
             if include_line is None:
                 break
-            try:
-                include_code = self.include(include_line.group(1)[1:-1])
-            except NotImplementedError:
-                break
+            include_code = self.include(include_line.group(1)[1:-1])
             code_u = (
                 code_u[:include_line.span()[0]] +
                 include_code.decode('utf-8') +
@@ -44,7 +41,7 @@ class ShaderCodePreprocessor:
                 for key, value in defines.items()
             )
 
-        version_line = re.search(r'^#version.+$', code_u, re.MULTILINE)
+        version_line = re.search(r'^#version.+(?=\r?\n)', code_u, re.MULTILINE)
         if version_line is None:
             raise RuntimeError('unable to find glsl version')
 

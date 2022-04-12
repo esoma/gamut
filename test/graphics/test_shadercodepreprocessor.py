@@ -125,3 +125,25 @@ def test_default_include() -> None:
     with pytest.raises(RuntimeError) as ex:
         output_code = scp(input_code)
     assert str(ex.value) == 'include not allowed'
+
+
+def test_default_include_windows_line_ending() -> None:
+    scp = ShaderCodePreprocessor()
+    input_code = dedent('''
+    #version 140\r
+    in vec3 pos;\r
+    #include <first.glsl>\r
+    in vec2 uv;\r
+    #include "second.glsl"\r
+    out vec2 vertex_uv;\r
+    uniform mat4 camera_transform;\r
+    uniform mat4 model_transform;\r
+    void main()\r
+    {\r
+        vertex_uv = uv;\r
+        gl_Position = camera_transform * model_transform * vec4(pos, 1.0);\r
+    }\r
+    ''').encode('utf-8')
+    with pytest.raises(RuntimeError) as ex:
+        output_code = scp(input_code)
+    assert str(ex.value) == 'include not allowed'
