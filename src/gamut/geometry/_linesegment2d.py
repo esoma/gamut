@@ -22,7 +22,7 @@ class LineSegment2d(Generic[T]):
             raise TypeError('b must be the same type as a')
         self._b = b
 
-        self._diff = b - a
+        self._slope = b - a
 
     def __hash__(self) -> int:
         return hash((self._a, self._b))
@@ -46,6 +46,23 @@ class LineSegment2d(Generic[T]):
     def b(self) -> T:
         return self._b
 
+    @property
+    def slope(self) -> T:
+        return self._slope
+
+    def get_distance_to_point(self, point: T) -> float:
+        if not isinstance(point, type(self._a)):
+            raise TypeError(f'point must be {type(self._a).__name__}')
+
+        length_2 = sum(x ** 2 for x in (self._a - self._b))
+        if length_2 == 0:
+            return self._a.distance(point)
+
+        slope = self.slope
+        t = max(0, min(1, ((point - self._a) @ slope) / length_2))
+        p = self._a + t * slope
+        return point.distance(p)
+
     def get_line_segment_intersection(
         self,
         other: LineSegment2d
@@ -53,21 +70,21 @@ class LineSegment2d(Generic[T]):
         if not isinstance(other, LineSegment2d):
             raise TypeError('other must be LineSegment2d')
 
-        self._diff = self._b - self._a
-        other._diff = other._b - other._a
+        self._slope = self._b - self._a
+        other._slope = other._b - other._a
 
-        div = -other._diff.x * self._diff.y + self._diff.x * other._diff.y
-        if div == 0:
+        det = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
+        if det == 0:
             return None
         s = (
-            (-self._diff.y * (self._a.x - other._a.x) +
-            self._diff.x * (self._a.y - other._a.y)) /
-            div
+            (-self._slope.y * (self._a.x - other._a.x) +
+            self._slope.x * (self._a.y - other._a.y)) /
+            det
         )
         t = (
-            (other._diff.x * (self._a.y - other._a.y) -
-            other._diff.y * (self._a.x - other._a.x)) /
-            div
+            (other._slope.x * (self._a.y - other._a.y) -
+            other._slope.y * (self._a.x - other._a.x)) /
+            det
         )
 
         if s >= 0 and s <= 1 and t >= 0 and t <= 1:
@@ -75,7 +92,7 @@ class LineSegment2d(Generic[T]):
         return None
 
     def get_point_from_a_to_b(self, t: float) -> T:
-        return self._a + (t * self._diff)
+        return self._a + (t * self._slope)
 
     def get_point_from_b_to_a(self, t: float) -> T:
         t = -(t - 1)

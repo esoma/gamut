@@ -37,6 +37,7 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
             self._calculate_weight = calculate_weight
         self._graph: Graph[Triangle3d[T], float] = Graph()
         self._edge_triangle: dict[tuple[T, T], set[Triangle3d[T]]] = {}
+        self._point_normal: dict[T, T] = {}
 
     def _get_triangle_edges(
         self,
@@ -50,7 +51,10 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
         if self._graph.contains_node(triangle):
             return
         self._graph.add_node(triangle)
-        for edge in self._get_triangle_edges(triangle):
+        for edge, edge_normal in zip(
+            self._get_triangle_edges(triangle),
+            triangle.edge_normals
+        ):
             try:
                 edge_triangles = self._edge_triangle[edge]
             except KeyError:
@@ -62,6 +66,14 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
                     self._calculate_weight(triangle, edge_triangle)
                 )
             edge_triangles.add(triangle)
+
+            for point in edge:
+                try:
+                    normal = self._point_normal[point]
+                except KeyError:
+                    normal = type(point)(0)
+                normal = normal + edge_normal
+                self._point_normal[point] = normal
 
     def contains_triangle(self, triangle: Triangle3d[T]) -> bool:
         return self._graph.contains_node(triangle)
@@ -87,14 +99,32 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
         start_point: T,
         start_triangle: Triangle3d[T],
         end_point: T,
-        end_triangle: Triangle3d[T]
+        end_triangle: Triangle3d[T],
+        *,
+        radius: float = 0,
+        footprint_radius: float | None = None,
+        touch_end: bool = True,
     ) -> tuple[P, ...] | None:
+        radius = float(radius)
+        if footprint_radius is None:
+            footprint_radius = radius
+        else:
+            footprint_radius = float(footprint_radius)
+
         finder = SimplePathFinder(self._graph, start_triangle, end_triangle)
         try:
             tri_path = next(finder)
         except StopIteration:
             return None
-        sp = StringPuller(start_point, tri_path, end_point)
+        sp = StringPuller(
+            start_point,
+            tri_path,
+            end_point,
+            radius,
+            footprint_radius,
+            self._point_normal,
+            touch_end
+        )
         return sp.calculate()
 
 
@@ -104,10 +134,16 @@ class StringPuller(Generic[T]):
         self,
         start_point: T,
         triangle_path: tuple[Triangle3d[T], ...],
-        end_point: T
+        end_point: T,
+        radius: float,
+        footprint_radius: float,
+        point_normal: dict[T, T],
     ):
         self.start_point = start_point
         self.end_point = end_point
+        self.radius = radius
+        self.footprint_radius = footprint_radius
+        self.point_normal = point_normal
         # eliminate triangles that truly degenerate to a line or point
         triangle_path = tuple(
             tri for tri in triangle_path
@@ -139,7 +175,9 @@ class StringPuller(Generic[T]):
         except StopIteration:
             pass
         self.path_iter = None
-        self._add_to_path(self.end_point)
+
+        self._add_to_path(self.end_point, 0.0, normal=type(self.end_point)(0))
+
         return tuple(self.path)
 
     def _calculate_inner(self) -> None:
@@ -185,7 +223,7 @@ class StringPuller(Generic[T]):
 
         new_area = self._get_funnel_area(funnel_left, funnel_right)
         if sign(new_area) != sign(area) or new_area < 0:
-            self._add_to_path(funnel_target)
+            self._add_to_path(funnel_target, self.radius)
             self.apex = funnel_target
             while i < len(self.triangle_path) - 1:
                 self.left, self.right = next_triangle - {self.apex}
@@ -206,14 +244,26 @@ class StringPuller(Generic[T]):
         else:
             target = getattr(self, line_target_name)
             if self._get_funnel_area(line_left, line_right) < 0:
-                self._add_to_path(target)
+                self._add_to_path(target, self.radius)
                 self.apex = target
             setattr(self, line_target_name, next_point)
 
     def _get_funnel_area(self, left: T, right: T) -> None:
         return ((left - self.apex).cross(right - self.apex)).y
 
-    def _add_to_path(self, point: T) -> None:
+    def _add_to_path(
+        self,
+        point: T,
+        radius: float,
+        *,
+        normal: T | None = None
+    ) -> None:
+        if normal is None:
+            normal = self.point_normal[point]
+        normal = type(normal)(normal.x, 0, normal.z).normalize()
+        offset = -normal * radius
+        point += offset
+
         current_y = self.path[-1].y
         path_line = LineSegment2d(self.path[-1].xz, point.xz)
 

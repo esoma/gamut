@@ -10,6 +10,8 @@ from jinja2 import Environment, FileSystemLoader, Template
 env = Environment(
     loader=FileSystemLoader(Path(__file__).resolve().parent / 'templates'),
 )
+env.globals["len"] = len
+env.globals["set"] = set
 env.globals["str"] = str
 env.globals["int"] = int
 env.globals["itertools"] = itertools

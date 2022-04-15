@@ -7,15 +7,16 @@ from gamut.math import DVector3, FVector3
 # python
 from math import isclose
 from pathlib import Path
+from typing import Any
 # pytest
 import pytest
 
 
-def vector_is_close(a: DVector3, b: DVector3) -> bool:
+def vector3_is_close(a: Any, b: Any) -> bool:
     return (
-        isclose(a.x, b.x),
-        isclose(a.y, b.y),
-        isclose(a.z, b.z),
+        isclose(a.x, b.x) and
+        isclose(a.y, b.y) and
+        isclose(a.z, b.z)
     )
 
 
@@ -130,7 +131,8 @@ def test_find_basic_path() -> None:
     assert path is None
 
 
-def test_custom_weight() -> None:
+@pytest.mark.parametrize("radius", [0.0, .1])
+def test_custom_weight(radius: float) -> None:
     triangle_1 = Triangle3d(
         DVector3(-.5, 0, 0),
         DVector3(.5, 0, 0),
@@ -166,7 +168,8 @@ def test_custom_weight() -> None:
         DVector3(-.5, 0, 0),
         triangle_1,
         DVector3(.25, 0, -1),
-        triangle_2
+        triangle_2,
+        radius=radius
     )
     assert path == (
         DVector3(-0.5, 0.0, 0.0),
@@ -448,20 +451,20 @@ def test_find_path_string_pull_y() -> None:
         )
     )
     print(path)
-    assert vector_is_close(path[0], DVector3(0.0, 0.0, 0.0))
-    assert vector_is_close(path[1], DVector3(2.0, 0.0, 0.25))
-    assert vector_is_close(
+    assert vector3_is_close(path[0], DVector3(0.0, 0.0, 0.0))
+    assert vector3_is_close(path[1], DVector3(2.0, 0.0, 0.25))
+    assert vector3_is_close(
         path[2],
         DVector3(2.2857142857142856, 0.2857142857142857, 0.2857142857142857)
     )
-    assert vector_is_close(path[3], DVector3(3.0, 1.0, 0.3750000000000001))
-    assert vector_is_close(path[4], DVector3(5.0, 1.0, 0.625))
-    assert vector_is_close(
+    assert vector3_is_close(path[3], DVector3(3.0, 1.0, 0.3750000000000001))
+    assert vector3_is_close(path[4], DVector3(5.0, 1.0, 0.625))
+    assert vector3_is_close(
         path[5],
         DVector3(5.714285714285714, 0.2857142857142857, 0.7142857142857143)
     )
-    assert vector_is_close(path[6], DVector3(6.0, 0.0, 0.75))
-    assert vector_is_close(path[7], DVector3(8.0, 0.0, 1.0))
+    assert vector3_is_close(path[6], DVector3(6.0, 0.0, 0.75))
+    assert vector3_is_close(path[7], DVector3(8.0, 0.0, 1.0))
 
 
 def test_find_path_string_pull_bug(resources: Path) -> None:
@@ -493,13 +496,13 @@ def test_find_path_string_pull_bug(resources: Path) -> None:
             FVector3(6.0, 2.0, -4.0)
         )
     )
-    assert vector_is_close(
+    assert vector3_is_close(
         path[0],
         FVector3(-5.265909194946289, 2.0, 3.866203784942627)
     )
-    assert vector_is_close(path[1], FVector3(-4.0, 2.0, 1.0))
-    assert vector_is_close(path[2], FVector3(4.0, 2.0, -1.0))
-    assert vector_is_close(
+    assert vector3_is_close(path[1], FVector3(-4.0, 2.0, 1.0))
+    assert vector3_is_close(path[2], FVector3(4.0, 2.0, -1.0))
+    assert vector3_is_close(
         path[3],
         FVector3(4.608282566070557, 2.0, -2.154895782470703)
     )

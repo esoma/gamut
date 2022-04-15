@@ -3,9 +3,18 @@
 from gamut.geometry import LineSegment3d, Triangle3d
 from gamut.math import DVector3, DVector4, FVector3
 # python
+from math import isclose
 from typing import Any
 # pytest
 import pytest
+
+
+def vector3_is_close(a: Any, b: Any) -> bool:
+    return (
+        isclose(a.x, b.x) and
+        isclose(a.y, b.y) and
+        isclose(a.z, b.z)
+    )
 
 
 def test_hash() -> None:
@@ -99,6 +108,45 @@ def test_attributes(vtype: Any) -> None:
         assert LineSegment3d(vtype(3, 4, 5), vtype(0, 1, 2)) in tri.edges
         assert LineSegment3d(vtype(0, 1, 2), vtype(6, 7, 8)) in tri.edges
         assert LineSegment3d(vtype(6, 7, 8), vtype(3, 4, 5)) in tri.edges
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_normals(vtype: Any) -> None:
+    tri = Triangle3d(vtype(0, 0, 0), vtype(1, 1, 0), vtype(1, -1, 0))
+    assert tri.normal == vtype(0, 0, -1)
+    assert vector3_is_close(
+        tri.edge_normals[0],
+        vtype(-0.7071067811865475, 0.7071067811865475, 0)
+    )
+    assert vector3_is_close(tri.edge_normals[1], vtype(1, 0, 0))
+    assert vector3_is_close(
+        tri.edge_normals[2],
+        vtype(-0.7071067811865475, -0.7071067811865475, 0)
+    )
+
+    tri = Triangle3d(vtype(0, 0, 0), vtype(1, -1, 0), vtype(1, 1, 0))
+    assert tri.normal == vtype(0, 0, 1)
+    assert vector3_is_close(
+        tri.edge_normals[0],
+        vtype(-0.7071067811865475, -0.7071067811865475, 0)
+    )
+    assert vector3_is_close(tri.edge_normals[1], vtype(1, 0, 0))
+    assert vector3_is_close(
+        tri.edge_normals[2],
+        vtype(-0.7071067811865475, 0.7071067811865475, 0)
+    )
+
+    tri = Triangle3d(vtype(0, 0, 0), vtype(1, 0, 1), vtype(1, 0, -1))
+    assert tri.normal == vtype(0, 1, 0)
+    assert vector3_is_close(
+        tri.edge_normals[0],
+        vtype(-0.7071067811865475, 0, 0.7071067811865475)
+    )
+    assert vector3_is_close(tri.edge_normals[1], vtype(1, 0, 0))
+    assert vector3_is_close(
+        tri.edge_normals[2],
+        vtype(-0.7071067811865475, 0, -0.7071067811865475)
+    )
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])

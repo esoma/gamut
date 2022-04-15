@@ -27,6 +27,7 @@ class App(ExampleApplication):
 
         self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
+        self.cube_radius = 5
         cube = RectangularCuboid(DVector3(0), DVector3(1))
         cube_positions, cube_normals, _, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
@@ -71,6 +72,7 @@ class App(ExampleApplication):
                 FVector3(4, 0, 10),
                 FVector3(6, 0, 10),
             ),
+            radius=self.cube_radius
         ))
         self.cube_position = self.path[0]
 
@@ -117,7 +119,8 @@ class App(ExampleApplication):
                     start,
                     start_triangle,
                     end,
-                    end_triangle
+                    end_triangle,
+                    radius=self.cube_radius
                 )
                 if path is not None:
                     self.path = list(path)

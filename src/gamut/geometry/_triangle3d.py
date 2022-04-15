@@ -46,6 +46,12 @@ class Triangle3d(Generic[T]):
         return sum(self._positions) / 3
 
     @property
+    def normal(self) -> T:
+        d_edge_0 = self._positions[1] - self._positions[0]
+        d_edge_1 = self._positions[0] - self._positions[2]
+        return -d_edge_0.cross(d_edge_1).normalize()
+
+    @property
     def positions(self) -> tuple[T, T, T]:
         return self._positions
 
@@ -59,4 +65,14 @@ class Triangle3d(Generic[T]):
             LineSegment3d(self._positions[0], self._positions[1]),
             LineSegment3d(self._positions[1], self._positions[2]),
             LineSegment3d(self._positions[2], self._positions[0]),
+        )
+
+    @property
+    def edge_normals(self) -> tuple[T, T, T]:
+        p = self._positions
+        normal = self.normal
+        return (
+            (p[1] - p[0]).cross(normal).normalize(),
+            (p[2] - p[1]).cross(normal).normalize(),
+            (p[0] - p[2]).cross(normal).normalize(),
         )
