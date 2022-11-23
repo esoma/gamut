@@ -46,6 +46,10 @@ class LineSegment3d(Generic[T]):
     def b(self) -> T:
         return self._b
 
+    @property
+    def points(self) -> tuple[T, T]:
+        return (self._a, self._b)
+
     def get_point_from_a_to_b(self, t: float) -> T:
         return self._a + (t * self._diff)
 

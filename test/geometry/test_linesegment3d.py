@@ -47,10 +47,11 @@ def test_invalid_b(a: Any, b: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
-def test_points(vtype: Any) -> None:
+def test_attributes(vtype: Any) -> None:
     line = LineSegment3d(vtype(0, 1, 2), vtype(3, 4, 5))
     assert line.a == vtype(0, 1, 2)
     assert line.b == vtype(3, 4, 5)
+    assert line.points == (line.a, line.b)
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])

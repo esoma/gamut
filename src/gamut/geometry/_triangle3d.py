@@ -41,6 +41,14 @@ class Triangle3d(Generic[T]):
             return False
         return self._positions == other._positions
 
+    def get_point_normal(self, point: T) -> T:
+        edge_indexes = []
+        for i, edge in enumerate(self.edges):
+            if point in edge.points:
+                edge_indexes.append(i)
+        edge_normals = self.edge_normals
+        return (sum(edge_normals[i] for i in edge_indexes) * .5).normalize()
+
     @property
     def center(self) -> T:
         return sum(self._positions) / 3
@@ -65,6 +73,14 @@ class Triangle3d(Generic[T]):
             LineSegment3d(self._positions[0], self._positions[1]),
             LineSegment3d(self._positions[1], self._positions[2]),
             LineSegment3d(self._positions[2], self._positions[0]),
+        )
+
+    @property
+    def point_normals(self) -> tuple[T, T, T]:
+        return (
+            self._get_point_normal(self._positions[0], self._positions[1], self._positions[2]),
+            self._get_point_normal(self._positions[1], self._positions[0], self._positions[2]),
+            self._get_point_normal(self._positions[2], self._positions[1], self._positions[0]),
         )
 
     @property

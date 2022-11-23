@@ -1,15 +1,21 @@
 
 # gamut
 from gamut.ai import NavigationMesh3d
-from gamut.geometry import Triangle3d
+from gamut.geometry import (
+    get_max_circle_radius_between_point_and_line_segment_along_direction,
+    LineSegment2d, Triangle3d)
 from gamut.gltf import Gltf
-from gamut.math import DVector3, FVector3
+from gamut.math import DVector2, DVector3, FVector3
 # python
-from math import isclose
+from math import inf, isclose
 from pathlib import Path
 from typing import Any
 # pytest
 import pytest
+
+check_radius = (
+    get_max_circle_radius_between_point_and_line_segment_along_direction
+)
 
 
 def vector3_is_close(a: Any, b: Any) -> bool:
@@ -18,6 +24,134 @@ def vector3_is_close(a: Any, b: Any) -> bool:
         isclose(a.y, b.y) and
         isclose(a.z, b.z)
     )
+
+
+@pytest.mark.parametrize("a_y, b_y, c_y", [
+    [0, 0, 0],
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+    [-1, 0, 1],
+])
+def test_max_radius_single_tri(
+    a_y: float,
+    b_y: float,
+    c_y: float
+) -> None:
+    nm = NavigationMesh3d()
+
+    a = DVector3(0, a_y, 0)
+    b = DVector3(0, b_y, 1)
+    c = DVector3(1, c_y, 0)
+    a, b, c = sorted((a, b, c))
+    a2 = a.xz
+    b2 = b.xz
+    c2 = c.xz
+
+    nm.add_triangle(Triangle3d(a, b, c))
+
+    nm._recalculate_point_max_radius()
+    nm._recalculate_edge_max_radius()
+    assert nm._point_max_radius[a] == inf
+    assert nm._point_max_radius[b] == inf
+    assert nm._point_max_radius[c] == inf
+
+    assert nm._edge_max_radius[(a, b)] == (
+        check_radius(
+            a2,
+            LineSegment2d(b2, c2),
+            b2 - a2,
+        ),
+        check_radius(
+            b2,
+            LineSegment2d(a2, c2),
+            a2 - b2,
+        ),
+    )
+    assert nm._edge_max_radius[(b, c)] == (
+       check_radius(
+            b2,
+            LineSegment2d(a2, c2),
+            c2 - b2,
+        ),
+        check_radius(
+            c2,
+            LineSegment2d(a2, b2),
+            b2 - c2,
+        ),
+    )
+    assert nm._edge_max_radius[(a, c)] == (
+       check_radius(
+            a2,
+            LineSegment2d(b2, c2),
+            c2 - a2,
+        ),
+        check_radius(
+            c2,
+            LineSegment2d(a2, b2),
+            a2 - c2,
+        ),
+    )
+
+
+def test_internals_center() -> None:
+    nm = NavigationMesh3d()
+
+    nm.add_triangle(Triangle3d(
+        DVector3(0, 0, 0),
+        DVector3(1, 0, 0),
+        DVector3(0, 0, 1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(0, 0, 0),
+        DVector3(-1, 0, 0),
+        DVector3(0, 0, 1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(0, 0, 0),
+        DVector3(1, 0, 0),
+        DVector3(0, 0, -1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(0, 0, 0),
+        DVector3(-1, 0, 0),
+        DVector3(0, 0, -1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(1, 0, 1),
+        DVector3(1, 0, 0),
+        DVector3(0, 0, 1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(-1, 0, 1),
+        DVector3(-1, 0, 0),
+        DVector3(0, 0, 1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(1, 0, -1),
+        DVector3(1, 0, 0),
+        DVector3(0, 0, -1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(-1, 0, -1),
+        DVector3(-1, 0, 0),
+        DVector3(0, 0, -1),
+    ))
+
+    # python
+    import pprint
+    pprint.pprint(nm._edge_triangle[(DVector3(0, 0, 1), DVector3(1, 0, 0))])
+    assert nm._edge_triangle
+
+    nm._recalculate_point_max_radius()
+    nm._recalculate_edge_max_radius()
+    assert nm._point_max_radius[DVector3(0, 0, 0)] == 0
+    assert nm._point_max_radius[DVector3(1, 0, 0)] == 1.0
+    assert nm._point_max_radius[DVector3(-1, 0, 0)] == 1.0
+    assert nm._point_max_radius[DVector3(0, 0, 1)] == 1.0
+    assert nm._point_max_radius[DVector3(0, 0, -1)] == 1.0
+
+    assert nm._point_max_radius[DVector3(1, 0, 1)] == 1.0
 
 
 def test_find_basic_path() -> None:
@@ -115,7 +249,7 @@ def test_find_basic_path() -> None:
         DVector3(1, 0, 1),
         Triangle3d(DVector3(1, 0, 1), DVector3(0, 0, 1), DVector3(1, 0, 0))
     )
-    assert path == (DVector3(0, 0, 0), DVector3(1, 0, 1))
+    assert path == (DVector3(0, 0, 0), DVector3(.5, 0, .5), DVector3(1, 0, 1))
 
     nm.remove_triangle(Triangle3d(
         DVector3(0, 0, 0),
@@ -505,4 +639,40 @@ def test_find_path_string_pull_bug(resources: Path) -> None:
     assert vector3_is_close(
         path[3],
         FVector3(4.608282566070557, 2.0, -2.154895782470703)
+    )
+
+
+def test_find_path_basic_portal_squeeze() -> None:
+    nm = NavigationMesh3d()
+    nm.add_triangle(Triangle3d(
+        DVector3(0, 0, 0),
+        DVector3(0, 0, 1),
+        DVector3(1, 0, 1),
+    ))
+    nm.add_triangle(Triangle3d(
+        DVector3(0, 0, 0),
+        DVector3(1, 0, 0),
+        DVector3(1, 0, 1),
+    ))
+
+    path = nm.find_path(
+        DVector3(0, 0, 1),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(0, 0, 1),
+            DVector3(1, 0, 1),
+        ),
+        DVector3(1, 0, .5),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(1, 0, 0),
+            DVector3(1, 0, 1),
+        ),
+        radius=1,
+        squeeze=True
+    )
+    assert path == (
+        DVector3(0.0, 0.0, 1.0),
+        DVector3(0.5, 0.0, 0.5),
+        DVector3(1.0, 0.0, 0.5),
     )

@@ -5,7 +5,7 @@ from gamut.geometry import (
     LineSegment2d)
 from gamut.math import DVector2, FVector2
 # python
-from math import isclose
+from math import isclose, isinf
 from typing import Any
 # pytest
 import pytest
@@ -59,31 +59,13 @@ def test_invalid_args():
         DVector2(1, 2),
         LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
         DVector2(1, -1),
-        0.7071067811865477,
+        1.17157287525381,
     ),
     (
         DVector2(1, 2),
         LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
         DVector2(0, -1),
         1,
-    ),
-    (
-        DVector2(1, 2),
-        LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
-        DVector2(0, 1),
-        2,
-    ),
-    (
-        DVector2(1, 2),
-        LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
-        DVector2(1, 1),
-        2,
-    ),
-    (
-        DVector2(1, 2),
-        LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
-        DVector2(-1, 1),
-        2,
     ),
     (
         DVector2(1, 2),
@@ -101,7 +83,7 @@ def test_invalid_args():
         FVector2(1, 2),
         LineSegment2d(FVector2(0, 0), FVector2(0, 2)),
         FVector2(-.5, 1),
-        0.8944272398948669,
+        0.6909830081817645,
     ),
 ])
 def test_result(
@@ -112,3 +94,29 @@ def test_result(
 ) -> None:
     f = get_max_circle_radius_between_point_and_line_segment_along_direction
     assert isclose(f(point, line_segment, direction), distance)
+
+
+@pytest.mark.parametrize("point, line_segment, direction", [
+    (
+        DVector2(1, 2),
+        LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
+        DVector2(0, 1),
+    ),
+    (
+        DVector2(1, 2),
+        LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
+        DVector2(1, 1),
+    ),
+    (
+        DVector2(1, 2),
+        LineSegment2d(DVector2(0, 0), DVector2(2, 0)),
+        DVector2(-1, 1),
+    ),
+])
+def test_inf(
+    point: Any,
+    line_segment: Any,
+    direction: Any,
+) -> None:
+    f = get_max_circle_radius_between_point_and_line_segment_along_direction
+    assert isinf(f(point, line_segment, direction))

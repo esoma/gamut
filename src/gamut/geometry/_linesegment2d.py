@@ -47,6 +47,10 @@ class LineSegment2d(Generic[T]):
         return self._b
 
     @property
+    def points(self) -> tuple[T, T]:
+        return (self._a, self._b)
+
+    @property
     def slope(self) -> T:
         return self._slope
 

@@ -1,6 +1,7 @@
 
 # gamut
 from gamut.ai import NavigationMesh3d
+from gamut.ai._navigationmesh3d import Debug as NavigationMesh3dDebug
 from gamut.event import Bind
 from gamut.geometry import LineSegment3d, Mesh3d, RectangularCuboid, Triangle3d
 from gamut.gltf import Gltf
@@ -9,7 +10,8 @@ from gamut.graphics import (BufferView, BufferViewMap, clear_render_target,
                             Shader)
 from gamut.math import (DVector3, DVector3Array, FMatrix3, FMatrix4, FVector2,
                         FVector3, UVector1, UVector1Array, UVector3Array)
-from gamut.peripheral import MouseButtonPressed, MouseMoved
+from gamut.peripheral import (MouseButtonPressed, MouseMoved,
+                              MouseScrolledVertically)
 # python
 from typing import Final
 # examples
@@ -27,7 +29,8 @@ class App(ExampleApplication):
 
         self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
-        self.cube_radius = 5
+        self.cube_radius = 2
+        self.cube_scale = FVector3(self.cube_radius)
         cube = RectangularCuboid(DVector3(0), DVector3(1))
         cube_positions, cube_normals, _, cube_indices = cube.render()
         self.cube_attributes = BufferViewMap({
@@ -59,8 +62,24 @@ class App(ExampleApplication):
                 navmesh_positions[navmesh_indices[(i * 3) + 1]],
                 navmesh_positions[navmesh_indices[(i * 3) + 2]],
             ))
-        self.path = list(self.navmesh.find_path(
-            FVector3(6, 0, -10),
+        """
+        self.navmesh.add_triangle(Triangle3d(
+            FVector3(0, 0, 0),
+            FVector3(1, -.1, 0),
+            FVector3(1, 0, 1),
+        ))
+        self.navmesh.add_triangle(Triangle3d(
+            FVector3(0, 0, 0),
+            FVector3(0, 0, 1),
+            FVector3(1, 0, 1),
+        ))
+        """
+
+        self.cube_position = FVector3(6, 0, -10)
+        self.path = []
+        """
+        path = self.navmesh.find_path(
+            self.cube_position,
             Triangle3d(
                 FVector3(4, 0, -10),
                 FVector3(6, 0, -8),
@@ -72,17 +91,35 @@ class App(ExampleApplication):
                 FVector3(4, 0, 10),
                 FVector3(6, 0, 10),
             ),
-            radius=self.cube_radius
-        ))
-        self.cube_position = self.path[0]
-
+            radius=self.cube_radius,
+            squeeze=True
+        )
+        if path is not None:
+            self.path = list(path)
+        else:
+            self.path = []
+        """
         self.mouse_press_bind = Bind.on(
             self.mouse.Button.left.Pressed,
             self.mouse_click
         )
+        self.mouse_scrolled_vertically_bind = Bind.on(
+            self.mouse.ScrolledVertically,
+            self.mouse_scrolled_vertically
+        )
+
+        self.debug = NavigationMesh3dDebug(self.navmesh)
 
     async def mouse_moved(self, mouse_moved: MouseMoved) -> None:
         pass
+
+    async def mouse_scrolled_vertically(
+        self,
+        scroll: MouseScrolledVertically
+    ) -> None:
+        c = scroll.delta * .1
+        self.cube_radius += c
+        self.cube_scale += FVector3(c, 0, c)
 
     async def mouse_click(self, button_pressed: MouseButtonPressed) -> None:
         clip_position = ((
@@ -120,7 +157,9 @@ class App(ExampleApplication):
                     start_triangle,
                     end,
                     end_triangle,
-                    radius=self.cube_radius
+                    radius=self.cube_radius,
+                    squeeze=True,
+                    debug=self.debug
                 )
                 if path is not None:
                     self.path = list(path)
@@ -131,7 +170,7 @@ class App(ExampleApplication):
             color=FVector3(0, 0, 0),
             depth=1
         )
-
+        """
         execute_shader(
             self.window_render_target,
             self.shader,
@@ -147,8 +186,9 @@ class App(ExampleApplication):
             depth_write=True,
             depth_test=DepthTest.LESS,
         )
+        """
 
-        cube_movement = (step.when - step.previous).total_seconds() * 4
+        cube_movement = (step.when - step.previous).total_seconds() * 10
         while cube_movement and self.path:
             distance = self.cube_position.distance(self.path[0])
             if distance == 0:
@@ -164,7 +204,7 @@ class App(ExampleApplication):
 
         cube_transform = FMatrix4(1).translate(
             self.cube_position + FVector3(0, .5, 0)
-        )
+        ).scale(self.cube_scale)
         execute_shader(
             self.window_render_target,
             self.shader,
@@ -182,6 +222,12 @@ class App(ExampleApplication):
             depth_write=True,
             depth_test=DepthTest.LESS,
             face_cull=FaceCull.BACK,
+        )
+
+        #clear_render_target(self.window_render_target, depth=1)
+        self.debug.draw(
+            self.window_render_target,
+            self.camera.view_projection_transform,
         )
 
         self.window.flip_buffer()
