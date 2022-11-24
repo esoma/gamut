@@ -19,6 +19,7 @@
 struct ModuleState
 {
     struct GamutMathApi *math_api;
+    PyTypeObject *CompactHeightField_PyTypeObject;
     PyTypeObject *HeightField_PyTypeObject;
 };
 
@@ -27,6 +28,13 @@ struct CompactHeightField
 {
     PyObject_HEAD
     rcCompactHeightfield *rc;
+};
+
+
+struct ContourSet
+{
+    PyObject_HEAD
+    rcContourSet *rc;
 };
 
 
@@ -69,9 +77,6 @@ CompactHeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     auto state = get_module_state();
     ASSERT(Py_TYPE(py_height_field) == state->HeightField_PyTypeObject);
     HeightField *height_field = (HeightField *)py_height_field;
-
-    int max_traversable_ledge_height = 1;
-    int minimum_actor_height = 2;
 
     rcContext ctx;
     CompactHeightField *self = (CompactHeightField*)cls->tp_alloc(cls, 0);
@@ -128,12 +133,15 @@ CompactHeightField_erode(
     Py_ssize_t nargs
 )
 {
-    ASSERT(nargs == 1);
-    int max_actor_radius = PyLong_AsLong(args[0]);
-    if (max_actor_radius == -1 && PyErr_Occurred())
+    if (nargs != 1)
     {
-        return 0;
+        return PyErr_Format(
+            PyExc_TypeError,
+            "expected 1 arg: max_actor_radius"
+        );
     }
+    int max_actor_radius = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
     if (max_actor_radius < 0 || max_actor_radius >= 255)
     {
          return PyErr_Format(
@@ -159,13 +167,288 @@ CompactHeightField_erode(
 }
 
 
+static PyObject *
+CompactHeightField_partition_layers(
+    CompactHeightField *self,
+    PyObject *const *args,
+    Py_ssize_t nargs
+)
+{
+    if (nargs != 2)
+    {
+        return PyErr_Format(
+            PyExc_TypeError,
+            "expected 2 args: border_size, minimum_region_area"
+        );
+    }
+    int border_size = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (border_size < 0)
+    {
+         return PyErr_Format(PyExc_ValueError, "expected: border_size >= 0");
+    }
+
+    int minimum_region_area = PyLong_AsLong(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+    if (minimum_region_area < 0)
+    {
+         return PyErr_Format(
+            PyExc_ValueError,
+            "expected: minimum_region_area >= 0"
+        );
+    }
+
+    rcContext ctx;
+    if (!rcBuildLayerRegions(
+        &ctx,
+        *self->rc,
+        border_size,
+        minimum_region_area
+    ))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to build regions"
+        );
+    }
+
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+CompactHeightField_partition_monotone(
+    CompactHeightField *self,
+    PyObject *const *args,
+    Py_ssize_t nargs
+)
+{
+    if (nargs != 3)
+    {
+        return PyErr_Format(
+            PyExc_TypeError,
+            "expected 3 args: border_size, minimum_region_area, "
+            "merge_region_area"
+        );
+    }
+    int border_size = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (border_size < 0)
+    {
+         return PyErr_Format(PyExc_ValueError, "expected: border_size >= 0");
+    }
+
+    int minimum_region_area = PyLong_AsLong(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+    if (minimum_region_area < 0)
+    {
+         return PyErr_Format(
+            PyExc_ValueError,
+            "expected: minimum_region_area >= 0"
+        );
+    }
+
+    int merge_region_area = PyLong_AsLong(args[2]);
+    if (PyErr_Occurred()){ return 0; }
+    if (merge_region_area < 0)
+    {
+         return PyErr_Format(
+            PyExc_ValueError,
+            "expected: merge_region_area >= 0"
+        );
+    }
+
+    rcContext ctx;
+    if (!rcBuildRegionsMonotone(
+        &ctx,
+        *self->rc,
+        border_size,
+        minimum_region_area,
+        merge_region_area
+    ))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to build regions"
+        );
+    }
+
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
+CompactHeightField_partition_watershed(
+    CompactHeightField *self,
+    PyObject *const *args,
+    Py_ssize_t nargs
+)
+{
+    if (nargs != 3)
+    {
+        return PyErr_Format(
+            PyExc_TypeError,
+            "expected 3 args: border_size, minimum_region_area, "
+            "merge_region_area"
+        );
+    }
+    int border_size = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+    if (border_size < 0)
+    {
+         return PyErr_Format(PyExc_ValueError, "expected: border_size >= 0");
+    }
+
+    int minimum_region_area = PyLong_AsLong(args[1]);
+    if (PyErr_Occurred()){ return 0; }
+    if (minimum_region_area < 0)
+    {
+         return PyErr_Format(
+            PyExc_ValueError,
+            "expected: minimum_region_area >= 0"
+        );
+    }
+
+    int merge_region_area = PyLong_AsLong(args[2]);
+    if (PyErr_Occurred()){ return 0; }
+    if (merge_region_area < 0)
+    {
+         return PyErr_Format(
+            PyExc_ValueError,
+            "expected: merge_region_area >= 0"
+        );
+    }
+
+    rcContext ctx;
+    if (!rcBuildDistanceField(&ctx, *self->rc))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to build distance field"
+        );
+    }
+    if (!rcBuildRegions(
+        &ctx,
+        *self->rc,
+        border_size,
+        minimum_region_area,
+        merge_region_area
+    ))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to build regions"
+        );
+    }
+
+    Py_RETURN_NONE;
+}
+
+
 static PyMethodDef CompactHeightField_PyMethodDef[] = {
     {"erode", (PyCFunction)CompactHeightField_erode, METH_FASTCALL, 0},
+    {
+        "partition_layers",
+        (PyCFunction)CompactHeightField_partition_layers,
+        METH_FASTCALL,
+        0
+    },
+    {
+        "partition_monotone",
+        (PyCFunction)CompactHeightField_partition_monotone,
+        METH_FASTCALL,
+        0
+    },
+    {
+        "partition_watershed",
+        (PyCFunction)CompactHeightField_partition_watershed,
+        METH_FASTCALL,
+        0
+    },
+    //mark convex volumes?
     {0, 0, 0, 0}
 };
 
 
+static PyObject *
+CompactHeightField_Getter_spans(CompactHeightField *self, void *)
+{
+    auto state = get_module_state();
+    PyObject *py_result = PyList_New(0);
+    if (!py_result){ return 0; }
+    for (int z = 0; z < self->rc->height; ++z)
+    {
+        for (int x = 0; x < self->rc->width; ++x)
+        {
+            float min[] = {
+                self->rc->bmin[0] + x * self->rc->cs,
+                0,
+                self->rc->bmin[2] + z * self->rc->cs
+            };
+            float max[] = {
+                min[0] + self->rc->cs,
+                0,
+                min[2] + self->rc->cs
+            };
+            const rcCompactCell &cell = self->rc->cells[
+                x + z * self->rc->width
+            ];
+            for (
+                unsigned int i = cell.index,
+                ni = cell.index + cell.count;
+                i < ni;
+                ++i
+            )
+            {
+                const rcCompactSpan& span = self->rc->spans[i];
+                min[1] = self->rc->bmin[1] + span.y * self->rc->ch;
+                max[1] = min[1] + self->rc->ch;
+
+                PyObject *py_span = PyTuple_New(4);
+                if (!py_span){ goto error; }
+                if (PyList_Append(py_result, py_span) != 0)
+                {
+                    Py_DECREF(py_span);
+                    goto error;
+                }
+
+                PyObject *py_min = state->math_api->FVector3_Create(min);
+                if (!py_min){ goto error; }
+                PyTuple_SET_ITEM(py_span, 0, py_min);
+
+                PyObject *py_max = state->math_api->FVector3_Create(max);
+                if (!py_max){ goto error; }
+                PyTuple_SET_ITEM(py_span, 1, py_max);
+
+                PyObject *py_walkable = PyBool_FromLong(
+                    self->rc->areas[i] & RC_WALKABLE_AREA
+                );
+                if (!py_walkable){ goto error; }
+                PyTuple_SET_ITEM(py_span, 2, py_walkable);
+
+                PyObject *py_region_id = PyLong_FromUnsignedLong(span.reg);
+                if (!py_region_id){ goto error; }
+                PyTuple_SET_ITEM(py_span, 3, py_region_id);
+
+                continue;
+error:
+                Py_DECREF(py_result);
+                return 0;
+            }
+        }
+    }
+    return py_result;
+}
+
+
 static PyGetSetDef CompactHeightField_PyGetSetDef[] = {
+    {
+        "spans",
+        (getter)CompactHeightField_Getter_spans,
+        0,
+        0,
+        0
+    },
     {0, 0, 0, 0, 0}
 };
 
@@ -203,6 +486,136 @@ define_compact_height_field_type(PyObject *module)
     // Unlike other functions that steal references, PyModule_AddObject() only
     // decrements the reference count of value on success.
     if (PyModule_AddObject(module, "CompactHeightField", (PyObject *)type) < 0)
+    {
+        Py_DECREF(type);
+        return 0;
+    }
+    return type;
+};
+
+
+// ContourSet
+// ----------------------------------------------------------------------------
+
+
+static PyObject *
+ContourSet___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+{
+    PyObject *py_compact_height_field;
+    float max_simplification_error;
+    int max_edge_length;
+    static char *kwlist[] = {
+        "compact_height_field",
+        "max_simplification_error",
+        "max_edge_length",
+        NULL
+    };
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwds, "Ofi|", kwlist,
+        &py_compact_height_field,
+        &max_simplification_error,
+        &max_edge_length
+    )){ return 0; }
+
+    auto state = get_module_state();
+    ASSERT(
+        Py_TYPE(py_compact_height_field) ==
+        state->CompactHeightField_PyTypeObject
+    );
+    CompactHeightField *compact_height_field =
+        (CompactHeightField *)py_compact_height_field;
+
+    rcContext ctx;
+    ContourSet *self = (ContourSet*)cls->tp_alloc(cls, 0);
+    self->rc = rcAllocContourSet();
+    if (!self->rc)
+    {
+        return PyErr_Format(
+            PyExc_MemoryError,
+            "failed to allocate recast contour set"
+        );
+    }
+    if (!rcBuildContours(
+        &ctx,
+        *compact_height_field->rc,
+        max_simplification_error,
+        max_edge_length,
+        *self->rc
+    ))
+	{
+		return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed build recast contour set"
+        );
+	}
+
+    return (PyObject *)self;
+}
+
+
+static void
+ContourSet___dealloc__(ContourSet *self)
+{
+    if (self->rc)
+    {
+        rcFreeContourSet(self->rc);
+        self->rc = 0;
+    }
+
+    PyTypeObject *type = Py_TYPE(self);
+    type->tp_free(self);
+    Py_DECREF(type);
+}
+
+
+static PyMemberDef ContourSet_PyMemberDef[] = {
+    {0, 0, 0, 0}
+};
+
+
+static PyMethodDef ContourSet_PyMethodDef[] = {
+    {0, 0, 0, 0}
+};
+
+
+static PyGetSetDef ContourSet_PyGetSetDef[] = {
+    {0, 0, 0, 0, 0}
+};
+
+
+static PyType_Slot ContourSet_PyType_Slots [] = {
+    {Py_tp_new, (void*)ContourSet___new__},
+    {Py_tp_dealloc, (void*)ContourSet___dealloc__},
+    {Py_tp_members, (void*)ContourSet_PyMemberDef},
+    {Py_tp_methods, (void*)ContourSet_PyMethodDef},
+    {Py_tp_getset, (void*)ContourSet_PyGetSetDef},
+    {0, 0},
+};
+
+
+static PyType_Spec ContourSet_PyTypeSpec = {
+    "gamut.navigation._navigation.ContourSet",
+    sizeof(ContourSet),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    ContourSet_PyType_Slots
+};
+
+
+static PyTypeObject *
+define_contour_set_type(PyObject *module)
+{
+    ASSERT(module);
+    PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
+        module,
+        &ContourSet_PyTypeSpec,
+        0
+    );
+    if (!type){ return 0; }
+    // Note:
+    // Unlike other functions that steal references, PyModule_AddObject() only
+    // decrements the reference count of value on success.
+    if (PyModule_AddObject(module, "ContourSet", (PyObject *)type) < 0)
     {
         Py_DECREF(type);
         return 0;
@@ -403,7 +816,132 @@ static PyMethodDef HeightField_PyMethodDef[] = {
 };
 
 
+static PyObject *
+HeightField_Getter_aabb_max(HeightField *self, void *)
+{
+    auto state = get_module_state();
+    return state->math_api->FVector3_Create(self->rc->bmax);
+}
+
+
+static PyObject *
+HeightField_Getter_aabb_min(HeightField *self, void *)
+{
+    auto state = get_module_state();
+    return state->math_api->FVector3_Create(self->rc->bmin);
+}
+
+
+static PyObject *
+HeightField_Getter_height(HeightField *self, void *)
+{
+    return PyLong_FromLong(self->rc->height);
+}
+
+
+static PyObject *
+HeightField_Getter_spans(HeightField *self, void *)
+{
+    auto state = get_module_state();
+    PyObject *py_result = PyList_New(0);
+    if (!py_result){ return 0; }
+    for (int z = 0; z < self->rc->height; ++z)
+    {
+        for (int x = 0; x < self->rc->width; ++x)
+        {
+            const rcSpan *span = self->rc->spans[x + z * self->rc->width];
+            float min[] = {
+                self->rc->bmin[0] + x * self->rc->cs,
+                0,
+                self->rc->bmin[2] + z * self->rc->cs
+            };
+            float max[] = {
+                min[0] + self->rc->cs,
+                0,
+                min[2] + self->rc->cs
+            };
+            while (span)
+            {
+                min[1] = self->rc->bmin[1] + span->smin * self->rc->ch;
+                max[1] = self->rc->bmin[1] + span->smax * self->rc->ch;
+
+                PyObject *py_span = PyTuple_New(3);
+                if (!py_span){ goto error; }
+                if (PyList_Append(py_result, py_span) != 0)
+                {
+                    Py_DECREF(py_span);
+                    goto error;
+                }
+
+                PyObject *py_min = state->math_api->FVector3_Create(min);
+                if (!py_min){ goto error; }
+                PyTuple_SET_ITEM(py_span, 0, py_min);
+
+                PyObject *py_max = state->math_api->FVector3_Create(max);
+                if (!py_max){ goto error; }
+                PyTuple_SET_ITEM(py_span, 1, py_max);
+
+                PyObject *py_walkable = PyBool_FromLong(
+                    span->area & RC_WALKABLE_AREA
+                );
+                if (!py_walkable){ goto error; }
+                PyTuple_SET_ITEM(py_span, 2, py_walkable);
+
+                span = span->next;
+                continue;
+error:
+                Py_DECREF(py_result);
+                return 0;
+            }
+        }
+    }
+    return py_result;
+}
+
+
+static PyObject *
+HeightField_Getter_width(HeightField *self, void *)
+{
+    return PyLong_FromLong(self->rc->width);
+}
+
+
 static PyGetSetDef HeightField_PyGetSetDef[] = {
+    {
+        "aabb_max",
+        (getter)HeightField_Getter_aabb_max,
+        0,
+        0,
+        0
+    },
+    {
+        "aabb_min",
+        (getter)HeightField_Getter_aabb_min,
+        0,
+        0,
+        0
+    },
+    {
+        "height",
+        (getter)HeightField_Getter_height,
+        0,
+        0,
+        0
+    },
+    {
+        "spans",
+        (getter)HeightField_Getter_spans,
+        0,
+        0,
+        0
+    },
+    {
+        "width",
+        (getter)HeightField_Getter_width,
+        0,
+        0,
+        0
+    },
     {0, 0, 0, 0, 0}
 };
 
@@ -547,6 +1085,7 @@ module_traverse(
 )
 {
     ModuleState *state = (ModuleState *)PyModule_GetState(self);
+    Py_VISIT(state->CompactHeightField_PyTypeObject);
     Py_VISIT(state->HeightField_PyTypeObject);
     return 0;
 }
@@ -556,6 +1095,7 @@ static int
 module_clear(PyObject *self)
 {
     ModuleState *state = (ModuleState *)PyModule_GetState(self);
+    Py_CLEAR(state->CompactHeightField_PyTypeObject);
     Py_CLEAR(state->HeightField_PyTypeObject);
     return 0;
 }
@@ -591,7 +1131,15 @@ PyInit__navigation()
     if (PyState_AddModule(module, &module_PyModuleDef) == -1){ goto error; }
     state = (ModuleState *)PyModule_GetState(module);
 
-    if (!define_compact_height_field_type(module)){ goto error; }
+    PyTypeObject *py_compact_height_field_type =
+        define_compact_height_field_type(module);
+    {
+        if (!py_compact_height_field_type){ goto error; }
+        Py_INCREF(py_compact_height_field_type);
+        state->CompactHeightField_PyTypeObject = py_compact_height_field_type;
+    }
+
+    if (!define_contour_set_type(module)){ goto error; }
 
     PyTypeObject *py_height_field_type = define_height_field_type(module);
     {
