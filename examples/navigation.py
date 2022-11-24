@@ -29,7 +29,7 @@ class App(ExampleApplication):
 
         self.shader = Shader(vertex=VERTEX_SHADER, fragment=FRAGMENT_SHADER)
 
-        self.cube_radius = 2
+        self.cube_radius = .5
         self.cube_scale = FVector3(self.cube_radius)
         cube = RectangularCuboid(DVector3(0), DVector3(1))
         cube_positions, cube_normals, _, cube_indices = cube.render()

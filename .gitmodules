@@ -7,3 +7,6 @@
 [submodule "vendor/CDT"]
 	path = vendor/CDT
 	url = https://github.com/artem-ogre/CDT.git
+[submodule "vendor/recastnavigation"]
+	path = vendor/recastnavigation
+	url = https://github.com/recastnavigation/recastnavigation.git

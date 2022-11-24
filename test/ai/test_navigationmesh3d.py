@@ -33,7 +33,7 @@ def vector3_is_close(a: Any, b: Any) -> bool:
     [0, 0, 1],
     [-1, 0, 1],
 ])
-def test_max_radius_single_tri(
+def test_internals_single_tri(
     a_y: float,
     b_y: float,
     c_y: float
@@ -47,16 +47,48 @@ def test_max_radius_single_tri(
     a2 = a.xz
     b2 = b.xz
     c2 = c.xz
+    tri = Triangle3d(a, b, c)
+    ab_normal, bc_normal, ca_normal = tri.edge_normals
 
-    nm.add_triangle(Triangle3d(a, b, c))
+    nm.add_triangle(tri)
+
+    assert nm._point_triangle[a] == {tri}
+    assert nm._point_triangle[b] == {tri}
+    assert nm._point_triangle[c] == {tri}
+
+    assert nm._get_point_normal(a) == ((
+        -ab_normal.xoz + -ca_normal.xoz
+    ) / 2).normalize()
+    assert nm._get_point_normal(b) == ((
+        -ab_normal.xoz + -bc_normal.xoz
+    ) / 2).normalize()
+    assert nm._get_point_normal(c) == ((
+        -bc_normal.xoz + -ca_normal.xoz
+    ) / 2).normalize()
 
     nm._recalculate_point_max_radius()
     nm._recalculate_edge_max_radius()
-    assert nm._point_max_radius[a] == inf
-    assert nm._point_max_radius[b] == inf
-    assert nm._point_max_radius[c] == inf
+    assert nm._point_max_radius[a] == check_radius(
+        a.xz,
+        LineSegment2d(b.xz, c.xz),
+        nm._get_point_normal(a).xz
+    )
+    assert nm._point_max_radius[b] == check_radius(
+        b.xz,
+        LineSegment2d(a.xz, c.xz),
+        nm._get_point_normal(b).xz
+    )
+    assert nm._point_max_radius[c] == check_radius(
+        c.xz,
+        LineSegment2d(a.xz, b.xz),
+        nm._get_point_normal(c).xz
+    )
 
-    assert nm._edge_max_radius[(a, b)] == (
+    assert nm._edge_triangle[(a, b)] == {tri}
+    assert nm._edge_triangle[(b, c)] == {tri}
+    assert nm._edge_triangle[(a, c)] == {tri}
+
+    assert nm._edge_max_radius[(a, b)] == min(
         check_radius(
             a2,
             LineSegment2d(b2, c2),
@@ -68,7 +100,7 @@ def test_max_radius_single_tri(
             a2 - b2,
         ),
     )
-    assert nm._edge_max_radius[(b, c)] == (
+    assert nm._edge_max_radius[(b, c)] == min(
        check_radius(
             b2,
             LineSegment2d(a2, c2),
@@ -80,7 +112,7 @@ def test_max_radius_single_tri(
             b2 - c2,
         ),
     )
-    assert nm._edge_max_radius[(a, c)] == (
+    assert nm._edge_max_radius[(a, c)] == min(
        check_radius(
             a2,
             LineSegment2d(b2, c2),
@@ -97,67 +129,176 @@ def test_max_radius_single_tri(
 def test_internals_center() -> None:
     nm = NavigationMesh3d()
 
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(1, 0, 0),
-        DVector3(0, 0, 1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
-        DVector3(0, 0, 1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(1, 0, 0),
-        DVector3(0, 0, -1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
-        DVector3(0, 0, -1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(1, 0, 1),
-        DVector3(1, 0, 0),
-        DVector3(0, 0, 1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(-1, 0, 1),
-        DVector3(-1, 0, 0),
-        DVector3(0, 0, 1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(1, 0, -1),
-        DVector3(1, 0, 0),
-        DVector3(0, 0, -1),
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(-1, 0, -1),
-        DVector3(-1, 0, 0),
-        DVector3(0, 0, -1),
-    ))
-
-    # python
-    import pprint
-    pprint.pprint(nm._edge_triangle[(DVector3(0, 0, 1), DVector3(1, 0, 0))])
-    assert nm._edge_triangle
+    # a square composed of 8 tris:
+    r"""
+        ---------
+       | 7/ | \6 |
+       | /3 | 2\ |
+       ----------
+       | \1 | 0/ |
+       | 5\ | /4 |
+       ----------
+    """
+    tris = (
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(1, 0, 0),
+            DVector3(0, 0, 1),
+        ),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(-1, 0, 0),
+            DVector3(0, 0, 1),
+        ),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(1, 0, 0),
+            DVector3(0, 0, -1),
+        ),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(-1, 0, 0),
+            DVector3(0, 0, -1),
+        ),
+        Triangle3d(
+            DVector3(1, 0, 1),
+            DVector3(1, 0, 0),
+            DVector3(0, 0, 1),
+        ),
+        Triangle3d(
+            DVector3(-1, 0, 1),
+            DVector3(-1, 0, 0),
+            DVector3(0, 0, 1),
+        ),
+        Triangle3d(
+            DVector3(1, 0, -1),
+            DVector3(1, 0, 0),
+            DVector3(0, 0, -1),
+        ),
+        Triangle3d(
+            DVector3(-1, 0, -1),
+            DVector3(-1, 0, 0),
+            DVector3(0, 0, -1),
+        )
+    )
+    for tri in tris:
+        nm.add_triangle(tri)
 
     nm._recalculate_point_max_radius()
     nm._recalculate_edge_max_radius()
-    assert nm._point_max_radius[DVector3(0, 0, 0)] == 0
-    assert nm._point_max_radius[DVector3(1, 0, 0)] == 1.0
-    assert nm._point_max_radius[DVector3(-1, 0, 0)] == 1.0
-    assert nm._point_max_radius[DVector3(0, 0, 1)] == 1.0
-    assert nm._point_max_radius[DVector3(0, 0, -1)] == 1.0
 
-    assert nm._point_max_radius[DVector3(1, 0, 1)] == 1.0
+    # center point has no walls
+    assert nm._point_triangle[DVector3(0, 0, 0)] == {
+        tris[0], tris[1], tris[2], tris[3]
+    }
+    assert nm._point_max_radius[DVector3(0, 0, 0)] == inf
+    assert nm._get_point_normal(DVector3(0, 0, 0)) == DVector3(0, 0, 0)
+
+    # non-corner points
+    assert nm._point_triangle[DVector3(1, 0, 0)] == {
+        tris[0], tris[2], tris[4], tris[6]
+    }
+    assert nm._point_max_radius[DVector3(1, 0, 0)] == 1.0
+    assert nm._get_point_normal(DVector3(1, 0, 0)) == DVector3(-1, 0, 0)
+
+    assert nm._point_triangle[DVector3(-1, 0, 0)] == {
+        tris[1], tris[3], tris[5], tris[7]
+    }
+    assert nm._point_max_radius[DVector3(-1, 0, 0)] == 1.0
+    assert nm._get_point_normal(DVector3(-1, 0, 0)) == DVector3(1, 0, 0)
+
+    assert nm._point_triangle[DVector3(0, 0, 1)] == {
+        tris[0], tris[1], tris[4], tris[5]
+    }
+    assert nm._point_max_radius[DVector3(0, 0, 1)] == 1.0
+    assert nm._get_point_normal(DVector3(0, 0, 1)) == DVector3(0, 0, -1)
+
+    assert nm._point_triangle[DVector3(0, 0, -1)] == {
+        tris[2], tris[3], tris[6], tris[7]
+    }
+    assert nm._point_max_radius[DVector3(0, 0, -1)] == 1.0
+    assert nm._get_point_normal(DVector3(0, 0, -1)) == DVector3(0, 0, 1)
+
+    # corners
+    assert nm._point_triangle[DVector3(1, 0, 1)] == { tris[4] }
+    assert isclose(nm._point_max_radius[DVector3(1, 0, 1)], 1.17157287525381)
+    assert nm._get_point_normal(DVector3(1, 0, 1)) == (
+        DVector3(-1, 0, -1).normalize()
+    )
+
+    assert nm._point_triangle[DVector3(1, 0, -1)] == { tris[6] }
+    assert isclose(nm._point_max_radius[DVector3(1, 0, -1)], 1.17157287525381)
+    assert nm._get_point_normal(DVector3(1, 0, -1)) == (
+        DVector3(-1, 0, 1).normalize()
+    )
+
+    assert nm._point_triangle[DVector3(-1, 0, 1)] == { tris[5] }
+    assert isclose(nm._point_max_radius[DVector3(-1, 0, 1)], 1.17157287525381)
+    assert nm._get_point_normal(DVector3(-1, 0, 1)) == (
+        DVector3(1, 0, -1).normalize()
+    )
+
+    assert nm._point_triangle[DVector3(-1, 0, -1)] == { tris[7] }
+    assert isclose(nm._point_max_radius[DVector3(-1, 0, -1)], 1.17157287525381)
+    assert nm._get_point_normal(DVector3(-1, 0, -1)) == (
+        DVector3(1, 0, 1).normalize()
+    )
+
+    # inner edges
+    edge = tuple(sorted((DVector3(0, 0, 0), DVector3(1, 0, 0))))
+    assert nm._edge_triangle[edge] == {tris[0], tris[2]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(0, 0, 0), DVector3(-1, 0, 0))))
+    assert nm._edge_triangle[edge] == {tris[1], tris[3]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(0, 0, 0), DVector3(0, 0, -1))))
+    assert nm._edge_triangle[edge] == {tris[2], tris[3]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(0, 0, 0), DVector3(0, 0, 1))))
+    assert nm._edge_triangle[edge] == {tris[0], tris[1]}
+    assert nm._edge_max_radius[edge] == .5
+
+    # outer edges
+    edge = tuple(sorted((DVector3(1, 0, 0), DVector3(1, 0, 1))))
+    assert nm._edge_triangle[edge] == {tris[4]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(1, 0, 1), DVector3(0, 0, 1))))
+    assert nm._edge_triangle[edge] == {tris[4]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(0, 0, 1), DVector3(-1, 0, 1))))
+    assert nm._edge_triangle[edge] == {tris[5]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(-1, 0, 1), DVector3(-1, 0, 0))))
+    assert nm._edge_triangle[edge] == {tris[5]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(-1, 0, 0), DVector3(-1, 0, -1))))
+    assert nm._edge_triangle[edge] == {tris[7]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(-1, 0, -1), DVector3(0, 0, -1))))
+    assert nm._edge_triangle[edge] == {tris[7]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(0, 0, -1), DVector3(1, 0, -1))))
+    assert nm._edge_triangle[edge] == {tris[6]}
+    assert nm._edge_max_radius[edge] == .5
+
+    edge = tuple(sorted((DVector3(1, 0, -1), DVector3(1, 0, 0))))
+    assert nm._edge_triangle[edge] == {tris[6]}
+    assert nm._edge_max_radius[edge] == .5
 
 
 def test_find_basic_path() -> None:
     nm = NavigationMesh3d()
 
-    nm.remove_triangle(Triangle3d(
+    nm.add_triangle(Triangle3d(
         DVector3(0, 0, 0),
         DVector3(0, 0, 1),
         DVector3(1, 0, 0)
@@ -167,23 +308,6 @@ def test_find_basic_path() -> None:
         DVector3(0, 0, 1),
         DVector3(1, 0, 0)
     ))
-
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-    nm.remove_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-
     nm.add_triangle(Triangle3d(
         DVector3(0, 0, 0),
         DVector3(0, 0, 1),
@@ -199,49 +323,6 @@ def test_find_basic_path() -> None:
         DVector3(-1, 0, 0),
         DVector3(1, 0, 0)
     ))
-
-    assert nm.contains_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-    assert nm.contains_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(-1, 0, 0)
-    ))
-    assert nm.contains_triangle(Triangle3d(
-        DVector3(1, 0, 1),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-    assert nm.contains_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
-        DVector3(1, 0, 0)
-    ))
-
-    triangles = list(set(t.positions) for t in nm.triangles)
-    assert {
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    } in triangles
-    assert {
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(-1, 0, 0)
-    } in triangles
-    assert {
-        DVector3(1, 0, 1),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    } in triangles
-    assert {
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
-        DVector3(1, 0, 0)
-    } in triangles
 
     path = nm.find_path(
         DVector3(0, 0, 0),
@@ -483,8 +564,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(0, 0, 0),
-        DVector3(1, 0, 0),
         DVector3(1, 0, 1),
+        DVector3(1, 0, 0),
     ))
     # __
     nm.add_triangle(Triangle3d(
@@ -494,8 +575,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(1, 0, 0),
-        DVector3(2, 0, 0),
         DVector3(2, 0, 1),
+        DVector3(2, 0, 0),
     ))
     # __/
     nm.add_triangle(Triangle3d(
@@ -505,8 +586,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(2, 0, 0),
-        DVector3(3, 1, 0),
         DVector3(3, 1, 1),
+        DVector3(3, 1, 0),
     ))
     #    _
     # __/
@@ -517,8 +598,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(3, 1, 0),
-        DVector3(4, 1, 0),
         DVector3(4, 1, 1),
+        DVector3(4, 1, 0),
     ))
     #    __
     # __/
@@ -529,8 +610,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(4, 1, 0),
-        DVector3(5, 1, 0),
         DVector3(5, 1, 1),
+        DVector3(5, 1, 0),
     ))
     #    __
     # __/  \
@@ -541,8 +622,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(5, 1, 0),
-        DVector3(6, 0, 0),
         DVector3(6, 0, 1),
+        DVector3(6, 0, 0),
     ))
     #    __
     # __/  \_
@@ -553,8 +634,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(6, 0, 0),
-        DVector3(7, 0, 0),
         DVector3(7, 0, 1),
+        DVector3(7, 0, 0),
     ))
     #    __
     # __/  \__
@@ -565,8 +646,8 @@ def test_find_path_string_pull_y() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(7, 0, 0),
-        DVector3(8, 0, 0),
         DVector3(8, 0, 1),
+        DVector3(8, 0, 0),
     ))
     #    __
     # s_/  \_e
@@ -579,26 +660,17 @@ def test_find_path_string_pull_y() -> None:
         ),
         DVector3(8, 0, 1),
         Triangle3d(
-            DVector3(8, 0, 1),
             DVector3(7, 0, 0),
+            DVector3(8, 0, 1),
             DVector3(8, 0, 0),
         )
     )
-    print(path)
     assert vector3_is_close(path[0], DVector3(0.0, 0.0, 0.0))
     assert vector3_is_close(path[1], DVector3(2.0, 0.0, 0.25))
-    assert vector3_is_close(
-        path[2],
-        DVector3(2.2857142857142856, 0.2857142857142857, 0.2857142857142857)
-    )
-    assert vector3_is_close(path[3], DVector3(3.0, 1.0, 0.3750000000000001))
-    assert vector3_is_close(path[4], DVector3(5.0, 1.0, 0.625))
-    assert vector3_is_close(
-        path[5],
-        DVector3(5.714285714285714, 0.2857142857142857, 0.7142857142857143)
-    )
-    assert vector3_is_close(path[6], DVector3(6.0, 0.0, 0.75))
-    assert vector3_is_close(path[7], DVector3(8.0, 0.0, 1.0))
+    assert vector3_is_close(path[2], DVector3(3.0, 1.0, 0.375))
+    assert vector3_is_close(path[3], DVector3(5.0, 1.0, 0.625))
+    assert vector3_is_close(path[4], DVector3(6.0, 0.0, 0.75))
+    assert vector3_is_close(path[5], DVector3(8.0, 0.0, 1.0))
 
 
 def test_find_path_string_pull_bug(resources: Path) -> None:
@@ -651,8 +723,8 @@ def test_find_path_basic_portal_squeeze() -> None:
     ))
     nm.add_triangle(Triangle3d(
         DVector3(0, 0, 0),
-        DVector3(1, 0, 0),
         DVector3(1, 0, 1),
+        DVector3(1, 0, 0),
     ))
 
     path = nm.find_path(
@@ -665,8 +737,25 @@ def test_find_path_basic_portal_squeeze() -> None:
         DVector3(1, 0, .5),
         Triangle3d(
             DVector3(0, 0, 0),
-            DVector3(1, 0, 0),
             DVector3(1, 0, 1),
+            DVector3(1, 0, 0),
+        ),
+        radius=1,
+    )
+    assert path is None
+
+    path = nm.find_path(
+        DVector3(0, 0, 1),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(0, 0, 1),
+            DVector3(1, 0, 1),
+        ),
+        DVector3(1, 0, .5),
+        Triangle3d(
+            DVector3(0, 0, 0),
+            DVector3(1, 0, 1),
+            DVector3(1, 0, 0),
         ),
         radius=1,
         squeeze=True

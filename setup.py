@@ -1,5 +1,6 @@
 
 # python
+from glob import glob
 import os
 from pathlib import Path
 from subprocess import run
@@ -127,6 +128,24 @@ math = Extension(
 )
 
 
+navigation = Extension(
+    'gamut.navigation._navigation',
+    libraries=[] if os.name == 'nt' else ['stdc++'],
+    include_dirs=[
+        'vendor/recastnavigation/Recast/Include',
+        'include',
+    ],
+    sources=
+        glob('vendor/recastnavigation/Recast/Source/*.cpp') + [
+        'src/gamut/navigation/_navigation.cpp'
+    ],
+    language='c++11',
+    extra_compile_args=coverage_compile_args +
+        ([] if os.name == 'nt' else ['-std=c++11', '-w']),
+    extra_link_args=coverage_links_args,
+)
+
+
 geometry_triangulate = Extension(
     'gamut.geometry._triangulate',
     include_dirs=[
@@ -159,5 +178,11 @@ setup(
         "build_bullet": BuildBullet,
         "codegen_math": GenerateMathCode,
     },
-    ext_modules=[geometry_triangulate, math, bullet, test_math_api]
+    ext_modules=[
+        geometry_triangulate,
+        math,
+        navigation,
+        bullet,
+        test_math_api
+    ]
 )

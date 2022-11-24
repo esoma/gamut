@@ -53,55 +53,88 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
             self._calculate_weight = default_calculate_weight
         else:
             self._calculate_weight = calculate_weight
+
         self._graph: Graph[Triangle3d[T], float] = Graph()
+
         self._point_triangle: dict[T, set[Triangle3d[T]]] = {}
-        self._edge_triangle: dict[tuple[T, T], set[Triangle3d[T]]] = {}
         self._point_normal: dict[T, T] = {}
         self._point_max_radius: dict[T, float] = {}
-        self._edge_max_radius: dict[tuple[T, T], tuple[float, float]] = {}
-        self._edge_normal: dict[tuple[T, T], T] = {}
+
+        self._edge_triangle: dict[tuple[T, T], set[Triangle3d[T]]] = {}
+        self._edge_max_radius: dict[tuple[T, T], float] = {}
 
     def _recalculate_point_max_radius(self) -> None:
-        self._point_max_radius = {}
+        if self._point_max_radius:
+            return
         for point in self._point_triangle:
             normal = self._get_point_normal(point)
             max_radius = inf
             for tri in self._graph.nodes:
-                for edge in get_triangle_edges(tri):
-                    if len(self._edge_triangle[edge]) > 1:
-                        continue
+                for edge, edge_normal in zip(
+                    get_triangle_edges(tri),
+                    tri.edge_normals
+                ):
                     if (
                         point in edge or
                         (edge[0].y != point.y and edge[1].y != point.y)
                     ):
                         continue
+                    # skip edges that aren't walls
+                    if len(self._edge_triangle[edge]) > 1:
+                        continue
+                    # skip edges that aren't facing the point
+                    edge_normal = -edge_normal
+                    for edge_point in edge:
+                        if (
+                            (edge_point - point) @ normal and
+                            (point - edge_point) @ edge_normal
+                        ):
+                            break
+                    else:
+                        continue
+                    # calculate the max radius from the point to the edge using
+                    # the point's normal
                     edge_2d = LineSegment2d(edge[0].xz, edge[1].xz)
                     r = check_radius(point.xz, edge_2d, normal.xz)
                     max_radius = min(max_radius, r)
             self._point_max_radius[point] = max_radius
 
     def _recalculate_edge_max_radius(self) -> None:
-        self._edge_max_radius = {}
+        if self._edge_max_radius:
+            return
         for edge in self._edge_triangle:
-            max_radius_a = max_radius_b = inf
+            max_radius = inf
             a_slope = (edge[1] - edge[0]).xz
             b_slope = (edge[0] - edge[1]).xz
             for tri in self._graph.nodes:
                 for tri_edge in get_triangle_edges(tri):
+                    # skip edges that aren't walls
                     if len(self._edge_triangle[tri_edge]) > 1:
                         continue
                     tri_edge_2d = LineSegment2d(tri_edge[0].xz, tri_edge[1].xz)
-                    if edge[0] not in tri_edge:
+                    if (
+                        edge[0] not in tri_edge and (
+                            edge[0].y == tri_edge[0].y or
+                            edge[0].y == tri_edge[1].y
+                        )
+                    ):
                         r = check_radius(edge[0].xz, tri_edge_2d, a_slope)
-                        max_radius_a = min(max_radius_a, r)
-                    if edge[1] not in tri_edge:
+                        max_radius = min(max_radius, r)
+                    if (
+                        edge[1] not in tri_edge and (
+                            edge[1].y == tri_edge[0].y or
+                            edge[1].y == tri_edge[1].y
+                        )
+                    ):
                         r = check_radius(edge[1].xz, tri_edge_2d, b_slope)
-                        max_radius_b = min(max_radius_b, r)
-            self._edge_max_radius[edge] = (max_radius_a, max_radius_b)
+                        max_radius = min(max_radius, r)
+            self._edge_max_radius[edge] = max_radius
 
     def add_triangle(self, triangle: Triangle3d[T]) -> None:
         if self._graph.contains_node(triangle):
             return
+        self._point_max_radius = {}
+        self._edge_max_radius = {}
         self._graph.add_node(triangle)
         for edge in get_triangle_edges(triangle):
             try:
@@ -128,19 +161,31 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
                 pass
 
     def _get_point_normal(self, point: T) -> T:
+        # check for a cached result
         try:
             return self._point_normal[point]
         except KeyError:
             pass
+        # collects all the normals of all the walls that this point is
+        # connected to
+        #
+        # the normals are inverted so that they point into the tri and the y
+        # value is ignored
         tris = self._point_triangle[point]
         normals = []
         for tri in tris:
             for edge, normal in zip(get_triangle_edges(tri), tri.edge_normals):
                 if point not in edge:
                     continue
+                # skip edges that aren't walls
                 if len(self._edge_triangle[edge]) == 1:
                     normals.append(-normal.xoz)
-        normal = (sum(normals) / len(normals)).normalize()
+        # average the collected normals to get the normal for the point
+        if normals:
+            normal = (sum(normals) / len(normals)).normalize()
+        else:
+            normal = type(point)()
+        # cache the result
         self._point_normal[point] = normal
         return normal
 
@@ -148,6 +193,10 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
         return self._graph.contains_node(triangle)
 
     def remove_triangle(self, triangle: Triangle3d[T]) -> None:
+        if not self._graph.contains_node(triangle):
+            return
+        self._point_max_radius = {}
+        self._edge_max_radius = {}
         self._graph.remove_node(triangle)
         for edge in get_triangle_edges(triangle):
             try:
@@ -183,6 +232,7 @@ class NavigationMesh3d(Graph[Triangle3d[T], float]):
         squeeze: bool = False,
         debug: Debug | Optional = None
     ) -> tuple[P, ...] | None:
+        print("-------------------------------------")
         radius = float(radius)
         if footprint_radius is None:
             footprint_radius = radius
@@ -246,11 +296,10 @@ class StringPuller(Generic[T]):
         footprint_radius: float,
         point_normal: dict[T, T],
         point_max_radius: dict[T, float],
-        edge_max_radius: dict[tuple[T, T], tuple[float, float]],
+        edge_max_radius: dict[tuple[T, T], float],
         squeeze: bool,
         debug: Debug | None
     ):
-        print("-----------------------------------")
         self.start_point = start_point
         self.end_point = end_point
         self.radius = radius
@@ -304,7 +353,6 @@ class StringPuller(Generic[T]):
                 self.debug.add_path_tri(tri)
             for point in self.path:
                 self.debug.add_path_point(point)
-
         return tuple(self.path)
 
     def _calculate_inner(self) -> None:
@@ -355,6 +403,7 @@ class StringPuller(Generic[T]):
             except self._PointSqueezed:
                 raise self.Squeezed(triangle)
             self.apex = funnel_target
+
             while i < len(self.triangle_path) - 1:
                 self.left, self.right = next_triangle - {self.apex}
                 try:
@@ -401,6 +450,7 @@ class StringPuller(Generic[T]):
         #
         # so we only include the first tri that includes the point, the next
         # point can deal with the remaining tris
+        i = 0
         for i, tri in enumerate(self.triangle_buffer):
             if point in tri.positions:
                 break
@@ -426,11 +476,6 @@ class StringPuller(Generic[T]):
         path_line = LineSegment2d(self.path[-1].xz, point.xz)
         if triangles:
             for triangle in triangles:
-                # we can skip tris that have the same normal since any
-                # intersections would produce redundant points that don't
-                # actually alter the path
-                if triangle.normal == self.last_normal:
-                    continue
                 intersections = [
                     (intersection, edge)
                     for intersection, edge in
@@ -450,34 +495,54 @@ class StringPuller(Generic[T]):
                 for (path_time, edge_time), edge in intersections:
                     edge_3d = LineSegment3d(*edge)
                     new_point = edge_3d.get_point_from_a_to_b(edge_time)
-
+                    # we can typically skip points that have the same normal
+                    # since any intersections would produce redundant points
+                    # that don't actually alter the path
+                    #
+                    # the exception is when the path would violate the edge
+                    # radius
+                    skip_adding_point = triangle.normal == self.last_normal
+                    # check if the actor is being squeezed
                     try:
-                        max_radius_a, max_radius_b = self.edge_max_radius[edge]
+                        edge_max_radius = self.edge_max_radius[edge]
                     except KeyError:
-                        max_radius_a = max_radius_b = 0
-                    if radius > max_radius_a or radius > max_radius_b:
+                        edge_max_radius = 0
+
+                    if radius > edge_max_radius:
                         if not self.squeeze:
                             raise self.Squeezed(triangle)
-
+                    """
                     a_distance = new_point.xz.distance(edge[0].xz) + radius
                     b_distance = new_point.xz.distance(edge[1].xz) + radius
-                    if a_distance > max_radius_a:
-                        if b_distance > max_radius_b:
+                    print(edge_3d)
+                    print(new_point)
+                    print(edge_max_radius, a_distance, b_distance)
+                    if a_distance > edge_max_radius:
+                        if b_distance > edge_max_radius:
                             new_point = edge_3d.get_point_from_a_to_b(.5)
+                            skip_adding_point = False
                         else:
-                            new_point = edge_3d.get_point_from_a_to_b(max_radius_a)
-                    elif b_distance > max_radius_b:
-                        new_point = edge_3d.get_point_from_a_to_b(1 - max_radius_b)
+                            new_point = edge_3d.get_point_from_b_to_a(
+                                radius / edge_3d.a.distance(edge_3d.b)
+                            )
+                            skip_adding_point = False
+                    elif b_distance > edge_max_radius:
+                        new_point = edge_3d.get_point_from_a_to_b(
+                            radius / edge_3d.a.distance(edge_3d.b)
+                        )
+                        skip_adding_point = False
+                    """
 
-                    if self.path[-1] != new_point:
+                    if self.path[-1] != new_point and not skip_adding_point:
+                        print("ADD TRI", new_point)
                         self.path.append(new_point)
-                    self.last_normal = triangle.normal
+                        path_line = LineSegment2d(self.path[-1].xz, point.xz)
                     # only the first intersection matters since any others
                     # would be along the same triangle normal
-                    break
-                path_line = LineSegment2d(self.path[-1].xz, point.xz)
+                self.last_normal = triangle.normal
 
         if self.path[-1] != point:
+            print("ADD END", point)
             self.path.append(point)
             if triangles:
                 self.last_normal = triangles[-1].normal
