@@ -9,6 +9,10 @@
 #include "gamut/math.h"
 // recast
 #include "Recast.h"
+// detour
+#include "DetourNavMesh.h"
+#include "DetourNavMeshBuilder.h"
+#include "DetourNavMeshQuery.h"
 
 #define ASSERT(x) if (!(x)){ std::cout << "ASSERTION FAILURE: " << __FILE__ << ":" << __LINE__ << std::endl; exit(1); }
 
@@ -20,7 +24,11 @@ struct ModuleState
 {
     struct GamutMathApi *math_api;
     PyTypeObject *CompactHeightField_PyTypeObject;
+    PyTypeObject *ContourSet_PyTypeObject;
+    PyTypeObject *DetailMesh_PyTypeObject;
     PyTypeObject *HeightField_PyTypeObject;
+    PyTypeObject *Mesh_PyTypeObject;
+    PyTypeObject *NavigationMesh_PyTypeObject;
 };
 
 
@@ -28,6 +36,9 @@ struct CompactHeightField
 {
     PyObject_HEAD
     rcCompactHeightfield *rc;
+    int max_actor_radius;
+    int max_traversable_ledge_height;
+    int min_actor_height;
 };
 
 
@@ -35,6 +46,16 @@ struct ContourSet
 {
     PyObject_HEAD
     rcContourSet *rc;
+    int max_actor_radius;
+    int max_traversable_ledge_height;
+    int min_actor_height;
+};
+
+
+struct DetailMesh
+{
+    PyObject_HEAD
+    rcPolyMeshDetail *rc;
 };
 
 
@@ -43,14 +64,24 @@ struct HeightField
     PyObject_HEAD
     rcHeightfield *rc;
     int max_traversable_ledge_height;
-    int minimum_actor_height;
+    int min_actor_height;
 };
 
 
 struct Mesh
 {
     PyObject_HEAD
-    rcConfig rc_config;
+    rcPolyMesh *rc;
+    int max_actor_radius;
+    int max_traversable_ledge_height;
+    int min_actor_height;
+};
+
+
+struct NavigationMesh
+{
+    PyObject_HEAD
+    dtNavMesh *dt;
 };
 
 
@@ -90,7 +121,7 @@ CompactHeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     }
     if (!rcBuildCompactHeightfield(
         &ctx,
-        height_field->minimum_actor_height,
+        height_field->min_actor_height,
         height_field->max_traversable_ledge_height,
         *height_field->rc,
         *self->rc
@@ -101,6 +132,10 @@ CompactHeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
             "failed build recast compact height field"
         );
 	}
+    self->max_actor_radius = 0;
+    self->min_actor_height = height_field->min_actor_height;
+    self->max_traversable_ledge_height =
+        height_field->max_traversable_ledge_height;
 
     return (PyObject *)self;
 }
@@ -137,23 +172,23 @@ CompactHeightField_erode(
     {
         return PyErr_Format(
             PyExc_TypeError,
-            "expected 1 arg: max_actor_radius"
+            "expected 1 arg: amount"
         );
     }
-    int max_actor_radius = PyLong_AsLong(args[0]);
+    int amount = PyLong_AsLong(args[0]);
     if (PyErr_Occurred()){ return 0; }
-    if (max_actor_radius < 0 || max_actor_radius >= 255)
+    if (amount < 0 || amount >= 255)
     {
          return PyErr_Format(
             PyExc_ValueError,
-            "expected: 0 < max_actor_radius < 255"
+            "expected: 0 < amount < 255"
         );
     }
 
     rcContext ctx;
     if (!rcErodeWalkableArea(
         &ctx,
-        max_actor_radius,
+        amount,
         *self->rc
     ))
     {
@@ -162,6 +197,7 @@ CompactHeightField_erode(
             "failed to erode recast compact height field"
         );
     }
+    self->max_actor_radius += amount;
 
     Py_RETURN_NONE;
 }
@@ -548,6 +584,10 @@ ContourSet___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
             "failed build recast contour set"
         );
 	}
+    self->max_actor_radius = compact_height_field->max_actor_radius;
+    self->max_traversable_ledge_height =
+        compact_height_field->max_traversable_ledge_height;
+    self->min_actor_height = compact_height_field->min_actor_height;
 
     return (PyObject *)self;
 }
@@ -624,6 +664,215 @@ define_contour_set_type(PyObject *module)
 };
 
 
+// DetailMesh
+// ----------------------------------------------------------------------------
+
+
+static PyObject *
+DetailMesh___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+{
+    auto state = get_module_state();
+    PyObject *py_mesh;
+    PyObject *py_compact_height_field;
+    float sample_distance;
+    float sample_max_distance_error;
+    static char *kwlist[] = {
+        "mesh",
+        "compact_height_field",
+        "sample_distance",
+        "sample_max_distance_error",
+        NULL
+    };
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwds, "OOff|", kwlist,
+        &py_mesh,
+        &py_compact_height_field,
+        &sample_distance,
+        &sample_max_distance_error
+    )){ return 0; }
+
+    if (Py_TYPE(py_mesh) != state->Mesh_PyTypeObject)
+    {
+        return PyErr_Format(PyExc_TypeError, "expected Mesh");
+    }
+    Mesh *mesh = (Mesh *)py_mesh;
+
+    if (Py_TYPE(py_compact_height_field) != state->CompactHeightField_PyTypeObject)
+    {
+        return PyErr_Format(PyExc_TypeError, "expected CompactHeightField");
+    }
+    CompactHeightField *compact_height_field =
+        (CompactHeightField *)py_compact_height_field;
+
+    if (sample_distance < 0)
+    {
+        return PyErr_Format(
+            PyExc_ValueError,
+            "expected: sample_distance >= 0"
+        );
+    }
+    if (sample_max_distance_error < 0)
+    {
+        return PyErr_Format(
+            PyExc_ValueError,
+            "expected: sample_max_distance_error >= 0"
+        );
+    }
+
+    rcContext ctx;
+    DetailMesh *self = (DetailMesh*)cls->tp_alloc(cls, 0);
+    self->rc = rcAllocPolyMeshDetail();
+    if (!self->rc)
+    {
+        return PyErr_Format(
+            PyExc_MemoryError,
+            "failed to allocate recast poly detail mesh"
+        );
+    }
+    if (!rcBuildPolyMeshDetail(
+        &ctx,
+        *mesh->rc,
+        *compact_height_field->rc,
+        sample_distance,
+        sample_max_distance_error,
+        *self->rc
+    ))
+	{
+		return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed build recast poly detail mesh"
+        );
+	}
+
+    return (PyObject *)self;
+}
+
+
+static void
+DetailMesh___dealloc__(DetailMesh *self)
+{
+    if (self->rc)
+    {
+        rcFreePolyMeshDetail(self->rc);
+        self->rc = 0;
+    }
+
+    PyTypeObject *type = Py_TYPE(self);
+    type->tp_free(self);
+    Py_DECREF(type);
+}
+
+
+static PyMemberDef DetailMesh_PyMemberDef[] = {
+    {0, 0, 0, 0}
+};
+
+
+static PyMethodDef DetailMesh_PyMethodDef[] = {
+    {0, 0, 0, 0}
+};
+
+
+static PyObject *
+DetailMesh_Getter_meshes(DetailMesh *self, void *)
+{
+    auto state = get_module_state();
+    PyObject *py_result = PyList_New(0);
+    if (!py_result){ return 0; }
+    for (int i = 0; i < self->rc->nmeshes; ++i)
+    {
+        auto base_vertex_index = self->rc->meshes[i * 4];
+        auto vertices = &self->rc->verts[base_vertex_index * 3];
+
+        auto base_tri_index = self->rc->meshes[i * 4 + 2];
+        auto tris = &self->rc->tris[base_tri_index * 4];
+
+        auto tri_count = self->rc->meshes[i * 4 + 3];
+
+        PyObject *py_vertices = PyList_New(0);
+        if (!py_vertices){ goto error; }
+        if (PyList_Append(py_result, py_vertices) != 0)
+        {
+            Py_DECREF(py_vertices);
+            goto error;
+        }
+
+        for (unsigned char j = 0; j < tri_count; ++j)
+        {
+            auto tri = &tris[j * 4];
+            for (int v = 0; v < 3; ++v)
+            {
+                float *vertex = &vertices[tri[v] * 3];
+                PyObject *py_vertex = state->math_api->FVector3_Create(vertex);
+                if (!py_vertex){ goto error; }
+                if (PyList_Append(py_vertices, py_vertex) != 0)
+                {
+                    Py_DECREF(py_vertex);
+                    goto error;
+                }
+            }
+        }
+    }
+    return py_result;
+error:
+    Py_DECREF(py_result);
+    return 0;
+}
+
+
+static PyGetSetDef DetailMesh_PyGetSetDef[] = {
+    {
+        "meshes",
+        (getter)DetailMesh_Getter_meshes,
+        0,
+        0,
+        0
+    },
+    {0, 0, 0, 0, 0}
+};
+
+
+static PyType_Slot DetailMesh_PyType_Slots [] = {
+    {Py_tp_new, (void*)DetailMesh___new__},
+    {Py_tp_dealloc, (void*)DetailMesh___dealloc__},
+    {Py_tp_members, (void*)DetailMesh_PyMemberDef},
+    {Py_tp_methods, (void*)DetailMesh_PyMethodDef},
+    {Py_tp_getset, (void*)DetailMesh_PyGetSetDef},
+    {0, 0},
+};
+
+
+static PyType_Spec DetailMesh_PyTypeSpec = {
+    "gamut.navigation._navigation.DetailMesh",
+    sizeof(DetailMesh),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    DetailMesh_PyType_Slots
+};
+
+
+static PyTypeObject *
+define_detail_mesh_type(PyObject *module)
+{
+    ASSERT(module);
+    PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
+        module,
+        &DetailMesh_PyTypeSpec,
+        0
+    );
+    if (!type){ return 0; }
+    // Note:
+    // Unlike other functions that steal references, PyModule_AddObject() only
+    // decrements the reference count of value on success.
+    if (PyModule_AddObject(module, "DetailMesh", (PyObject *)type) < 0)
+    {
+        Py_DECREF(type);
+        return 0;
+    }
+    return type;
+};
+
+
 // HeightField
 // ----------------------------------------------------------------------------
 
@@ -638,7 +887,7 @@ HeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     float xz_cell_size;
     float y_cell_size;
     int max_traversable_ledge_height;
-    int minimum_actor_height;
+    int min_actor_height;
     static char *kwlist[] = {
         "width",
         "height",
@@ -647,7 +896,7 @@ HeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         "xz_cell_size",
         "y_cell_size",
         "max_traversable_ledge_height",
-        "minimum_actor_height",
+        "min_actor_height",
         NULL
     };
     if (!PyArg_ParseTupleAndKeywords(
@@ -656,7 +905,7 @@ HeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
         &py_aabb_min, &py_aabb_max,
         &xz_cell_size, &y_cell_size,
         &max_traversable_ledge_height,
-        &minimum_actor_height
+        &min_actor_height
     )){ return 0; }
 
     auto state = get_module_state();
@@ -669,7 +918,7 @@ HeightField___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
     HeightField *self = (HeightField*)cls->tp_alloc(cls, 0);
     self->rc = rcAllocHeightfield();
     self->max_traversable_ledge_height = max_traversable_ledge_height;
-    self->minimum_actor_height = minimum_actor_height;
+    self->min_actor_height = min_actor_height;
     if (!self->rc)
     {
         return PyErr_Format(
@@ -795,13 +1044,13 @@ HeightField_filter(
     );
     rcFilterLedgeSpans(
         &ctx,
-        self->minimum_actor_height,
+        self->min_actor_height,
         self->max_traversable_ledge_height,
         *self->rc
     );
     rcFilterWalkableLowHeightSpans(
         &ctx,
-        self->minimum_actor_height,
+        self->min_actor_height,
         *self->rc
     );
 
@@ -994,12 +1243,65 @@ define_height_field_type(PyObject *module)
 static PyObject *
 Mesh___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {NULL};
+    auto state = get_module_state();
+    PyObject *py_contour_set;
+    int max_vertices_per_polygon;
+    static char *kwlist[] = {
+        "contour_set",
+        "max_vertices_per_polygon",
+        NULL
+    };
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwds, "", kwlist
+        args, kwds, "Oi|", kwlist,
+        &py_contour_set,
+        &max_vertices_per_polygon
     )){ return 0; }
 
+    if (Py_TYPE(py_contour_set) != state->ContourSet_PyTypeObject)
+    {
+        return PyErr_Format(PyExc_TypeError, "expected: ContourSet");
+    }
+    ContourSet *contour_set = (ContourSet *)py_contour_set;
+    if (max_vertices_per_polygon < 3)
+    {
+        return PyErr_Format(
+            PyExc_ValueError,
+            "expected: max_vertices_per_polygon >= 3"
+        );
+    }
+
+    rcContext ctx;
     Mesh *self = (Mesh*)cls->tp_alloc(cls, 0);
+    self->rc = rcAllocPolyMesh();
+    if (!self->rc)
+    {
+        return PyErr_Format(
+            PyExc_MemoryError,
+            "failed to allocate recast poly mesh"
+        );
+    }
+    if (!rcBuildPolyMesh(
+        &ctx,
+        *contour_set->rc,
+        max_vertices_per_polygon,
+        *self->rc
+    ))
+	{
+		return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed build recast poly mesh"
+        );
+	}
+    self->max_actor_radius = contour_set->max_actor_radius;
+    self->max_traversable_ledge_height =
+        contour_set->max_traversable_ledge_height;
+    self->min_actor_height = contour_set->min_actor_height;
+
+    // XXX
+    for (int i = 0; i < self->rc->npolys; ++i)
+    {
+        self->rc->flags[i] = 1;
+    }
 
     return (PyObject *)self;
 }
@@ -1008,6 +1310,12 @@ Mesh___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
 static void
 Mesh___dealloc__(Mesh *self)
 {
+    if (self->rc)
+    {
+        rcFreePolyMesh(self->rc);
+        self->rc = 0;
+    }
+
     PyTypeObject *type = Py_TYPE(self);
     type->tp_free(self);
     Py_DECREF(type);
@@ -1024,7 +1332,69 @@ static PyMethodDef Mesh_PyMethodDef[] = {
 };
 
 
+static PyObject *
+Mesh_Getter_polygons(Mesh *self, void *)
+{
+    auto state = get_module_state();
+    PyObject *py_result = PyList_New(0);
+    if (!py_result){ return 0; }
+    for (int i = 0; i < self->rc->npolys; ++i)
+    {
+        PyObject *py_polygon = PyTuple_New(3);
+        if (!py_polygon){ goto error; }
+        if (PyList_Append(py_result, py_polygon) != 0)
+        {
+            Py_DECREF(py_polygon);
+            goto error;
+        }
+
+        PyObject *py_walkable = PyBool_FromLong(
+            self->rc->areas[i] & RC_WALKABLE_AREA
+        );
+        if (!py_walkable){ goto error; }
+        PyTuple_SET_ITEM(py_polygon, 0, py_walkable);
+
+        PyObject *py_region = PyLong_FromUnsignedLong(self->rc->regs[i]);
+        if (!py_region){ goto error; }
+        PyTuple_SET_ITEM(py_polygon, 1, py_region);
+
+        const unsigned short *poly = &self->rc->polys[i * self->rc->nvp * 2];
+        PyObject *py_vertices = PyList_New(0);
+        if (!py_vertices){ goto error; }
+        PyTuple_SET_ITEM(py_polygon, 2, py_vertices);
+        for (int j = 0; j < self->rc->nvp; ++j)
+        {
+            if (poly[j] == RC_MESH_NULL_IDX){ break; }
+            auto vertex_indexes = &self->rc->verts[poly[j] * 3];
+            float vertex[] = {
+                self->rc->bmin[0] + vertex_indexes[0] * self->rc->cs,
+                self->rc->bmin[1] + vertex_indexes[1] * self->rc->ch,
+                self->rc->bmin[2] + vertex_indexes[2] * self->rc->cs
+            };
+            PyObject *py_vertex = state->math_api->FVector3_Create(vertex);
+            if (!py_vertex){ goto error; }
+            if (PyList_Append(py_vertices, py_vertex) != 0)
+            {
+                Py_DECREF(py_vertex);
+                goto error;
+            }
+        }
+    }
+    return py_result;
+error:
+    Py_DECREF(py_result);
+    return 0;
+}
+
+
 static PyGetSetDef Mesh_PyGetSetDef[] = {
+    {
+        "polygons",
+        (getter)Mesh_Getter_polygons,
+        0,
+        0,
+        0
+    },
     {0, 0, 0, 0, 0}
 };
 
@@ -1069,6 +1439,359 @@ define_mesh_type(PyObject *module)
     return type;
 };
 
+
+// NavigationMesh
+// ----------------------------------------------------------------------------
+
+
+static PyObject *
+NavigationMesh___new__(PyTypeObject *cls, PyObject *args, PyObject *kwds)
+{
+    auto state = get_module_state();
+    PyObject *py_mesh;
+    PyObject *py_detail_mesh = 0;
+    static char *kwlist[] = {
+        "mesh",
+        "detail_mesh",
+        NULL
+    };
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwds, "O|$O", kwlist,
+        &py_mesh,
+        &py_detail_mesh
+    )){ return 0; }
+
+    if (Py_TYPE(py_mesh) != state->Mesh_PyTypeObject)
+    {
+        return PyErr_Format(PyExc_TypeError, "expected Mesh");
+    }
+    Mesh *mesh = (Mesh *)py_mesh;
+
+    if (mesh->rc->nverts >= 0xffff)
+    {
+        // The vertex indices are ushorts, and cannot point to more than 0xffff vertices.
+		return PyErr_Format(
+            PyExc_ValueError,
+            "Mesh has too many vertices"
+        );
+    }
+
+    DetailMesh *detail_mesh = 0;
+    if (py_detail_mesh)
+    {
+        if (Py_TYPE(py_detail_mesh) != state->DetailMesh_PyTypeObject)
+        {
+            return PyErr_Format(PyExc_TypeError, "expected DetailMesh");
+        }
+        detail_mesh = (DetailMesh *)py_detail_mesh;
+    }
+
+    NavigationMesh *self = (NavigationMesh*)cls->tp_alloc(cls, 0);
+    self->dt = dtAllocNavMesh();
+    if (!self->dt)
+    {
+        return PyErr_Format(
+            PyExc_MemoryError,
+            "failed to allocate detour nav mesh"
+        );
+    }
+
+    dtNavMeshCreateParams params;
+    memset(&params, 0, sizeof(params));
+    params.verts = mesh->rc->verts;
+    params.vertCount = mesh->rc->nverts;
+    params.polys = mesh->rc->polys;
+    params.polyAreas = mesh->rc->areas;
+    params.polyFlags = mesh->rc->flags;
+    params.polyCount = mesh->rc->npolys;
+    params.nvp = mesh->rc->nvp;
+    rcVcopy(params.bmin, mesh->rc->bmin);
+    rcVcopy(params.bmax, mesh->rc->bmax);
+    params.cs = mesh->rc->cs;
+    params.ch = mesh->rc->ch;
+    // ?
+    params.walkableHeight = mesh->min_actor_height * mesh->rc->ch;
+    params.walkableRadius = mesh->max_actor_radius * mesh->rc->cs;
+    params.walkableClimb = mesh->max_traversable_ledge_height * mesh->rc->ch;
+    if (detail_mesh)
+    {
+        params.detailMeshes = detail_mesh->rc->meshes;
+        params.detailVerts = detail_mesh->rc->verts;
+        params.detailVertsCount = detail_mesh->rc->nverts;
+        params.detailTris = detail_mesh->rc->tris;
+        params.detailTriCount = detail_mesh->rc->ntris;
+    }
+    params.buildBvTree = true;
+
+    unsigned char* data = 0;
+    int data_size = 0;
+    if (!dtCreateNavMeshData(&params, &data, &data_size))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to build detour nav mesh data"
+        );
+    }
+
+    auto dt_status = self->dt->init(data, data_size, DT_TILE_FREE_DATA);
+    if (dtStatusFailed(dt_status))
+    {
+        dtFree(data);
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to initialize detour nav mesh"
+        );
+    }
+
+    return (PyObject *)self;
+}
+
+
+static void
+NavigationMesh___dealloc__(NavigationMesh *self)
+{
+    if (self->dt)
+    {
+        dtFreeNavMesh(self->dt);
+        self->dt = 0;
+    }
+
+    PyTypeObject *type = Py_TYPE(self);
+    type->tp_free(self);
+    Py_DECREF(type);
+}
+
+
+static PyMemberDef NavigationMesh_PyMemberDef[] = {
+    {0, 0, 0, 0}
+};
+
+
+static PyObject *
+NavigationMesh_find_nearest_polygon(
+    NavigationMesh *self,
+    PyObject *const *args,
+    Py_ssize_t nargs
+)
+{
+    auto state = get_module_state();
+    if (nargs != 2)
+    {
+        return PyErr_Format(
+            PyExc_TypeError,
+            "expected 2 args: point, extents"
+        );
+    }
+
+    float *point = state->math_api->FVector3_GetValuePointer(args[0]);
+    if (!point){ return 0; }
+
+    float *extents = state->math_api->FVector3_GetValuePointer(args[1]);
+    if (!extents){ return 0; }
+
+    dtNavMeshQuery query;
+    query.init(self->dt, 2048);
+    dtQueryFilter filter;
+    dtPolyRef nearest_poly;
+    float nearest_point[3];
+    auto dt_status = query.findNearestPoly(
+        point,
+        extents,
+        &filter,
+        &nearest_poly,
+        nearest_point
+    );
+    if (dtStatusFailed(dt_status))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to find nearest poly"
+        );
+    }
+
+    if (nearest_poly == 0)
+    {
+        return PyTuple_Pack(2, Py_None, Py_None);
+    }
+
+    auto py_result = PyTuple_New(2);
+
+    auto py_nearest_poly = PyLong_FromUnsignedLong(nearest_poly);
+    if (!py_nearest_poly)
+    {
+        Py_DECREF(py_result);
+        return 0;
+    }
+    PyTuple_SET_ITEM(py_result, 0, py_nearest_poly);
+
+    auto py_nearest_point = state->math_api->FVector3_Create(nearest_point);
+    if (!py_nearest_point)
+    {
+        Py_DECREF(py_result);
+        return 0;
+    }
+    PyTuple_SET_ITEM(py_result, 1, py_nearest_point);
+
+    return py_result;
+}
+
+
+
+static PyObject *
+NavigationMesh_find_path(
+    NavigationMesh *self,
+    PyObject *const *args,
+    Py_ssize_t nargs
+)
+{
+    auto state = get_module_state();
+    if (nargs != 4)
+    {
+        return PyErr_Format(
+            PyExc_TypeError,
+            "expected 4 args: start_poly, start_position, end_poly, "
+            "end_position"
+        );
+    }
+
+    dtPolyRef start_poly = PyLong_AsUnsignedLong(args[0]);
+    if (PyErr_Occurred()){ return 0; }
+
+    float *start_position = state->math_api->FVector3_GetValuePointer(args[1]);
+    if (!start_position){ return 0; }
+
+    dtPolyRef end_poly = PyLong_AsUnsignedLong(args[2]);
+    if (PyErr_Occurred()){ return 0; }
+
+    float *end_position = state->math_api->FVector3_GetValuePointer(args[3]);
+    if (!end_position){ return 0; }
+
+    dtNavMeshQuery query;
+    query.init(self->dt, 2048);
+    dtQueryFilter filter;
+    static const int PATH_SIZE = 1000;
+    dtPolyRef path[PATH_SIZE];
+    int path_count;
+    auto dt_status = query.findPath(
+        start_poly,
+        end_poly,
+        start_position,
+        end_position,
+        &filter,
+        path,
+        &path_count,
+        PATH_SIZE
+    );
+    if (dtStatusFailed(dt_status))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to find path"
+        );
+    }
+
+    static const int STRAIGHT_PATH_SIZE = 1000;
+    float straight_path[STRAIGHT_PATH_SIZE * 3];
+    int straight_path_count;
+    dt_status = query.findStraightPath(
+        start_position,
+        end_position,
+        path,
+        path_count,
+        straight_path,
+        0,
+        0,
+        &straight_path_count,
+        STRAIGHT_PATH_SIZE,
+        DT_STRAIGHTPATH_ALL_CROSSINGS
+    );
+    if (dtStatusFailed(dt_status))
+    {
+        return PyErr_Format(
+            PyExc_RuntimeError,
+            "failed to find straight path"
+        );
+    }
+
+    auto py_result = PyTuple_New(straight_path_count);
+    for (int i = 0; i < straight_path_count; ++i)
+    {
+        auto vertex = &straight_path[i * 3];
+        auto py_vertex = state->math_api->FVector3_Create(vertex);
+        if (!py_vertex)
+        {
+            Py_DECREF(py_result);
+            return 0;
+        }
+        PyTuple_SetItem(py_result, i, py_vertex);
+    }
+    return py_result;
+}
+
+
+static PyMethodDef NavigationMesh_PyMethodDef[] = {
+    {
+        "find_nearest_polygon",
+        (PyCFunction)NavigationMesh_find_nearest_polygon,
+        METH_FASTCALL,
+        0
+    },
+    {
+        "find_path",
+        (PyCFunction)NavigationMesh_find_path,
+        METH_FASTCALL,
+        0
+    },
+    {0, 0, 0, 0}
+};
+
+
+static PyGetSetDef NavigationMesh_PyGetSetDef[] = {
+    {0, 0, 0, 0, 0}
+};
+
+
+static PyType_Slot NavigationMesh_PyType_Slots [] = {
+    {Py_tp_new, (void*)NavigationMesh___new__},
+    {Py_tp_dealloc, (void*)NavigationMesh___dealloc__},
+    {Py_tp_members, (void*)NavigationMesh_PyMemberDef},
+    {Py_tp_methods, (void*)NavigationMesh_PyMethodDef},
+    {Py_tp_getset, (void*)NavigationMesh_PyGetSetDef},
+    {0, 0},
+};
+
+
+static PyType_Spec NavigationMesh_PyTypeSpec = {
+    "gamut.navigation._navigation.NavigationMesh",
+    sizeof(NavigationMesh),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    NavigationMesh_PyType_Slots
+};
+
+
+static PyTypeObject *
+define_navigation_mesh_type(PyObject *module)
+{
+    ASSERT(module);
+    PyTypeObject *type = (PyTypeObject *)PyType_FromModuleAndSpec(
+        module,
+        &NavigationMesh_PyTypeSpec,
+        0
+    );
+    if (!type){ return 0; }
+    // Note:
+    // Unlike other functions that steal references, PyModule_AddObject() only
+    // decrements the reference count of value on success.
+    if (PyModule_AddObject(module, "NavigationMesh", (PyObject *)type) < 0)
+    {
+        Py_DECREF(type);
+        return 0;
+    }
+    return type;
+};
+
+
 // module
 // ----------------------------------------------------------------------------
 
@@ -1086,7 +1809,10 @@ module_traverse(
 {
     ModuleState *state = (ModuleState *)PyModule_GetState(self);
     Py_VISIT(state->CompactHeightField_PyTypeObject);
+    Py_VISIT(state->ContourSet_PyTypeObject);
     Py_VISIT(state->HeightField_PyTypeObject);
+    Py_VISIT(state->Mesh_PyTypeObject);
+    Py_VISIT(state->NavigationMesh_PyTypeObject);
     return 0;
 }
 
@@ -1096,7 +1822,10 @@ module_clear(PyObject *self)
 {
     ModuleState *state = (ModuleState *)PyModule_GetState(self);
     Py_CLEAR(state->CompactHeightField_PyTypeObject);
+    Py_CLEAR(state->ContourSet_PyTypeObject);
     Py_CLEAR(state->HeightField_PyTypeObject);
+    Py_CLEAR(state->Mesh_PyTypeObject);
+    Py_CLEAR(state->NavigationMesh_PyTypeObject);
     return 0;
 }
 
@@ -1140,6 +1869,19 @@ PyInit__navigation()
     }
 
     if (!define_contour_set_type(module)){ goto error; }
+    PyTypeObject *py_countour_set_type = define_contour_set_type(module);
+    {
+        if (!py_countour_set_type){ goto error; }
+        Py_INCREF(py_countour_set_type);
+        state->ContourSet_PyTypeObject = py_countour_set_type;
+    }
+
+    PyTypeObject *py_detail_mesh_type = define_detail_mesh_type(module);
+    {
+        if (!py_detail_mesh_type){ goto error; }
+        Py_INCREF(py_detail_mesh_type);
+        state->DetailMesh_PyTypeObject = py_detail_mesh_type;
+    }
 
     PyTypeObject *py_height_field_type = define_height_field_type(module);
     {
@@ -1148,7 +1890,19 @@ PyInit__navigation()
         state->HeightField_PyTypeObject = py_height_field_type;
     }
 
-    if (!define_mesh_type(module)){ goto error; }
+    PyTypeObject *py_mesh_type = define_mesh_type(module);
+    {
+        if (!py_mesh_type){ goto error; }
+        Py_INCREF(py_mesh_type);
+        state->Mesh_PyTypeObject = py_mesh_type;
+    }
+
+    PyTypeObject *py_navigation_mesh_type = define_navigation_mesh_type(module);
+    {
+        if (!py_navigation_mesh_type){ goto error; }
+        Py_INCREF(py_navigation_mesh_type);
+        state->NavigationMesh_PyTypeObject = py_navigation_mesh_type;
+    }
 
     state->math_api = GamutMathApi_Get();
     if (!state->math_api){ goto error; }

@@ -41,14 +41,6 @@ class Triangle3d(Generic[T]):
             return False
         return self._positions == other._positions
 
-    def get_point_normal(self, point: T) -> T:
-        edge_indexes = []
-        for i, edge in enumerate(self.edges):
-            if point in edge.points:
-                edge_indexes.append(i)
-        edge_normals = self.edge_normals
-        return (sum(edge_normals[i] for i in edge_indexes) * .5).normalize()
-
     @property
     def center(self) -> T:
         return sum(self._positions) / 3
@@ -76,14 +68,6 @@ class Triangle3d(Generic[T]):
         )
 
     @property
-    def point_normals(self) -> tuple[T, T, T]:
-        return (
-            self._get_point_normal(self._positions[0], self._positions[1], self._positions[2]),
-            self._get_point_normal(self._positions[1], self._positions[0], self._positions[2]),
-            self._get_point_normal(self._positions[2], self._positions[1], self._positions[0]),
-        )
-
-    @property
     def edge_normals(self) -> tuple[T, T, T]:
         p = self._positions
         normal = self.normal
@@ -92,3 +76,9 @@ class Triangle3d(Generic[T]):
             (p[2] - p[1]).cross(normal).normalize(),
             (p[0] - p[2]).cross(normal).normalize(),
         )
+
+    def get_edge_normal(self, edge: LineSegments3d[T]) -> T:
+        for i, match_edge in enumerate(self.edges):
+            if edge == match_edge:
+                return self.edge_normals[i]
+        raise ValueError('edge is not part of triangle')

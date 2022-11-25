@@ -60,13 +60,15 @@ import OpenGL.GL
 from OpenGL.GL import (GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, GL_ACTIVE_ATTRIBUTES,
                        GL_ACTIVE_UNIFORM_MAX_LENGTH, GL_ACTIVE_UNIFORMS,
                        GL_ANY_SAMPLES_PASSED, GL_BLEND, GL_CULL_FACE,
-                       GL_DEPTH_TEST, GL_FALSE, GL_QUERY_RESULT, glBeginQuery,
-                       glBlendColor, glBlendEquation, glBlendFuncSeparate,
-                       GLchar, glCullFace, glDepthFunc, glDisable,
-                       glDrawArrays, glDrawArraysInstanced, glDrawElements,
+                       GL_DEPTH_TEST, GL_FALSE, GL_FRONT_AND_BACK, GL_LINE,
+                       GL_QUERY_RESULT, glBeginQuery, glBlendColor,
+                       glBlendEquation, glBlendFuncSeparate, GLchar,
+                       glCullFace, glDepthFunc, glDisable, glDrawArrays,
+                       glDrawArraysInstanced, glDrawElements,
                        glDrawElementsInstanced, glEnable, glEndQuery, GLenum,
                        glGenQueries, glGetActiveUniform, glGetQueryObjectuiv,
-                       glGetUniformLocation, GLint, glPointSize, GLsizei)
+                       glGetUniformLocation, GLint, glPointSize, glPolygonMode,
+                       GLsizei)
 from OpenGL.GL.shaders import (GL_COMPILE_STATUS, GL_FRAGMENT_SHADER,
                                GL_GEOMETRY_SHADER, GL_LINK_STATUS,
                                GL_VERTEX_SHADER, glAttachShader,
@@ -635,6 +637,7 @@ def execute_shader(
     gl_context = get_gl_context()
     # XXX
     glPointSize(8)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     if index_buffer_view is None and index_range is None:
         raise TypeError('index_buffer_view or index_range must be supplied')
     if index_buffer_view is not None and index_range is not None:

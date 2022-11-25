@@ -12,6 +12,7 @@ __all__ = [
     'Mesh2d',
     'Mesh3d',
     'Mesh3dRaycastHit',
+    'MeshModifier',
     'Plane',
     'Polygon',
     'Quad3d',
@@ -34,6 +35,7 @@ from ._linesegment2d import LineSegment2d
 from ._linesegment3d import LineSegment3d
 from ._mesh2d import Mesh2d
 from ._mesh3d import Mesh3d, Mesh3dRaycastHit
+from ._meshmodifier import MeshModifier
 from ._plane import Plane
 from ._polygon import Polygon
 from ._protocol import Shape3dCullable, Shape3dPointContainer

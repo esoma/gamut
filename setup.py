@@ -132,11 +132,13 @@ navigation = Extension(
     'gamut.navigation._navigation',
     libraries=[] if os.name == 'nt' else ['stdc++'],
     include_dirs=[
+        'vendor/recastnavigation/Detour/Include',
         'vendor/recastnavigation/Recast/Include',
         'include',
     ],
     sources=
-        glob('vendor/recastnavigation/Recast/Source/*.cpp') + [
+        glob('vendor/recastnavigation/Recast/Source/*.cpp') +
+        glob('vendor/recastnavigation/Detour/Source/*.cpp') + [
         'src/gamut/navigation/_navigation.cpp'
     ],
     language='c++11',
