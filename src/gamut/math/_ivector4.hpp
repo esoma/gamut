@@ -1157,6 +1157,17 @@ IVector4_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+IVector4_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->IVector4Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef IVector4_PyMethodDef[] = {
 
     {"min", (PyCFunction)IVector4_min, METH_O, 0},
@@ -1164,6 +1175,7 @@ static PyMethodDef IVector4_PyMethodDef[] = {
     {"clamp", (PyCFunction)IVector4_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)IVector4_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)IVector4_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction)IVector4_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)IVector4_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };

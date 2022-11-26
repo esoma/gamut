@@ -123,6 +123,42 @@ class BoundingBox3d(Generic[T, VT, MT]):
             (sphere.radius ** 2)
         )
 
+    def intersects_bounding_box_3d_exclusive(
+        self,
+        other: BoundingBox3d[T, VT, MT]
+    ) -> bool:
+        if self._min.x >= other._max.x:
+            return False
+        if self._max.x <= other._min.x:
+            return False
+        if self._min.y >= other._max.y:
+            return False
+        if self._max.y <= other._min.y:
+            return False
+        if self._min.z >= other._max.z:
+            return False
+        if self._max.z <= other._min.z:
+            return False
+        return True
+
+    def intersects_bounding_box_3d_inclusive(
+        self,
+        other: BoundingBox3d[T, VT, MT]
+    ) -> bool:
+        if self._min.x > other._max.x:
+            return False
+        if self._max.x < other._min.x:
+            return False
+        if self._min.y > other._max.y:
+            return False
+        if self._max.y < other._min.y:
+            return False
+        if self._min.z > other._max.z:
+            return False
+        if self._max.z < other._min.z:
+            return False
+        return True
+
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:
             if all(plane.distance_to_point(c) < 0 for c in self.corners):

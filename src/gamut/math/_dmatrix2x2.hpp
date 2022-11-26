@@ -888,6 +888,17 @@ DMatrix2x2_from_buffer(PyTypeObject *cls, PyObject *buffer)
 
 
 
+static PyObject *
+DMatrix2x2_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->DMatrix2x2Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef DMatrix2x2_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)DMatrix2x2_inverse, METH_NOARGS, 0},
@@ -902,6 +913,7 @@ static PyMethodDef DMatrix2x2_PyMethodDef[] = {
     {"transpose", (PyCFunction)DMatrix2x2_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix2x2_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)DMatrix2x2_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction)DMatrix2x2_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)DMatrix2x2_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
