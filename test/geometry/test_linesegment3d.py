@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import LineSegment3d
-from gamut.math import DVector3, DVector4, FVector3
+from gamut.math import BVector3, DVector3, DVector4, FVector3
 # python
 from typing import Any
 # pytest
@@ -47,6 +47,17 @@ def test_invalid_b(a: Any, b: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_degenerate(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0), vtype(0))
+    assert line.is_degenerate
+    assert line.degenerate_form == vtype(0)
+
+    line = LineSegment3d(vtype(0), vtype(1))
+    assert not line.is_degenerate
+    assert line.degenerate_form is None
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_attributes(vtype: Any) -> None:
     line = LineSegment3d(vtype(0, 1, 2), vtype(3, 4, 5))
     assert line.a == vtype(0, 1, 2)
@@ -72,6 +83,25 @@ def test_equal(vtype: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
+@pytest.mark.parametrize("axis", [
+    BVector3(True, False, False),
+    BVector3(False, True, False),
+    BVector3(False, False, True),
+    BVector3(True, True, False),
+    BVector3(False, True, True),
+    BVector3(True, False, True),
+])
+def test_are_points_on_same_side(vtype: Any, axis: BVector3) -> None:
+    av = vtype(*(1 if a else 0 for a in axis))
+    line = LineSegment3d(vtype(0), vtype(*(0 if a else 1 for a in axis)))
+    assert line.are_points_on_same_side(vtype(1) * av, vtype(2) * av)
+    assert line.are_points_on_same_side(vtype(0) * av, vtype(2) * av)
+    assert line.are_points_on_same_side(vtype(0) * av, vtype(-2) * av)
+    assert not line.are_points_on_same_side(vtype(2) * av, vtype(-2) * av)
+    assert line.are_points_on_same_side(vtype(0) * av, vtype(0) * av)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_point_along_line(vtype: Any) -> None:
     line = LineSegment3d(vtype(-5), vtype(5))
     assert line.get_point_from_a_to_b(0) == vtype(-5)
@@ -89,3 +119,29 @@ def test_point_along_line(vtype: Any) -> None:
     assert line.get_point_from_b_to_a(1) == vtype(-5)
     assert line.get_point_from_b_to_a(2) == vtype(-15)
     assert line.get_point_from_b_to_a(-1) == vtype(15)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_distance_to_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0), vtype(5, 0, 0))
+    assert line.distance_to_point(vtype(0)) == 0
+    assert line.distance_to_point(vtype(5, 0, 0)) == 0
+    assert line.distance_to_point(vtype(6, 0, 0)) == 1
+    assert line.distance_to_point(vtype(-1, 0, 0)) == 1
+    assert line.distance_to_point(vtype(0, 1, 0)) == 1
+    assert line.distance_to_point(vtype(0, -1, 0)) == 1
+    assert line.distance_to_point(vtype(0, 0, 2)) == 2
+    assert line.distance_to_point(vtype(0, 0, -2)) == 2
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_intersects_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(-5), vtype(5))
+    assert not line.intersects_point(vtype(-6))
+    assert line.intersects_point(vtype(-5))
+    assert line.intersects_point(vtype(0))
+    assert line.intersects_point(vtype(5))
+    assert not line.intersects_point(vtype(6))
+
+    assert line.intersects_point(vtype(6), tolerance=1.733)
+    assert line.intersects_point(vtype(-1), tolerance=1.733)

@@ -1,5 +1,6 @@
 
 __all__ = [
+    'BoundingBox2d',
     'BoundingBox3d',
     'Capsule',
     'Composite3d',
@@ -20,11 +21,13 @@ __all__ = [
     'Shape3dCullable',
     'Shape3dPointContainer',
     'Sphere',
+    'Triangle2d',
     'Triangle3d',
     'ViewFrustum3d'
 ]
 
 # gamut
+from ._boundingbox2d import BoundingBox2d
 from ._boundingbox3d import BoundingBox3d
 from ._capsule import Capsule
 from ._composite3d import Composite3d
@@ -42,6 +45,7 @@ from ._protocol import Shape3dCullable, Shape3dPointContainer
 from ._quad3d import Quad3d
 from ._rectangularcuboid import RectangularCuboid
 from ._sphere import Sphere
+from ._triangle2d import Triangle2d
 from ._triangle3d import Triangle3d
 from ._viewfrustum3d import ViewFrustum3d
 

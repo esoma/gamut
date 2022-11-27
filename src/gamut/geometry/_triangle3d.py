@@ -7,16 +7,20 @@ __all__ = ['Triangle3d']
 from ._boundingbox3d import BoundingBox3d
 from ._linesegment3d import LineSegment3d
 from ._plane import Plane
+from ._triangle2d import Triangle2d
 # gamut
-from gamut.math import DVector3, FVector3
+from gamut.math import DMatrix4, DVector3, FMatrix4, FVector3
 # python
-from math import copysign, inf
-from typing import Generic, TypeVar
+from math import copysign, inf, isnan
+from typing import Generic, overload, TypeVar
 
 T = TypeVar('T', FVector3, DVector3)
 
 
 class Triangle3d(Generic[T]):
+
+    class DegenerateError(RuntimeError):
+        pass
 
     def __init__(self, point_0: T, point_1: T, point_2: T, /):
         if not isinstance(point_0, (FVector3, DVector3)):
@@ -50,6 +54,7 @@ class Triangle3d(Generic[T]):
             *self._positions
         ))
 
+    @property
     def center(self) -> T:
         return sum(self._positions) / 3
 
@@ -75,12 +80,32 @@ class Triangle3d(Generic[T]):
             (p[0] - p[2]).cross(normal).normalize(),
         )
 
-    def get_edge_normal(self, edge: LineSegments3d[T]) -> T:
-        for i, match_edge in enumerate(self.edges):
-            if edge == match_edge:
-                return self.edge_normals[i]
-        raise ValueError('edge is not part of triangle')
+    @property
+    def degenerate_form(self) -> T | LineSegment3d[T] | None:
+        if not self.is_degenerate:
+            return None
+        unique_points = set(self._positions)
+        if len(unique_points) == 1:
+            return next(iter(unique_points))
+        elif len(unique_points) == 2:
+            return LineSegment3d(*unique_points)
+        segment_distance = [
+            (a, b, a.distance(b))
+            for a, b in (
+                (self._positions[0], self._positions[1]),
+                (self._positions[1], self._positions[2]),
+                (self._positions[2], self._positions[0])
+            )
+        ]
+        segment_distance.sort(key=lambda s: s[2])
+        seg = segment_distance[-1]
+        return LineSegment3d(seg[0], seg[1])
 
+    @property
+    def is_degenerate(self) -> bool:
+        return isnan(self.normal.x)
+
+    @property
     def normal(self) -> T:
         d_edge_0 = self._positions[1] - self._positions[0]
         d_edge_1 = self._positions[0] - self._positions[2]
@@ -95,18 +120,106 @@ class Triangle3d(Generic[T]):
     def positions(self) -> tuple[T, T, T]:
         return self._positions
 
-    def project_ortho(self) -> None:
-        p1mp0 = self._positions[1] - self._positions[0]
-        p2mp0 = self._positions[2] - self._positions[0]
-        ox = (p1mp0).normalize()
-        oz = ox.cross(p2mp0).normalize()
-        oy = oz.cross(ox)
+    @overload
+    def project_orthographic(
+        self: Triangle3d[FVector3]
+    ) -> Triangle2d[FVector2]:
+        ...
 
-        p0 = self._positions[0].x
-        ptype = type(p0)
-        p1 = ptype(p1mp0.magnitude, 0)
-        p2 = ptype(p2mp0 @ ox, p2mp0 @ oy)
-        return p0, p1, p2
+    @overload
+    def project_orthographic(
+        self: Triangle3d[DVector3]
+    ) -> Triangle2d[DVector2]:
+        ...
+
+    def get_edge_normal(self, edge: LineSegments3d[T]) -> T:
+        for i, match_edge in enumerate(self.edges):
+            if edge == match_edge:
+                return self.edge_normals[i]
+        raise ValueError('edge is not part of triangle')
+
+    def project_orthographic(self) -> Triangle2d:
+        if self.is_degenerate:
+            raise DegenerateError(
+                'unable to orthographically project a degenerate triangle'
+            )
+        Vector3 = type(self._positions[0])
+        Matrix4 = FMatrix4 if Vector3 is FVector3 else DMatrix4
+        view = Matrix4.look_at(
+            Vector3(0),
+            self.normal,
+            Vector3(0, 1, 0)
+        )
+        projection = Matrix4.orthographic(-1, 1, -1, 1, -1, 1)
+        vp = projection @ view.inverse()
+        return Triangle2d(*(
+            (vp @ p.xyzl).xy
+            for p in self._positions
+        ))
+
+    def intersects_point(
+        self,
+        point: T,
+        *,
+        tolerance: float = 0.0
+    ) -> bool:
+        # handle degenerate triangles
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            if isinstance(degen_form, LineSegment3d):
+                return degen_form.intersects_point(
+                    point,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(self._positions[0]))
+            if tolerance == 0:
+                return degen_form == point
+            return degen_form.distance(point) <= tolerance
+        # make sure the point lies in the triangle's plane
+        if abs(self.plane.distance_to_point(point)) > tolerance:
+            return False
+        # solve for the points barycentric coordinates
+        u_tolerance = v_tolerance = 0.0
+        if tolerance != 0.0:
+            u_tolerance = (
+                tolerance / self._positions[0].distance(self._positions[2])
+            )
+            v_tolerance = (
+                tolerance / self._positions[0].distance(self._positions[1])
+            )
+        v0 = self._positions[2] - self._positions[0]
+        v1 = self._positions[1] - self._positions[0]
+        v2 = point - self._positions[0]
+        dot00 = v0 @ v0
+        dot01 = v0 @ v1
+        dot02 = v0 @ v2
+        dot11 = v1 @ v1
+        dot12 = v1 @ v2
+        inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
+        u = (dot11 * dot02 - dot01 * dot12) * inv_denom
+        if u < -u_tolerance:
+            return False
+        v = (dot00 * dot12 - dot01 * dot02) * inv_denom
+        return v >= -v_tolerance and u + v <= 1 + u_tolerance + v_tolerance
+
+    def intersects_line_segment(
+        self,
+        line_segment: LineSegment3d[T],
+        *,
+        tolerance: float = 0.0
+    ) -> bool:
+        # handle degenerate triangles
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            if isinstance(degen_form, LineSegment3d):
+                return degen_form.intersects_line_segment(
+                    point,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(self._positions[0]))
+            return line_segment.intersects_point(point, tolerance=tolerance)
+        #
+        assert False
 
     def intersects_triangle_3d(
         self,
@@ -114,6 +227,16 @@ class Triangle3d(Generic[T]):
         *,
         tolerance: float = 0.0
     ) -> bool:
+        # handle degenerate triangles
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            if isinstance(degen_form, LineSegment3d):
+                return other.intersects_line_segment(
+                    degen_form,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(self._positions[0]))
+            return other.intersects_point(degen_form, tolerance=tolerance)
         # broad aabb check
         if not self.bounding_box.intersects_bounding_box_3d_inclusive(
             other.bounding_box
@@ -138,6 +261,12 @@ class Triangle3d(Generic[T]):
             return False
         if last_side is None:
             print("2D")
+            self_2d = self.project_orthographic()
+            other_2d = other.project_orthographic()
+            return self_2d.intersects_triangle_2d(
+                other_2d,
+                tolerance=tolerance
+            )
         print("PLANE PASSED")
         # SAT theorem
         for a_edge in self.edges:
@@ -162,7 +291,6 @@ class Triangle3d(Generic[T]):
                     min_b = min(min_b, d)
                     max_b = max(max_b, d)
 
-                print(min_a, max_a, min_b, max_b)
                 half_a_diff = (max_a - min_a) * .5
                 min_b -= half_a_diff
                 max_b += half_a_diff
@@ -171,6 +299,6 @@ class Triangle3d(Generic[T]):
                 dmin = min_b - idk
                 dmax = max_b - idk
 
-                if dmin > tolerance or dmax < -tolerance:
+                if dmin >= tolerance or dmax <= -tolerance:
                     return False
         return True
