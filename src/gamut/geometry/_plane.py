@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['Plane']
 
 # gamut
+from ._linesegment3d import LineSegment3d
+# gamut
 from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
                         FVector4)
@@ -111,3 +113,31 @@ class Plane(Generic[VT, MT]):
         if not isinstance(point, type(self._normal)):
             raise TypeError(f'point must be {type(self._normal).__name__}')
         return self._normal @ point + self._distance
+
+    def where_intersects_line_segment(
+        self,
+        line: LineSegment3d[VT],
+        *,
+        tolerance = 0.0
+    ) -> VT:
+        print("___")
+        # handle degenerate line segments
+        if line.is_degenerate:
+            degen_form = line.degenerate_from
+            assert isinstance(degen_form, type(line.a))
+            if self.distance_to_point(degen_form) <= tolerance:
+                return degen_form
+            else:
+                return None
+        # math :^)
+        ab = line.a - line.b
+        den = self.normal @ ab
+        if den == 0:
+            return None
+        d = (self.normal @ line.a - self._distance) / den
+        if tolerance == 0 and (d < 0 or d > 1):
+            return None
+        p = line.a + ab * -d
+        if tolerance != 0 and self.distance_to_point(p) > tolerance:
+            return None
+        return p
