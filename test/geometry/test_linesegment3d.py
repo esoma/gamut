@@ -145,3 +145,80 @@ def test_intersects_point(vtype: Any) -> None:
 
     assert line.intersects_point(vtype(6), tolerance=1.733)
     assert line.intersects_point(vtype(-1), tolerance=1.733)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_is_parallel_with_line_segment(vtype: Any) -> None:
+    line = LineSegment3d(vtype(-5), vtype(5))
+    assert line.is_parallel_with_line_segment(line)
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5), vtype(-5))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(8), vtype(16))
+    )
+    assert not line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(0), vtype(5, 0, 0))
+    )
+    assert not line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(0), vtype(0))
+    )
+
+    line = LineSegment3d(vtype(0), vtype(0))
+    assert not line.is_parallel_with_line_segment(line)
+
+    line = LineSegment3d(vtype(0), vtype(5, 0, 0))
+    assert line.is_parallel_with_line_segment(line)
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, 0, 0), vtype(0))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, 1, 0), vtype(0, 1, 0))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, 0, 1), vtype(0, 0, 1))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, -1, 1), vtype(0, -1, 1))
+    )
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_distance_to_line_segment(vtype: Any) -> None:
+    assert LineSegment3d(vtype(0), vtype(0)).distance_to_line_segment(
+        LineSegment3d(vtype(1, 0, 0), vtype(2, 0, 0))
+    ) == 1.0
+    assert LineSegment3d(
+        vtype(1, 0, 0), vtype(2, 0, 0)
+    ).distance_to_line_segment(
+        LineSegment3d(vtype(0), vtype(0))
+    ) == 1.0
+
+    line = LineSegment3d(vtype(-5), vtype(5))
+    assert line.distance_to_line_segment(line) == 0.0
+    assert line.distance_to_line_segment(
+        LineSegment3d(vtype(-4), vtype(4))
+    ) == 0.0
+    assert line.distance_to_line_segment(
+        LineSegment3d(vtype(6), vtype(8))
+    ) == vtype(5).distance(vtype(6))
+    assert line.distance_to_line_segment(
+        LineSegment3d(vtype(-7), vtype(-8))
+    ) == vtype(-5).distance(vtype(-7))
+
+    assert line.distance_to_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(0, 0, 0))
+    ) == 0.0
+    assert pytest.approx(
+        line.distance_to_line_segment(
+            LineSegment3d(vtype(-1, 0, 0), vtype(-2, 0, 0))
+        )
+    ) == 0.8164966106414795
+
+    line = LineSegment3d(vtype(0), vtype(1, 0, 0))
+    assert line.distance_to_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(-2, 0, 0))
+    ) == 1.0
+    assert line.distance_to_line_segment(
+        LineSegment3d(vtype(0, -1, 0), vtype(1, -1, 0))
+    ) == 1.0

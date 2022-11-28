@@ -114,7 +114,7 @@ class Triangle3d(Generic[T]):
     @property
     def plane(self) -> Plane:
         normal = self.normal
-        return Plane(normal @ self._positions[0], normal)
+        return Plane(-normal @ self._positions[0], normal)
 
     @property
     def positions(self) -> tuple[T, T, T]:
@@ -140,16 +140,18 @@ class Triangle3d(Generic[T]):
 
     def project_orthographic(self) -> Triangle2d:
         if self.is_degenerate:
-            raise DegenerateError(
+            raise self.DegenerateError(
                 'unable to orthographically project a degenerate triangle'
             )
         Vector3 = type(self._positions[0])
         Matrix4 = FMatrix4 if Vector3 is FVector3 else DMatrix4
-        view = Matrix4.look_at(
-            Vector3(0),
-            self.normal,
-            Vector3(0, 1, 0)
-        )
+        up = Vector3(0, 1, 0)
+        eye = -self.normal
+        if abs(up @ eye) == 1.0:
+            up = Vector3(0, 0, -1)
+            eye = -eye
+            assert abs(up @ eye) != 1.0
+        view = Matrix4.look_at(Vector3(0), eye, up)
         projection = Matrix4.orthographic(-1, 1, -1, 1, -1, 1)
         vp = projection @ view.inverse()
         return Triangle2d(*(
@@ -179,14 +181,6 @@ class Triangle3d(Generic[T]):
         if abs(self.plane.distance_to_point(point)) > tolerance:
             return False
         # solve for the points barycentric coordinates
-        u_tolerance = v_tolerance = 0.0
-        if tolerance != 0.0:
-            u_tolerance = (
-                tolerance / self._positions[0].distance(self._positions[2])
-            )
-            v_tolerance = (
-                tolerance / self._positions[0].distance(self._positions[1])
-            )
         v0 = self._positions[2] - self._positions[0]
         v1 = self._positions[1] - self._positions[0]
         v2 = point - self._positions[0]
@@ -197,10 +191,27 @@ class Triangle3d(Generic[T]):
         dot12 = v1 @ v2
         inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
         u = (dot11 * dot02 - dot01 * dot12) * inv_denom
-        if u < -u_tolerance:
-            return False
+        if u < 0:
+            return self._intersects_point_not_inside(point, tolerance)
         v = (dot00 * dot12 - dot01 * dot02) * inv_denom
-        return v >= -v_tolerance and u + v <= 1 + u_tolerance + v_tolerance
+        if v >= 0 and u + v <= 1:
+            return True
+        return self._intersects_point_not_inside(point, tolerance)
+
+
+    def _intersects_point_not_inside(self, point: T, tolerance: float) -> bool:
+        # checks if the point which has already been calculated to not be
+        # inside the tri intersects the tri with a tolerance
+        if tolerance == 0:
+            # tolerance of 0 means no futher checks are needed, the point isn't
+            # in the tri so it can't be intersecting
+            return False
+        # since we know the point is outside the tri we can check if any edges
+        # are intersecting it, given the tolerance
+        return any(
+            edge.intersects_point(point, tolerance=tolerance)
+            for edge in self.edges
+        )
 
     def intersects_line_segment(
         self,
@@ -208,18 +219,34 @@ class Triangle3d(Generic[T]):
         *,
         tolerance: float = 0.0
     ) -> bool:
-        # handle degenerate triangles
+        # handle degenerate triangle
         if self.is_degenerate:
             degen_form = self.degenerate_form
             if isinstance(degen_form, LineSegment3d):
                 return degen_form.intersects_line_segment(
-                    point,
+                    line_segment,
                     tolerance=tolerance
                 )
             assert isinstance(degen_form, type(self._positions[0]))
-            return line_segment.intersects_point(point, tolerance=tolerance)
-        #
-        assert False
+            return line_segment.intersects_point(
+                degen_form,
+                tolerance=tolerance
+            )
+        # handle degenerate line segment
+        if line_segment.is_degenerate:
+            degen_form = line_segment.degenerate_form
+            assert isinstance(degen_form, type(self._positions[0]))
+            return self.intersects_point(degen_form, tolerance=tolerance)
+        # check points intersecting
+        for point in (line_segment.a, line_segment.b):
+            if self.intersects_point(point, tolerance=tolerance):
+                return True
+
+        # check edges intersecting
+        for edge in self.edges:
+            if edge.intersects_line_segment(line_segment, tolerance=tolerance):
+                return True
+        return False
 
     def intersects_triangle_3d(
         self,
@@ -228,46 +255,49 @@ class Triangle3d(Generic[T]):
         tolerance: float = 0.0
     ) -> bool:
         # handle degenerate triangles
-        if self.is_degenerate:
-            degen_form = self.degenerate_form
-            if isinstance(degen_form, LineSegment3d):
-                return other.intersects_line_segment(
-                    degen_form,
-                    tolerance=tolerance
-                )
-            assert isinstance(degen_form, type(self._positions[0]))
-            return other.intersects_point(degen_form, tolerance=tolerance)
+        for t1, t2 in ((self, other), (other, self)):
+            if t1.is_degenerate:
+                degen_form = t1.degenerate_form
+                if isinstance(degen_form, LineSegment3d):
+                    return t2.intersects_line_segment(
+                        degen_form,
+                        tolerance=tolerance
+                    )
+                assert isinstance(degen_form, type(t1._positions[0]))
+                return t2.intersects_point(degen_form, tolerance=tolerance)
         # broad aabb check
-        if not self.bounding_box.intersects_bounding_box_3d_inclusive(
-            other.bounding_box
+        if not self.bounding_box.intersects_bounding_box_3d(
+            other.bounding_box,
+            tolerance=tolerance
         ):
             return False
-        print("AABB passed")
         # narrow plane/point check
         # if there are points on either side of the plane or a point inside
         # the plane then we may be intersecting
         plane = self.plane
         last_side = None
-        for point in other.positions:
+        for i, point in enumerate(other.positions):
             distance = plane.distance_to_point(point)
             if abs(distance) <= tolerance:
-                break
-            elif last_side is None:
+                if last_side is not None:
+                    break
+                continue
+            if last_side is None:
+                if i != 0:
+                    break
                 last_side = copysign(1, distance)
             elif copysign(1, distance) != last_side:
                 break
             assert(copysign(1, distance) == last_side)
         else:
+            if last_side is None:
+                self_2d = self.project_orthographic()
+                other_2d = other.project_orthographic()
+                return self_2d.intersects_triangle_2d(
+                    other_2d,
+                    tolerance=tolerance
+                )
             return False
-        if last_side is None:
-            print("2D")
-            self_2d = self.project_orthographic()
-            other_2d = other.project_orthographic()
-            return self_2d.intersects_triangle_2d(
-                other_2d,
-                tolerance=tolerance
-            )
-        print("PLANE PASSED")
         # SAT theorem
         for a_edge in self.edges:
             a_axis = (a_edge.a - a_edge.b).normalize()
@@ -299,6 +329,6 @@ class Triangle3d(Generic[T]):
                 dmin = min_b - idk
                 dmax = max_b - idk
 
-                if dmin >= tolerance or dmax <= -tolerance:
+                if dmin > tolerance or dmax < -tolerance:
                     return False
         return True

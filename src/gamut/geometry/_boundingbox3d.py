@@ -123,39 +123,23 @@ class BoundingBox3d(Generic[T, VT, MT]):
             (sphere.radius ** 2)
         )
 
-    def intersects_bounding_box_3d_exclusive(
+    def intersects_bounding_box_3d(
         self,
-        other: BoundingBox3d[T, VT, MT]
+        other: BoundingBox3d[T, VT, MT],
+        *,
+        tolerance: float = 0.0
     ) -> bool:
-        if self._min.x >= other._max.x:
+        if self._min.x > other._max.x + tolerance:
             return False
-        if self._max.x <= other._min.x:
+        if self._max.x < other._min.x - tolerance:
             return False
-        if self._min.y >= other._max.y:
+        if self._min.y > other._max.y + tolerance:
             return False
-        if self._max.y <= other._min.y:
+        if self._max.y < other._min.y - tolerance:
             return False
-        if self._min.z >= other._max.z:
+        if self._min.z > other._max.z + tolerance:
             return False
-        if self._max.z <= other._min.z:
-            return False
-        return True
-
-    def intersects_bounding_box_3d_inclusive(
-        self,
-        other: BoundingBox3d[T, VT, MT]
-    ) -> bool:
-        if self._min.x > other._max.x:
-            return False
-        if self._max.x < other._min.x:
-            return False
-        if self._min.y > other._max.y:
-            return False
-        if self._max.y < other._min.y:
-            return False
-        if self._min.z > other._max.z:
-            return False
-        if self._max.z < other._min.z:
+        if self._max.z < other._min.z - tolerance:
             return False
         return True
 

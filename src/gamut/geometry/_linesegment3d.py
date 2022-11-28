@@ -6,7 +6,7 @@ __all__ = ['LineSegment3d']
 # gamut
 from gamut.math import DVector3, FVector3
 # python
-from math import hypot
+from math import hypot, inf
 from typing import Generic, TypeVar
 
 T = TypeVar('T', FVector3, DVector3)
@@ -74,8 +74,40 @@ class LineSegment3d(Generic[T]):
         t = -(t - 1)
         return self.get_point_from_a_to_b(t)
 
-    def distance_to_point(self, point: VT) -> float:
+    def distance_to_line_segment(self, other: LineSegment[T]) -> float:
         # handle degenerate line segments
+        for l1, l2 in ((self, other), (other, self)):
+            if l1.is_degenerate:
+                degen_form = l1.degenerate_form
+                assert isinstance(degen_form, type(l1._a))
+                return l2.distance_to_point(degen_form)
+        # math :^)
+        d1 = self._b - self._a
+        d2 = other._b - other._a
+        r = self._a - other._a
+        a = d1 @ d1
+        e = d2 @ d2
+        f = d2 @ r
+        c = d1 @ r
+        b = d1 @ d2
+        denom = a * e - b * b
+        if denom != 0.0:
+            s = max(min((b * f - c * e) / denom, 1.0), 0.0)
+        else:
+            s = 0.0
+        t = (b * s + f) / e
+        if t < 0:
+            t = 0
+            s = max(min(-c / a, 1.0), 0.0)
+        elif t > 1:
+            t = 1
+            s = max(min((b - c) / a, 1.0), 0.0)
+        c1 = self._a + d1 * s
+        c2 = other._a + d2 * t
+        return c1.distance(c2)
+
+    def distance_to_point(self, point: T) -> float:
+        # handle degenerate line segment
         if self.is_degenerate:
             degen_form = self.degenerate_form
             assert isinstance(degen_form, type(self._a))
@@ -96,3 +128,18 @@ class LineSegment3d(Generic[T]):
         tolerance: float = 0.0
     ) -> bool:
         return self.distance_to_point(point) <= tolerance
+
+    def intersects_line_segment(
+        self,
+        other: LineSegment[T],
+        *,
+        tolerance: float = 0.0
+    ):
+        return self.distance_to_line_segment(other) <= tolerance
+
+    def is_parallel_with_line_segment(self, other: LineSegment3d[T]) -> bool:
+        if self.is_degenerate or other.is_degenerate:
+            return False
+        ab = self._b - self._a
+        cd = other._b - other._a
+        return ab.cross(cd) ** 2 <= (ab * ab).cross(cd * cd)
