@@ -126,6 +126,25 @@ def test_attributes(vtype: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
+def test_degenerate(vtype: Any) -> None:
+    assert Triangle2d(vtype(0), vtype(0), vtype(0)).is_degenerate
+    assert Triangle2d(vtype(0), vtype(0), vtype(0)).degenerate_form == vtype(0)
+
+    assert Triangle2d(vtype(0), vtype(1), vtype(0)).is_degenerate
+    assert Triangle2d(vtype(0), vtype(0, 1), vtype(0)).degenerate_form == (
+        LineSegment2d(vtype(0, 1), vtype(0))
+    )
+
+    assert Triangle2d(vtype(0), vtype(1), vtype(2)).is_degenerate
+    assert Triangle2d(vtype(0), vtype(0, 1), vtype(0, 2)).degenerate_form == (
+        LineSegment2d(vtype(0, 2), vtype(0))
+    )
+
+    assert not Triangle2d(vtype(0), vtype(0, 1), vtype(2)).is_degenerate
+    assert Triangle2d(vtype(0), vtype(0, 1), vtype(2)).degenerate_form is None
+
+
+@pytest.mark.parametrize("vtype", [FVector2, DVector2])
 def test_equal(vtype: Any) -> None:
     assert (
         Triangle2d(vtype(0), vtype(0), vtype(0)) ==
@@ -159,6 +178,31 @@ def test_equal(vtype: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
+def test_intersects_point(vtype: Any) -> None:
+    tri = Triangle2d(vtype(0), vtype(0), vtype(0))
+    assert tri.intersects_point(vtype(0))
+    assert not tri.intersects_point(vtype(1))
+    assert tri.intersects_point(vtype(1, 0), tolerance=1)
+
+    tri = Triangle2d(vtype(0), vtype(1, 0), vtype(0))
+    assert tri.intersects_point(vtype(0))
+    assert tri.intersects_point(vtype(.5, 0))
+    assert tri.intersects_point(vtype(1, 0))
+    assert not tri.intersects_point(vtype(2, 0))
+    assert tri.intersects_point(vtype(2, 0), tolerance=1)
+
+    tri = Triangle2d(vtype(0), vtype(1, 0), vtype(0, 1))
+    assert tri.intersects_point(vtype(0))
+    assert tri.intersects_point(vtype(1, 0))
+    assert tri.intersects_point(vtype(0, 1))
+    assert tri.intersects_point(vtype(.5, 0))
+    assert tri.intersects_point(vtype(0, .5))
+    assert tri.intersects_point(vtype(.25, .25))
+    assert not tri.intersects_point(vtype(2, 0))
+    assert tri.intersects_point(vtype(2, 0), tolerance=1)
+
+
+@pytest.mark.parametrize("vtype", [FVector2, DVector2])
 def test_intersects_triangle_2d(vtype: Any) -> None:
     assert(
         Triangle2d(
@@ -171,6 +215,41 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             vtype(0),
         ))
     )
+    assert not (
+        Triangle2d(
+            vtype(0),
+            vtype(0),
+            vtype(0),
+        ).intersects_triangle_2d(Triangle2d(
+            vtype(1),
+            vtype(1),
+            vtype(1),
+        ))
+    )
+
+    assert (
+        Triangle2d(
+            vtype(0),
+            vtype(1),
+            vtype(0),
+        ).intersects_triangle_2d(Triangle2d(
+            vtype(0),
+            vtype(1),
+            vtype(0),
+        ))
+    )
+    assert not (
+        Triangle2d(
+            vtype(0),
+            vtype(1),
+            vtype(0),
+        ).intersects_triangle_2d(Triangle2d(
+            vtype(1, 0),
+            vtype(2, 1),
+            vtype(1, 0),
+        ))
+    )
+
     assert(
         not
         Triangle2d(

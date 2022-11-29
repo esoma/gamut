@@ -109,35 +109,49 @@ class Plane(Generic[VT, MT]):
     def normal(self) -> VT:
         return self._normal
 
-    def distance_to_point(self, point: VT) -> float:
+    @property
+    def origin(self) -> VT:
+        return self._normal * -self._distance
+
+    def signed_distance_to_point(self, point: VT) -> float:
         if not isinstance(point, type(self._normal)):
             raise TypeError(f'point must be {type(self._normal).__name__}')
         return self._normal @ point + self._distance
 
-    def where_intersects_line_segment(
+    def where_intersected_by_line_segment(
         self,
         line: LineSegment3d[VT],
         *,
         tolerance = 0.0
-    ) -> VT:
-        print("___")
+    ) -> LineSegment3d[VT] | VT | None:
         # handle degenerate line segments
         if line.is_degenerate:
-            degen_form = line.degenerate_from
+            degen_form = line.degenerate_form
             assert isinstance(degen_form, type(line.a))
-            if self.distance_to_point(degen_form) <= tolerance:
-                return degen_form
+            if abs(self.signed_distance_to_point(degen_form)) <= tolerance:
+                if tolerance == 0.0:
+                    return degen_form
+                else:
+                    # project the point onto the plane
+                    v = degen_form - self.origin
+                    d = v @ self._normal
+                    return degen_form - d * self._normal
             else:
                 return None
-        # math :^)
-        ab = line.a - line.b
+        # find the intersection using math :^)
+        ab = line.b - line.a
         den = self.normal @ ab
         if den == 0:
+            # line segment is parallel to the plane
+            return line
+        d = self._normal @ self.origin
+        t = (d - self._normal @ line.a) / den
+        if tolerance == 0 and (t < 0 or t > 1):
             return None
-        d = (self.normal @ line.a - self._distance) / den
-        if tolerance == 0 and (d < 0 or d > 1):
-            return None
-        p = line.a + ab * -d
-        if tolerance != 0 and self.distance_to_point(p) > tolerance:
+        p = line.a + t * ab
+        if (
+            tolerance != 0 and
+            abs(self.signed_distance_to_point(p)) > tolerance
+        ):
             return None
         return p

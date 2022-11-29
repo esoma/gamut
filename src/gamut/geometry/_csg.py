@@ -1,12 +1,16 @@
+from __future__ import annotations
 
 __all__ = ['CsgBrush']
 
 # gamut
-from ._triangle3d import Triangle2d, Triangle3d
+from ._linesegment2d import LineSegment2d
+from ._triangle2d import Triangle2d
+from ._triangle3d import Triangle3d
 # gamut
-from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
-                        FVector3Array, IVector3, IVector3Array, U8Vector3Array,
-                        U16Vector3Array, U32Vector3Array, UVector3Array)
+from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, FMatrix4,
+                        FVector2, FVector3, FVector3Array, IVector3,
+                        IVector3Array, U8Vector3Array, U16Vector3Array,
+                        U32Vector3Array, UVector3Array)
 # python
 from math import copysign
 from typing import Generic, overload, TypeVar
@@ -46,7 +50,7 @@ class CsgOperation(Generic[PT]):
 
     def _are_points_snappable(self, a: PT, b: PT) -> bool:
         d = a - b
-        return d @ d < self._snap_distance_2
+        return d @ d <= self._snap_distance_2
 
     def _is_tri_degenerate(self, tri: Triangle3d[PT]) -> bool:
         # checks if a tri will degenerate to a line/point when snapped
@@ -62,7 +66,13 @@ class CsgOperation(Generic[PT]):
             return
         a_intersections, b_intersections = self._get_intersections()
         tri_2d_intersections = [
-            Tri2dIntersection(t, intersections, self._tolerance)
+            Tri2dIntersection(
+                t,
+                intersections,
+                self._tolerance,
+                self._snap_distance,
+                self._snap_distance_2
+            )
             for t, intersections in (
                 *a_intersections.items(),
                 *b_intersections.items()
@@ -97,7 +107,9 @@ class Tri2dIntersection:
         self,
         tri: Triangle3d[PT],
         intersections: set[Triangle3d[PT]],
-        tolerance: float
+        tolerance: float,
+        snap_distance: float,
+        snap_distance_2: float
     ) -> None:
         Matrix4 = (
             FMatrix4
@@ -105,6 +117,9 @@ class Tri2dIntersection:
             else DMatrix4
         )
         self._plane = tri.plane
+        self._tolerance = tolerance
+        self._snap_distance = snap_distance
+        self._snap_distance_2 = snap_distance_2
 
         bmc = (tri.positions[1] - tri.positions[2]).normalize()
         self._to_3d = Matrix4(
@@ -113,41 +128,325 @@ class Tri2dIntersection:
             *tri.normal, 0,
             *tri.positions[0], 1
         )
-        to_2d = self._to_3d.inverse()
+        self._to_2d = self._to_3d.inverse()
 
-        self._2d_tris = [
+        self._2d_tris = {
             Triangle2d(*(
-                (to_2d @ p.xyzl).xy
+                (self._to_2d @ p.xyzl).xy
                 for p in tri.positions
             ))
-        ]
-        for intersection in intersections:
-            self._add_intersection(intersection, to_2d, tolerance)
+        }
 
-    def _add_intersection(
+        self._2d_points = {
+            p
+            for t in self._2d_tris
+            for p in t.positions
+        }
+        for intersection in intersections:
+            self._add_intersection(intersection)
+
+    @overload
+    def _are_points_snappable(
+        self: Tri2dIntersection[FVector3],
+        a: FVector2,
+        b: FVector2
+    ) -> bool:
+        ...
+
+    @overload
+    def _are_points_snappable(
+        self: Tri2dIntersection[DVector3],
+        a: DVector2,
+        b: DVector2
+    ) -> bool:
+        ...
+
+    def _are_points_snappable(
         self,
-        tri: Triangle3d[PT],
-        to_2d: FMatrix4 | DMatrix4,
-        tolerance: float
-    ) -> None:
+        a: FVector2 | DVector2,
+        b: FVector2 | DVector2
+    ) -> bool:
+        assert isinstance(a, type(b))
+        d = a - b
+        return d @ d <= self._snap_distance_2
+
+    @overload
+    def _is_tri_degenerate(
+        self: Tri2dIntersection[FVector3],
+        tri: Triangle2d[FVector2]
+    ) -> bool:
+        ...
+
+    @overload
+    def _is_tri_degenerate(
+        self: Tri2dIntersection[DVector3],
+        tri: Triangle2d[DVector2]
+    ) -> bool:
+        ...
+
+    def _is_tri_degenerate(
+        self,
+        tri: Triangle2d[FVector2] | Triangle2d[DVector2]
+    ) -> bool:
+        # checks if a tri will degenerate to a line/point when snapped
+        p = tri.positions
+        return (
+            self._are_points_snappable(p[0], p[1]) or
+            self._are_points_snappable(p[0], p[2]) or
+            self._are_points_snappable(p[1], p[2])
+        )
+
+    def _add_intersection(self, tri: Triangle3d[PT]) -> None:
         points_to_add: list[PT] = []
 
-        pd = [self._plane.distance_to_point(p) for p in tri.positions]
+        pd = [self._plane.signed_distance_to_point(p) for p in tri.positions]
         for i, (p, d, edge) in enumerate(zip(tri.positions, pd, tri.edges)):
-            if abs(d) <= tolerance:
+            if abs(d) <= self._tolerance:
                 points_to_add.append(p)
             else:
                 next_d = pd[(i + 1) % 3]
-                if abs(next_d) <= tolerance:
+                if abs(next_d) <= self._tolerance:
                     continue
                 if copysign(d, next_d) == d:
                     continue
-                edge_intersection = self._plane.where_intersects_line_segment(
-                    edge,
-                    tolerance=tolerance
+                edge_intersection = (
+                    self._plane.where_intersected_by_line_segment(
+                        edge,
+                        tolerance=self._tolerance
+                    )
                 )
                 if edge_intersection is not None:
                     points_to_add.append(edge_intersection)
 
-        print(points_to_add)
+        added_points = []
+        for p in points_to_add:
+            p2 = self._add_point((self._to_2d @ p.xyzl).xy)
+            if p2 is None:
+                return
+            added_points.append(p2)
+
+        if len(added_points) == 2:
+            self._add_line_segment(LineSegment2d(*added_points))
+        elif len(added_points) == 3:
+            print("ADD TRIANGLE")
+
+    @overload
+    def _add_point(
+        self: Tri2dIntersection[FVector3],
+        point: FVector2
+    ) -> FVector2 | None:
+        ...
+
+    @overload
+    def _add_point(
+        self: Tri2dIntersection[DVector3],
+        point: DVector2
+    ) -> DVector2 | None:
+        ...
+
+    def _add_point(
+        self,
+        point: FVector2 | DVector2
+    ) -> FVector2 | DVector2 | None:
+        assert isinstance(point, type(self._plane.normal.oo))
+        for tri in list(self._2d_tris):
+            assert not self._is_tri_degenerate(tri)
+            #if self._is_tri_degenerate(tri):
+            #    continue
+            # check if the point is existing face vertex
+            for p in tri.positions:
+                if p.distance(point) <= self._snap_distance:
+                    return p
+            # check if point is on an edge
+            for edge in tri.edges:
+                if edge.get_distance_to_point(point) <= self._snap_distance:
+                    snapped_point = self._add_snapped_point(point)
+                    opposite_point = next(iter(
+                        set(tri.positions) - {edge.a, edge.b}
+                    ))
+                    # if new snapped point snaps to the opposite point then we
+                    # can delete the face since it will degenerate
+                    if snapped_point == opposite_point:
+                        self._2d_tris.remove(tri)
+                        return snapped_point
+                    # subdivide the tri along the edge where the intersection
+                    # was
+                    tri_a = Triangle2d(edge.a, snapped_point, opposite_point)
+                    if self._is_tri_degenerate(tri_a):
+                        return snapped_point
+                    tri_b = Triangle2d(edge.b, snapped_point, opposite_point)
+                    if self._is_tri_degenerate(tri_b):
+                        return snapped_point
+                    # if there was no degeneration we can replace the tri with
+                    # the subdivided versions
+                    self._2d_tris.remove(tri)
+                    self._2d_tris.add(tri_a)
+                    self._2d_tris.add(tri_b)
+                    return snapped_point
+            else:
+                # not on an edge, check if the point is inside the tri
+                if tri.intersects_point(point, tolerance=self._tolerance):
+                    # replace this tri with 3 tris, where each edge of the
+                    # original tri connects to the point
+                    snapped_point = self._add_snapped_point(point)
+                    for edge in tri.edges:
+                        new_tri = Triangle2d(edge.a, edge.b, snapped_point)
+                        if self._is_tri_degenerate(new_tri):
+                            continue
+                        self._2d_tris.add(new_tri)
+                    self._2d_tris.remove(tri)
+                    return snapped_point
+        return None
+
+    @overload
+    def _add_snapped_point(
+        self: Tri2dIntersection[FVector3],
+        point: FVector2
+    ) -> FVector2:
+        ...
+
+    @overload
+    def _add_snapped_point(
+        self: Tri2dIntersection[DVector3],
+        point: DVector2
+    ) -> DVector2:
+        ...
+
+    def _add_snapped_point(
+        self,
+        point: FVector2 | DVector2
+    ) -> FVector2 | DVector2:
+        p = point
+        if self._snap_distance != 0:
+            for p in self._2d_points:
+                if p.distance(point) <= self._snap_distance:
+                    return p
+            p = point
+        self._2d_points.add(p)
+        return p
+
+    @overload
+    def _add_line_segment(
+        self: Tri2dIntersection[FVector3],
+        line: LineSegment2d[FVector2]
+    ) -> None:
+        ...
+
+
+    @overload
+    def _add_line_segment(
+        self: Tri2dIntersection[DVector3],
+        line: LineSegment2d[DVector2]
+    ) -> None:
+        ...
+
+    def _add_line_segment(
+        self,
+        line: LineSegment2d[FVector2] | LineSegment2d[DVector2]
+    ) -> None:
+        assert isinstance(line.a, type(self._plane.normal.oo))
+        shape_points = {line.a, line.b}
+        for tri in list(self._2d_tris):
+            for edge in tri.edges:
+                intersection = edge.where_intersected_by_line_segment(
+                    line,
+                    tolerance=self._tolerance
+                )
+                # skip if no intersection or if the line and edge are parallel
+                # intersecting
+                if (
+                    intersection is None or
+                    isinstance(intersection, LineSegment2d)
+                ):
+                    continue
+                assert isinstance(intersection, (FVector2, DVector2))
+                # skip if the intersection point would snap to one of the
+                # edge's points
+                if (
+                    self._are_points_snappable(intersection, edge.a) or
+                    self._are_points_snappable(intersection, edge.b)
+                ):
+                    continue
+                point = self._add_snapped_point(intersection)
+                shape_points.add(point)
+                opposite_point = next(iter(
+                    set(tri.positions) - {edge.a, edge.b}
+                ))
+                # if new snapped point snaps to the opposite point then we can
+                # delete the face since it will degenerate
+                if point == opposite_point:
+                    self._2d_tris.remove(tri)
+                    break
+
+                if (
+                    line.get_distance_to_point(opposite_point) <=
+                    self._snap_distance_2
+                ):
+                    shape_points.add(opposite_point)
+                # subdivide the tri into two using the intersection on the edge
+                # as the split
+                tri_a = Triangle2d(point, opposite_point, edge.a)
+                tri_b = Triangle2d(opposite_point, edge.b, point)
+                self._2d_tris.remove(tri)
+                self._2d_tris.add(tri_a)
+                self._2d_tris.add(tri_b)
+                break
+        self._merge_tris(shape_points)
+
+    @overload
+    def _merge_tris(
+        self: Tri2dIntersection[FVector3],
+        points: set[FVector2]
+    ) -> None:
+        ...
+
+    @overload
+    def _merge_tris(
+        self: Tri2dIntersection[DVector3],
+        points: set[DVector2]
+    ) -> None:
+        ...
+
+    def _merge_tris(self, points: set[FVector2 | DVector2]) -> None:
+        if len(points) < 3:
+            return
+        print("______________________")
+        # sort points by the axis with the overall widest range
+        min_x = min(*(p.x for p in points))
+        max_x = max(*(p.x for p in points))
+        min_y = min(*(p.y for p in points))
+        max_y = max(*(p.y for p in points))
+        axis = 0 if abs(max_x - min_x) > abs(max_y - min_y) else 1
+        sorted_points = sorted(points, key=lambda p: p[axis])
+
+        print(len(sorted_points))
+        # tris around an inner vertex are merged by moving the inner vertex to
+        # the closest index
+        half_index = (len(points) - 1) // 2
+        for point, closest in (
+            *zip(
+                sorted_points[1:half_index + 1],
+                (sorted_points[0] for i in range(half_index))
+            ),
+            *zip(
+                sorted_points[half_index + 1:-1],
+                (sorted_points[-1] for i in range(half_index))
+            )
+        ):
+            # find the tris that share a vertex with the point so that they
+            # can be merged
+            merges: list[tuple[
+                Triangle2d[FVector2 | DVector2],
+                FVector2 | DVector2
+            ]] = []
+            for tri in self._2d_tris:
+                for tri_p in tri.positions:
+                    if tri_p == point:
+                        merges.append((tri, tri_p))
+            # create new tris
+            for tri, tri_p in merges:
+                opposite_edge = tri.get_edge_opposite_of_point(tri_p)
+                print(opposite_edge)
+
+
 

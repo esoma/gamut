@@ -178,7 +178,7 @@ class Triangle3d(Generic[T]):
                 return degen_form == point
             return degen_form.distance(point) <= tolerance
         # make sure the point lies in the triangle's plane
-        if abs(self.plane.distance_to_point(point)) > tolerance:
+        if abs(self.plane.signed_distance_to_point(point)) > tolerance:
             return False
         # solve for the points barycentric coordinates
         v0 = self._positions[2] - self._positions[0]
@@ -277,7 +277,7 @@ class Triangle3d(Generic[T]):
         plane = self.plane
         last_side = None
         for i, point in enumerate(other.positions):
-            distance = plane.distance_to_point(point)
+            distance = plane.signed_distance_to_point(point)
             if abs(distance) <= tolerance:
                 if last_side is not None:
                     break

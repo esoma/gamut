@@ -87,8 +87,93 @@ class Triangle2d(Generic[T]):
         return not self.is_clockwise
 
     @property
+    def degenerate_form(self) -> T | LineSegment2d[T] | None:
+        unique_points = set(self._positions)
+        if len(unique_points) == 1:
+            return next(iter(unique_points))
+        elif len(unique_points) == 2:
+            return LineSegment2d(*unique_points)
+        edges = self.edges
+        if not edges[0].is_parallel_with_line_segment(edges[1]):
+            return None
+        segment_distance = [
+            (a, b, a.distance(b))
+            for a, b in (
+                (self._positions[0], self._positions[1]),
+                (self._positions[1], self._positions[2]),
+                (self._positions[2], self._positions[0])
+            )
+        ]
+        segment_distance.sort(key=lambda s: s[2])
+        seg = segment_distance[-1]
+        return LineSegment2d(seg[0], seg[1])
+
+    @property
+    def is_degenerate(self) -> bool:
+        return self.degenerate_form is not None
+
+    @property
     def positions(self) -> tuple[T, T, T]:
         return self._positions
+
+    def get_edge_opposite_of_point(self, point: T) -> LineSegment2d[T]:
+        if point == self._positions[0]:
+            return LineSegment2d(self._positions[1], self._positions[2])
+        if point == self._positions[1]:
+            return LineSegment2d(self._positions[2], self._positions[0])
+        if point == self._positions[2]:
+            return LineSegment2d(self._positions[0], self._positions[1])
+        raise ValueError('point is not a position in the triangle')
+
+    def intersects_point(
+        self,
+        point: T,
+        *,
+        tolerance: float = 0.0
+    ) -> bool:
+        # handle degenerate triangles
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            if isinstance(degen_form, LineSegment2d):
+                return degen_form.intersects_point(
+                    point,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(self._positions[0]))
+            if tolerance == 0:
+                return degen_form == point
+            return degen_form.distance(point) <= tolerance
+        # solve for the points barycentric coordinates
+        v0 = self._positions[2] - self._positions[0]
+        v1 = self._positions[1] - self._positions[0]
+        v2 = point - self._positions[0]
+        dot00 = v0 @ v0
+        dot01 = v0 @ v1
+        dot02 = v0 @ v2
+        dot11 = v1 @ v1
+        dot12 = v1 @ v2
+        inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
+        u = (dot11 * dot02 - dot01 * dot12) * inv_denom
+        if u < 0:
+            return self._intersects_point_not_inside(point, tolerance)
+        v = (dot00 * dot12 - dot01 * dot02) * inv_denom
+        if v >= 0 and u + v <= 1:
+            return True
+        return self._intersects_point_not_inside(point, tolerance)
+
+    def _intersects_point_not_inside(self, point: T, tolerance: float) -> bool:
+        # checks if the point which has already been calculated to not be
+        # inside the tri intersects the tri with a tolerance
+        if tolerance == 0:
+            # tolerance of 0 means no futher checks are needed, the point isn't
+            # in the tri so it can't be intersecting
+            return False
+        # since we know the point is outside the tri we can check if any edges
+        # are intersecting it, given the tolerance
+        return any(
+            edge.intersects_point(point, tolerance=tolerance)
+            for edge in self.edges
+        )
 
     def intersects_triangle_2d(
         self,
