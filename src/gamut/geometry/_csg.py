@@ -40,6 +40,8 @@ class CsgOperation(Generic[PT]):
         self._snap_distance = snap_distance
         self._snap_distance_2 = snap_distance * snap_distance
         self._tolerance = 0.0
+        self._a_tris_inside: dict[Triangle3d[PT], bool] = {}
+        self._b_tris_inside: dict[Triangle3d[PT], bool] = {}
         self._tris_built = False
 
     def union(self) -> CsgBrush[PT]:
@@ -64,22 +66,36 @@ class CsgOperation(Generic[PT]):
     def _build_tris(self) -> None:
         if self._tris_built:
             return
-        a_intersections, b_intersections = self._get_intersections()
-        tri_2d_intersections = [
-            Tri2dIntersection(
-                t,
-                intersections,
-                self._tolerance,
-                self._snap_distance,
-                self._snap_distance_2
+        a_tri_2d_intersections, b_tri_2d_intersections = (
+            self._get_tri_2d_intersections()
+        )
+        a_tris = self._build_brush_tris(self._a, a_tri_2d_intersections)
+        b_tris = self._build_brush_tris(self._b, b_tri_2d_intersections)
+        for tri in a_tris:
+            self._a_tris_inside[tri] = self._is_tri_inside(
+                a_tris,
+                b_tris,
+                tri,
+                True
             )
-            for t, intersections in (
-                *a_intersections.items(),
-                *b_intersections.items()
+        for tri in b_tris:
+            self._b_tris_inside[tri] = self._is_tri_inside(
+                a_tris,
+                b_tris,
+                tri,
+                False
             )
-        ]
-
         self._tris_built = True
+
+    def _is_tri_inside(
+        self,
+        a_tris: set[Triangle3d[PT]],
+        b_tris: set[Triangle3d[PT]],
+        tri: Triangle3d[PT],
+        is_a_tri: bool
+    ) -> bool:
+        for other_tri in (*a_tris, *b_tris):
+            pass
 
     def _get_intersections(self) -> tuple[
         dict[Triangle3d[PT], set[Triangle3d[PT]]],
@@ -101,7 +117,52 @@ class CsgOperation(Generic[PT]):
                     b_intersections.setdefault(b_tri, set()).add(a_tri)
         return (a_intersections, b_intersections)
 
-class Tri2dIntersection:
+    def _get_tri_2d_intersections(self) -> tuple[
+        dict[Triangle3d[PT], Tri2dIntersection[PT]],
+        dict[Triangle3d[PT], Tri2dIntersection[PT]],
+    ]:
+        a_intersections, b_intersections = self._get_intersections()
+        a = {
+            t: Tri2dIntersection(
+                t,
+                intersections,
+                self._tolerance,
+                self._snap_distance,
+                self._snap_distance_2
+            )
+            for t, intersections in a_intersections.items()
+        }
+        b = {
+            t: Tri2dIntersection(
+                t,
+                intersections,
+                self._tolerance,
+                self._snap_distance,
+                self._snap_distance_2
+            )
+            for t, intersections in b_intersections.items()
+        }
+        return (a, b)
+
+    def _build_brush_tris(
+        self,
+        brush: CsgBrush[PT],
+        tri_2d_intersections: dict[Triangle3d[PT], Tri2dIntersection[PT]],
+    ) -> set[Triangle3d[PT]]:
+        brush_tris = set()
+        for tri in brush._tris:
+            intersection = tri_2d_intersections.get(tri)
+            if intersection is None:
+                if not tri.is_degenerate:
+                    brush_tris.add(tri)
+            else:
+                for sub_tri in intersection.get_tris():
+                    assert not sub_tri.is_degenerate
+                    brush_tris.add(sub_tri)
+        return brush_tris
+
+
+class Tri2dIntersection(Generic[PT]):
 
     def __init__(
         self,
@@ -136,7 +197,6 @@ class Tri2dIntersection:
                 for p in tri.positions
             ))
         }
-
         self._2d_points = {
             p
             for t in self._2d_tris
@@ -144,6 +204,13 @@ class Tri2dIntersection:
         }
         for intersection in intersections:
             self._add_intersection(intersection)
+
+    def get_tris(self) -> Generator[Triangle3d[PT], None, None]:
+        for tri2 in self._2d_tris:
+            yield Triangle3d(*(
+                (self._to_3d @ p.xyol).xyz
+                for p in tri2.positions
+            ))
 
     @overload
     def _are_points_snappable(
@@ -229,6 +296,7 @@ class Tri2dIntersection:
             self._add_line_segment(LineSegment2d(*added_points))
         elif len(added_points) == 3:
             print("ADD TRIANGLE")
+            assert False
 
     @overload
     def _add_point(
@@ -261,9 +329,7 @@ class Tri2dIntersection:
             for edge in tri.edges:
                 if edge.get_distance_to_point(point) <= self._snap_distance:
                     snapped_point = self._add_snapped_point(point)
-                    opposite_point = next(iter(
-                        set(tri.positions) - {edge.a, edge.b}
-                    ))
+                    opposite_point = tri.get_point_opposite_of_edge(edge)
                     # if new snapped point snaps to the opposite point then we
                     # can delete the face since it will degenerate
                     if snapped_point == opposite_point:
@@ -369,9 +435,7 @@ class Tri2dIntersection:
                     continue
                 point = self._add_snapped_point(intersection)
                 shape_points.add(point)
-                opposite_point = next(iter(
-                    set(tri.positions) - {edge.a, edge.b}
-                ))
+                opposite_point = tri.get_point_opposite_of_edge(edge)
                 # if new snapped point snaps to the opposite point then we can
                 # delete the face since it will degenerate
                 if point == opposite_point:
@@ -439,14 +503,30 @@ class Tri2dIntersection:
                 Triangle2d[FVector2 | DVector2],
                 FVector2 | DVector2
             ]] = []
-            for tri in self._2d_tris:
+            for tri in tuple(self._2d_tris):
                 for tri_p in tri.positions:
                     if tri_p == point:
                         merges.append((tri, tri_p))
+                        self._2d_tris.remove(tri)
             # create new tris
+            degenerate_points: list[FVector2 | DVector2] = []
             for tri, tri_p in merges:
                 opposite_edge = tri.get_edge_opposite_of_point(tri_p)
-                print(opposite_edge)
-
+                # skip flattened faces
+                if opposite_edge.a == closest or opposite_edge.b == closest:
+                    continue
+                new_tri = Triangle2d(
+                    closest,
+                    opposite_edge.a,
+                    opposite_edge.b
+                )
+                if new_tri.is_degenerate:
+                    degenerate_points.append(tri_p)
+                    continue
+                self._2d_tris.add(new_tri)
+            if not degenerate_points:
+                continue
+            print("DEGEN POINTS")
+            assert False
 
 

@@ -97,6 +97,34 @@ def test_attributes(vtype: Any) -> None:
         assert tri.bounding_box.min == vtype(0, 0)
         assert tri.bounding_box.max == vtype(1, 2)
 
+        assert tri.get_edge_opposite_of_point(vtype(0, 0)) == LineSegment2d(
+            vtype(1, 0), vtype(1, 2)
+        )
+        assert tri.get_edge_opposite_of_point(vtype(1, 0)) == LineSegment2d(
+            vtype(1, 2), vtype(0, 0)
+        )
+        assert tri.get_edge_opposite_of_point(vtype(1, 2)) == LineSegment2d(
+            vtype(0, 0), vtype(1, 0)
+        )
+        with pytest.raises(ValueError) as excinfo:
+            tri.get_edge_opposite_of_point(vtype(2, 2))
+        assert str(excinfo.value) == 'point is not a position of the triangle'
+
+        assert tri.get_point_opposite_of_edge(
+            LineSegment2d(vtype(1, 0), vtype(1, 2))
+        ) == vtype(0, 0)
+        assert tri.get_point_opposite_of_edge(
+            LineSegment2d(vtype(1, 2), vtype(0, 0))
+        ) == vtype(1, 0)
+        assert tri.get_point_opposite_of_edge(
+            LineSegment2d(vtype(0, 0), vtype(1, 0))
+        ) == vtype(1, 2)
+        with pytest.raises(ValueError) as excinfo:
+            tri.get_point_opposite_of_edge(
+                LineSegment2d(vtype(0, 0), vtype(2, 0))
+            )
+        assert str(excinfo.value) == 'edge is not an edge of the triangle'
+
     for tri in [
         Triangle2d(vtype(1, 0), vtype(0, 0), vtype(1, 2)),
         Triangle2d(vtype(1, 2), vtype(1, 0), vtype(0, 0)),
@@ -123,6 +151,34 @@ def test_attributes(vtype: Any) -> None:
 
         assert tri.bounding_box.min == vtype(0, 0)
         assert tri.bounding_box.max == vtype(1, 2)
+
+        assert tri.get_edge_opposite_of_point(vtype(0, 0)) == LineSegment2d(
+            vtype(1, 2), vtype(1, 0)
+        )
+        assert tri.get_edge_opposite_of_point(vtype(1, 0)) == LineSegment2d(
+            vtype(0, 0), vtype(1, 2)
+        )
+        assert tri.get_edge_opposite_of_point(vtype(1, 2)) == LineSegment2d(
+            vtype(1, 0), vtype(0, 0)
+        )
+        with pytest.raises(ValueError) as excinfo:
+            tri.get_edge_opposite_of_point(vtype(2, 2))
+        assert str(excinfo.value) == 'point is not a position of the triangle'
+
+        assert tri.get_point_opposite_of_edge(
+            LineSegment2d(vtype(1, 2), vtype(1, 0))
+        ) == vtype(0, 0)
+        assert tri.get_point_opposite_of_edge(
+            LineSegment2d(vtype(0, 0), vtype(1, 2))
+        ) == vtype(1, 0)
+        assert tri.get_point_opposite_of_edge(
+            LineSegment2d(vtype(1, 0), vtype(0, 0))
+        ) == vtype(1, 2)
+        with pytest.raises(ValueError) as excinfo:
+            tri.get_point_opposite_of_edge(
+                LineSegment2d(vtype(0, 0), vtype(2, 0))
+            )
+        assert str(excinfo.value) == 'edge is not an edge of the triangle'
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])

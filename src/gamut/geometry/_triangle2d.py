@@ -123,7 +123,17 @@ class Triangle2d(Generic[T]):
             return LineSegment2d(self._positions[2], self._positions[0])
         if point == self._positions[2]:
             return LineSegment2d(self._positions[0], self._positions[1])
-        raise ValueError('point is not a position in the triangle')
+        raise ValueError('point is not a position of the triangle')
+
+    def get_point_opposite_of_edge(self, edge: LineSegment2d[T]) -> T:
+        edges = self.edges
+        if edge == edges[0]:
+            return self._positions[2]
+        if edge == edges[1]:
+            return self._positions[0]
+        if edge == edges[2]:
+            return self._positions[1]
+        raise ValueError('edge is not an edge of the triangle')
 
     def intersects_point(
         self,
