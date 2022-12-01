@@ -4,6 +4,9 @@ from __future__ import annotations
 __all__ = ['Mesh3d', 'Mesh3dRaycastHit']
 
 # gamut
+from ._boundingbox3d import BoundingBox3d
+from ._triangle3d import Triangle3d
+# gamut
 from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
                         FVector3Array, IVector3, IVector3Array, U8Vector3Array,
@@ -98,6 +101,8 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
                     'vertices'
                 )
 
+        self._bounding_box = BoundingBox3d(self._positions)
+
         self._bt: Shape | None = None
         self._bt_mesh: Any = None
         self._bt_mesh_data: Any = None
@@ -178,6 +183,10 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
         return self._bt
 
     @property
+    def bounding_box(self) -> BoundingBox3d:
+        return self._bounding_box
+
+    @property
     def normals(self) -> VT | None:
         return self._normals
 
@@ -188,6 +197,21 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
     @property
     def triangle_indices(self) -> IT:
         return self._triangle_indices
+
+    @property
+    def triangles(self) -> tuple[Triangle3d[VT], ...]:
+        return tuple(
+            self.get_triangle(i)
+            for i in range(len(self._triangle_indices))
+        )
+
+    def get_triangle(self, index: int) -> Triangle3d[VT]:
+        ti = self._triangle_indices[index]
+        return Triangle3d(
+            self._positions[ti[0]],
+            self._positions[ti[1]],
+            self._positions[ti[2]]
+        )
 
     def raycast(
         self,

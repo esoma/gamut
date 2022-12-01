@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import LineSegment3d
+from gamut.geometry import LineSegment3d, Plane
 from gamut.math import BVector3, DVector3, DVector4, FVector3
 # python
 from typing import Any
@@ -222,3 +222,46 @@ def test_distance_to_line_segment(vtype: Any) -> None:
     assert line.distance_to_line_segment(
         LineSegment3d(vtype(0, -1, 0), vtype(1, -1, 0))
     ) == 1.0
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_plane(vtype: Any) -> None:
+    line = LineSegment3d(vtype(1), vtype(1))
+    assert line.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == vtype(1)
+    assert line.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0))
+    ) is None
+    assert line.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(1)
+
+    line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+    assert line.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+    assert line.where_intersected_by_plane(
+        Plane(-3, vtype(0, 1, 0))
+    ) is None
+    assert line.where_intersected_by_plane(
+        Plane(-3, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(0, 2, 0)
+    assert line.where_intersected_by_plane(
+        Plane(3, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(0, -2, 0)
+
+    line = LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+    assert line.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+    assert line.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0))
+    ) is None
+    assert line.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))

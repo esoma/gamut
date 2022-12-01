@@ -88,7 +88,7 @@ class Triangle3d(Generic[T]):
         if len(unique_points) == 1:
             return next(iter(unique_points))
         elif len(unique_points) == 2:
-            return LineSegment3d(*unique_points)
+            return self.get_edge_for_points(*unique_points)
         segment_distance = [
             (a, b, a.distance(b))
             for a, b in (
@@ -131,6 +131,33 @@ class Triangle3d(Generic[T]):
         self: Triangle3d[DVector3]
     ) -> Triangle2d[DVector2]:
         ...
+
+    def get_edge_for_points(self, a: T, b: T) -> LineSegment3d[T]:
+        for edge in self.edges:
+            if (edge.a == a and edge.b == b) or (edge.a == b and edge.b == a):
+                return edge
+        raise ValueError(
+            'one or more points are not a position of the triangle'
+        )
+
+    def get_edge_opposite_of_point(self, point: T) -> LineSegment3d[T]:
+        if point == self._positions[0]:
+            return LineSegment3d(self._positions[1], self._positions[2])
+        if point == self._positions[1]:
+            return LineSegment3d(self._positions[2], self._positions[0])
+        if point == self._positions[2]:
+            return LineSegment3d(self._positions[0], self._positions[1])
+        raise ValueError('point is not a position of the triangle')
+
+    def get_point_opposite_of_edge(self, edge: LineSegment3d[T]) -> T:
+        edges = self.edges
+        if edge == edges[0]:
+            return self._positions[2]
+        if edge == edges[1]:
+            return self._positions[0]
+        if edge == edges[2]:
+            return self._positions[1]
+        raise ValueError('edge is not an edge of the triangle')
 
     def get_edge_normal(self, edge: LineSegments3d[T]) -> T:
         for i, match_edge in enumerate(self.edges):
@@ -332,3 +359,83 @@ class Triangle3d(Generic[T]):
                 if dmin > tolerance or dmax < -tolerance:
                     return False
         return True
+
+    def where_intersected_by_plane(
+        self,
+        plane: Plane[T],
+        *,
+        tolerance: float = 0.0
+    ) -> Triangle3d[T] | LineSegment3d[T] | T | None:
+        if (
+            not isinstance(plane, Plane) or
+            not isinstance(plane.normal, type(self._positions[0]))
+        ):
+            raise TypeError(
+                f'plane must be Plane[{type(self._positions[0]).__name__}]'
+            )
+        # handle degenerate triangles
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            if isinstance(degen_form, LineSegment3d):
+                return degen_form.where_intersected_by_plane(
+                    plane,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(self._positions[0]))
+            if abs(plane.signed_distance_to_point(degen_form)) <= tolerance:
+                return degen_form
+        # check each edge of the tri
+        intersections = []
+        for edge in self.edges:
+            intersection = edge.where_intersected_by_plane(
+                plane,
+                tolerance=tolerance
+            )
+            if intersection is not None:
+                intersections.append(intersection)
+        if not intersections:
+            return None
+        if len(intersections) == 1:
+            # 1 intersection is either a single point or segment
+            return intersections[0]
+        if len(intersections) == 2:
+            # if there are just two intersections and one of them is a line
+            # segment then we can assume that is the actual intersection (the
+            # extra is almost certainly a point from a shared edge)
+            for intersection in intersections:
+                if isinstance(intersection, LineSegment3d):
+                    return intersection
+            assert all(
+                isinstance(i, type(self._normal))
+                for i in intersections
+            )
+            # two points make a segment
+            intersection = LineSegment3d(*intersections)
+            if intersection.is_degenerate:
+                return intersection.degenerate_form
+            return intersection
+        assert len(intersections) == 3
+        # there are basically two conditions here, either we have a single line
+        # segment and some points "extra" points or we have 3 line segments
+        if all(isinstance(i, LineSegment3d) for i in intersections):
+            return tri
+        for intersection in intersections:
+            if isinstance(intersection, LineSegment3d):
+                return intersection
+        assert False
+
+    def where_intersected_by_triangle3d(
+        self,
+        other: Triangle3d[T],
+        *,
+        tolerance: float = 0.0
+    ) -> Triangle3d[T] | LineSegment3d[T] | T | None:
+        # handle degenerate triangles
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            if isinstance(degen_form, LineSegment3d):
+                return degen_form.where_intersected_by_triangle3d(
+                    other,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(t1._positions[0]))

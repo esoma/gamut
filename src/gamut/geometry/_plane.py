@@ -10,17 +10,20 @@ from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
                         FVector4)
 # python
-from typing import Generic, overload, TypeVar
+from typing import Generic, overload, TYPE_CHECKING, TypeVar
+
+if TYPE_CHECKING:
+    # gamut
+    from ._triangle3d import Triangle3d
 
 VT = TypeVar('VT', FVector3, DVector3)
-MT = TypeVar('MT', FMatrix4, DMatrix4)
 
 
-class Plane(Generic[VT, MT]):
+class Plane(Generic[VT]):
 
     @overload
     def __init__(
-        self: Plane[FVector3, FMatrix4],
+        self: Plane[FVector3],
         distance: float,
         normal: FVector3
     ):
@@ -28,7 +31,7 @@ class Plane(Generic[VT, MT]):
 
     @overload
     def __init__(
-        self: Plane[DVector3, DMatrix4],
+        self: Plane[DVector3],
         distance: float,
         normal: DVector3
     ):
@@ -71,7 +74,15 @@ class Plane(Generic[VT, MT]):
             self._distance == other._distance
         )
 
-    def __rmatmul__(self, transform: MT) -> Plane:
+    @overload
+    def __rmatmul__(self: Plane[FVector3], transform: FMatrix4) -> Plane:
+        ...
+
+    @overload
+    def __rmatmul__(self: Plane[DVector3], transform: DMatrix4) -> Plane:
+        ...
+
+    def __rmatmul__(self, transform: FMatrix4 | DMatrix4) -> Plane:
         if not isinstance(transform, (FMatrix4, DMatrix4)):
             return NotImplemented
 
@@ -113,10 +124,33 @@ class Plane(Generic[VT, MT]):
     def origin(self) -> VT:
         return self._normal * -self._distance
 
+    def project_point(self, point: VT) -> VT:
+        if not isinstance(point, type(self._normal)):
+            raise TypeError(f'point must be {type(self._normal).__name__}')
+        v = point - self.origin
+        d = v @ self._normal
+        return point - d * self._normal
+
     def signed_distance_to_point(self, point: VT) -> float:
         if not isinstance(point, type(self._normal)):
             raise TypeError(f'point must be {type(self._normal).__name__}')
         return self._normal @ point + self._distance
+
+    def where_intersected_by_point(
+        self,
+        point: VT,
+        *,
+        tolerance = 0.0
+    ) -> VT | None:
+        if not isinstance(point, type(self._normal)):
+            raise TypeError(f'point must be {type(self._normal).__name__}')
+        if abs(self.signed_distance_to_point(point)) <= tolerance:
+            if tolerance == 0.0:
+                return point
+            else:
+                return self.project_point(point)
+        else:
+            return None
 
     def where_intersected_by_line_segment(
         self,
@@ -124,34 +158,120 @@ class Plane(Generic[VT, MT]):
         *,
         tolerance = 0.0
     ) -> LineSegment3d[VT] | VT | None:
+        if (
+            not isinstance(line, LineSegment3d) or
+            not isinstance(line.a, type(self._normal))
+        ):
+            raise TypeError(
+                f'line must be LineSegment3d[{type(self._normal).__name__}]'
+            )
         # handle degenerate line segments
         if line.is_degenerate:
             degen_form = line.degenerate_form
             assert isinstance(degen_form, type(line.a))
-            if abs(self.signed_distance_to_point(degen_form)) <= tolerance:
-                if tolerance == 0.0:
-                    return degen_form
-                else:
-                    # project the point onto the plane
-                    v = degen_form - self.origin
-                    d = v @ self._normal
-                    return degen_form - d * self._normal
-            else:
-                return None
+            return self.where_intersected_by_point(
+                degen_form,
+                tolerance=tolerance
+            )
         # find the intersection using math :^)
         ab = line.b - line.a
         den = self.normal @ ab
         if den == 0:
-            # line segment is parallel to the plane
-            return line
+            # line segment is parallel to the plane, so any point of the
+            # segment will do as an intersection check
+            if abs(self.signed_distance_to_point(line.a)) > tolerance:
+                return None
+            if tolerance == 0:
+                return line
+            else:
+                return LineSegment3d(
+                    self.project_point(line.a),
+                    self.project_point(line.b)
+                )
         d = self._normal @ self.origin
         t = (d - self._normal @ line.a) / den
-        if tolerance == 0 and (t < 0 or t > 1):
-            return None
+        if tolerance == 0:
+            if t < 0 or t > 1:
+                return None
+        else:
+            t = max(min(t, 1), 0)
         p = line.a + t * ab
-        if (
-            tolerance != 0 and
-            abs(self.signed_distance_to_point(p)) > tolerance
-        ):
-            return None
+        if tolerance != 0:
+            if abs(line.distance_to_point(p)) > tolerance:
+                return None
+            p = self.project_point(p)
         return p
+
+    def where_intersected_by_triangle(
+        self,
+        tri: Triangle3d[VT],
+        *,
+        tolerance = 0.0
+    ) -> Triangle3d[VT] | LineSegment3d[VT] | VT | None:
+        # gamut
+        from gamut.geometry import Triangle3d
+        if (
+            not isinstance(tri, Triangle3d) or
+            not isinstance(tri.positions[0], type(self._normal))
+        ):
+            raise TypeError(
+                f'tri must be Triangle3d[{type(self._normal).__name__}]'
+            )
+        # handle degenerate triangles
+        if tri.is_degenerate:
+            degen_form = tri.degenerate_form
+            if isinstance(degen_form, LineSegment3d):
+                return self.where_intersected_by_line_segment(
+                    degen_form,
+                    tolerance=tolerance
+                )
+            assert isinstance(degen_form, type(self._normal))
+            return self.where_intersected_by_point(
+                degen_form,
+                tolerance=tolerance
+            )
+        # check each edge of the tri
+        intersections = []
+        for edge in tri.edges:
+            intersection = self.where_intersected_by_line_segment(
+                edge,
+                tolerance=tolerance
+            )
+            if intersection is not None:
+                intersections.append(intersection)
+        if not intersections:
+            return None
+        if len(intersections) == 1:
+            # 1 intersection is either a single point or segment
+            return intersections[0]
+        if len(intersections) == 2:
+            # if there are just two intersections and one of them is a line
+            # segment then we can assume that is the actual intersection (the
+            # extra is almost certainly a point from a shared edge)
+            for intersection in intersections:
+                if isinstance(intersection, LineSegment3d):
+                    return intersection
+            assert all(
+                isinstance(i, type(self._normal))
+                for i in intersections
+            )
+            # two points make a segment
+            intersection = LineSegment3d(*intersections)
+            if intersection.is_degenerate:
+                return intersection.degenerate_form
+            return intersection
+        assert len(intersections) == 3
+        # there are basically two conditions here, either we have a single line
+        # segment and some points "extra" points or we have 3 line segments
+        if all(isinstance(i, LineSegment3d) for i in intersections):
+            if tolerance == 0:
+                return tri
+            else:
+                return Triangle3d(*(
+                    self.project_point(p)
+                    for p in tri.positions
+                ))
+        for intersection in intersections:
+            if isinstance(intersection, LineSegment3d):
+                return intersection
+        assert False

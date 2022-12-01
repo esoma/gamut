@@ -738,3 +738,84 @@ def test_intersects_triangle_3d(vtype: Any) -> None:
             vtype(0, 0, 0),
         ), tolerance=.1001)
     )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edge_for_points(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+    for edge in t.edges:
+        assert t.get_edge_for_points(edge.a, edge.b) == edge
+        assert t.get_edge_for_points(edge.b, edge.a) == edge
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_edge_for_points(vtype(0, 1, 0), vtype(1, 1, 1))
+    assert str(excinfo.value).startswith(
+        'one or more points are not a position of the triangle'
+    )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edge_opposite_of_point(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+
+    for edge in t.edges:
+        p = t.get_point_opposite_of_edge(edge)
+        assert t.get_edge_opposite_of_point(p) == edge
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_edge_opposite_of_point(vtype(1, 1, 1))
+    assert str(excinfo.value).startswith(
+        'point is not a position of the triangle'
+    )
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edge_point_opposite_of_edge(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+
+    assert t.get_point_opposite_of_edge(t.edges[0]) == t._positions[2]
+    assert t.get_point_opposite_of_edge(t.edges[1]) == t._positions[0]
+    assert t.get_point_opposite_of_edge(t.edges[2]) == t._positions[1]
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_point_opposite_of_edge(LineSegment3d(vtype(0), vtype(0)))
+    assert str(excinfo.value).startswith(
+        'edge is not an edge of the triangle'
+    )
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_plane(vtype: Any) -> None:
+    t = Triangle3d(vtype(1), vtype(1), vtype(1))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert t.where_intersected_by_plane(None)
+    assert str(excinfo.value).startswith(
+        f'plane must be Plane[{vtype.__name__}]'
+    )
+
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == vtype(1)
+    assert t.where_intersected_by_plane(
+        Plane(0, vtype(0, 1, 0))
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(0, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(1)
+
+    t = Triangle3d(vtype(1), vtype(1), vtype(0, 1, 1))
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == LineSegment3d(vtype(0, 1, 1), vtype(1))
+    assert t.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0))
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(0, 1, 1), vtype(1))
+
+    t = Triangle3d(vtype(0, 2, 0), vtype(0, 2, 0), vtype(0, -2, 0))
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)

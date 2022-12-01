@@ -4,16 +4,17 @@ __all__ = ['CsgBrush']
 
 # gamut
 from ._linesegment2d import LineSegment2d
+from ._mesh3d import Mesh3d
 from ._triangle2d import Triangle2d
 from ._triangle3d import Triangle3d
 # gamut
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, FMatrix4,
                         FVector2, FVector3, FVector3Array, IVector3,
                         IVector3Array, U8Vector3Array, U16Vector3Array,
-                        U32Vector3Array, UVector3Array)
+                        U32Vector3Array, UVector3, UVector3Array)
 # python
 from math import copysign
-from typing import Generic, overload, TypeVar
+from typing import Generic, Iterable, overload, TypeVar
 
 PT = TypeVar('PT', FVector3, DVector3)
 
@@ -25,6 +26,35 @@ class CsgBrush(Generic[PT]):
 
     def add_triangle(self, tri: Triangle3d[PT]):
         self._tris.append(tri)
+
+    def to_mesh(self) -> Mesh3d[PT] | None:
+        if not self._tris:
+            return None
+
+        positions_count = 0
+        positions_index: dict[PT, int] = {}
+        triangle_indices: list[UVector3] = []
+        for tri in self._tris:
+            tri_indices = []
+            for position in tri.positions:
+                try:
+                    position_index = positions_index[position]
+                except KeyError:
+                    position_index = positions_count
+                    positions_index[position] = position_index
+                    positions_count += 1
+                tri_indices.append(position_index)
+            triangle_indices.append(UVector3(*tri_indices))
+
+        p_array_type = tri.positions[0].get_array_type()
+        return Mesh3d(
+            p_array_type(*(
+                p
+                for p, i in
+                sorted(positions_index.items(), key=lambda pi: pi[1])
+            )),
+            UVector3Array(*triangle_indices),
+        )
 
 
 class CsgOperation(Generic[PT]):
@@ -40,13 +70,19 @@ class CsgOperation(Generic[PT]):
         self._snap_distance = snap_distance
         self._snap_distance_2 = snap_distance * snap_distance
         self._tolerance = 0.0
-        self._a_tris_inside: dict[Triangle3d[PT], bool] = {}
-        self._b_tris_inside: dict[Triangle3d[PT], bool] = {}
-        self._tris_built = False
+
+        self._mesh: Mesh3d[PT] | None = None
+        self._mesh_tris_inside: dict[int, bool] = {}
+        self._mesh_built = False
 
     def union(self) -> CsgBrush[PT]:
-        self._build_tris()
+        self._build_mesh()
         result = CsgBrush()
+
+        for i in range(len(self._mesh.triangle_indices)):
+            if self._mesh_tris_inside[i]:
+                continue
+            result.add_triangle(self._mesh.get_triangle(i))
 
         return result
 
@@ -63,39 +99,120 @@ class CsgOperation(Generic[PT]):
             self._are_points_snappable(p[1], p[2])
         )
 
-    def _build_tris(self) -> None:
-        if self._tris_built:
+    def _build_mesh(self) -> None:
+        if self._mesh_built:
             return
         a_tri_2d_intersections, b_tri_2d_intersections = (
             self._get_tri_2d_intersections()
         )
-        a_tris = self._build_brush_tris(self._a, a_tri_2d_intersections)
-        b_tris = self._build_brush_tris(self._b, b_tri_2d_intersections)
-        for tri in a_tris:
-            self._a_tris_inside[tri] = self._is_tri_inside(
-                a_tris,
-                b_tris,
+        a_tris = tuple(self._build_brush_tris(self._a, a_tri_2d_intersections))
+        b_tris = tuple(self._build_brush_tris(self._b, b_tri_2d_intersections))
+        mesh, a_tris_index, b_tris_index = self._create_mesh_from_tris(
+            a_tris,
+            b_tris
+        )
+        # add a bit of extra length to the ray to avoid any floating point
+        # problems
+        ray_length = mesh.bounding_box.min.distance(mesh.bounding_box.max) + .1
+        mesh_tris_inside: dict[int, bool] = {}
+        for i, tri in enumerate(mesh.triangles):
+            mesh_tris_inside[i] = self._is_tri_inside(
+                mesh,
+                a_tris_index,
+                b_tris_index,
                 tri,
-                True
+                i,
+                ray_length
             )
-        for tri in b_tris:
-            self._b_tris_inside[tri] = self._is_tri_inside(
-                a_tris,
-                b_tris,
-                tri,
-                False
-            )
-        self._tris_built = True
+
+        self._mesh = mesh
+        self._mesh_tris_inside = mesh_tris_inside
+        self._mesh_built = True
 
     def _is_tri_inside(
         self,
-        a_tris: set[Triangle3d[PT]],
-        b_tris: set[Triangle3d[PT]],
+        mesh: Mesh3d[PT],
+        a_tris_index: dict[int, int],
+        b_tris_index: dict[int, int],
         tri: Triangle3d[PT],
-        is_a_tri: bool
+        index: int,
+        ray_length: float,
     ) -> bool:
-        for other_tri in (*a_tris, *b_tris):
-            pass
+        is_a_tri = index in a_tris_index
+        assert (
+            (is_a_tri and index not in b_tris_index) or
+            (not is_a_tri and index in b_tris_index)
+        )
+
+        a_intersection_times: set[float] = set()
+        b_intersection_times: set[float] = set()
+
+        for hit in mesh.raycast(
+            tri.center,
+            tri.center + (tri.normal * ray_length)
+        ):
+            if hit.triangle_index == index:
+                continue
+            is_hit_a_tri = hit.triangle_index in a_tris_index
+            assert (
+                (is_hit_a_tri and hit.triangle_index not in b_tris_index) or
+                (not is_hit_a_tri and hit.triangle_index in b_tris_index)
+            )
+            if is_hit_a_tri:
+                intersection_times = a_intersection_times
+            else:
+                intersection_times = b_intersection_times
+            intersection_times.add(hit.time)
+        #if FVector3(.25, .25, .25) in tri.positions:
+        #    return True
+        return (len(a_intersection_times) + len(b_intersection_times)) & 1 == 1
+
+    def _create_mesh_from_tris(
+        self,
+        a_tris: Sequence[Triangle3d[PT]],
+        b_tris: Sequence[Triangle3d[PT]],
+    ) -> tuple[
+        Mesh3d[PT],
+        dict[int, int],
+        dict[int, int],
+    ]:
+        positions_count = 0
+        positions_index: dict[PT, int] = {}
+        triangle_indices: list[UVector3] = []
+        a_tris_index: dict[int, int] = {}
+        b_tris_index: dict[int, int] = {}
+        for local_index, tri, ab in (
+            *((i, t, 'a') for i, t in enumerate(a_tris)),
+            *((i, t, 'b') for i, t in enumerate(b_tris))
+        ):
+            tri_indices = []
+            for position in tri.positions:
+                try:
+                    position_index = positions_index[position]
+                except KeyError:
+                    position_index = positions_count
+                    positions_index[position] = position_index
+                    positions_count += 1
+                tri_indices.append(position_index)
+            ab_tris_index = locals()[f'{ab}_tris_index']
+            ab_tris_index[len(triangle_indices)] = local_index
+            triangle_indices.append(UVector3(*tri_indices))
+
+        if not triangle_indices:
+            raise ValueError('must have at least 1 triangle')
+        p_array_type = tri.positions[0].get_array_type()
+        return (
+            Mesh3d(
+                p_array_type(*(
+                    p
+                    for p, i in
+                    sorted(positions_index.items(), key=lambda pi: pi[1])
+                )),
+                UVector3Array(*triangle_indices),
+            ),
+            a_tris_index,
+            b_tris_index
+        )
 
     def _get_intersections(self) -> tuple[
         dict[Triangle3d[PT], set[Triangle3d[PT]]],
@@ -172,6 +289,14 @@ class Tri2dIntersection(Generic[PT]):
         snap_distance: float,
         snap_distance_2: float
     ) -> None:
+        self._xxx = tri == Triangle3d(
+            # ltb
+            FVector3(0, 1, 0),
+            # ltf
+            FVector3(0, 1, 1),
+            # rtf
+            FVector3(1, 1, 1)
+        )
         Matrix4 = (
             FMatrix4
             if isinstance(tri.positions[0], FVector3)
@@ -202,8 +327,12 @@ class Tri2dIntersection(Generic[PT]):
             for t in self._2d_tris
             for p in t.positions
         }
+        if self._xxx:
+            print("==========================")
         for intersection in intersections:
             self._add_intersection(intersection)
+        if self._xxx:
+            print("==========================")
 
     def get_tris(self) -> Generator[Triangle3d[PT], None, None]:
         for tri2 in self._2d_tris:
@@ -264,6 +393,9 @@ class Tri2dIntersection(Generic[PT]):
         )
 
     def _add_intersection(self, tri: Triangle3d[PT]) -> None:
+        if self._xxx:
+            print("*****")
+            print(tri)
         points_to_add: list[PT] = []
 
         pd = [self._plane.signed_distance_to_point(p) for p in tri.positions]
@@ -284,13 +416,16 @@ class Tri2dIntersection(Generic[PT]):
                 )
                 if edge_intersection is not None:
                     points_to_add.append(edge_intersection)
-
+        if self._xxx:
+            print(points_to_add)
         added_points = []
         for p in points_to_add:
             p2 = self._add_point((self._to_2d @ p.xyzl).xy)
             if p2 is None:
-                return
+                continue
             added_points.append(p2)
+        if self._xxx:
+            print(added_points)
 
         if len(added_points) == 2:
             self._add_line_segment(LineSegment2d(*added_points))
@@ -350,6 +485,8 @@ class Tri2dIntersection(Generic[PT]):
                     self._2d_tris.add(tri_b)
                     return snapped_point
             else:
+                if self._xxx:
+                    print(tri)
                 # not on an edge, check if the point is inside the tri
                 if tri.intersects_point(point, tolerance=self._tolerance):
                     # replace this tri with 3 tris, where each edge of the
@@ -362,6 +499,8 @@ class Tri2dIntersection(Generic[PT]):
                         self._2d_tris.add(new_tri)
                     self._2d_tris.remove(tri)
                     return snapped_point
+        if self._xxx:
+            print("SKIP", point)
         return None
 
     @overload
@@ -528,5 +667,7 @@ class Tri2dIntersection(Generic[PT]):
                 continue
             print("DEGEN POINTS")
             assert False
+
+
 
 

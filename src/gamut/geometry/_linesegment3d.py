@@ -7,7 +7,11 @@ __all__ = ['LineSegment3d']
 from gamut.math import DVector3, FVector3
 # python
 from math import hypot, inf
-from typing import Generic, TypeVar
+from typing import Generic, TYPE_CHECKING, TypeVar
+
+if TYPE_CHECKING:
+    # gamut
+    from ._plane import Plane
 
 T = TypeVar('T', FVector3, DVector3)
 
@@ -143,3 +147,44 @@ class LineSegment3d(Generic[T]):
         ab = self._b - self._a
         cd = other._b - other._a
         return ab.cross(cd) ** 2 <= (ab * ab).cross(cd * cd)
+
+    def where_intersected_by_plane(
+        self,
+        plane: Plane[T],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment3d[T] | T | None:
+        # gamut
+        from ._plane import Plane
+        if (
+            not isinstance(plane, Plane) or
+            not isinstance(plane.normal, type(self._a))
+        ):
+            raise TypeError(f'plane must be Plane[{type(self._a).__name__}]')
+        # handle degenerate segment
+        if self.is_degenerate:
+            degen_form = self.degenerate_form
+            assert isinstance(degen_form, type(self._a))
+            if abs(plane.signed_distance_to_point(degen_form)) <= tolerance:
+                return degen_form
+        # find the intersection using math :^)
+        ab = self._b - self._a
+        den = plane.normal @ ab
+        if den == 0:
+            # line segment is parallel to the plane, so any point of the
+            # segment will do as an intersection check
+            if abs(plane.signed_distance_to_point(self.a)) > tolerance:
+                return None
+            return self
+        d = plane.normal @ plane.origin
+        t = (d - plane.normal @ self._a) / den
+        if tolerance == 0:
+            if t < 0 or t > 1:
+                return None
+        else:
+            t = max(min(t, 1), 0)
+        p = self._a + t * ab
+        if tolerance != 0:
+            if abs(self.distance_to_point(p)) > tolerance:
+                return None
+        return p
