@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import (BoundingBox3d, LineSegment3d, Plane, Triangle2d,
-                            Triangle3d)
+                            Triangle3d, Triangle3d.DegenerateError)
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector4, FMatrix4,
                         FVector2, FVector3)
 # python
@@ -13,26 +13,27 @@ import pytest
 
 def vector3_is_close(a: Any, b: Any) -> bool:
     return (
-        isclose(a.x, b.x) and
-        isclose(a.y, b.y) and
-        isclose(a.z, b.z)
+        isclose(a.x, b.x, rel_tol=.00001) and
+        isclose(a.y, b.y, rel_tol=.00001) and
+        isclose(a.z, b.z, rel_tol=.00001)
     )
 
 
-def test_hash() -> None:
-    t = Triangle3d(DVector3(0), DVector3(1), DVector3(2))
-    assert hash(t) == hash(Triangle3d(DVector3(0), DVector3(1), DVector3(2)))
-    assert hash(t) == hash(Triangle3d(DVector3(1), DVector3(2), DVector3(0)))
-    assert hash(t) != hash(Triangle3d(DVector3(1), DVector3(0), DVector3(2)))
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_hash(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 2), vtype(1), vtype(2))
+    assert hash(t) == hash(Triangle3d(vtype(0, 1, 2), vtype(1), vtype(2)))
+    assert hash(t) == hash(Triangle3d(vtype(1), vtype(2), vtype(0, 1, 2)))
+    assert hash(t) != hash(Triangle3d(vtype(1), vtype(0, 1, 2), vtype(2)))
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_repr(vtype: Any) -> None:
-    line = Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
+    line = Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(8, 6, 7))
     assert (
         repr(line) ==
         f'<gamut.geometry.Triangle3d '
-        f'((0.0, 1.0, 2.0), (3.0, 4.0, 5.0), (6.0, 7.0, 8.0))>'
+        f'((0.0, 1.0, 2.0), (3.0, 4.0, 5.0), (8.0, 6.0, 7.0))>'
     )
 
 
@@ -180,53 +181,52 @@ def test_normals(vtype: Any) -> None:
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_equal(vtype: Any) -> None:
     assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) ==
-        Triangle3d(vtype(0), vtype(0), vtype(0))
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) ==
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2))
     )
     assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) !=
-        Triangle3d(vtype(0, 1, 0), vtype(0), vtype(0))
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) !=
+        Triangle3d(vtype(0, 1, 0), vtype(1), vtype(0))
     )
     assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) !=
-        Triangle3d(vtype(0), vtype(1, 0, 0), vtype(0))
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) !=
+        Triangle3d(vtype(1), vtype(1, 0, 0), vtype(0))
     )
     assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) !=
-        Triangle3d(vtype(0), vtype(0), vtype(1, 0, 0))
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) !=
+        Triangle3d(vtype(0), vtype(1), vtype(1, 0, 0))
     )
     assert (
-        Triangle3d(vtype(0), vtype(1), vtype(2)) ==
-        Triangle3d(vtype(2), vtype(0), vtype(1))
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) ==
+        Triangle3d(vtype(0, 1, 2), vtype(0), vtype(1))
     )
     assert (
-        Triangle3d(vtype(2), vtype(0), vtype(1)) ==
-        Triangle3d(vtype(1), vtype(2), vtype(0))
+        Triangle3d(vtype(0, 1, 2), vtype(0), vtype(1)) ==
+        Triangle3d(vtype(1), vtype(0, 1, 2), vtype(0))
     )
     assert (
-        Triangle3d(vtype(0), vtype(2), vtype(1)) !=
-        Triangle3d(vtype(1), vtype(2), vtype(0))
+        Triangle3d(vtype(0), vtype(0, 1, 2), vtype(1)) !=
+        Triangle3d(vtype(1), vtype(0, 1, 2), vtype(0))
     )
-    assert Triangle3d(vtype(0), vtype(0), vtype(0)) != object()
+    assert Triangle3d(vtype(0), vtype(0, 1, 2), vtype(1)) != object()
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_degenerate(vtype: Any) -> None:
-    t = Triangle3d(vtype(0), vtype(0), vtype(0))
-    assert t.is_degenerate
-    assert t.degenerate_form == vtype(0)
+    with pytest.raises(Triangle3d.DegenerateError) as excinfo:
+        Triangle3d(vtype(0), vtype(0), vtype(0))
+    assert str(excinfo.value).startswith('degenerate triangle')
+    assert excinfo.value.degenerate_form == vtype(0)
 
-    t = Triangle3d(vtype(0), vtype(1), vtype(0))
-    assert t.is_degenerate
-    assert t.degenerate_form == LineSegment3d(vtype(0), vtype(1))
+    with pytest.raises(Triangle3d.DegenerateError) as excinfo:
+        Triangle3d(vtype(0), vtype(1), vtype(0))
+    assert str(excinfo.value).startswith('degenerate triangle')
+    assert excinfo.value.degenerate_form == LineSegment3d(vtype(0), vtype(1))
 
-    t = Triangle3d(vtype(0), vtype(1), vtype(2))
-    assert t.is_degenerate
-    assert t.degenerate_form == LineSegment3d(vtype(2), vtype(0))
-
-    t = Triangle3d(vtype(0), vtype(0, 1, 0), vtype(1, 0, 0))
-    assert not t.is_degenerate
-    assert t.degenerate_form is None
+    with pytest.raises(Triangle3d.DegenerateError) as excinfo:
+        Triangle3d(vtype(0), vtype(1), vtype(2))
+    assert str(excinfo.value).startswith('degenerate triangle')
+    assert excinfo.value.degenerate_form == LineSegment3d(vtype(2), vtype(0))
 
 
 @pytest.mark.parametrize("vtype, vtype2", [
@@ -234,13 +234,6 @@ def test_degenerate(vtype: Any) -> None:
     [DVector3, DVector2],
 ])
 def test_project_orthographic(vtype: Any, vtype2: Any) -> None:
-    with pytest.raises(Triangle3d.DegenerateError):
-        Triangle3d(vtype(0), vtype(0), vtype(0)).project_orthographic()
-    with pytest.raises(Triangle3d.DegenerateError):
-        Triangle3d(vtype(0), vtype(1), vtype(0)).project_orthographic()
-    with pytest.raises(Triangle3d.DegenerateError):
-        Triangle3d(vtype(0), vtype(1), vtype(2)).project_orthographic()
-
     t2 = Triangle3d(
         vtype(0, 1, 10),
         vtype(0, 0, 15),
@@ -276,93 +269,104 @@ def test_project_orthographic(vtype: Any, vtype2: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
-def test_intersects_point(vtype: Any) -> None:
-    tri = Triangle3d(vtype(0), vtype(0), vtype(0))
-    assert tri.intersects_point(vtype(0))
-    assert not tri.intersects_point(vtype(1, 0, 0))
-    assert not tri.intersects_point(vtype(0, 1, 0))
-    assert not tri.intersects_point(vtype(0, 0, 1))
-    assert not tri.intersects_point(vtype(1, 0, 0), tolerance=.99)
-    assert not tri.intersects_point(vtype(0, 1, 0), tolerance=.99)
-    assert not tri.intersects_point(vtype(0, 0, 1), tolerance=.99)
-    assert tri.intersects_point(vtype(1, 0, 0), tolerance=1)
-    assert tri.intersects_point(vtype(0, 1, 0), tolerance=1)
-    assert tri.intersects_point(vtype(0, 0, 1), tolerance=1)
-
-    tri = Triangle3d(vtype(0), vtype(1), vtype(2))
-    assert tri.intersects_point(vtype(0))
-    assert tri.intersects_point(vtype(1))
-    assert tri.intersects_point(vtype(2))
-    assert not tri.intersects_point(vtype(3))
-    assert not tri.intersects_point(vtype(-1))
-    assert tri.intersects_point(vtype(3), tolerance=1.733)
-    assert tri.intersects_point(vtype(-1), tolerance=1.733)
-
-    tri = Triangle3d(
+def test_where_intersected_by_point(vtype: Any) -> None:
+    t = Triangle3d(
         vtype(0),
         vtype(.5),
         vtype(1, .5, 0)
     )
-    assert tri.intersects_point(vtype(0))
-    assert tri.intersects_point(vtype(.5))
-    assert tri.intersects_point(vtype(1, .5, 0))
-    assert tri.intersects_point(vtype(.5, .25, 0), tolerance=.0001)
-    assert tri.intersects_point(vtype(.25), tolerance=.0001)
-    assert tri.intersects_point(vtype(.75, .5, .25), tolerance=.0001)
-    assert tri.intersects_point(tri.center, tolerance=.0001)
-    assert not tri.intersects_point(vtype(.504, .242, .004), tolerance=.0001)
-    assert not tri.intersects_point(vtype(.254, .242, .254), tolerance=.0001)
-    assert not tri.intersects_point(vtype(.754, .492, .254), tolerance=.0001)
-    assert tri.intersects_point(vtype(.504, .242, .004), tolerance=.01)
-    assert tri.intersects_point(vtype(.254, .242, .254), tolerance=.01)
-    assert tri.intersects_point(vtype(.754, .492, .254), tolerance=.01)
+
+    with pytest.raises(TypeError) as excinfo:
+        assert t.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert t.where_intersected_by_point(vtype(0)) == vtype(0)
+    assert t.where_intersected_by_point(vtype(.5)) == vtype(.5)
+    assert t.where_intersected_by_point(vtype(1, .5, 0)) == vtype(1, .5, 0)
+
+    assert t.where_intersected_by_point(vtype(.5, .25, 0)) == vtype(.5, .25, 0)
+    assert t.where_intersected_by_point(vtype(.25)) == vtype(.25)
+    assert (
+        t.where_intersected_by_point(vtype(.75, .5, .25), tolerance=.00001) ==
+        vtype(.75, .5, .25)
+    )
+
+    assert vector3_is_close(
+        t.where_intersected_by_point(t.center, tolerance=.000001),
+        t.center
+    )
+
+    assert t.where_intersected_by_point(
+        vtype(.504, .242, .004),
+        tolerance=.0001
+    ) is None
+    assert t.where_intersected_by_point(
+        vtype(.254, .242, .254),
+        tolerance=.0001
+    ) is None
+    assert t.where_intersected_by_point(
+        vtype(.754, .492, .254),
+        tolerance=.0001
+    ) is None
+
+    assert (
+        t.where_intersected_by_point(vtype(.504, .242, .004), tolerance=.01) ==
+        vtype(.5, .25, 0)
+    )
+    assert (
+        t.where_intersected_by_point(vtype(.254, .242, .254), tolerance=.01) ==
+        vtype(.25)
+    )
+    assert (
+        t.where_intersected_by_point(vtype(.754, .492, .254), tolerance=.01) ==
+        vtype(.75, .5, .25)
+    )
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
-def test_intersects_line_segment(vtype: Any) -> None:
-    tri = Triangle3d(vtype(0), vtype(0), vtype(0))
-    assert tri.intersects_line_segment(LineSegment3d(vtype(0), vtype(1)))
-    assert tri.intersects_line_segment(LineSegment3d(vtype(1), vtype(0)))
-    assert not tri.intersects_line_segment(
-        LineSegment3d(vtype(1, 0, 0), vtype(1))
-    )
-    assert not tri.intersects_line_segment(
-        LineSegment3d(vtype(0, 1, 0), vtype(1))
-    )
-    assert not tri.intersects_line_segment(
-        LineSegment3d(vtype(0, 0, 1), vtype(1))
-    )
-    assert not tri.intersects_line_segment(
-        LineSegment3d(vtype(1, 0, 0), vtype(1)),
-        tolerance=.999
-    )
-    assert not tri.intersects_line_segment(
-        LineSegment3d(vtype(0, 1, 0), vtype(1)),
-        tolerance=.999
-    )
-    assert not tri.intersects_line_segment(
-        LineSegment3d(vtype(0, 0, 1), vtype(1)),
-        tolerance=.999
-    )
-    assert tri.intersects_line_segment(
-        LineSegment3d(vtype(1, 0, 0), vtype(1)),
-        tolerance=1
-    )
-    assert tri.intersects_line_segment(
-        LineSegment3d(vtype(0, 1, 0), vtype(1)),
-        tolerance=1
-    )
-    assert tri.intersects_line_segment(
-        LineSegment3d(vtype(0, 0, 1), vtype(1)),
-        tolerance=1
-    )
-
-    tri = Triangle3d(
+def test_where_intersected_by_line_segment(vtype: Any) -> None:
+    t = Triangle3d(
         vtype(1, 0, 0),
         vtype(1, 1, 0),
         vtype(0, 0, 0),
     )
-    assert tri.intersects_line_segment(LineSegment3d(vtype(0), vtype(0)))
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0), vtype(0, 0, 1))
+    ) == vtype(0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 0, 0), vtype(1, 0, 1))
+    ) == vtype(1, 0, 0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 1, 0), vtype(1, 1, 1))
+    ) == vtype(1, 1, 0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0, 0, -1), vtype(0, 0, 1))
+    ) == vtype(0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 0, -1), vtype(1, 0, 1))
+    ) == vtype(1, 0, 0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 1, -1), vtype(1, 1, 1))
+    ) == vtype(1, 1, 0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(.5, .5, -1), vtype(.5, .5, 1))
+    ) == vtype(.5, .5, 0)
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(.5, .5, 1), vtype(.5, .5, 2))
+    ) is None
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(.5, .5, 1), vtype(.5, .5, 2)),
+        tolerance=1
+    )== vtype(.5, .5, 0)
+
+    """
+    assert t.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 0, 0), vtype(1, 1, 0))
+    ) == LineSegment3d(vtype(1, 0, 0), vtype(1, 1, 0))
+    """
+
+
+    assert False
     assert not tri.intersects_line_segment(LineSegment3d(vtype(1), vtype(1)))
     assert not tri.intersects_line_segment(
         LineSegment3d(vtype(1), vtype(1)),
@@ -434,150 +438,6 @@ def test_intersects_line_segment(vtype: Any) -> None:
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_intersects_triangle_3d(vtype: Any) -> None:
-    assert(
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ))
-    )
-    assert(
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(1),
-        ))
-    )
-    assert(
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(1),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ))
-    )
-    assert not (
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(1),
-            vtype(1),
-            vtype(1),
-        ))
-    )
-    assert not (
-        Triangle3d(
-            vtype(1),
-            vtype(1),
-            vtype(1),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ))
-    )
-    assert not (
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(1),
-            vtype(1),
-            vtype(1),
-        ), tolerance=.999)
-    )
-    assert not (
-        Triangle3d(
-            vtype(1),
-            vtype(1),
-            vtype(1),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ), tolerance=.999)
-    )
-    assert(
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(1),
-            vtype(0),
-            vtype(0),
-        ), tolerance=1)
-    )
-    assert(
-        Triangle3d(
-            vtype(1),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ), tolerance=1)
-    )
-    assert not (
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-        ), tolerance=.999)
-    )
-    assert not (
-        Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ), tolerance=.999)
-    )
-    assert(
-        Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-        ), tolerance=1)
-    )
-    assert(
-        Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-            vtype(1, 0, 0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ), tolerance=1)
-    )
-
     assert not (
         Triangle3d(
             vtype(1, 0, 0),
@@ -598,52 +458,6 @@ def test_intersects_triangle_3d(vtype: Any) -> None:
             vtype(.4, .6, 0),
             vtype(.5, 1, 0),
             vtype(0, .5, 0),
-        ), tolerance=.15)
-    )
-
-    assert not (
-        Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 1, 0),
-            vtype(0, 0, 0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0, 1, 0),
-            vtype(.4, .6, 0),
-            vtype(0, 1, 0),
-        ))
-    )
-    assert(
-        Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 1, 0),
-            vtype(0, 0, 0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(0, 1, 0),
-            vtype(.4, .6, 0),
-            vtype(0, 1, 0),
-        ), tolerance=.15)
-    )
-
-    assert not (
-        Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 1, 0),
-            vtype(0, 0, 0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(.4, .6, 0),
-            vtype(.4, .6, 0),
-            vtype(.4, .6, 0),
-        ))
-    )
-    assert(
-        Triangle3d(
-            vtype(1, 0, 0),
-            vtype(1, 1, 0),
-            vtype(0, 0, 0),
-        ).intersects_triangle_3d(Triangle3d(
-            vtype(.4, .6, 0),
-            vtype(.4, .6, 0),
-            vtype(.4, .6, 0),
         ), tolerance=.15)
     )
 
@@ -738,6 +552,7 @@ def test_intersects_triangle_3d(vtype: Any) -> None:
             vtype(0, 0, 0),
         ), tolerance=.1001)
     )
+
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_get_edge_for_points(vtype: Any) -> None:
@@ -751,6 +566,7 @@ def test_get_edge_for_points(vtype: Any) -> None:
     assert str(excinfo.value).startswith(
         'one or more points are not a position of the triangle'
     )
+
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_get_edge_opposite_of_point(vtype: Any) -> None:
@@ -771,9 +587,9 @@ def test_get_edge_opposite_of_point(vtype: Any) -> None:
 def test_get_edge_point_opposite_of_edge(vtype: Any) -> None:
     t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
 
-    assert t.get_point_opposite_of_edge(t.edges[0]) == t._positions[2]
-    assert t.get_point_opposite_of_edge(t.edges[1]) == t._positions[0]
-    assert t.get_point_opposite_of_edge(t.edges[2]) == t._positions[1]
+    assert t.get_point_opposite_of_edge(t.edges[0]) == t.positions[2]
+    assert t.get_point_opposite_of_edge(t.edges[1]) == t.positions[0]
+    assert t.get_point_opposite_of_edge(t.edges[2]) == t.positions[1]
 
     with pytest.raises(ValueError) as excinfo:
         assert t.get_point_opposite_of_edge(LineSegment3d(vtype(0), vtype(0)))
@@ -783,8 +599,32 @@ def test_get_edge_point_opposite_of_edge(vtype: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edges_for_point(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+
+    assert t.get_edges_for_point(t.positions[0]) == (
+        t.edges[2],
+        t.edges[0]
+    )
+    assert t.get_edges_for_point(t.positions[1]) == (
+        t.edges[0],
+        t.edges[1]
+    )
+    assert t.get_edges_for_point(t.positions[2]) == (
+        t.edges[1],
+        t.edges[2]
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_edges_for_point(vtype(1, 1, 1))
+    assert str(excinfo.value).startswith(
+        'point is not a position of the triangle'
+    )
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_where_intersected_by_plane(vtype: Any) -> None:
-    t = Triangle3d(vtype(1), vtype(1), vtype(1))
+    t = Triangle3d(vtype(1, 2, 0), vtype(1, 2, 1), vtype(0, 2, 0))
 
     with pytest.raises(TypeError) as excinfo:
         assert t.where_intersected_by_plane(None)
@@ -793,29 +633,76 @@ def test_where_intersected_by_plane(vtype: Any) -> None:
     )
 
     assert t.where_intersected_by_plane(
-        Plane(-1, vtype(0, 1, 0))
-    ) == vtype(1)
+        Plane(-2, vtype(0, 1, 0))
+    ) == t
     assert t.where_intersected_by_plane(
-        Plane(0, vtype(0, 1, 0))
+        Plane(-1, vtype(0, 1, 0))
     ) is None
     assert t.where_intersected_by_plane(
-        Plane(0, vtype(0, 1, 0)),
+        Plane(-1, vtype(0, 1, 0)),
         tolerance=1
-    ) == vtype(1)
+    ) == t
 
-    t = Triangle3d(vtype(1), vtype(1), vtype(0, 1, 1))
-    assert t.where_intersected_by_plane(
-        Plane(-1, vtype(0, 1, 0))
-    ) == LineSegment3d(vtype(0, 1, 1), vtype(1))
+    t = Triangle3d(vtype(1, 2, 0), vtype(1, 2, 1), vtype(0, 3, 0))
     assert t.where_intersected_by_plane(
         Plane(-2, vtype(0, 1, 0))
-    ) is None
-    assert t.where_intersected_by_plane(
-        Plane(-2, vtype(0, 1, 0)),
-        tolerance=1
-    ) == LineSegment3d(vtype(0, 1, 1), vtype(1))
-
-    t = Triangle3d(vtype(0, 2, 0), vtype(0, 2, 0), vtype(0, -2, 0))
+    ) == LineSegment3d(vtype(1, 2, 0), vtype(1, 2, 1))
     assert t.where_intersected_by_plane(
         Plane(-1, vtype(0, 1, 0))
-    ) == vtype(0, 1, 0)
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(1, 2, 0), vtype(1, 2, 1))
+    assert t.where_intersected_by_plane(
+        Plane(-3, vtype(0, 1, 0))
+    ) == vtype(0, 3, 0)
+    assert t.where_intersected_by_plane(
+        Plane(-4, vtype(0, 1, 0))
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(-4, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(0, 3, 0)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_barycentric(vtype: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Triangle3d(vtype(0), vtype(1, 0, 0), vtype(0, 1, 0)
+            ).get_projected_barycentric_point_from_cartesian(None)
+    assert str(excinfo.value).startswith(
+        f'cartesian_point must be {vtype}'
+    )
+    with pytest.raises(TypeError) as excinfo:
+        Triangle3d(vtype(0), vtype(1, 0, 0), vtype(0, 1, 0)
+            ).get_cartesian_point_from_barycentric(None)
+    assert str(excinfo.value).startswith(
+        f'barycentric_point must be {vtype}'
+    )
+
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(0))
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(0))
+    assert bp == vtype(1, 0, 0)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(0, 1, 0))
+    assert bp == vtype(0, 1, 0)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(0, 1, 0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(1, 0, 0))
+    assert bp == vtype(0, 0, 1)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(1, 0, 0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(0, 0, 1))
+    assert bp == vtype(1, 0, 0)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(t.center)
+    assert vector3_is_close(bp, vtype(1 / 3, 1 / 3, 1 / 3))
+    assert t.get_cartesian_point_from_barycentric(bp) == t.center
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(-1, 2, 4))
+    assert bp == vtype(0, 2, -1)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(-1, 2, 0)

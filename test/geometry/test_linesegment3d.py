@@ -1,11 +1,20 @@
 
 # gamut
-from gamut.geometry import LineSegment3d, Plane
+from gamut.geometry import LineSegment3d, Plane, Triangle3d
 from gamut.math import BVector3, DVector3, DVector4, FVector3
 # python
+from math import isclose
 from typing import Any
 # pytest
 import pytest
+
+
+def vector3_is_close(a: Any, b: Any) -> bool:
+    return (
+        isclose(a.x, b.x, rel_tol=.00001) and
+        isclose(a.y, b.y, rel_tol=.00001) and
+        isclose(a.z, b.z, rel_tol=.00001)
+    )
 
 
 def test_hash() -> None:
@@ -48,13 +57,10 @@ def test_invalid_b(a: Any, b: Any) -> None:
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_degenerate(vtype: Any) -> None:
-    line = LineSegment3d(vtype(0), vtype(0))
-    assert line.is_degenerate
-    assert line.degenerate_form == vtype(0)
-
-    line = LineSegment3d(vtype(0), vtype(1))
-    assert not line.is_degenerate
-    assert line.degenerate_form is None
+    with pytest.raises(LineSegment3d.DegenerateError) as excinfo:
+        LineSegment3d(vtype(0), vtype(0))
+    assert str(excinfo.value).startswith('degenerate line segment')
+    assert excinfo.value.degenerate_form == vtype(0)
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
@@ -68,18 +74,18 @@ def test_attributes(vtype: Any) -> None:
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_equal(vtype: Any) -> None:
     assert (
-        LineSegment3d(vtype(0), vtype(0)) ==
-        LineSegment3d(vtype(0), vtype(0))
+        LineSegment3d(vtype(0), vtype(1)) ==
+        LineSegment3d(vtype(0), vtype(1))
     )
     assert (
-        LineSegment3d(vtype(0), vtype(0)) !=
+        LineSegment3d(vtype(0), vtype(1)) !=
         LineSegment3d(vtype(0, 1, 0), vtype(0))
     )
     assert (
-        LineSegment3d(vtype(0), vtype(0)) !=
+        LineSegment3d(vtype(0), vtype(1)) !=
         LineSegment3d(vtype(0), vtype(1, 0, 0))
     )
-    assert LineSegment3d(vtype(0), vtype(0)) != object()
+    assert LineSegment3d(vtype(0), vtype(1)) != object()
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
@@ -160,12 +166,6 @@ def test_is_parallel_with_line_segment(vtype: Any) -> None:
     assert not line.is_parallel_with_line_segment(
         LineSegment3d(vtype(0), vtype(5, 0, 0))
     )
-    assert not line.is_parallel_with_line_segment(
-        LineSegment3d(vtype(0), vtype(0))
-    )
-
-    line = LineSegment3d(vtype(0), vtype(0))
-    assert not line.is_parallel_with_line_segment(line)
 
     line = LineSegment3d(vtype(0), vtype(5, 0, 0))
     assert line.is_parallel_with_line_segment(line)
@@ -185,15 +185,6 @@ def test_is_parallel_with_line_segment(vtype: Any) -> None:
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_distance_to_line_segment(vtype: Any) -> None:
-    assert LineSegment3d(vtype(0), vtype(0)).distance_to_line_segment(
-        LineSegment3d(vtype(1, 0, 0), vtype(2, 0, 0))
-    ) == 1.0
-    assert LineSegment3d(
-        vtype(1, 0, 0), vtype(2, 0, 0)
-    ).distance_to_line_segment(
-        LineSegment3d(vtype(0), vtype(0))
-    ) == 1.0
-
     line = LineSegment3d(vtype(-5), vtype(5))
     assert line.distance_to_line_segment(line) == 0.0
     assert line.distance_to_line_segment(
@@ -226,19 +217,14 @@ def test_distance_to_line_segment(vtype: Any) -> None:
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_where_intersected_by_plane(vtype: Any) -> None:
-    line = LineSegment3d(vtype(1), vtype(1))
-    assert line.where_intersected_by_plane(
-        Plane(-1, vtype(0, 1, 0))
-    ) == vtype(1)
-    assert line.where_intersected_by_plane(
-        Plane(-2, vtype(0, 1, 0))
-    ) is None
-    assert line.where_intersected_by_plane(
-        Plane(-2, vtype(0, 1, 0)),
-        tolerance=1
-    ) == vtype(1)
-
     line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.where_intersected_by_plane(None)
+    assert str(excinfo.value).startswith(
+        f'plane must be Plane[{vtype.__name__}]'
+    )
+
     assert line.where_intersected_by_plane(
         Plane(-1, vtype(0, 1, 0))
     ) == vtype(0, 1, 0)
@@ -265,3 +251,308 @@ def test_where_intersected_by_plane(vtype: Any) -> None:
         Plane(-2, vtype(0, 1, 0)),
         tolerance=1
     ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_project_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.project_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert line.project_point(vtype(0, -2, 0)) == vtype(0, -2, 0)
+    assert line.project_point(vtype(0, 2, 0)) == vtype(0, 2, 0)
+    assert line.project_point(vtype(0, 0, 0)) == vtype(0, 0, 0)
+    assert line.project_point(vtype(0, -4, 0)) == vtype(0, -4, 0)
+
+    assert line.project_point(vtype(100, -2, -100)) == vtype(0, -2, 0)
+    assert line.project_point(vtype(1, -4, -1)) == vtype(0, -4, 0)
+
+    assert line.project_point(
+        vtype(100, -2, -100),
+        clamped=True
+    ) == vtype(0, -2, 0)
+    assert line.project_point(
+        vtype(1, -4, -1),
+        clamped=True
+    ) == vtype(0, -2, 0)
+    assert line.project_point(
+        vtype(1, 4, -1),
+        clamped=True
+    ) == vtype(0, 2, 0)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_project_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert line.where_intersected_by_point(vtype(0, -2, 0)) == vtype(0, -2, 0)
+    assert line.where_intersected_by_point(vtype(0, 2, 0)) == vtype(0, 2, 0)
+    assert line.where_intersected_by_point(vtype(0, 0, 0)) == vtype(0, 0, 0)
+
+    assert line.where_intersected_by_point(vtype(0, -3, 0)) is None
+    assert line.where_intersected_by_point(
+        vtype(0, -3, 0),
+        tolerance=1
+    ) == vtype(0, -2, 0)
+    assert line.where_intersected_by_point(vtype(1, 0, 0)) is None
+    assert line.where_intersected_by_point(
+        vtype(1, 0, 0),
+        tolerance=1
+    ) == vtype(0, 0, 0)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_line_segment(vtype: Any) -> None:
+    line = LineSegment3d(vtype(-5), vtype(5))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.where_intersected_by_line_segment(None)
+    assert str(excinfo.value).startswith(
+        f'other must be LineSegment3d[{vtype.__name__}]'
+    )
+
+    assert line.where_intersected_by_line_segment(line) == line
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(-4), vtype(4))
+    ) == LineSegment3d(vtype(-4), vtype(4))
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(6), vtype(8))
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(-7), vtype(-8))
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(0, 0, 0))
+    ) == vtype(0, 0, 0)
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(-1, -2, -2), vtype(-1, -3, -3))
+    ) is None
+
+
+    line = LineSegment3d(vtype(0), vtype(1, 0, 0))
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(-2, 0, 0))
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(-2, 0, 0)),
+        tolerance=1
+    ) == vtype(0)
+
+    assert LineSegment3d(
+        vtype(0),
+        vtype(2, 0, 0)
+    ).where_intersected_by_line_segment(
+        LineSegment3d(
+            vtype(-1, 0, 0),
+            vtype(1, 0, 0)
+        ),
+    ) == LineSegment3d(vtype(0), vtype(1, 0, 0))
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_triangle(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0), vtype(2, 0, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.where_intersected_by_triangle(None)
+    assert str(excinfo.value).startswith(
+        f'tri must be Triangle3d[{vtype.__name__}]'
+    )
+
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(5),
+        vtype(6, 5, 5),
+        vtype(5, 6, 5),
+    )) is None
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(-1, 0, 0),
+        vtype(1, 0, 0),
+        vtype(0, 1, 0)
+    )) == LineSegment3d(vtype(0, 0, 0), vtype(1, 0, 0))
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(3, 0, 0),
+        vtype(1, 0, 0),
+        vtype(0, 1, 0)
+    )) == LineSegment3d(vtype(1, 0, 0), vtype(2, 0, 0))
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(-1, 0, 0),
+        vtype(3, 0, 0),
+        vtype(0, 1, 0)
+    )) == LineSegment3d(vtype(0, 0, 0), vtype(2, 0, 0))
+
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(0, 0, 0),
+        vtype(0, 1, 1),
+        vtype(0, 1, 0)
+    )) == vtype(0, 0, 0)
+
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(0, 1, 1),
+        vtype(1, 1, 0),
+        vtype(0, 1, 0)
+    )) is None
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(0, 1, 1),
+        vtype(1, 1, 0),
+        vtype(0, 1, 0)
+    ), tolerance=1) == vtype(0)
+
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(0, 2, 1),
+        vtype(1, 2, 0),
+        vtype(0, 1, 0)
+    )) is None
+    assert line.where_intersected_by_triangle(Triangle3d(
+        vtype(0, 2, 1),
+        vtype(1, 2, 0),
+        vtype(0, 1, 0)
+    ), tolerance=1) == vtype(0)
+
+    assert vector3_is_close(
+        line.where_intersected_by_triangle(
+            Triangle3d(
+                vtype(0, 2, 1),
+                vtype(1, 2, 0),
+                vtype(1, -1, 0)
+            )
+        ),
+        vtype(1, 0, 0)
+    )
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 3, 0),
+            vtype(-1, -1, 0),
+            vtype(3, -1, 0)
+        )
+    ) == line
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 3, 1),
+            vtype(-1, -1, 1),
+            vtype(3, -1, 1)
+        )
+    ) is None
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 3, 1),
+            vtype(-1, -1, 1),
+            vtype(3, -1, 1)
+        ),
+        tolerance=1
+    ) == line
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 3, 0),
+            vtype(1, -1, 0),
+            vtype(3, -1, 0)
+        )
+    ) == LineSegment3d(vtype(1, 0, 0), vtype(2, 0, 0))
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 3, 1),
+            vtype(1, -1, 1),
+            vtype(3, -1, 1)
+        )
+    ) is None
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 3, 1),
+            vtype(1, -1, 1),
+            vtype(3, -1, 1)
+        ),
+        tolerance=1
+    ) == LineSegment3d(vtype(1, 0, 0), vtype(2, 0, 0))
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(2, 3, 0),
+            vtype(2, -1, 0),
+            vtype(4, -1, 0)
+        )
+    ) == vtype(2, 0, 0)
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(2, 3, 1),
+            vtype(2, -1, 1),
+            vtype(4, -1, 1)
+        )
+    ) is None
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(2, 3, 1),
+            vtype(2, -1, 1),
+            vtype(4, -1, 1)
+        ),
+        tolerance=1
+    ) == vtype(2, 0, 0)
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(0, -1, 0),
+            vtype(2, -1, 0),
+            vtype(1, 3, 0)
+        )
+    ) == LineSegment3d(vtype(.25, 0, 0), vtype(1.75, 0, 0))
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(0, -1, 1),
+            vtype(2, -1, 1),
+            vtype(1, 3, 1)
+        )
+    ) is None
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(0, -1, 1),
+            vtype(2, -1, 1),
+            vtype(1, 3, 1)
+        ),
+        tolerance=1
+    ) == LineSegment3d(vtype(.25, 0, 0), vtype(1.75, 0, 0))
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(2, -1, 0),
+            vtype(4, -1, 0),
+            vtype(3, 3, 0)
+        )
+    ) is None
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(-1, 0, 0),
+            vtype(-2, 0, 0),
+            vtype(-1, 1, 0)
+        )
+    ) is None
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(-1, 0, 0),
+            vtype(-2, 0, 0),
+            vtype(-1, 1, 0)
+        ),
+        tolerance=1
+    ) == vtype(0)
+
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 1, 0),
+            vtype(0, 1, 0),
+            vtype(2, 2, 0)
+        )
+    ) is None
+    assert line.where_intersected_by_triangle(
+        Triangle3d(
+            vtype(1, 1, 0),
+            vtype(0, 1, 0),
+            vtype(2, 2, 0)
+        ),
+        tolerance=1
+    ) == LineSegment3d(vtype(0), vtype(1, 0, 0))
