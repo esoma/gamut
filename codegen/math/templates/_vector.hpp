@@ -755,6 +755,12 @@ static PyGetSetDef {{ name }}_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':
@@ -1054,6 +1060,17 @@ static PyObject *
 }
 
 
+static PyObject *
+{{ name }}_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->{{ name }}Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef {{ name }}_PyMethodDef[] = {
     {% if c_type in ['float', 'double'] %}
         {% if component_count == 3 %}
@@ -1069,6 +1086,7 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
     {"clamp", (PyCFunction){{ name }}_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction){{ name }}_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction){{ name }}_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction){{ name }}_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };

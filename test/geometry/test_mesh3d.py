@@ -1,12 +1,12 @@
 
 # gamut
-from gamut.geometry import Mesh3d
+from gamut.geometry import Mesh3d, Mesh3dRaycastHit, RectangularCuboid
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, DVector4,
                         FMatrix4, FVector3, FVector3Array, U8Vector3,
                         U8Vector3Array, U16Vector3, U16Vector3Array,
                         U32Vector3, U32Vector3Array, UVector3, UVector3Array)
 # python
-from math import radians
+from math import isclose, radians
 from typing import Any
 # pytest
 import pytest
@@ -380,11 +380,19 @@ def test_raycast_invalid_start_end(
         )
     )
     with pytest.raises(TypeError) as ex:
-        mesh.raycast(invalid_value, pos_vector(0))
+        list(mesh.raycast(invalid_value, pos_vector(0)))
     assert str(ex.value) == f'start must be {pos_vector.__name__}'
 
     with pytest.raises(TypeError) as ex:
-        mesh.raycast(pos_vector(0), invalid_value)
+        list(mesh.raycast(pos_vector(0), invalid_value))
+    assert str(ex.value) == f'end must be {pos_vector.__name__}'
+
+    with pytest.raises(TypeError) as ex:
+        mesh.get_raycast_first_hit(invalid_value, pos_vector(0))
+    assert str(ex.value) == f'start must be {pos_vector.__name__}'
+
+    with pytest.raises(TypeError) as ex:
+        mesh.get_raycast_first_hit(pos_vector(0), invalid_value)
     assert str(ex.value) == f'end must be {pos_vector.__name__}'
 
 
@@ -404,63 +412,151 @@ def test_raycast_no_normals(
     index_array: Any,
     index_vector: Any
 ) -> None:
+    positions, _, _, indexes = RectangularCuboid(
+        pos_vector(0),
+        pos_vector(2)
+    ).render()
+
     mesh = Mesh3d(
-        pos_array(
-            pos_vector(-1, -1, 0),
-            pos_vector(1, -1, 0),
-            pos_vector(1, 1, 0),
-            pos_vector(-1, 1, 0),
+        pos_array(*(pos_vector(*p) for p in positions)),
+        index_array(*(
+            index_vector(*indexes[i * 3 : i * 3 + 3])
+            for i in range(len(indexes) // 3)
+        ))
+    )
+    results = set(mesh.raycast(pos_vector(0, 0, 2), pos_vector(0, 0, -2)))
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, 1),
+            9,
+            .25
         ),
-        index_array(
-            index_vector(0, 1, 3),
-            index_vector(3, 1, 2),
-        )
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, 1),
+            8,
+            .25
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, 1),
+            10,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, 1),
+            11,
+            .75
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(0, 0, 2),
+        pos_vector(0, 0, -2)
+    )
+    assert result == Mesh3dRaycastHit(
+        pos_vector(0, 0, 1),
+        pos_vector(0, 0, 1),
+        8,
+        .25
     )
 
-    result = mesh.raycast(pos_vector(-.5, -.5, 1), pos_vector(-.5, -.5, -1))
-    assert result is not None
-    assert result.position == pos_vector(-.5, -.5, 0)
-    assert result.normal == pos_vector(0, 0, 1)
-    assert result.triangle_index == 0
-    assert result.time == .5
-
-    result = mesh.raycast(pos_vector(-.5, -.5, -1), pos_vector(-.5, -.5, 1))
-    assert result is not None
-    assert result.position == pos_vector(-.5, -.5, 0)
-    assert result.normal == pos_vector(0, 0, -1)
-    assert result.triangle_index == 0
-    assert result.time == .5
-
-    result = mesh.raycast(pos_vector(.5, .5, 1), pos_vector(.5, .5, -1))
-    assert result is not None
-    assert result.position == pos_vector(.5, .5, 0)
-    assert result.normal == pos_vector(0, 0, 1)
-    assert result.triangle_index == 1
-    assert result.time == .5
-
-    result = mesh.raycast(pos_vector(.5, .5, -1), pos_vector(.5, .5, 1))
-    assert result is not None
-    assert result.position == pos_vector(.5, .5, 0)
-    assert result.normal == pos_vector(0, 0, -1)
-    assert result.triangle_index == 1
-    assert result.time == .5
-
-    result = mesh.raycast(
-        pos_vector(-.75, -.75, 1),
-        pos_vector(-.25, -.25, -1)
+    results = set(mesh.raycast(pos_vector(0, 0, -2), pos_vector(0, 0, 2)))
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, -1),
+            9,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, -1),
+            8,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, -1),
+            10,
+            .25
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, -1),
+            11,
+            .25
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(0, 0, -2),
+        pos_vector(0, 0, 2)
     )
-    assert result is not None
-    assert result.position == pos_vector(-.5, -.5, 0)
-    assert result.normal == pos_vector(0, 0, 1)
-    assert result.triangle_index == 0
-    assert result.time == .5
+    assert result == Mesh3dRaycastHit(
+        pos_vector(0, 0, -1),
+        pos_vector(0, 0, -1),
+        10,
+        .25
+    )
 
-    result = mesh.raycast(pos_vector(-.5, -.5, 2), pos_vector(-.5, -.5, -1))
-    assert result is not None
-    assert result.position == pos_vector(-.5, -.5, 0)
-    assert result.normal == pos_vector(0, 0, 1)
-    assert result.triangle_index == 0
-    assert result.time == .6666666666666666
+    results = set(mesh.raycast(
+        pos_vector(.1, .25, -2),
+        pos_vector(.1, .25, 2))
+    )
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, 1),
+            pos_vector(0, 0, -1),
+            8,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, -1),
+            pos_vector(0, 0, -1),
+            11,
+            .25
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(.1, .25, -2),
+        pos_vector(.1, .25, 2)
+    )
+    assert result == Mesh3dRaycastHit(
+        pos_vector(.1, .25, -1),
+        pos_vector(0, 0, -1),
+        11,
+        .25
+    )
+
+    results = set(mesh.raycast(
+        pos_vector(.1, .25, 2),
+        pos_vector(.1, .25, -2))
+    )
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, 1),
+            pos_vector(0, 0, 1),
+            8,
+            .25
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, -1),
+            pos_vector(0, 0, 1),
+            11,
+            .75
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(.1, .25, 2),
+        pos_vector(.1, .25, -2)
+    )
+    assert result == Mesh3dRaycastHit(
+        pos_vector(.1, .25, 1),
+        pos_vector(0, 0, 1),
+        8,
+        .25
+    )
 
 
 @pytest.mark.parametrize("pos_array, pos_vector", [
@@ -479,61 +575,218 @@ def test_raycast_normals(
     index_array: Any,
     index_vector: Any
 ) -> None:
+    positions, _, _, indexes = RectangularCuboid(
+        pos_vector(0),
+        pos_vector(2)
+    ).render()
+
+    normals = pos_array(
+        # top
+        pos_vector(1, 1, 1).normalize(),
+        pos_vector(1, 1, -1).normalize(),
+        pos_vector(-1, 1, -1).normalize(),
+        pos_vector(-1, 1, 1).normalize(),
+        # bottom
+        pos_vector(-1, -1, -1).normalize(),
+        pos_vector(1, -1, -1).normalize(),
+        pos_vector(1, -1, 1).normalize(),
+        pos_vector(-1, -1, 1).normalize(),
+        # right
+        pos_vector(1, -1, 1).normalize(),
+        pos_vector(1, -1, -1).normalize(),
+        pos_vector(1, 1, -1).normalize(),
+        pos_vector(1, 1, 1).normalize(),
+        # left
+        pos_vector(-1, 1, -1).normalize(),
+        pos_vector(-1, -1, -1).normalize(),
+        pos_vector(-1, -1, 1).normalize(),
+        pos_vector(-1, 1, 1).normalize(),
+        # front
+        pos_vector(1, -1, 1).normalize(),
+        pos_vector(1, 1, 1).normalize(),
+        pos_vector(-1, 1, 1).normalize(),
+        pos_vector(-1, -1, 1).normalize(),
+        # back
+        pos_vector(1, 1, -1).normalize(),
+        pos_vector(1, -1, -1).normalize(),
+        pos_vector(-1, -1, -1).normalize(),
+        pos_vector(-1, 1, -1).normalize(),
+    )
+
     mesh = Mesh3d(
-        pos_array(
-            pos_vector(-1, -1, 0),
-            pos_vector(1, -1, 0),
-            pos_vector(1, 1, 0),
-            pos_vector(-1, 1, 0),
+        pos_array(*(pos_vector(*p) for p in positions)),
+        index_array(*(
+            index_vector(*indexes[i * 3 : i * 3 + 3])
+            for i in range(len(indexes) // 3)
+        )),
+        normals=normals
+    )
+
+    results = set(mesh.raycast(pos_vector(0, 0, 2), pos_vector(0, 0, -2)))
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, 1),
+            9,
+            .25
         ),
-        index_array(
-            index_vector(0, 1, 3),
-            index_vector(3, 1, 2),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, 1),
+            8,
+            .25
         ),
-        normals=pos_array(
-            pos_vector(0, .5, 1).normalize(),
-            pos_vector(0, .5, 1).normalize(),
-            pos_vector(0, -.5, 1).normalize(),
-            pos_vector(0, -.5, 1).normalize(),
-        )
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, 1),
+            10,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, 1),
+            11,
+            .75
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(0, 0, 2),
+        pos_vector(0, 0, -2)
+    )
+    assert result == Mesh3dRaycastHit(
+        pos_vector(0, 0, 1),
+        pos_vector(0, 0, 1),
+        8,
+        .25
     )
 
-    result = mesh.raycast(pos_vector(-.5, -.5, 1), pos_vector(-.5, -.5, -1))
-    assert result is not None
-    assert result.position == pos_vector(-.5, -.5, 0)
-    assert result.normal == pos_vector(
-        0,
-        0.242535625036333,
-        0.9701425001453319
+    results = set(mesh.raycast(pos_vector(0, 0, -2), pos_vector(0, 0, 2)))
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, -1),
+            9,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, 1),
+            pos_vector(0, 0, -1),
+            8,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, -1),
+            10,
+            .25
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(0, 0, -1),
+            pos_vector(0, 0, -1),
+            11,
+            .25
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(0, 0, -2),
+        pos_vector(0, 0, 2)
     )
-    assert result.triangle_index == 0
-    assert result.time == .5
-
-    result = mesh.raycast(pos_vector(-.5, -.5, -1), pos_vector(-.5, -.5, 1))
-    assert result is None
-
-    result = mesh.raycast(pos_vector(0, 0, 1), pos_vector(0, 0, -1))
-    assert result is not None
-    assert result.position == pos_vector(0, 0, 0)
-    assert result.normal == pos_vector(0, 0, 1)
-    assert result.time == .5
-
-    result = mesh.raycast(pos_vector(-1, -1, 1), pos_vector(-1, -1, -1))
-    assert result is not None
-    assert result.position == pos_vector(-1, -1, 0)
-    assert result.normal == pos_vector(
-        0,
-        0.44721359549995804,
-        0.8944271909999161
+    assert result == Mesh3dRaycastHit(
+        pos_vector(0, 0, -1),
+        pos_vector(0, 0, -1),
+        10,
+        .25
     )
-    assert result.time == .5
 
-    result = mesh.raycast(pos_vector(1, 1, 1), pos_vector(1, 1, -1))
-    assert result is not None
-    assert result.position == pos_vector(1, 1, 0)
-    assert result.normal == pos_vector(
-        0,
-        -0.44721359549995804,
-        0.8944271909999161
+    results = set(mesh.raycast(
+        pos_vector(.1, .25, -2),
+        pos_vector(.1, .25, 2))
     )
-    assert result.time == .5
+    expected_normal_11 = None
+    expected_normal_8 = None
+    for result in results:
+        if (
+            isclose(result.normal.x, 0.09656090991705354, rel_tol=.0001) and
+            isclose(result.normal.y, 0.24140227479263376, rel_tol=.0001) and
+            isclose(result.normal.z, -0.9656090991705353, rel_tol=.0001)
+        ):
+            expected_normal_11 = result.normal
+        if (
+            isclose(result.normal.x, -0.09656090991705354, rel_tol=.0001) and
+            isclose(result.normal.y, -0.24140227479263382, rel_tol=.0001) and
+            isclose(result.normal.z, -0.9656090991705353, rel_tol=.0001)
+        ):
+            expected_normal_8 = result.normal
+    assert expected_normal_11 is not None
+    assert expected_normal_8 is not None
+
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, 1),
+            expected_normal_8,
+            8,
+            .75
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, -1),
+            expected_normal_11,
+            11,
+            .25
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(.1, .25, -2),
+        pos_vector(.1, .25, 2)
+    )
+    assert result == Mesh3dRaycastHit(
+        pos_vector(.1, .25, -1),
+        expected_normal_11,
+        11,
+        .25
+    )
+
+    results = set(mesh.raycast(
+        pos_vector(.1, .25, 2),
+        pos_vector(.1, .25, -2))
+    )
+    expected_normal_11 = None
+    expected_normal_8 = None
+    for result in results:
+        if (
+            isclose(result.normal.x, -0.09656090991705354, rel_tol=.0001) and
+            isclose(result.normal.y, -0.24140227479263376, rel_tol=.0001) and
+            isclose(result.normal.z, 0.9656090991705353, rel_tol=.0001)
+        ):
+            expected_normal_11 = result.normal
+        if (
+            isclose(result.normal.x, 0.09656090991705354, rel_tol=.0001) and
+            isclose(result.normal.y, 0.24140227479263382, rel_tol=.0001) and
+            isclose(result.normal.z, 0.9656090991705353, rel_tol=.0001)
+        ):
+            expected_normal_8 = result.normal
+    assert expected_normal_11 is not None
+    assert expected_normal_8 is not None
+    assert results == {
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, 1),
+            expected_normal_8,
+            8,
+            .25
+        ),
+        Mesh3dRaycastHit(
+            pos_vector(.1, .25, -1),
+            expected_normal_11,
+            11,
+            .75
+        ),
+    }
+    result = mesh.get_raycast_first_hit(
+        pos_vector(.1, .25, 2),
+        pos_vector(.1, .25, -2)
+    )
+    assert result == Mesh3dRaycastHit(
+        pos_vector(.1, .25, 1),
+        expected_normal_8,
+        8,
+        .25
+    )

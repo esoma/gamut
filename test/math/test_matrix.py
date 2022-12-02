@@ -1166,6 +1166,9 @@ class MatrixTest:
         assert isclose(mat_quat.y, quat.y)
         assert isclose(mat_quat.z, quat.z)
 
+    def test_array_get_array_type(self) -> None:
+        assert self.cls.get_array_type() is self.array_cls
+
     def test_array_get_component_type(self) -> None:
         assert self.array_cls.get_component_type() is self.cls
 

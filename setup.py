@@ -1,5 +1,6 @@
 
 # python
+from glob import glob
 import os
 from pathlib import Path
 from subprocess import run
@@ -159,5 +160,10 @@ setup(
         "build_bullet": BuildBullet,
         "codegen_math": GenerateMathCode,
     },
-    ext_modules=[geometry_triangulate, math, bullet, test_math_api]
+    ext_modules=[
+        geometry_triangulate,
+        math,
+        bullet,
+        test_math_api
+    ]
 )

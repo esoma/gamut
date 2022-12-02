@@ -235,14 +235,18 @@ class VectorTest:
                 else:
                     with pytest.raises(AttributeError):
                         getattr(vector, attr_name)
+        with pytest.raises(AttributeError):
+            vector.o
+        with pytest.raises(AttributeError):
+            vector.l
 
     def test_swizzle(self) -> None:
         vector = self.cls(*range(self.component_count))
         good = [
-            *self.POSITION_ATTRIBUTES[:self.component_count],
-            *self.COLOR_ATTRIBUTES[:self.component_count],
-            *self.UV_ATTRIBUTES[:self.component_count],
-            *self.TEXTURE_ATTRIBUTES[:self.component_count],
+            *self.POSITION_ATTRIBUTES[:self.component_count] + ('o', 'l'),
+            *self.COLOR_ATTRIBUTES[:self.component_count] + ('o', 'l'),
+            *self.UV_ATTRIBUTES[:self.component_count] + ('o', 'l'),
+            *self.TEXTURE_ATTRIBUTES[:self.component_count] + ('o', 'l'),
         ]
         bad = [
             *self.POSITION_ATTRIBUTES[self.component_count:],
@@ -262,7 +266,11 @@ class VectorTest:
                 assert isinstance(result, swizzle_type)
                 assert all(isinstance(c, self.type) for c in result)
                 assert result == swizzle_type(*(
-                    getattr(vector, attr) for attr in attrs
+                    getattr(vector, attr, {
+                        "o": 0,
+                        "l": 1,
+                    }.get(attr, None))
+                    for attr in attrs
                 ))
 
         for i in range(2, 5):
@@ -1335,6 +1343,9 @@ class VectorTest:
             return
 
         assert self.cls(0).lerp(self.cls(1), .5) == self.cls(1) * .5
+
+    def test_array_get_array_type(self) -> None:
+        assert self.cls.get_array_type() is self.array_cls
 
     def test_array_get_component_type(self) -> None:
         assert self.array_cls.get_component_type() is self.cls

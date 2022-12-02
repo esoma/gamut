@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import Plane
+from gamut.geometry import LineSegment3d, Plane, Triangle3d
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector4, FMatrix4,
                         FVector3, FVector4)
 # python
@@ -71,6 +71,16 @@ def test_normal(normal: Any) -> None:
     plane = Plane(1, normal)
     assert plane.normal == normal.normalize()
     assert plane.normal is not normal
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_origin(vtype: Any) -> None:
+    assert Plane(0, vtype(1, 0, 0)).origin == vtype(0)
+    assert Plane(0, vtype(0, 1, 0)).origin == vtype(0)
+    assert Plane(0, vtype(0, 0, 1)).origin == vtype(0)
+    assert Plane(1, vtype(1, 0, 0)).origin == vtype(-1, 0, 0)
+    assert Plane(1, vtype(0, 1, 0)).origin == vtype(0, -1, 0)
+    assert Plane(1, vtype(0, 0, 1)).origin == vtype(0, 0, -1)
 
 
 @pytest.mark.parametrize("plane", [
@@ -158,10 +168,10 @@ def test_transform_wrong_type():
     DVector3(1),
     DVector3(-1),
 ])
-def test_d_distance_to_point(plane: Plane, point: DVector3) -> None:
+def test_d_signed_distance_to_point(plane: Plane, point: DVector3) -> None:
     expected = plane.normal @ point + plane.distance
     assert (
-        plane.distance_to_point(point) == pytest.approx(expected)
+        plane.signed_distance_to_point(point) == pytest.approx(expected)
     )
 
 
@@ -175,27 +185,27 @@ def test_d_distance_to_point(plane: Plane, point: DVector3) -> None:
     FVector3(1),
     FVector3(-1),
 ])
-def test_f_distance_to_point(plane: Plane, point: FVector3) -> None:
+def test_f_signed_distance_to_point(plane: Plane, point: FVector3) -> None:
     expected = plane.normal @ point + plane.distance
     assert (
-        plane.distance_to_point(point) == pytest.approx(expected)
+        plane.signed_distance_to_point(point) == pytest.approx(expected)
     )
 
 
 @pytest.mark.parametrize("point", [None, '123', 123, DVector4(1), DVector2(1)])
-def test_distance_to_point_invalid(point: Any) -> None:
+def test_signed_distance_to_point_invalid(point: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Plane(1, DVector3(0, 1, 0)).distance_to_point(point)
+        Plane(1, DVector3(0, 1, 0)).signed_distance_to_point(point)
     assert str(excinfo.value) == 'point must be DVector3'
 
 
-def test_distance_to_point_wrong_type():
+def test_signed_distance_to_point_wrong_type():
     with pytest.raises(TypeError) as excinfo:
-        Plane(0, FVector3(1, 0, 0)).distance_to_point(DVector3(0))
+        Plane(0, FVector3(1, 0, 0)).signed_distance_to_point(DVector3(0))
     assert str(excinfo.value).startswith('point must be FVector3')
 
     with pytest.raises(TypeError) as excinfo:
-        Plane(0, DVector3(1, 0, 0)).distance_to_point(FVector3(0))
+        Plane(0, DVector3(1, 0, 0)).signed_distance_to_point(FVector3(0))
     assert str(excinfo.value).startswith('point must be DVector3')
 
 
@@ -207,3 +217,186 @@ def test_equal() -> None:
     assert Plane(0, DVector3(0, 1, 0)) != Plane(0, DVector3(1, 0, 0))
     assert Plane(0, DVector3(0, 1, 0)) != Plane(0, DVector3(0, 0, 1))
     assert Plane(0, DVector3(0, 1, 0)) != object()
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_point(vtype: Any) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert plane.where_intersected_by_point(vtype(0)) is None
+    assert plane.where_intersected_by_point(
+        vtype(0), tolerance=1) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_point(
+        vtype(0, 1, 0)) == vtype(0, 1, 0)
+
+
+@pytest.mark.parametrize("vtype,wrong_type", [
+    (FVector3, DVector3),
+    (DVector3, FVector3)
+])
+def test_where_intersected_by_line_segment(
+    vtype: Any,
+    wrong_type: Any
+) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_line_segment(None)
+    assert str(excinfo.value).startswith(
+        f'line must be LineSegment3d[{vtype.__name__}]'
+    )
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_line_segment(LineSegment3d(
+            wrong_type(0),
+            wrong_type(0)
+        ))
+    assert str(excinfo.value).startswith(
+        f'line must be LineSegment3d[{vtype.__name__}]'
+    )
+
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0), vtype(0))
+    ) is None
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0), vtype(0)),
+        tolerance=1
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0, 1, 0), vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    ) == LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 0, 0), vtype(0, 0, 0))
+    ) is None
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 0, 0), vtype(0, 0, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0, 0, 0), vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0, 2, 0), vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(0, 0, 0), vtype(0, 2, 0))
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_line_segment(
+        LineSegment3d(vtype(1, 0, -1), vtype(1, 2, -1))
+    ) == vtype(1, 1, -1)
+
+
+@pytest.mark.parametrize("vtype,wrong_type", [
+    (FVector3, DVector3),
+    (DVector3, FVector3)
+])
+def test_where_intersected_by_triangle(
+    vtype: Any,
+    wrong_type: Any
+) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_triangle(None)
+    assert str(excinfo.value).startswith(
+        f'tri must be Triangle3d[{vtype.__name__}]'
+    )
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_triangle(Triangle3d(
+            wrong_type(0),
+            wrong_type(0),
+            wrong_type(0),
+        ))
+    assert str(excinfo.value).startswith(
+        f'tri must be Triangle3d[{vtype.__name__}]'
+    )
+
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(0), vtype(0), vtype(0))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(0), vtype(0), vtype(0)),
+        tolerance=1
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(0, 1, 0), vtype(0, 1, 0), vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 0))
+    ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, 0, 0))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, 0, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(0, 0, 0), vtype(0, 1, 0), vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(0, 2, 0), vtype(0, 1, 0), vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(0, 0, 0), vtype(0, 2, 0), vtype(0, 2, 0))
+    ) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, -1), vtype(1, 2, -1), vtype(1, 2, -1))
+    ) == vtype(1, 1, -1)
+
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 1))
+    ) == Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 1))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, 0, 1))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, 0, 1)),
+        tolerance=1
+    ) == Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 1))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 0, 1))
+    ) == LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, -1, 1))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, -1, 1)),
+        tolerance=1
+    ) == LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 0, 0), vtype(0, 0, 1))
+    ) == vtype(1, 1, 0)
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, -1, 0), vtype(0, -1, 1))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, -1, 0), vtype(0, -1, 1)),
+        tolerance=1
+    ) == vtype(1, 1, 0)
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_project_point(vtype: Any) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.project_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert plane.project_point(vtype(0, 0, 0)) == vtype(0, 1, 0)
+    assert plane.project_point(vtype(1, 5, 1)) == vtype(1, 1, 1)
+
+    plane = Plane(1, vtype(1, 0, 0))
+    assert plane.project_point(vtype(0, 0, 0)) == vtype(-1, 0, 0)
+    assert plane.project_point(vtype(1, 5, 1)) == vtype(-1, 5, 1)

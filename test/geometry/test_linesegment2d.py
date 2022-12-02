@@ -3,6 +3,7 @@
 from gamut.geometry import LineSegment2d
 from gamut.math import DVector2, DVector3, FVector2
 # python
+from math import isclose
 from typing import Any
 # pytest
 import pytest
@@ -46,10 +47,12 @@ def test_invalid_b(a: Any, b: Any) -> None:
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
-def test_points(vtype: Any) -> None:
+def test_attributes(vtype: Any) -> None:
     line = LineSegment2d(vtype(0, 1), vtype(2, 3))
     assert line.a == vtype(0, 1)
     assert line.b == vtype(2, 3)
+    assert line.points == (line.a, line.b)
+    assert line.slope == vtype(2, 3) - vtype(0, 1)
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
@@ -67,6 +70,53 @@ def test_equal(vtype: Any) -> None:
         LineSegment2d(vtype(0), vtype(1, 0))
     )
     assert LineSegment2d(vtype(0), vtype(0)) != object()
+
+
+def test_distance_to_point_invalid() -> None:
+    line = LineSegment2d(DVector2(-5, -5), DVector2(5, 5))
+    with pytest.raises(TypeError) as ex:
+        line.get_distance_to_point(FVector2(0))
+    assert str(ex.value) == 'point must be DVector2'
+
+    line = LineSegment2d(FVector2(-5, -5), FVector2(5, 5))
+    with pytest.raises(TypeError) as ex:
+        line.get_distance_to_point(DVector2(0))
+    assert str(ex.value) == 'point must be FVector2'
+
+
+@pytest.mark.parametrize("edge, point, distance", [
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(0, 0),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(10, 10),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(5, 5),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(0, 0)),
+        DVector2(0, 0),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(0, 10),
+        7.0710678118654755
+    ),
+])
+def test_distance_to_point(
+    edge: LineSegment2d,
+    point: Any,
+    distance: float
+) -> None:
+    assert isclose(edge.get_distance_to_point(point), distance)
 
 
 def test_intersection_invalid() -> None:
@@ -163,3 +213,151 @@ def test_get_point(vtype: Any) -> None:
     assert line.get_point_from_b_to_a(1) == vtype(-5)
     assert line.get_point_from_b_to_a(2) == vtype(-15)
     assert line.get_point_from_b_to_a(-1) == vtype(15)
+
+
+@pytest.mark.parametrize("vtype", [FVector2, DVector2])
+def test_is_parallel_with_line_segment(vtype: Any) -> None:
+    line = LineSegment2d(vtype(0), vtype(0))
+    assert not line.is_parallel_with_line_segment(line)
+
+    line = LineSegment2d(vtype(0), vtype(1))
+    assert line.is_parallel_with_line_segment(line)
+    assert line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(2), vtype(3)
+    ))
+
+    line = LineSegment2d(vtype(0), vtype(1, 0))
+    assert line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(0, 1), vtype(1, 1)
+    ))
+    assert not line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(0, 1), vtype(1, 1.01)
+    ))
+    assert not line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(0, 0), vtype(0, 1)
+    ))
+
+
+@pytest.mark.parametrize("vtype", [FVector2, DVector2])
+def test_intersects_point(vtype: Any) -> None:
+    line = LineSegment2d(vtype(0), vtype(0))
+    assert line.intersects_point(vtype(0))
+    assert not line.intersects_point(vtype(1, 0))
+    assert line.intersects_point(vtype(1, 0), tolerance=1)
+
+    line = LineSegment2d(vtype(0), vtype(0, 1))
+    assert line.intersects_point(vtype(0))
+    assert line.intersects_point(vtype(0, 1))
+    assert not line.intersects_point(vtype(0, 2))
+    assert line.intersects_point(vtype(0, 2), tolerance=1)
+
+
+@pytest.mark.parametrize("vtype", [FVector2, DVector2])
+def test_where_intersected_by_line_segment(vtype: Any) -> None:
+    line = LineSegment2d(vtype(0), vtype(0))
+    assert line.where_intersected_by_line_segment(line) == vtype(0)
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(1, 0), vtype(1, 0))
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(1, 0), vtype(1, 0)),
+        tolerance=1
+    ) == vtype(0)
+    assert LineSegment2d(
+        vtype(1, 0),
+        vtype(1, 0)
+    ).where_intersected_by_line_segment(
+        line,
+        tolerance=1
+    ) == vtype(1, 0)
+
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(0), vtype(1, 0))
+    ) == vtype(0)
+    assert LineSegment2d(
+        vtype(0), vtype(1, 0)
+    ).where_intersected_by_line_segment(
+        line
+    ) == vtype(0)
+
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(0), vtype(-1, 0))
+    ) == vtype(0)
+    assert LineSegment2d(
+        vtype(0), vtype(-1, 0)
+    ).where_intersected_by_line_segment(
+        line
+    ) == vtype(0)
+
+    line = LineSegment2d(vtype(1, 0), vtype(2, 0))
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(2, 0), vtype(3, 0))
+    ) == vtype(2, 0)
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(3, 0), vtype(4, 0))
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(3, 0), vtype(4, 0)),
+        tolerance=1
+    ) == vtype(2, 0)
+    assert LineSegment2d(
+        vtype(3, 0),
+        vtype(4, 0)
+    ).where_intersected_by_line_segment(
+        line,
+        tolerance=1
+    ) == vtype(3, 0)
+    assert line.where_intersected_by_line_segment(line) == line
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(1, 1), vtype(2, 1)),
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(1, 1), vtype(2, 1)),
+        tolerance=1
+    ) == line
+    assert LineSegment2d(
+        vtype(1, 1),
+        vtype(2, 1)
+    ).where_intersected_by_line_segment(
+        line,
+        tolerance=1
+    ) == LineSegment2d(vtype(1, 1), vtype(2, 1))
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(1.5, 0), vtype(3, 0))
+    ) == LineSegment2d(vtype(1.5, 0), vtype(2, 0))
+    assert LineSegment2d(
+        vtype(1.5, 0),
+        vtype(3, 0)
+    ).where_intersected_by_line_segment(
+        line
+    ) == LineSegment2d(vtype(2, 0), vtype(1.5, 0))
+
+    assert LineSegment2d(
+        vtype(1.5, 1),
+        vtype(1.5, -1)
+    ).where_intersected_by_line_segment(
+        line
+    ) == vtype(1.5, 0)
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(1.5, 1), vtype(1.5, -1))
+    ) == vtype(1.5, 0)
+    assert LineSegment2d(
+        vtype(0, 1),
+        vtype(0, -1)
+    ).where_intersected_by_line_segment(
+        line
+    ) is None
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(0, 1), vtype(0, -1))
+    ) is None
+    assert LineSegment2d(
+        vtype(0, 1),
+        vtype(0, -1)
+    ).where_intersected_by_line_segment(
+        line,
+        tolerance=1
+    ) == vtype(0, 0)
+    assert line.where_intersected_by_line_segment(
+        LineSegment2d(vtype(0, 1), vtype(0, -1)),
+        tolerance=1
+    ) == vtype(1, 0)

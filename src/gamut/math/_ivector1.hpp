@@ -623,6 +623,12 @@ static PyGetSetDef IVector1_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':
@@ -670,6 +676,12 @@ static PyGetSetDef IVector1_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':
@@ -717,6 +729,12 @@ static PyGetSetDef IVector1_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':
@@ -900,6 +918,17 @@ IVector1_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+IVector1_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->IVector1Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef IVector1_PyMethodDef[] = {
 
     {"min", (PyCFunction)IVector1_min, METH_O, 0},
@@ -907,6 +936,7 @@ static PyMethodDef IVector1_PyMethodDef[] = {
     {"clamp", (PyCFunction)IVector1_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)IVector1_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)IVector1_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction)IVector1_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)IVector1_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
