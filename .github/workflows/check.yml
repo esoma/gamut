@@ -45,7 +45,7 @@ jobs:
         git clone https://github.com/esoma/freetype-py.git
         cd freetype-py
         git checkout 2.11
-        python setup.py install
+        python -m pip install .
 
     - name: Install PyICU (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
