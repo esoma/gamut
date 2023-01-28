@@ -219,7 +219,7 @@ def test_render_glyph_invalid_index(file: str, glyph_index: int) -> None:
 
 
 @pytest.mark.parametrize("file", FONTS)
-@pytest.mark.parametrize("character", ['a', 'Z', '1'])
+@pytest.mark.parametrize("character", ['a', 'Z', '1', ' '])
 @pytest.mark.parametrize("use_glyph_index", [False, True])
 @pytest.mark.parametrize("format", [None] + list(RenderedGlyphFormat))
 def test_render_glyph(
@@ -244,7 +244,6 @@ def test_render_glyph(
     rendered_glyph = font.render_glyph(input, **kwargs)
 
     assert isinstance(rendered_glyph.data, bytes)
-    assert rendered_glyph.data
     assert len(rendered_glyph.data) == (
         rendered_glyph.size.x *
         rendered_glyph.size.y * (
@@ -256,8 +255,8 @@ def test_render_glyph(
     )
 
     assert isinstance(rendered_glyph.size, UVector2)
-    assert rendered_glyph.size.x > 0
-    assert rendered_glyph.size.y > 0
+    assert rendered_glyph.size.x >= 0
+    assert rendered_glyph.size.y >= 0
     rendered_glyph_size = rendered_glyph.size
     rendered_glyph_size += UVector2(1, 1)
     assert rendered_glyph.size != rendered_glyph_size

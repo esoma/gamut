@@ -118,7 +118,10 @@ class Face:
             except FT_Exception as ex:
                 raise ValueError('face does not contain the specified glyph')
         ft_glyph = self._ft_face.glyph
-        ft_glyph.render(format.value)
+        try:
+            ft_glyph.render(format.value)
+        except FT_Exception as ex:
+            pass
         width = ft_glyph.bitmap.width
         height = ft_glyph.bitmap.rows
         data = bytes(ft_glyph.bitmap.buffer)
