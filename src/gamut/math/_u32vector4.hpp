@@ -780,6 +780,12 @@ static PyGetSetDef U32Vector4_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':
@@ -846,6 +852,12 @@ static PyGetSetDef U32Vector4_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':
@@ -912,6 +924,12 @@ static PyGetSetDef U32Vector4_PyGetSetDef[] = {
             int glm_index;
             switch(c_name)
             {
+                case 'o':
+                    vec[i] = 0;
+                    continue;
+                case 'l':
+                    vec[i] = 1;
+                    continue;
                 case 'x':
                 case 'r':
                 case 's':

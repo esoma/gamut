@@ -137,10 +137,21 @@ class {{ type }}:
 
 {% for attributes in ['xyzw', 'rgba', 'stqp', 'uv'] %}
 {% for count in range(1, 5) %}
-{% for prop in itertools.combinations_with_replacement(attributes[:component_count], count) %}
+{% for prop in itertools.combinations_with_replacement(attributes[:component_count] + 'ol', count) %}
+{% if set(prop) - set ('ol') %}
     @property
     def {{ ''.join(prop) }}(self) -> {% if count > 1 %}{{ type[:-1] }}{{ count }}{% else %}{{ component_type }}{% endif %}: ...
+{% endif %}
 {% endfor %}
+{% endfor %}
+{% endfor %}
+
+{% for count in range(1, 5) %}
+{% for prop in itertools.combinations_with_replacement('ol', count) %}
+{% if len(prop) > 1 %}
+    @property
+    def {{ ''.join(prop) }}(self) -> {% if count > 1 %}{{ type[:-1] }}{{ count }}{% else %}{{ component_type }}{% endif %}: ...
+{% endif %}
 {% endfor %}
 {% endfor %}
 
