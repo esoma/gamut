@@ -63,16 +63,6 @@ class BoundingBox2d(Generic[T, VT]):
             f'max=({self._max.x}, {self._max.y})>'
         )
 
-    def _squared_distance_to_point(self, point: VT) -> float:
-        result = 0.0
-        for i in range(3):
-            c = point[i]
-            if c < self._min[i]:
-                result += (self._min[i] - c) ** 2
-            if c > self._max[i]:
-                result += (self._max[i] - c) ** 2
-        return result
-
     @property
     def center(self) -> VT:
         return (self._min + self._max) * .5
