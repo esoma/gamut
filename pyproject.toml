@@ -5,6 +5,11 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.coverage.report]
+exclude_lines = [
+    '@overload',
+]
+
 [tool.mypy]
 plugins = 'gamut.mypy'
 python_version = '3.10'
