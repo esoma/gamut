@@ -1,5 +1,6 @@
 
 __all__ = [
+    'BoundingBox2d',
     'BoundingBox3d',
     'Capsule',
     'Composite3d',
@@ -23,6 +24,7 @@ __all__ = [
 ]
 
 # gamut
+from ._boundingbox2d import BoundingBox2d
 from ._boundingbox3d import BoundingBox3d
 from ._capsule import Capsule
 from ._composite3d import Composite3d
