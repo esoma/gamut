@@ -1344,6 +1344,9 @@ class VectorTest:
 
         assert self.cls(0).lerp(self.cls(1), .5) == self.cls(1) * .5
 
+    def test_array_get_array_type(self) -> None:
+        assert self.cls.get_array_type() is self.array_cls
+
     def test_array_get_component_type(self) -> None:
         assert self.array_cls.get_component_type() is self.cls
 

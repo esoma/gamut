@@ -1007,6 +1007,17 @@ static PyObject *
 {% endif %}
 
 
+static PyObject *
+{{ name }}_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->{{ name }}Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef {{ name }}_PyMethodDef[] = {
     {% if row_size == column_size %}
         {"inverse", (PyCFunction){{ name }}_inverse, METH_NOARGS, 0},
@@ -1033,6 +1044,7 @@ static PyMethodDef {{ name }}_PyMethodDef[] = {
     {"transpose", (PyCFunction){{ name }}_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction){{ name }}_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction){{ name }}_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction){{ name }}_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction){{ name }}_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };

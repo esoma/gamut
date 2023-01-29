@@ -1469,6 +1469,17 @@ DMatrix4x4_from_buffer(PyTypeObject *cls, PyObject *buffer)
 
 
 
+static PyObject *
+DMatrix4x4_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->DMatrix4x4Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef DMatrix4x4_PyMethodDef[] = {
 
         {"inverse", (PyCFunction)DMatrix4x4_inverse, METH_NOARGS, 0},
@@ -1493,6 +1504,7 @@ static PyMethodDef DMatrix4x4_PyMethodDef[] = {
     {"transpose", (PyCFunction)DMatrix4x4_transpose, METH_NOARGS, 0},
     {"get_limits", (PyCFunction)DMatrix4x4_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)DMatrix4x4_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction)DMatrix4x4_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)DMatrix4x4_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };

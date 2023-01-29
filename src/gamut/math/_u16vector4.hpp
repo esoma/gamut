@@ -1132,6 +1132,17 @@ U16Vector4_from_buffer(PyTypeObject *cls, PyObject *buffer)
 }
 
 
+static PyObject *
+U16Vector4_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->U16Vector4Array_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef U16Vector4_PyMethodDef[] = {
 
     {"min", (PyCFunction)U16Vector4_min, METH_O, 0},
@@ -1139,6 +1150,7 @@ static PyMethodDef U16Vector4_PyMethodDef[] = {
     {"clamp", (PyCFunction)U16Vector4_clamp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)U16Vector4_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)U16Vector4_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction)U16Vector4_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)U16Vector4_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };

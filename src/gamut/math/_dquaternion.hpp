@@ -703,6 +703,17 @@ DQuaternion_get_size(DQuaternion *cls, void *)
 }
 
 
+static PyObject *
+DQuaternion_get_array_type(PyTypeObject *cls, void*)
+{
+    auto module_state = get_module_state();
+    if (!module_state){ return 0; }
+    auto array_type = module_state->DQuaternionArray_PyTypeObject;
+    Py_INCREF(array_type);
+    return (PyObject *)array_type;
+}
+
+
 static PyMethodDef DQuaternion_PyMethodDef[] = {
     {"cross", (PyCFunction)DQuaternion_cross, METH_O, 0},
     {"to_matrix3", (PyCFunction)DQuaternion_to_matrix3, METH_NOARGS, 0},
@@ -713,6 +724,7 @@ static PyMethodDef DQuaternion_PyMethodDef[] = {
     {"lerp", (PyCFunction)DQuaternion_lerp, METH_FASTCALL, 0},
     {"get_limits", (PyCFunction)DQuaternion_get_limits, METH_NOARGS | METH_STATIC, 0},
     {"get_size", (PyCFunction)DQuaternion_get_size, METH_NOARGS | METH_STATIC, 0},
+    {"get_array_type", (PyCFunction)DQuaternion_get_array_type, METH_NOARGS | METH_STATIC, 0},
     {"from_buffer", (PyCFunction)DQuaternion_from_buffer, METH_O | METH_CLASS, 0},
     {0, 0, 0, 0}
 };
