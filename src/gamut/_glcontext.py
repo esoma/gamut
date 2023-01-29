@@ -339,7 +339,7 @@ def get_gl_context() -> GlContext:
         return singleton
 
 
-def init_sdl_video() -> None:
+def init_sdl_video() -> None: # pragma: no cover
     # the need for part of this mess should be fixed in
     # https://github.com/libsdl-org/SDL/issues/4826
     if SDL_Init(SDL_INIT_EVENTS) != 0:
