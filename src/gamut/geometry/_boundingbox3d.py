@@ -77,14 +77,16 @@ class BoundingBox3d(Generic[T, VT, MT]):
             transform @ c for c in self.corners
         )))
 
-    def _squared_distance_to_point(self, point: VT) -> float:
+    def _squared_distance_to_point(self, point: VT, padding: float) -> float:
         result = 0.0
         for i in range(3):
             c = point[i]
-            if c < self._min[i]:
-                result += (self._min[i] - c) ** 2
-            if c > self._max[i]:
-                result += (self._max[i] - c) ** 2
+            min = self._min[i] - padding
+            if c < min:
+                result += (min - c) ** 2
+            max = self._max[i] + padding
+            if c > max:
+                result += (max - c) ** 2
         return result
 
     @property
@@ -137,9 +139,14 @@ class BoundingBox3d(Generic[T, VT, MT]):
             return False
         return True
 
-    def intersects_sphere(self, sphere: Sphere) -> bool:
+    def intersects_sphere(
+        self,
+        sphere: Sphere,
+        *,
+        tolerance: float = 0.0
+    ) -> bool:
         return (
-            self._squared_distance_to_point(sphere.center) <=
+            self._squared_distance_to_point(sphere.center, tolerance) <=
             (sphere.radius ** 2)
         )
 
