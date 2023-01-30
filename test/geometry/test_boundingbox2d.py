@@ -197,88 +197,51 @@ def test_contains_point_wrong_type():
 def test_intersects_bounding_box_2d() -> None:
     bb = BoundingBox2d(DVector2Array(DVector2(0, 0), DVector2(1, 1)))
 
-    assert bb.intersects_bounding_box_2d_exclusive(bb)
-    assert bb.intersects_bounding_box_2d_inclusive(bb)
-    assert bb.intersects_bounding_box_2d_exclusive(
-        BoundingBox2d(DVector2Array(DVector2(.5, .5)))
-    )
-    assert bb.intersects_bounding_box_2d_inclusive(
+    assert bb.intersects_bounding_box_2d(bb)
+    assert bb.intersects_bounding_box_2d(
         BoundingBox2d(DVector2Array(DVector2(.5, .5)))
     )
 
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(-1, 0), DVector2(0, 1)
-    )).intersects_bounding_box_2d_exclusive(bb)
     assert BoundingBox2d(DVector2Array(
         DVector2(-1, 0), DVector2(0, 1)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(0, -1), DVector2(1, 0)
-    )).intersects_bounding_box_2d_exclusive(bb)
     assert BoundingBox2d(DVector2Array(
         DVector2(0, -1), DVector2(1, 0)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
     assert not BoundingBox2d(DVector2Array(
         DVector2(2, 2), DVector2(3, 3)
-    )).intersects_bounding_box_2d_exclusive(bb)
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(2, 2), DVector2(3, 3)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
     assert not BoundingBox2d(DVector2Array(
         DVector2(.5, -2), DVector2(.5, -1)
-    )).intersects_bounding_box_2d_exclusive(bb)
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(.5, -2), DVector2(.5, -1)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
     assert BoundingBox2d(DVector2Array(
         DVector2(.5, -2), DVector2(.5, -1)
-    )).intersects_bounding_box_2d_exclusive(bb, tolerance=1.01)
-    assert BoundingBox2d(DVector2Array(
-        DVector2(.5, -2), DVector2(.5, -1)
-    )).intersects_bounding_box_2d_inclusive(bb, tolerance=1)
+    )).intersects_bounding_box_2d(bb, tolerance=1)
 
     assert not BoundingBox2d(DVector2Array(
         DVector2(.5, 3), DVector2(.5, 2)
-    )).intersects_bounding_box_2d_exclusive(bb)
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(.5, 3), DVector2(.5, 2)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
     assert BoundingBox2d(DVector2Array(
         DVector2(.5, 3), DVector2(.5, 2)
-    )).intersects_bounding_box_2d_exclusive(bb, tolerance=1.01)
-    assert BoundingBox2d(DVector2Array(
-        DVector2(.5, 3), DVector2(.5, 2)
-    )).intersects_bounding_box_2d_inclusive(bb, tolerance=1)
+    )).intersects_bounding_box_2d(bb, tolerance=1)
 
     assert not BoundingBox2d(DVector2Array(
         DVector2(-1, .5), DVector2(-2, .5)
-    )).intersects_bounding_box_2d_exclusive(bb)
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(-1, .5), DVector2(-2, .5)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
     assert BoundingBox2d(DVector2Array(
         DVector2(-1, .5), DVector2(-2, .5)
-    )).intersects_bounding_box_2d_exclusive(bb, tolerance=1.01)
-    assert BoundingBox2d(DVector2Array(
-        DVector2(-1, .5), DVector2(-2, .5)
-    )).intersects_bounding_box_2d_inclusive(bb, tolerance=1)
+    )).intersects_bounding_box_2d(bb, tolerance=1)
 
     assert not BoundingBox2d(DVector2Array(
         DVector2(2, .5), DVector2(3, .5)
-    )).intersects_bounding_box_2d_exclusive(bb)
-    assert not BoundingBox2d(DVector2Array(
-        DVector2(2, .5), DVector2(3, .5)
-    )).intersects_bounding_box_2d_inclusive(bb)
+    )).intersects_bounding_box_2d(bb)
 
     assert BoundingBox2d(DVector2Array(
         DVector2(2, .5), DVector2(3, .5)
-    )).intersects_bounding_box_2d_exclusive(bb, tolerance=1.01)
-    assert BoundingBox2d(DVector2Array(
-        DVector2(2, .5), DVector2(3, .5)
-    )).intersects_bounding_box_2d_inclusive(bb, tolerance=1)
+    )).intersects_bounding_box_2d(bb, tolerance=1)

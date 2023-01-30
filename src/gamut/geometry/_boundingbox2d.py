@@ -92,23 +92,7 @@ class BoundingBox2d(Generic[T, VT]):
             all(p <= m for p, m in zip(point, self._max))
         )
 
-    def intersects_bounding_box_2d_exclusive(
-        self,
-        other: BoundingBox2d[T, VT],
-        *,
-        tolerance: float = 0.0
-    ) -> bool:
-        if self._min.x >= other._max.x + tolerance:
-            return False
-        if self._max.x <= other._min.x - tolerance:
-            return False
-        if self._min.y >= other._max.y + tolerance:
-            return False
-        if self._max.y <= other._min.y - tolerance:
-            return False
-        return True
-
-    def intersects_bounding_box_2d_inclusive(
+    def intersects_bounding_box_2d(
         self,
         other: BoundingBox2d[T, VT],
         *,
