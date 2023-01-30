@@ -422,3 +422,53 @@ def test_intersects_sphere() -> None:
     assert not BoundingBox3d(DVector3Array(
         DVector3(0, 0, 1.1))
     ).intersects_sphere(sphere)
+
+
+def test_intersects_bounding_box_3d() -> None:
+    bb = BoundingBox3d(DVector3Array(DVector3(0, 0, 0), DVector3(1, 1, 1)))
+
+    assert bb.intersects_bounding_box_3d(bb)
+
+    assert BoundingBox3d(DVector3Array(
+        DVector3(-1, 0, 0), DVector3(0, 1, 1)
+    )).intersects_bounding_box_3d(bb)
+
+    assert BoundingBox3d(DVector3Array(
+        DVector3(0, -1, 0), DVector3(1, 0, 1)
+    )).intersects_bounding_box_3d(bb)
+
+    assert BoundingBox3d(DVector3Array(
+        DVector3(0, 0, -1), DVector3(1, 1, 0)
+    )).intersects_bounding_box_3d(bb)
+
+    assert BoundingBox3d(DVector3Array(
+        DVector3(2, 2, 2), DVector3(3, 3, 3)
+    )).intersects_bounding_box_3d(bb, tolerance=2)
+
+    assert BoundingBox3d(DVector3Array(
+        DVector3(.5, .5, .5)
+    )).intersects_bounding_box_3d(bb)
+
+    assert not BoundingBox3d(DVector3Array(
+        DVector3(-1, .5, .5)
+    )).intersects_bounding_box_3d(bb)
+
+    assert not BoundingBox3d(DVector3Array(
+        DVector3(2, .5, .5)
+    )).intersects_bounding_box_3d(bb)
+
+    assert not BoundingBox3d(DVector3Array(
+        DVector3(.5, -1, .5)
+    )).intersects_bounding_box_3d(bb)
+
+    assert not BoundingBox3d(DVector3Array(
+        DVector3(.5, 2, .5)
+    )).intersects_bounding_box_3d(bb)
+
+    assert not BoundingBox3d(DVector3Array(
+        DVector3(.5, .5, -1)
+    )).intersects_bounding_box_3d(bb)
+
+    assert not BoundingBox3d(DVector3Array(
+        DVector3(.5, .5, 2)
+    )).intersects_bounding_box_3d(bb)

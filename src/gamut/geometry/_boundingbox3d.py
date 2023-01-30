@@ -117,6 +117,26 @@ class BoundingBox3d(Generic[T, VT, MT]):
             all(p <= m for p, m in zip(point, self._max))
         )
 
+    def intersects_bounding_box_3d(
+        self,
+        other: BoundingBox3d[T, VT, MT],
+        *,
+        tolerance: float = 0.0
+    ) -> bool:
+        if self._min.x > other._max.x + tolerance:
+            return False
+        if self._max.x < other._min.x - tolerance:
+            return False
+        if self._min.y > other._max.y + tolerance:
+            return False
+        if self._max.y < other._min.y - tolerance:
+            return False
+        if self._min.z > other._max.z + tolerance:
+            return False
+        if self._max.z < other._min.z - tolerance:
+            return False
+        return True
+
     def intersects_sphere(self, sphere: Sphere) -> bool:
         return (
             self._squared_distance_to_point(sphere.center) <=
