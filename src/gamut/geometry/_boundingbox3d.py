@@ -110,13 +110,13 @@ class BoundingBox3d(Generic[T, VT, MT]):
             for z in (self._min.z, self._max.z)
         )
 
-    def contains_point(self, point: VT) -> bool:
+    def contains_point(self, point: VT, *, tolerance: float = 0.0) -> bool:
         expected_type = self._array_type.get_component_type()
         if not isinstance(point, expected_type):
             raise TypeError(f'point must be {expected_type.__name__}')
         return (
-            all(p >= m for p, m in zip(point, self._min)) and
-            all(p <= m for p, m in zip(point, self._max))
+            all(p >= m - tolerance for p, m in zip(point, self._min)) and
+            all(p <= m + tolerance for p, m in zip(point, self._max))
         )
 
     def intersects_bounding_box_3d(
