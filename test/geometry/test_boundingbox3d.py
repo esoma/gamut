@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 # gamut
 from gamut.geometry import (BoundingBox3d, Plane, Shape3dCullable,
                             Shape3dPointContainer, Sphere, ViewFrustum3d)

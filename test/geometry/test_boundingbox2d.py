@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 # gamut
 from gamut.geometry import BoundingBox2d
 from gamut.math import (DVector2, DVector2Array, DVector4, FVector2,
