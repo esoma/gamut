@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 # gamut
 from gamut.geometry import DegenerateGeometryError, LineSegment2d
 from gamut.math import DVector2, DVector3, FVector2
