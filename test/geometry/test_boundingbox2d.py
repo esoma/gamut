@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 # gamut
 from gamut.geometry import BoundingBox2d
 from gamut.math import (DVector2, DVector2Array, DVector4, FVector2,
@@ -140,48 +140,47 @@ def test_equal(array_type: Any) -> None:
     assert BoundingBox2d(array_type(v_type(0))) != object()
 
 
-@pytest.mark.parametrize("bounding_box", [
-    BoundingBox2d(FVector2Array(FVector2(0))),
-    BoundingBox2d(FVector2Array(FVector2(-1, -1), FVector2(1, 1))),
-    BoundingBox2d(FVector2Array(
-        FVector2(-1000, 67),
-        FVector2(-56, 87))
-    ),
+@pytest.mark.parametrize("points", [
+    [(0, 0)],
+    [(-1, -1), (1, 1)],
+    [(-1000, 67), (-56, 87)],
 ])
-def test_f_contains_point(bounding_box: BoundingBox2d) -> None:
+@pytest.mark.parametrize("vector_type", [FVector2, DVector2])
+def test_contains_point(
+    points: list[tuple[float, float]],
+    vector_type: type[FVector2] | type[DVector2]
+) -> None:
+    bounding_box = BoundingBox2d(vector_type.get_array_type()(*(
+        vector_type(*p) for p in points
+    )))
+
     assert bounding_box.contains_point(bounding_box.center)
     for corner in bounding_box.corners:
         assert bounding_box.contains_point(corner)
 
     for offset in (
-        FVector2(1, -1),
-        FVector2(-1, 1),
-        FVector2(1, 1)
+        vector_type(1, -1),
+        vector_type(-1, 1),
+        vector_type(1, 1)
     ):
         assert not bounding_box.contains_point(bounding_box.min - offset)
         assert not bounding_box.contains_point(bounding_box.max + offset)
-
-
-@pytest.mark.parametrize("bounding_box", [
-    BoundingBox2d(DVector2Array(DVector2(0))),
-    BoundingBox2d(DVector2Array(DVector2(-1, -1), DVector2(1, 1))),
-    BoundingBox2d(DVector2Array(
-        DVector2(-1000, 67),
-        DVector2(-56, 87))
-    ),
-])
-def test_d_contains_point(bounding_box: BoundingBox2d) -> None:
-    assert bounding_box.contains_point(bounding_box.center)
-    for corner in bounding_box.corners:
-        assert bounding_box.contains_point(corner)
-
-    for offset in (
-        DVector2(1, -1,),
-        DVector2(-1, 1),
-        DVector2(1, 1),
-    ):
-        assert not bounding_box.contains_point(bounding_box.min - offset)
-        assert not bounding_box.contains_point(bounding_box.max + offset)
+        assert not bounding_box.contains_point(
+            bounding_box.min - offset,
+            tolerance=.9
+        )
+        assert not bounding_box.contains_point(
+            bounding_box.max + offset,
+            tolerance=.9
+        )
+        assert bounding_box.contains_point(
+            bounding_box.min - offset,
+            tolerance=1
+        )
+        assert bounding_box.contains_point(
+            bounding_box.max + offset,
+            tolerance=1
+        )
 
 
 def test_contains_point_wrong_type():
