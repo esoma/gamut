@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 # gamut
 from gamut.geometry import Capsule, DegenerateGeometryError
 from gamut.math import (DQuaternion, DVector2, DVector3, DVector4, FQuaternion,
