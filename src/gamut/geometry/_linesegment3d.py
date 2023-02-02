@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['LineSegment3d']
 
 # gamut
+from ._error import DegenerateGeometryError
+# gamut
 from gamut.math import DVector3, FVector3
 # python
 from typing import Generic, TypeVar
@@ -13,6 +15,9 @@ T = TypeVar('T', FVector3, DVector3)
 
 class LineSegment3d(Generic[T]):
 
+    class DegenerateError(DegenerateGeometryError):
+        degenerate_form: T
+
     def __init__(self, a: T, b: T):
         if not isinstance(a, (FVector3, DVector3)):
             raise TypeError('a must be FVector3 or DVector3')
@@ -21,6 +26,9 @@ class LineSegment3d(Generic[T]):
         if not isinstance(b, type(a)):
             raise TypeError('b must be the same type as a')
         self._b = b
+
+        if a == b:
+            raise self.DegenerateError(a, 'degenerate line segment')
 
         self._diff = b - a
 

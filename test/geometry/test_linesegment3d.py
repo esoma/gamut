@@ -1,6 +1,6 @@
-
+from __future__ import annotations
 # gamut
-from gamut.geometry import LineSegment3d
+from gamut.geometry import DegenerateGeometryError, LineSegment3d
 from gamut.math import DVector3, DVector4, FVector3
 # python
 from typing import Any
@@ -46,6 +46,26 @@ def test_invalid_b(a: Any, b: Any) -> None:
     assert str(excinfo.value) == 'b must be the same type as a'
 
 
+@pytest.mark.parametrize("point", [
+    (0, 0, 0),
+    (1.5, 2.0, -3.0),
+    (2.0, 1.5, .876),
+])
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_degenerate(
+    point: tuple[float, float],
+    vtype: type[FVector3] | type[DVector3]
+) -> None:
+    with pytest.raises(LineSegment3d.DegenerateError) as excinfo:
+        LineSegment3d(vtype(*point), vtype(*point))
+    assert str(excinfo.value) == 'degenerate line segment'
+    assert excinfo.value.degenerate_form == vtype(*point)
+
+
+def test_degenerate_error():
+    assert issubclass(LineSegment3d.DegenerateError, DegenerateGeometryError)
+
+
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_points(vtype: Any) -> None:
     line = LineSegment3d(vtype(0, 1, 2), vtype(3, 4, 5))
@@ -56,18 +76,18 @@ def test_points(vtype: Any) -> None:
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_equal(vtype: Any) -> None:
     assert (
-        LineSegment3d(vtype(0), vtype(0)) ==
-        LineSegment3d(vtype(0), vtype(0))
+        LineSegment3d(vtype(0), vtype(1)) ==
+        LineSegment3d(vtype(0), vtype(1))
     )
     assert (
-        LineSegment3d(vtype(0), vtype(0)) !=
+        LineSegment3d(vtype(0), vtype(1)) !=
         LineSegment3d(vtype(0, 1, 0), vtype(0))
     )
     assert (
-        LineSegment3d(vtype(0), vtype(0)) !=
+        LineSegment3d(vtype(0), vtype(1)) !=
         LineSegment3d(vtype(0), vtype(1, 0, 0))
     )
-    assert LineSegment3d(vtype(0), vtype(0)) != object()
+    assert LineSegment3d(vtype(0), vtype(1)) != object()
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
