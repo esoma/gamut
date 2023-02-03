@@ -1,6 +1,6 @@
-
+from __future__ import annotations
 # gamut
-from gamut.geometry import Capsule
+from gamut.geometry import Capsule, DegenerateGeometryError
 from gamut.math import (DQuaternion, DVector2, DVector3, DVector4, FQuaternion,
                         FVector3)
 # python
@@ -52,24 +52,45 @@ def test_invalid_height(height: Any) -> None:
 ])
 def test_invalid_center(center: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Capsule(center, 0, 0)
+        Capsule(center, 1, 1)
     assert str(excinfo.value) == 'center must be FVector3 or DVector3'
 
 
 @pytest.mark.parametrize("rotation", ['123', 123, DVector3(1), DVector2(1)])
 def test_invalid_rotation(rotation: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Capsule(DVector3(0), 0, 0, rotation=rotation)
+        Capsule(DVector3(0), 1, 1, rotation=rotation)
     assert str(excinfo.value) == 'rotation must be DQuaternion'
+
+
+@pytest.mark.parametrize("radius, height", [
+    (0, 1),
+    (1, 0),
+    (0, 0),
+])
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_degenerate(
+    radius: float,
+    height: float,
+    vtype: type[FVector3] | type[DVector3]
+) -> None:
+    with pytest.raises(Capsule.DegenerateError) as excinfo:
+        Capsule(vtype(1, 2, 3), radius, height)
+    assert str(excinfo.value) == 'degenerate capsule'
+    assert excinfo.value.degenerate_form == vtype(1, 2, 3)
+
+
+def test_degenerate_error():
+    assert issubclass(Capsule.DegenerateError, DegenerateGeometryError)
 
 
 def test_different_rotation() -> None:
     with pytest.raises(TypeError) as excinfo:
-        Capsule(FVector3(0), 0, 0, rotation=DQuaternion(1))
+        Capsule(FVector3(0), 1, 1, rotation=DQuaternion(1))
     assert str(excinfo.value) == 'rotation must be FQuaternion'
 
     with pytest.raises(TypeError) as excinfo:
-        Capsule(DVector3(0), 0, 0, rotation=FQuaternion(1))
+        Capsule(DVector3(0), 1, 1, rotation=FQuaternion(1))
     assert str(excinfo.value) == 'rotation must be DQuaternion'
 
 
@@ -116,15 +137,15 @@ def test_default_rotation() -> None:
 
 
 def test_equal() -> None:
-    assert Capsule(DVector3(0), 0, 0) == Capsule(DVector3(0), 0, 0)
-    assert Capsule(FVector3(0), 0, 0) == Capsule(FVector3(0), 0, 0)
-    assert Capsule(DVector3(0), 0, 0) != Capsule(FVector3(0), 0, 0)
-    assert Capsule(DVector3(0), 0, 0) != Capsule(
-        DVector3(0), 0, 0, rotation=DQuaternion(0)
+    assert Capsule(DVector3(0), 1, 1) == Capsule(DVector3(0), 1, 1)
+    assert Capsule(FVector3(0), 1, 1) == Capsule(FVector3(0), 1, 1)
+    assert Capsule(DVector3(0), 1, 1) != Capsule(FVector3(0), 1, 1)
+    assert Capsule(DVector3(0), 1, 1) != Capsule(
+        DVector3(0), 1, 1, rotation=DQuaternion(0)
     )
-    assert Capsule(DVector3(0), 0, 0) != Capsule(DVector3(1, 0, 0), 0, 0)
-    assert Capsule(DVector3(0), 0, 0) != Capsule(DVector3(0, 1, 0), 0, 0)
-    assert Capsule(DVector3(0), 0, 0) != Capsule(DVector3(0, 0, 1), 0, 0)
-    assert Capsule(DVector3(0), 0, 0) != Capsule(DVector3(0), 1, 0)
-    assert Capsule(DVector3(0), 0, 0) != Capsule(DVector3(0), 0, 1)
-    assert Capsule(DVector3(0), 0, 0) != object()
+    assert Capsule(DVector3(0), 1, 1) != Capsule(DVector3(1, 0, 0), 1, 1)
+    assert Capsule(DVector3(0), 1, 1) != Capsule(DVector3(0, 1, 0), 1, 1)
+    assert Capsule(DVector3(0), 1, 1) != Capsule(DVector3(0, 0, 1), 1, 1)
+    assert Capsule(DVector3(0), 1, 1) != Capsule(DVector3(0), 2, 1)
+    assert Capsule(DVector3(0), 1, 1) != Capsule(DVector3(0), 1, 2)
+    assert Capsule(DVector3(0), 1, 1) != object()
