@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['Cylinder']
 
 # gamut
+from ._error import DegenerateGeometryError
+# gamut
 from gamut._bullet import Shape
 from gamut.math import DQuaternion, DVector3, FQuaternion, FVector3
 # python
@@ -14,6 +16,9 @@ QT = TypeVar('QT', FQuaternion, DQuaternion)
 
 
 class Cylinder(Generic[VT, QT]):
+
+    class DegenerateError(DegenerateGeometryError):
+        degenerate_form: VT
 
     @overload
     def __init__(
@@ -59,6 +64,9 @@ class Cylinder(Generic[VT, QT]):
             self._height = abs(float(height))
         except (TypeError, ValueError):
             raise TypeError('height must be float')
+
+        if radius == 0 or height == 0:
+            raise self.DegenerateError(center, 'degenerate cylinder')
 
         if is_double:
             quat_type = DQuaternion
