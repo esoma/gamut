@@ -3,6 +3,7 @@ __all__ = [
     'BoundingBox2d',
     'BoundingBox3d',
     'Capsule',
+    'Circle3d',
     'Composite3d',
     'Cone',
     'ConvexHull',
@@ -28,6 +29,7 @@ __all__ = [
 from ._boundingbox2d import BoundingBox2d
 from ._boundingbox3d import BoundingBox3d
 from ._capsule import Capsule
+from ._circle3d import Circle3d
 from ._composite3d import Composite3d
 from ._cone import Cone
 from ._convexhull import ConvexHull
