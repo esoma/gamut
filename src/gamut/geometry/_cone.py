@@ -67,7 +67,6 @@ class Cone(Generic[VT, QT]):
         except (TypeError, ValueError):
             raise TypeError('height must be float')
 
-
         if radius == 0 and height == 0:
             raise self.DegenerateError(center, 'degenerate cone')
         elif height == 0:
