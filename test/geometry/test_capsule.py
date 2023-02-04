@@ -1,9 +1,11 @@
 from __future__ import annotations
 # gamut
-from gamut.geometry import Capsule, DegenerateGeometryError
+from gamut.geometry import (Capsule, Circle3d, DegenerateGeometryError,
+                            LineSegment3d)
 from gamut.math import (DQuaternion, DVector2, DVector3, DVector4, FQuaternion,
                         FVector3)
 # python
+from math import radians
 from typing import Any
 # pytest
 import pytest
@@ -63,21 +65,109 @@ def test_invalid_rotation(rotation: Any) -> None:
     assert str(excinfo.value) == 'rotation must be DQuaternion'
 
 
-@pytest.mark.parametrize("radius, height", [
-    (0, 1),
-    (1, 0),
-    (0, 0),
+@pytest.mark.parametrize("center, radius, height, rotation, degenerate_form", [
+    (
+        FVector3(0),
+        0,
+        1,
+        None,
+        LineSegment3d(FVector3(0, -1, 0), FVector3(0, 1, 0))
+    ),
+    (
+        FVector3(0),
+        0,
+        1,
+        FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)),
+        LineSegment3d(
+            FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)) @
+            FVector3(0, -1, 0),
+            FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)) @
+            FVector3(0, 1, 0)
+        )
+    ),
+    (
+        FVector3(0),
+        1,
+        0,
+        None,
+        Circle3d(FVector3(0), 1, FVector3(0, 1, 0))
+    ),
+    (
+        FVector3(0),
+        1,
+        0,
+        FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)),
+        Circle3d(
+            FVector3(0),
+            1,
+            FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)) @
+            FVector3(0, 1, 0)
+        )
+    ),
+    (
+        FVector3(0),
+        0,
+        0,
+        None,
+        FVector3(0)
+    ),
+    (
+        DVector3(0),
+        0,
+        1,
+        None,
+        LineSegment3d(DVector3(0, -1, 0), DVector3(0, 1, 0))
+    ),
+    (
+        DVector3(0),
+        0,
+        1,
+        DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)),
+        LineSegment3d(
+            DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)) @
+            DVector3(0, -1, 0),
+            DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)) @
+            DVector3(0, 1, 0)
+        )
+    ),
+    (
+        DVector3(0),
+        1,
+        0,
+        None,
+        Circle3d(DVector3(0), 1, DVector3(0, 1, 0))
+    ),
+    (
+        DVector3(0),
+        1,
+        0,
+        DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)),
+        Circle3d(
+            DVector3(0),
+            1,
+            DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)) @
+            DVector3(0, 1, 0)
+        )
+    ),
+    (
+        DVector3(0),
+        0,
+        0,
+        None,
+        DVector3(0)
+    )
 ])
-@pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_degenerate(
+    center: Any,
     radius: float,
     height: float,
-    vtype: type[FVector3] | type[DVector3]
+    rotation: Any,
+    degenerate_form: Any
 ) -> None:
     with pytest.raises(Capsule.DegenerateError) as excinfo:
-        Capsule(vtype(1, 2, 3), radius, height)
+        Capsule(center, radius, height, rotation=rotation)
     assert str(excinfo.value) == 'degenerate capsule'
-    assert excinfo.value.degenerate_form == vtype(1, 2, 3)
+    assert excinfo.value.degenerate_form == degenerate_form
 
 
 def test_degenerate_error():
