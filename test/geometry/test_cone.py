@@ -1,9 +1,11 @@
 from __future__ import annotations
 # gamut
-from gamut.geometry import Cone, DegenerateGeometryError
+from gamut.geometry import (Circle3d, Cone, DegenerateGeometryError,
+                            LineSegment3d)
 from gamut.math import (DQuaternion, DVector2, DVector3, DVector4, FQuaternion,
                         FVector3)
 # python
+from math import radians
 from typing import Any
 # pytest
 import pytest
@@ -56,21 +58,111 @@ def test_invalid_center(center: Any) -> None:
     assert str(excinfo.value) == 'center must be FVector3 or DVector3'
 
 
-@pytest.mark.parametrize("radius, height", [
-    (0, 1),
-    (1, 0),
-    (0, 0),
+
+
+@pytest.mark.parametrize("center, radius, height, rotation, degenerate_form", [
+    (
+        FVector3(0),
+        0,
+        1,
+        None,
+        LineSegment3d(FVector3(0, -1, 0), FVector3(0, 1, 0))
+    ),
+    (
+        FVector3(0),
+        0,
+        1,
+        FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)),
+        LineSegment3d(
+            FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)) @
+            FVector3(0, -1, 0),
+            FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)) @
+            FVector3(0, 1, 0)
+        )
+    ),
+    (
+        FVector3(0),
+        1,
+        0,
+        None,
+        Circle3d(FVector3(0), 1, FVector3(0, 1, 0))
+    ),
+    (
+        FVector3(0),
+        1,
+        0,
+        FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)),
+        Circle3d(
+            FVector3(0),
+            1,
+            FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)) @
+            FVector3(0, 1, 0)
+        )
+    ),
+    (
+        FVector3(0),
+        0,
+        0,
+        None,
+        FVector3(0)
+    ),
+    (
+        DVector3(0),
+        0,
+        1,
+        None,
+        LineSegment3d(DVector3(0, -1, 0), DVector3(0, 1, 0))
+    ),
+    (
+        DVector3(0),
+        0,
+        1,
+        DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)),
+        LineSegment3d(
+            DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)) @
+            DVector3(0, -1, 0),
+            DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)) @
+            DVector3(0, 1, 0)
+        )
+    ),
+    (
+        DVector3(0),
+        1,
+        0,
+        None,
+        Circle3d(DVector3(0), 1, DVector3(0, 1, 0))
+    ),
+    (
+        DVector3(0),
+        1,
+        0,
+        DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)),
+        Circle3d(
+            DVector3(0),
+            1,
+            DQuaternion(1).rotate(radians(90), DVector3(1, 0, 0)) @
+            DVector3(0, 1, 0)
+        )
+    ),
+    (
+        DVector3(0),
+        0,
+        0,
+        None,
+        DVector3(0)
+    )
 ])
-@pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_degenerate(
+    center: Any,
     radius: float,
     height: float,
-    vtype: type[FVector3] | type[DVector3]
+    rotation: Any,
+    degenerate_form: Any
 ) -> None:
     with pytest.raises(Cone.DegenerateError) as excinfo:
-        Cone(vtype(1, 2, 3), radius, height)
+        Cone(center, radius, height, rotation=rotation)
     assert str(excinfo.value) == 'degenerate cone'
-    assert excinfo.value.degenerate_form == vtype(1, 2, 3)
+    assert excinfo.value.degenerate_form == degenerate_form
 
 
 def test_degenerate_error():
