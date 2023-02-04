@@ -4,7 +4,9 @@ from __future__ import annotations
 __all__ = ['Capsule']
 
 # gamut
+from ._circle3d import Circle3d
 from ._error import DegenerateGeometryError
+from ._linesegment3d import LineSegment3d
 # gamut
 from gamut._bullet import Shape
 from gamut.math import DQuaternion, DVector3, FQuaternion, FVector3
@@ -65,8 +67,27 @@ class Capsule(Generic[VT, QT]):
         except (TypeError, ValueError):
             raise TypeError('height must be float')
 
-        if radius == 0 or height == 0:
+        if radius == 0 and height == 0:
             raise self.DegenerateError(center, 'degenerate capsule')
+        elif height == 0:
+            normal = type(self.center)(0, 1, 0)
+            if rotation is not None:
+                normal = rotation @ normal
+            raise self.DegenerateError(
+                Circle3d(self.center, radius, normal),
+                'degenerate capsule'
+            )
+        elif radius == 0:
+            height_vector = type(self.center)(0, height, 0)
+            if rotation is not None:
+                height_vector = rotation @ height_vector
+            raise self.DegenerateError(
+                LineSegment3d(
+                    self.center - height_vector,
+                    self.center + height_vector
+                ),
+                'degenerate capsule'
+            )
 
         if is_double:
             quat_type = DQuaternion
