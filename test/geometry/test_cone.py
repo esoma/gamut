@@ -58,8 +58,6 @@ def test_invalid_center(center: Any) -> None:
     assert str(excinfo.value) == 'center must be FVector3 or DVector3'
 
 
-
-
 @pytest.mark.parametrize("center, radius, height, rotation, degenerate_form", [
     (
         FVector3(0),
