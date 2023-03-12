@@ -17,6 +17,7 @@ __all__ = [
     'Plane',
     'Polygon',
     'Quad3d',
+    'Rectangle3d',
     'RectangularCuboid',
     'Shape3dCullable',
     'Shape3dPointContainer',
@@ -43,6 +44,7 @@ from ._plane import Plane
 from ._polygon import Polygon
 from ._protocol import Shape3dCullable, Shape3dPointContainer
 from ._quad3d import Quad3d
+from ._rectangle3d import Rectangle3d
 from ._rectangularcuboid import RectangularCuboid
 from ._sphere import Sphere
 from ._triangle3d import Triangle3d
