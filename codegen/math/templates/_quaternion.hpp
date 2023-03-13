@@ -274,9 +274,16 @@ static PyObject *
     {{ name }}Glm quat;
     if (Py_TYPE(left) == cls)
     {
-        auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
-        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
-        quat = (*(({{name }} *)left)->glm) * c_right;
+        if (Py_TYPE(right) == cls)
+        {
+            quat = (*(({{name }} *)left)->glm) * (*(({{name }} *)right)->glm);
+        }
+        else
+        {
+            auto c_right = pyobject_to_c_{{ c_type.replace(' ', '_') }}(right);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            quat = (*(({{name }} *)left)->glm) * c_right;
+        }
     }
     else
     {
