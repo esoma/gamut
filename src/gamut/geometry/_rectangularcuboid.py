@@ -4,20 +4,29 @@ from __future__ import annotations
 __all__ = ['RectangularCuboid']
 
 # gamut
+from ._error import DegenerateGeometryError
+from ._linesegment3d import LineSegment3d
+from ._rectangle3d import Rectangle3d
+# gamut
 from gamut._bullet import Shape
 from gamut.math import (DQuaternion, DVector2, DVector2Array, DVector3,
                         DVector3Array, FQuaternion, FVector2, FVector2Array,
                         FVector3, FVector3Array, U8Array)
 # python
+from math import pi
 from typing import Generic, overload, TypeVar
 
 AT = TypeVar('AT', FVector3Array, DVector3Array)
 VT = TypeVar('VT', FVector3, DVector3)
 QT = TypeVar('QT', FQuaternion, DQuaternion)
 UT = TypeVar('UT', FVector2Array, DVector2Array)
+VT2 = TypeVar('VT2', FVector2, DVector2)
 
 
-class RectangularCuboid(Generic[VT, QT, AT, UT]):
+class RectangularCuboid(Generic[VT, QT, AT, UT, VT2]):
+
+    class DegenerateError(DegenerateGeometryError):
+        degenerate_form: VT | LineSegment3d[VT] | Rectangle3d[VT, VT2, QT]
 
     @overload
     def __init__(
@@ -25,7 +34,8 @@ class RectangularCuboid(Generic[VT, QT, AT, UT]):
             FVector3,
             FQuaternion,
             FVector3Array,
-            FVector2Array
+            FVector2Array,
+            FVector2,
         ],
         center: FVector3,
         dimensions: FVector3,
@@ -40,7 +50,8 @@ class RectangularCuboid(Generic[VT, QT, AT, UT]):
             DVector3,
             DQuaternion,
             DVector3Array,
-            DVector2Array
+            DVector2Array,
+            DVector2,
         ],
         center: DVector3,
         dimensions: DVector3,
@@ -76,6 +87,45 @@ class RectangularCuboid(Generic[VT, QT, AT, UT]):
             if not isinstance(rotation, quat_type):
                 raise TypeError(f'rotation must be {quat_type.__name__}')
             self._rotation = rotation
+
+        zero_dim_count = sum(d == 0 for d in self._dimensions)
+        if zero_dim_count == 3:
+            raise self.DegenerateError(center, 'degenerate rectangular cuboid')
+        elif zero_dim_count == 2:
+            half_dimensions = self._rotation @ (dimensions * .5)
+            raise self.DegenerateError(
+                LineSegment3d(
+                    center - half_dimensions,
+                    center + half_dimensions,
+                ),
+                'degenerate rectangular cuboid'
+            )
+        elif zero_dim_count == 1:
+            swizzle = ''.join(
+                s
+                for s, d in
+                zip(('x', 'y', 'z'), self._dimensions)
+                if d != 0
+            )
+            degen_rotation = self._rotation
+            if swizzle == 'xz':
+                degen_rotation = degen_rotation.rotate(
+                    pi * .5,
+                    FVector3(1, 0, 0)
+                )
+            elif swizzle == 'yz':
+                degen_rotation = degen_rotation.rotate(
+                    pi * .5,
+                    FVector3(0, 1, 0)
+                )
+            raise self.DegenerateError(
+                Rectangle3d(
+                    center,
+                    getattr(dimensions, swizzle),
+                    rotation=degen_rotation
+                ),
+                'degenerate rectangular cuboid'
+            )
 
         self._bt: Shape | None = None
         self._bt_capsule: Any = None
