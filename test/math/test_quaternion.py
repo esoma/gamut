@@ -390,12 +390,33 @@ class QuaternionTest:
             object() - quat
 
     def test_multiply(self) -> None:
+        vector3_cls = globals()[f'{self.cls.__name__[0]}Vector3']
+
         assert self.cls(1) * -1 == self.cls(-1)
         assert self.cls(1) * 0 == self.cls(0)
         assert self.cls(1) * 1 == self.cls(1)
         assert -1 * self.cls(1) == self.cls(-1)
         assert 0 * self.cls(1) == self.cls(0)
         assert 1 * self.cls(1) == self.cls(1)
+
+        assert self.cls(1) * self.cls(1) == self.cls(1)
+        assert (
+            self.cls(1) *
+            self.cls(1).rotate(radians(90), vector3_cls(1, 0, 0)) ==
+            self.cls(1).rotate(radians(90), vector3_cls(1, 0, 0))
+        )
+        assert (
+            self.cls(1).rotate(radians(90), vector3_cls(1, 0, 0)) *
+            self.cls(1) ==
+            self.cls(1).rotate(radians(90), vector3_cls(1, 0, 0))
+        )
+        assert (
+            self.cls(1).rotate(radians(90), vector3_cls(1, 0, 0)) *
+            self.cls(1).rotate(radians(90), vector3_cls(0, 1, 0)) ==
+            self.cls(1)
+                .rotate(radians(90), vector3_cls(1, 0, 0))
+                .rotate(radians(90), vector3_cls(0, 1, 0))
+        )
 
         quat = self.cls(*range(4))
         assert quat * 2 == self.cls(*(i * 2 for i in range(4)))
@@ -407,10 +428,6 @@ class QuaternionTest:
         assert quat == self.cls(*range(4))
         assert i_quat == self.cls(*(i * 2 for i in range(4)))
 
-        with pytest.raises(TypeError):
-            quat * self.cls()
-        with pytest.raises(TypeError):
-            self.cls() * quat
         with pytest.raises(TypeError):
             quat * None
         with pytest.raises(TypeError):

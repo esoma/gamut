@@ -274,9 +274,16 @@ FQuaternion__mul__(PyObject *left, PyObject *right)
     FQuaternionGlm quat;
     if (Py_TYPE(left) == cls)
     {
-        auto c_right = pyobject_to_c_float(right);
-        if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
-        quat = (*((FQuaternion *)left)->glm) * c_right;
+        if (Py_TYPE(right) == cls)
+        {
+            quat = (*((FQuaternion *)left)->glm) * (*((FQuaternion *)right)->glm);
+        }
+        else
+        {
+            auto c_right = pyobject_to_c_float(right);
+            if (PyErr_Occurred()){ PyErr_Clear(); Py_RETURN_NOTIMPLEMENTED; }
+            quat = (*((FQuaternion *)left)->glm) * c_right;
+        }
     }
     else
     {
