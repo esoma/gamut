@@ -4,6 +4,7 @@ from __future__ import annotations
 __all__ = ['Sphere']
 
 # gamut
+from ._error import DegenerateGeometryError
 from ._viewfrustum3d import ViewFrustum3d
 # gamut
 from gamut._bullet import Shape
@@ -16,6 +17,9 @@ MT = TypeVar('MT', FMatrix4, DMatrix4)
 
 
 class Sphere(Generic[VT, MT]):
+
+    class DegenerateError(DegenerateGeometryError):
+        degenerate_form: VT
 
     @overload
     def __init__(
@@ -42,6 +46,9 @@ class Sphere(Generic[VT, MT]):
             self._radius = abs(float(radius))
         except (TypeError, ValueError):
             raise TypeError('radius must be float')
+
+        if self._radius == 0:
+            raise self.DegenerateError(center, 'degenerate sphere')
 
         self._bt: Shape | None = None
         self._bt_capsule: Any = None
