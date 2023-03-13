@@ -1,13 +1,118 @@
 
 # gamut
-from gamut.geometry import RectangularCuboid
+from gamut.geometry import (DegenerateGeometryError, LineSegment3d,
+                            Rectangle3d, RectangularCuboid)
 from gamut.math import (DQuaternion, DVector2, DVector2Array, DVector3,
-                        DVector3Array, DVector4, FQuaternion, FVector2Array,
-                        FVector3, FVector3Array, U8Array)
+                        DVector3Array, DVector4, FQuaternion, FVector2,
+                        FVector2Array, FVector3, FVector3Array, U8Array)
 # python
+from math import radians
 from typing import Any
 # pytest
 import pytest
+
+
+@pytest.mark.parametrize("center, dimensions, rotation, degenerate_form", [
+    (
+        FVector3(1),
+        FVector3(0),
+        None,
+        FVector3(1),
+    ),
+    (
+        FVector3(1),
+        FVector3(1, 0, 0),
+        None,
+        LineSegment3d(FVector3(.5, 1, 1), FVector3(1.5, 1, 1)),
+    ),
+    (
+        FVector3(1),
+        FVector3(0, 1, 0),
+        None,
+        LineSegment3d(FVector3(1, .5, 1), FVector3(1, 1.5, 1)),
+    ),
+    (
+        FVector3(1),
+        FVector3(0, 0, 1),
+        None,
+        LineSegment3d(FVector3(1, 1, .5), FVector3(1, 1, 1.5)),
+    ),
+    (
+        FVector3(1),
+        FVector3(0, 0, 1),
+        FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0)),
+        LineSegment3d(
+            FVector3(1, 1.5, 1),
+            FVector3(1, .5, 1)
+        ),
+    ),
+    (
+        FVector3(1),
+        FVector3(1, 1, 0),
+        None,
+        Rectangle3d(FVector3(1), FVector2(1, 1)),
+    ),
+    (
+        FVector3(1),
+        FVector3(0, 1, 1),
+        None,
+        Rectangle3d(
+            FVector3(1),
+            FVector2(1, 1),
+            rotation=FQuaternion(1).rotate(radians(90), FVector3(0, 1, 0))
+        ),
+    ),
+    (
+        FVector3(1),
+        FVector3(1, 0, 1),
+        None,
+        Rectangle3d(
+            FVector3(1),
+            FVector2(1, 1),
+            rotation=FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0))
+        ),
+    ),
+    (
+        FVector3(1),
+        FVector3(1, 1, 0),
+        FQuaternion(1).rotate(radians(90), FVector3(0, 0, 1)),
+        Rectangle3d(
+            FVector3(1),
+            FVector2(1, 1),
+            rotation=FQuaternion(1).rotate(radians(90), FVector3(0, 0, 1)),
+        ),
+    ),
+    (
+        FVector3(1),
+        FVector3(1, 0, 1),
+        FQuaternion(1).rotate(radians(90), FVector3(0, 0, 1)),
+        Rectangle3d(
+            FVector3(1),
+            FVector2(1, 1),
+            rotation=(
+                FQuaternion(1).rotate(radians(90), FVector3(0, 0, 1)) *
+                FQuaternion(1).rotate(radians(90), FVector3(1, 0, 0))
+            )
+        ),
+    ),
+])
+def test_degenerate(
+    center: Any,
+    dimensions: float,
+    rotation: Any,
+    degenerate_form: Any
+) -> None:
+    with pytest.raises(RectangularCuboid.DegenerateError) as excinfo:
+        RectangularCuboid(center, dimensions, rotation=rotation)
+    assert str(excinfo.value) == 'degenerate rectangular cuboid'
+    assert excinfo.value.degenerate_form == degenerate_form
+
+
+def test_degenerate_error():
+    assert issubclass(
+        RectangularCuboid.DegenerateError,
+        DegenerateGeometryError
+    )
 
 
 def test_hash() -> None:
@@ -99,20 +204,20 @@ def test_dimensions(dimensions: Any) -> None:
 
 
 @pytest.mark.parametrize("center, rotation", [
-    (FVector3(0), FQuaternion(2)),
-    (FVector3(0), FQuaternion(-2)),
-    (DVector3(0), DQuaternion(2)),
-    (DVector3(0), DQuaternion(-2)),
+    (FVector3(1), FQuaternion(2)),
+    (FVector3(1), FQuaternion(-2)),
+    (DVector3(1), DQuaternion(2)),
+    (DVector3(1), DQuaternion(-2)),
 ])
 def test_rotation(center: Any, rotation: Any) -> None:
     r = RectangularCuboid(center, center, rotation=rotation)
     assert r.rotation == rotation
 
 def test_default_rotation() -> None:
-    r = RectangularCuboid(FVector3(0), FVector3(0))
+    r = RectangularCuboid(FVector3(0), FVector3(1))
     assert r.rotation == FQuaternion(1)
 
-    r = RectangularCuboid(DVector3(0), DVector3(0))
+    r = RectangularCuboid(DVector3(0), DVector3(1))
     assert r.rotation == DQuaternion(1)
 
 
@@ -131,9 +236,9 @@ def test_equal() -> None:
     assert rc != RectangularCuboid(DVector3(1, 0, 0), DVector3(1))
     assert rc != RectangularCuboid(DVector3(0, 1, 0), DVector3(1))
     assert rc != RectangularCuboid(DVector3(0, 0, 1), DVector3(1))
-    assert rc != RectangularCuboid(DVector3(0), DVector3(1, 0, 0))
-    assert rc != RectangularCuboid(DVector3(0), DVector3(0, 1, 0))
-    assert rc != RectangularCuboid(DVector3(0), DVector3(0, 0, 1))
+    assert rc != RectangularCuboid(DVector3(0), DVector3(1, 2, 2))
+    assert rc != RectangularCuboid(DVector3(0), DVector3(2, 1, 2))
+    assert rc != RectangularCuboid(DVector3(0), DVector3(2, 2, 1))
     assert rc != object()
 
 
