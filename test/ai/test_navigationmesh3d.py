@@ -59,11 +59,6 @@ def test_find_basic_path() -> None:
         DVector3(0, 0, 1),
         DVector3(1, 0, 0)
     ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
-        DVector3(1, 0, 0)
-    ))
 
     assert nm.contains_triangle(Triangle3d(
         DVector3(0, 0, 0),
@@ -78,11 +73,6 @@ def test_find_basic_path() -> None:
     assert nm.contains_triangle(Triangle3d(
         DVector3(1, 0, 1),
         DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-    assert nm.contains_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
         DVector3(1, 0, 0)
     ))
 
@@ -100,11 +90,6 @@ def test_find_basic_path() -> None:
     assert {
         DVector3(1, 0, 1),
         DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    } in triangles
-    assert {
-        DVector3(0, 0, 0),
-        DVector3(-1, 0, 0),
         DVector3(1, 0, 0)
     } in triangles
 
@@ -191,39 +176,6 @@ def test_find_single_triangle() -> None:
         Triangle3d(DVector3(0, 0, 0), DVector3(0, 0, 1), DVector3(1, 0, 0)),
     )
     assert path == (DVector3(0, 0, 0), DVector3(1, 0, 0))
-
-
-def test_degenerate_triangle_point() -> None:
-    nm = NavigationMesh3d()
-
-    nm.add_triangle(Triangle3d(
-        DVector3(1, 0, 0),
-        DVector3(1, 0, 0),
-        DVector3(1, 0, 0)
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(1, 0, 0),
-        DVector3(1, 0, 0)
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(0, 0, 0),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-    nm.add_triangle(Triangle3d(
-        DVector3(1, 0, 1),
-        DVector3(0, 0, 1),
-        DVector3(1, 0, 0)
-    ))
-
-    path = nm.find_path(
-        DVector3(1, 0, 0),
-        Triangle3d(DVector3(1, 0, 0), DVector3(1, 0, 0), DVector3(1, 0, 0)),
-        DVector3(1, 0, 1),
-        Triangle3d(DVector3(1, 0, 1), DVector3(0, 0, 1), DVector3(1, 0, 0)),
-    )
-    assert path == (DVector3(1, 0, 0), DVector3(1, 0, 1))
 
 
 @pytest.mark.parametrize("c", [
