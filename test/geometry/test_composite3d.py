@@ -1,4 +1,5 @@
 
+from __future__ import annotations
 # gamut
 from gamut.geometry import (Composite3d, Plane, Shape3dCullable,
                             Shape3dPointContainer, Sphere, ViewFrustum3d)
@@ -63,7 +64,7 @@ def test_shapes_flattened():
 
 @pytest.mark.parametrize("composite", [
     Composite3d(),
-    Composite3d(Sphere(DVector3(0), 0), Sphere(DVector3(0), 0)),
+    Composite3d(Sphere(DVector3(0), 1), Sphere(DVector3(0), 1)),
 ])
 @pytest.mark.parametrize("transform", [
     DMatrix4(1).translate(DVector3(1, 0, 0)),

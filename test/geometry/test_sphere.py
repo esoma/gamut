@@ -1,7 +1,8 @@
 
+from __future__ import annotations
 # gamut
-from gamut.geometry import (Plane, Shape3dCullable, Shape3dPointContainer,
-                            Sphere, ViewFrustum3d)
+from gamut.geometry import (DegenerateGeometryError, Plane, Shape3dCullable,
+                            Shape3dPointContainer, Sphere, ViewFrustum3d)
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector4, FMatrix4,
                         FVector3)
 # python
@@ -12,11 +13,11 @@ import pytest
 
 
 def test_cullable() -> None:
-    assert isinstance(Sphere(DVector3(0), 0), Shape3dCullable)
+    assert isinstance(Sphere(DVector3(0), 1), Shape3dCullable)
 
 
 def test_point_container() -> None:
-    assert isinstance(Sphere(DVector3(0), 0), Shape3dPointContainer)
+    assert isinstance(Sphere(DVector3(0), 1), Shape3dPointContainer)
 
 
 def test_sphere() -> None:
@@ -51,7 +52,7 @@ def test_invalid_radius(radius: Any) -> None:
 ])
 def test_invalid_center(center: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Sphere(center, 0)
+        Sphere(center, 1)
     assert str(excinfo.value) == 'center must be FVector3 or DVector3'
 
 
@@ -72,9 +73,21 @@ def test_center(center: Any) -> None:
     assert sphere.center == center
 
 
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_degenerate(vtype: type[FVector3] | type[DVector3]) -> None:
+    with pytest.raises(Sphere.DegenerateError) as excinfo:
+        Sphere(vtype(1, 2, 3), 0)
+    assert str(excinfo.value) == 'degenerate sphere'
+    assert excinfo.value.degenerate_form == vtype(1, 2, 3)
+
+
+def test_degenerate_error():
+    assert issubclass(Sphere.DegenerateError, DegenerateGeometryError)
+
+
 @pytest.mark.parametrize("sphere", [
-    Sphere(DVector3(0, 0, 0), 0),
-    Sphere(DVector3(1, 1, 1), 1),
+    Sphere(DVector3(0, 0, 0), 1),
+    Sphere(DVector3(1, 1, 1), 2),
     Sphere(DVector3(0, .5, 1), 99),
 ])
 @pytest.mark.parametrize("transform", [
@@ -105,8 +118,8 @@ def test_d_transform(sphere: Sphere, transform: DMatrix4) -> None:
 
 
 @pytest.mark.parametrize("sphere", [
-    Sphere(FVector3(0, 0, 0), 0),
-    Sphere(FVector3(1, 1, 1), 1),
+    Sphere(FVector3(0, 0, 0), 1),
+    Sphere(FVector3(1, 1, 1), 2),
     Sphere(FVector3(0, .5, 1), 99),
 ])
 @pytest.mark.parametrize("transform", [
@@ -145,27 +158,27 @@ def test_transform_invalid(transform: Any) -> None:
 
 def test_transform_wrong_type():
     with pytest.raises(TypeError) as excinfo:
-        DMatrix4(1) @ Sphere(FVector3(0), 0)
+        DMatrix4(1) @ Sphere(FVector3(0), 1)
     assert str(excinfo.value).startswith('unsupported operand type(s) for @:')
 
     with pytest.raises(TypeError) as excinfo:
-        FMatrix4(1) @ Sphere(DVector3(0), 0)
+        FMatrix4(1) @ Sphere(DVector3(0), 1)
     assert str(excinfo.value).startswith('unsupported operand type(s) for @:')
 
 
 def test_equal() -> None:
-    assert Sphere(DVector3(0), 0) == Sphere(DVector3(0), 0)
-    assert Sphere(FVector3(0), 0) == Sphere(FVector3(0), 0)
-    assert Sphere(FVector3(0), 0) != Sphere(DVector3(0), 0)
-    assert Sphere(DVector3(0), 0) != Sphere(DVector3(1, 0, 0), 0)
-    assert Sphere(DVector3(0), 0) != Sphere(DVector3(0, 1, 0), 0)
-    assert Sphere(DVector3(0), 0) != Sphere(DVector3(0, 0, 1), 0)
-    assert Sphere(DVector3(0), 0) != Sphere(DVector3(0), 1)
-    assert Sphere(DVector3(0), 0) != object()
+    assert Sphere(DVector3(0), 1) == Sphere(DVector3(0), 1)
+    assert Sphere(FVector3(0), 1) == Sphere(FVector3(0), 1)
+    assert Sphere(FVector3(0), 1) != Sphere(DVector3(0), 1)
+    assert Sphere(DVector3(0), 1) != Sphere(DVector3(1, 0, 0), 1)
+    assert Sphere(DVector3(0), 1) != Sphere(DVector3(0, 1, 0), 1)
+    assert Sphere(DVector3(0), 1) != Sphere(DVector3(0, 0, 1), 1)
+    assert Sphere(DVector3(0), 1) != Sphere(DVector3(0), 2)
+    assert Sphere(DVector3(0), 1) != object()
 
 
 @pytest.mark.parametrize("sphere", [
-    Sphere(DVector3(0), 0),
+    Sphere(DVector3(0), 1),
     Sphere(DVector3(0), 10),
     Sphere(DVector3(1, 2, 3), 5),
 ])
@@ -202,7 +215,7 @@ def test_d_contains_point(sphere: Sphere) -> None:
 
 
 @pytest.mark.parametrize("sphere", [
-    Sphere(FVector3(0), 0),
+    Sphere(FVector3(0), 1),
     Sphere(FVector3(0), 10),
     Sphere(FVector3(1, 2, 3), 5),
 ])
@@ -240,11 +253,11 @@ def test_f_contains_point(sphere: Sphere) -> None:
 
 def test_contains_point_wrong_type() -> None:
     with pytest.raises(TypeError) as ex:
-        Sphere(FVector3(0), 0).contains_point(DVector3(0))
+        Sphere(FVector3(0), 1).contains_point(DVector3(0))
     assert str(ex.value) == 'point must be FVector3'
 
     with pytest.raises(TypeError) as ex:
-        Sphere(DVector3(0), 0).contains_point(FVector3(0))
+        Sphere(DVector3(0), 1).contains_point(FVector3(0))
     assert str(ex.value) == 'point must be DVector3'
 
 
@@ -260,26 +273,26 @@ def test_seen_by(vec_type: Any) -> None:
     )
 
     # near
-    assert not Sphere(vec_type(0), 0).seen_by(frustum)
+    assert not Sphere(vec_type(0), .01).seen_by(frustum)
     assert Sphere(vec_type(0), 1).seen_by(frustum)
-    assert Sphere(vec_type(0, 0, 1), 0).seen_by(frustum)
+    assert Sphere(vec_type(0, 0, 1), .01).seen_by(frustum)
     # far
-    assert not Sphere(vec_type(0, 0, 11), 0).seen_by(frustum)
+    assert not Sphere(vec_type(0, 0, 11), .01).seen_by(frustum)
     assert Sphere(vec_type(0, 0, 11), 1).seen_by(frustum)
-    assert Sphere(vec_type(0, 0, 10), 0).seen_by(frustum)
+    assert Sphere(vec_type(0, 0, 10), .01).seen_by(frustum)
     # left
-    assert not Sphere(vec_type(-6, 0, 5), 0).seen_by(frustum)
+    assert not Sphere(vec_type(-6, 0, 5), .01).seen_by(frustum)
     assert Sphere(vec_type(-6, 0, 5), 1).seen_by(frustum)
-    assert Sphere(vec_type(-5, 0, 5), 0).seen_by(frustum)
+    assert Sphere(vec_type(-5, 0, 5), .01).seen_by(frustum)
     # right
-    assert not Sphere(vec_type(6, 0, 5), 0).seen_by(frustum)
+    assert not Sphere(vec_type(6, 0, 5), .01).seen_by(frustum)
     assert Sphere(vec_type(6, 0, 5), 1).seen_by(frustum)
-    assert Sphere(vec_type(5, 0, 5), 0).seen_by(frustum)
+    assert Sphere(vec_type(5, 0, 5), .01).seen_by(frustum)
     # bottom
-    assert not Sphere(vec_type(0, -6, 5), 0).seen_by(frustum)
+    assert not Sphere(vec_type(0, -6, 5), .01).seen_by(frustum)
     assert Sphere(vec_type(0, -6, 5), 1).seen_by(frustum)
-    assert Sphere(vec_type(0, -5, 5), 0).seen_by(frustum)
+    assert Sphere(vec_type(0, -5, 5), .01).seen_by(frustum)
     # top
-    assert not Sphere(vec_type(0, 6, 5), 0).seen_by(frustum)
+    assert not Sphere(vec_type(0, 6, 5), .01).seen_by(frustum)
     assert Sphere(vec_type(0, 6, 5), 1).seen_by(frustum)
-    assert Sphere(vec_type(0, 5, 5), 0).seen_by(frustum)
+    assert Sphere(vec_type(0, 5, 5), .01).seen_by(frustum)
