@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import LineSegment3d, Triangle3d
+from gamut.geometry import DegenerateGeometryError, LineSegment3d, Triangle3d
 from gamut.math import DVector3, DVector4, FVector3
 # python
 from typing import Any
@@ -8,20 +8,21 @@ from typing import Any
 import pytest
 
 
-def test_hash() -> None:
-    t = Triangle3d(DVector3(0), DVector3(1), DVector3(2))
-    assert hash(t) == hash(Triangle3d(DVector3(0), DVector3(1), DVector3(2)))
-    assert hash(t) == hash(Triangle3d(DVector3(1), DVector3(2), DVector3(0)))
-    assert hash(t) != hash(Triangle3d(DVector3(1), DVector3(0), DVector3(2)))
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_hash(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 2), vtype(1), vtype(2))
+    assert hash(t) == hash(Triangle3d(vtype(0, 1, 2), vtype(1), vtype(2)))
+    assert hash(t) == hash(Triangle3d(vtype(1), vtype(2), vtype(0, 1, 2)))
+    assert hash(t) != hash(Triangle3d(vtype(1), vtype(0, 1, 2), vtype(2)))
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_repr(vtype: Any) -> None:
-    line = Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8))
+    line = Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(8, 6, 7))
     assert (
         repr(line) ==
         f'<gamut.geometry.Triangle3d '
-        f'((0.0, 1.0, 2.0), (3.0, 4.0, 5.0), (6.0, 7.0, 8.0))>'
+        f'((0.0, 1.0, 2.0), (3.0, 4.0, 5.0), (8.0, 6.0, 7.0))>'
     )
 
 
@@ -59,76 +60,97 @@ def test_invalid_c(a: Any, b: Any, c: Any) -> None:
         Triangle3d(a, b, c)
     assert str(excinfo.value) == 'point 2 must be the same type as point 0'
 
-
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_attributes(vtype: Any) -> None:
     for tri in [
-        Triangle3d(vtype(0, 1, 2), vtype(3, 4, 5), vtype(6, 7, 8)),
-        Triangle3d(vtype(3, 4, 5), vtype(6, 7, 8), vtype(0, 1, 2)),
-        Triangle3d(vtype(6, 7, 8), vtype(0, 1, 2), vtype(3, 4, 5)),
+        Triangle3d(vtype(0, 0, 0), vtype(1, 1, 0), vtype(1, 1, 2)),
+        Triangle3d(vtype(1, 1, 0), vtype(1, 1, 2), vtype(0, 0, 0)),
+        Triangle3d(vtype(1, 1, 2), vtype(0, 0, 0), vtype(1, 1, 0)),
     ]:
         assert tri.positions == (
-            vtype(0, 1, 2),
-            vtype(3, 4, 5),
-            vtype(6, 7, 8)
+            vtype(0, 0, 0),
+            vtype(1, 1, 0),
+            vtype(1, 1, 2)
         )
         assert tri.center == sum((
-            vtype(0, 1, 2),
-            vtype(3, 4, 5),
-            vtype(6, 7, 8)
+            vtype(0, 0, 0),
+            vtype(1, 1, 0),
+            vtype(1, 1, 2)
         )) / 3
-        assert LineSegment3d(vtype(0, 1, 2), vtype(3, 4, 5)) in tri.edges
-        assert LineSegment3d(vtype(3, 4, 5), vtype(6, 7, 8)) in tri.edges
-        assert LineSegment3d(vtype(6, 7, 8), vtype(0, 1, 2)) in tri.edges
+        assert LineSegment3d(vtype(0, 0, 0), vtype(1, 1, 0)) in tri.edges
+        assert LineSegment3d(vtype(1, 1, 0), vtype(1, 1, 2)) in tri.edges
+        assert LineSegment3d(vtype(1, 1, 2), vtype(0, 0, 0)) in tri.edges
 
     for tri in [
-        Triangle3d(vtype(3, 4, 5), vtype(0, 1, 2), vtype(6, 7, 8)),
-        Triangle3d(vtype(6, 7, 8), vtype(3, 4, 5), vtype(0, 1, 2)),
-        Triangle3d(vtype(0, 1, 2), vtype(6, 7, 8), vtype(3, 4, 5)),
+        Triangle3d(vtype(1, 1, 0), vtype(0, 0, 0), vtype(1, 1, 2)),
+        Triangle3d(vtype(1, 1, 2), vtype(1, 1, 0), vtype(0, 0, 0)),
+        Triangle3d(vtype(0, 0, 0), vtype(1, 1, 2), vtype(1, 1, 0)),
     ]:
         assert tri.positions == (
-            vtype(0, 1, 2),
-            vtype(6, 7, 8),
-            vtype(3, 4, 5),
+            vtype(0, 0, 0),
+            vtype(1, 1, 2),
+            vtype(1, 1, 0),
         )
         assert tri.center == sum((
-            vtype(0, 1, 2),
-            vtype(3, 4, 5),
-            vtype(6, 7, 8)
+            vtype(0, 0, 0),
+            vtype(1, 1, 0),
+            vtype(1, 1, 2)
         )) / 3
-        assert LineSegment3d(vtype(3, 4, 5), vtype(0, 1, 2)) in tri.edges
-        assert LineSegment3d(vtype(0, 1, 2), vtype(6, 7, 8)) in tri.edges
-        assert LineSegment3d(vtype(6, 7, 8), vtype(3, 4, 5)) in tri.edges
+        assert LineSegment3d(vtype(1, 1, 0), vtype(0, 0, 0)) in tri.edges
+        assert LineSegment3d(vtype(0, 0, 0), vtype(1, 1, 2)) in tri.edges
+        assert LineSegment3d(vtype(1, 1, 2), vtype(1, 1, 0)) in tri.edges
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_equal(vtype: Any) -> None:
     assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) ==
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) ==
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2))
+    )
+    assert (
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) !=
+        Triangle3d(vtype(0, 1, 0), vtype(1), vtype(0))
+    )
+    assert (
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) !=
+        Triangle3d(vtype(1), vtype(1, 0, 0), vtype(0))
+    )
+    assert (
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) !=
+        Triangle3d(vtype(0), vtype(1), vtype(1, 0, 0))
+    )
+    assert (
+        Triangle3d(vtype(0), vtype(1), vtype(0, 1, 2)) ==
+        Triangle3d(vtype(0, 1, 2), vtype(0), vtype(1))
+    )
+    assert (
+        Triangle3d(vtype(0, 1, 2), vtype(0), vtype(1)) ==
+        Triangle3d(vtype(1), vtype(0, 1, 2), vtype(0))
+    )
+    assert (
+        Triangle3d(vtype(0), vtype(0, 1, 2), vtype(1)) !=
+        Triangle3d(vtype(1), vtype(0, 1, 2), vtype(0))
+    )
+    assert Triangle3d(vtype(0), vtype(0, 1, 2), vtype(1)) != object()
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_degenerate(vtype: Any) -> None:
+    with pytest.raises(Triangle3d.DegenerateError) as excinfo:
         Triangle3d(vtype(0), vtype(0), vtype(0))
-    )
-    assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) !=
-        Triangle3d(vtype(0, 1, 0), vtype(0), vtype(0))
-    )
-    assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) !=
-        Triangle3d(vtype(0), vtype(1, 0, 0), vtype(0))
-    )
-    assert (
-        Triangle3d(vtype(0), vtype(0), vtype(0)) !=
-        Triangle3d(vtype(0), vtype(0), vtype(1, 0, 0))
-    )
-    assert (
-        Triangle3d(vtype(0), vtype(1), vtype(2)) ==
-        Triangle3d(vtype(2), vtype(0), vtype(1))
-    )
-    assert (
-        Triangle3d(vtype(2), vtype(0), vtype(1)) ==
-        Triangle3d(vtype(1), vtype(2), vtype(0))
-    )
-    assert (
-        Triangle3d(vtype(0), vtype(2), vtype(1)) !=
-        Triangle3d(vtype(1), vtype(2), vtype(0))
-    )
-    assert Triangle3d(vtype(0), vtype(0), vtype(0)) != object()
+    assert str(excinfo.value).startswith('degenerate triangle')
+    assert excinfo.value.degenerate_form == vtype(0)
+
+    with pytest.raises(Triangle3d.DegenerateError) as excinfo:
+        Triangle3d(vtype(0), vtype(1), vtype(0))
+    assert str(excinfo.value).startswith('degenerate triangle')
+    assert excinfo.value.degenerate_form == LineSegment3d(vtype(0), vtype(1))
+
+    with pytest.raises(Triangle3d.DegenerateError) as excinfo:
+        Triangle3d(vtype(0), vtype(1), vtype(2))
+    assert str(excinfo.value).startswith('degenerate triangle')
+    assert excinfo.value.degenerate_form == LineSegment3d(vtype(2), vtype(0))
+
+
+def test_degenerate_error():
+    assert issubclass(Triangle3d.DegenerateError, DegenerateGeometryError)
