@@ -69,9 +69,6 @@ class LineSegment2d(Generic[T]):
         if not isinstance(other, LineSegment2d):
             raise TypeError('other must be LineSegment2d')
 
-        self._slope = self._b - self._a
-        other._slope = other._b - other._a
-
         div = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
         if div == 0:
             return None
