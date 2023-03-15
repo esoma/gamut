@@ -66,10 +66,12 @@ def test_degenerate_error():
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
-def test_points(vtype: Any) -> None:
+def test_attributes(vtype: Any) -> None:
     line = LineSegment2d(vtype(0, 1), vtype(2, 3))
     assert line.a == vtype(0, 1)
     assert line.b == vtype(2, 3)
+    assert line.points == (line.a, line.b)
+    assert line.slope == vtype(2, 3) - vtype(0, 1)
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])

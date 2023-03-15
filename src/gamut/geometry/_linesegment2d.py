@@ -30,7 +30,7 @@ class LineSegment2d(Generic[T]):
         if a == b:
             raise self.DegenerateError(a, 'degenerate line segment')
 
-        self._diff = b - a
+        self._slope = b - a
 
     def __hash__(self) -> int:
         return hash((self._a, self._b))
@@ -54,6 +54,14 @@ class LineSegment2d(Generic[T]):
     def b(self) -> T:
         return self._b
 
+    @property
+    def points(self) -> tuple[T, T]:
+        return (self._a, self._b)
+
+    @property
+    def slope(self) -> T:
+        return self._slope
+
     def get_line_segment_intersection(
         self,
         other: LineSegment2d
@@ -61,20 +69,17 @@ class LineSegment2d(Generic[T]):
         if not isinstance(other, LineSegment2d):
             raise TypeError('other must be LineSegment2d')
 
-        self._diff = self._b - self._a
-        other._diff = other._b - other._a
-
-        div = -other._diff.x * self._diff.y + self._diff.x * other._diff.y
+        div = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
         if div == 0:
             return None
         s = (
-            (-self._diff.y * (self._a.x - other._a.x) +
-            self._diff.x * (self._a.y - other._a.y)) /
+            (-self._slope.y * (self._a.x - other._a.x) +
+            self._slope.x * (self._a.y - other._a.y)) /
             div
         )
         t = (
-            (other._diff.x * (self._a.y - other._a.y) -
-            other._diff.y * (self._a.x - other._a.x)) /
+            (other._slope.x * (self._a.y - other._a.y) -
+            other._slope.y * (self._a.x - other._a.x)) /
             div
         )
 
@@ -83,7 +88,7 @@ class LineSegment2d(Generic[T]):
         return None
 
     def get_point_from_a_to_b(self, t: float) -> T:
-        return self._a + (t * self._diff)
+        return self._a + (t * self._slope)
 
     def get_point_from_b_to_a(self, t: float) -> T:
         t = -(t - 1)
