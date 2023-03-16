@@ -75,6 +75,12 @@ class LineSegment2d(Generic[T]):
         p = self.get_point_from_a_to_b(t)
         return point.distance(p)
 
+    def is_parallel_with_line_segment(self, other: LineSegment2d[T]) -> bool:
+        return (
+            -other._slope.x * self._slope.y +
+            self._slope.x * other._slope.y
+        ) == 0
+
     def get_line_segment_intersection(
         self,
         other: LineSegment2d

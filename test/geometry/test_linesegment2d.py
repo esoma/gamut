@@ -211,6 +211,26 @@ def test_intersection(
 
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
+def test_is_parallel_with_line_segment(vtype: Any) -> None:
+    line = LineSegment2d(vtype(0), vtype(1))
+    assert line.is_parallel_with_line_segment(line)
+    assert line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(2), vtype(3)
+    ))
+
+    line = LineSegment2d(vtype(0), vtype(1, 0))
+    assert line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(0, 1), vtype(1, 1)
+    ))
+    assert not line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(0, 1), vtype(1, 1.01)
+    ))
+    assert not line.is_parallel_with_line_segment(LineSegment2d(
+        vtype(0, 0), vtype(0, 1)
+    ))
+
+
+@pytest.mark.parametrize("vtype", [FVector2, DVector2])
 def test_get_point(vtype: Any) -> None:
     line = LineSegment2d(vtype(-5), vtype(5))
     assert line.get_point_from_a_to_b(0) == vtype(-5)
