@@ -46,6 +46,12 @@ class LineSegment2d(Generic[T]):
             return False
         return self._a == other._a and self._b == other._b
 
+    def _project_point_time(self, point: T) -> float:
+        # projects the point onto the line described by the segment, the result
+        # is the time on the segment that represents the point
+        length_2 = sum(x ** 2 for x in (self._a - self._b))
+        return ((point - self._a) @ self.slope) / length_2
+
     @property
     def a(self) -> T:
         return self._a
@@ -61,6 +67,14 @@ class LineSegment2d(Generic[T]):
     @property
     def slope(self) -> T:
         return self._slope
+
+    def get_distance_to_point(self, point: T) -> float:
+        if not isinstance(point, type(self._a)):
+            raise TypeError(f'point must be {type(self._a).__name__}')
+        t = self._project_point_time(point)
+        t = max(min(t, 1), 0)
+        p = self._a + t * self._slope
+        return point.distance(p)
 
     def get_line_segment_intersection(
         self,

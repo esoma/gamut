@@ -3,6 +3,7 @@ from __future__ import annotations
 from gamut.geometry import DegenerateGeometryError, LineSegment2d
 from gamut.math import DVector2, DVector3, FVector2
 # python
+from math import isclose
 from typing import Any
 # pytest
 import pytest
@@ -89,6 +90,48 @@ def test_equal(vtype: Any) -> None:
         LineSegment2d(vtype(0), vtype(1, 0))
     )
     assert LineSegment2d(vtype(0), vtype(1)) != object()
+
+
+def test_distance_to_point_invalid() -> None:
+    line = LineSegment2d(DVector2(-5, -5), DVector2(5, 5))
+    with pytest.raises(TypeError) as ex:
+        line.get_distance_to_point(FVector2(0))
+    assert str(ex.value) == 'point must be DVector2'
+
+    line = LineSegment2d(FVector2(-5, -5), FVector2(5, 5))
+    with pytest.raises(TypeError) as ex:
+        line.get_distance_to_point(DVector2(0))
+    assert str(ex.value) == 'point must be FVector2'
+
+
+@pytest.mark.parametrize("edge, point, distance", [
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(0, 0),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(10, 10),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(5, 5),
+        0
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        DVector2(0, 10),
+        7.0710678118654755
+    ),
+])
+def test_distance_to_point(
+    edge: LineSegment2d,
+    point: Any,
+    distance: float
+) -> None:
+    assert isclose(edge.get_distance_to_point(point), distance)
 
 
 def test_intersection_invalid() -> None:
