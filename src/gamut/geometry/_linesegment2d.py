@@ -71,9 +71,8 @@ class LineSegment2d(Generic[T]):
     def get_distance_to_point(self, point: T) -> float:
         if not isinstance(point, type(self._a)):
             raise TypeError(f'point must be {type(self._a).__name__}')
-        t = self._project_point_time(point)
-        t = max(min(t, 1), 0)
-        p = self._a + t * self._slope
+        t = max(min(self._project_point_time(point), 1), 0)
+        p = self.get_point_from_a_to_b(t)
         return point.distance(p)
 
     def get_line_segment_intersection(
