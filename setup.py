@@ -109,7 +109,7 @@ bullet = Extension(
     ],
     libraries=['BulletDynamics', 'BulletCollision', 'LinearMath'],
     sources=['src/gamut/_bullet.cpp'],
-    language='c++',
+    language='c++11',
     extra_compile_args=coverage_compile_args,
     extra_link_args=coverage_links_args,
 )
