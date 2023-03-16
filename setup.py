@@ -110,8 +110,10 @@ bullet = Extension(
     libraries=['BulletDynamics', 'BulletCollision', 'LinearMath'],
     sources=['src/gamut/_bullet.cpp'],
     language='c++11',
-    extra_compile_args=coverage_compile_args,
-    extra_link_args=coverage_links_args,
+    extra_compile_args=coverage_compile_args +
+        ([] if os.name == 'nt' else ['-std=c++11', '-w']),
+    extra_link_args=coverage_links_args +
+        ([] if os.name == 'nt' else ['-lstdc++']),
 )
 
 
@@ -123,7 +125,8 @@ math = Extension(
     language='c++11',
     extra_compile_args=coverage_compile_args +
         ([] if os.name == 'nt' else ['-std=c++11', '-w']),
-    extra_link_args=coverage_links_args,
+    extra_link_args=coverage_links_args +
+        ([] if os.name == 'nt' else ['-lstdc++']),
 )
 
 
