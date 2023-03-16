@@ -189,7 +189,32 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
     def triangle_indices(self) -> IT:
         return self._triangle_indices
 
-    def raycast(self, start: PT, end: PT) -> Mesh3dRaycastHit[PT] | None:
+    def raycast(
+        self,
+        start: PT,
+        end: PT
+    ) -> Generator[Mesh3dRaycastHit[PT], None, None]:
+        v_type = self._positions.get_component_type()
+        if not isinstance(start, v_type):
+            raise TypeError(f'start must be {v_type.__name__}')
+        if not isinstance(end, v_type):
+            raise TypeError(f'end must be {v_type.__name__}')
+
+        bt = self._get_bullet_shape()
+        results = bt.mesh_raycast_all(*start, *end)
+        for result in results:
+            yield Mesh3dRaycastHit(
+                v_type(result[0], result[1], result[2]),
+                v_type(result[3], result[4], result[5]),
+                result[6],
+                result[7]
+            )
+
+    def get_raycast_first_hit(
+        self,
+        start: PT,
+        end: PT
+    ) -> Mesh3dRaycastHit[PT] | None:
         v_type = self._positions.get_component_type()
         if not isinstance(start, v_type):
             raise TypeError(f'start must be {v_type.__name__}')
@@ -221,3 +246,20 @@ class Mesh3dRaycastHit(Generic[PT]):
         self.normal = normal
         self.triangle_index = triangle_index
         self.time = time
+
+    def __hash__(self) -> int:
+        return hash((self.time, self.triangle_index))
+
+    def __eq__(self, other: Mesh3dRaycastHit[PT]) -> bool:
+        return (
+            self.triangle_index == other.triangle_index and
+            self.time == other.time and
+            self.position == other.position and
+            self.normal == other.normal
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f'<gamut.geometry.Mesh3dRaycastHit '
+            f'({self.position.x}, {self.position.y}, {self.position.z})>'
+        )
