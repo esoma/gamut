@@ -29,6 +29,7 @@ GamutCalculateTrimeshNormal(
     btBvhTriangleMeshShape* trimesh,
     const glm::dvec3 *normals,
     const glm::dvec3& point,
+    const glm::dvec3& normal,
     int part_id,
     int triangle_index
 )
@@ -81,11 +82,16 @@ GamutCalculateTrimeshNormal(
     auto w = (d00 * d21 - d01 * d20) / denom;
     auto u = 1.0 - v - w;
 
-    return glm::normalize(
+    auto new_normal = glm::normalize(
         (*normal_0) * u +
         (*normal_1) * v +
         (*normal_2) * w
     );
+    if (glm::dot(normal, new_normal) < 0)
+    {
+        return -new_normal;
+    }
+    return new_normal;
 }
 
 
@@ -116,6 +122,7 @@ GamutContactAddedCallback(
         trimesh,
         normals,
         glm::dvec3(cp.m_localPointB[0], cp.m_localPointB[1], cp.m_localPointB[2]),
+        glm::dvec3(cp.m_normalWorldOnB[0], cp.m_normalWorldOnB[1], cp.m_normalWorldOnB[2]),
         partId0,
         index0
     );
@@ -1951,8 +1958,8 @@ Shape_calculate_local_inertia(Shape *self, PyObject *args)
 struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
 {
     btBvhTriangleMeshShape *m_mesh;
-    const glm::dvec3& m_from;
-    const glm::dvec3& m_to;
+    const glm::dvec3& m_glm_from;
+    const glm::dvec3& m_glm_to;
     glm::dvec3 m_ray_normal;
     bool m_hit;
     glm::dvec3 m_hit_point;
@@ -1968,8 +1975,8 @@ struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
         const btVector3& bt_to
     ):
         btTriangleRaycastCallback(bt_from, bt_to, 0),
-        m_from(from),
-        m_to(to),
+        m_glm_from(from),
+        m_glm_to(to),
         m_ray_normal(glm::normalize(from - to)),
         m_mesh(mesh),
         m_hit(false)
@@ -1986,7 +1993,7 @@ struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
         // hit is not ealier in the ray than the one currently recorded
         if (m_hit && hit_fraction > m_hit_fraction){ return 0; }
 
-        auto hit_point = m_from + (hit_fraction * (m_to - m_from));
+        auto hit_point = m_glm_from + (hit_fraction * (m_glm_to - m_glm_from));
 
         auto *normals = (const glm::dvec3 *)m_mesh->getUserPointer();
         if (normals)
@@ -1995,12 +2002,20 @@ struct ShapeMeshRaycastTriangleCallback: public btTriangleRaycastCallback
                 m_mesh,
                 normals,
                 hit_point,
+                glm::dvec3(
+                    hit_normal_local.x(),
+                    hit_normal_local.y(),
+                    hit_normal_local.z()
+                ),
                 part_id,
                 triangle_index
             );
-            if (glm::dot(m_ray_normal, adjusted_normal) <= 0)
+            if (
+                (m_flags & kF_FilterBackfaces) != 0 &&
+                glm::dot(m_ray_normal, adjusted_normal) <= 0
+            )
             {
-                return 0;
+                return m_hitFraction;
             }
             m_hit_normal_local = adjusted_normal;
         }
@@ -2094,6 +2109,175 @@ Shape_mesh_raycast(Shape *self, PyObject *const *args, Py_ssize_t nargs)
 }
 
 
+struct ShapeMeshRaycastAllTriangleCallback: public btTriangleRaycastCallback
+{
+    struct Hit
+    {
+        glm::dvec3 point;
+        btScalar fraction;
+        glm::dvec3 normal_local;
+        int triangle_index;
+
+        Hit(const glm::dvec3& p, btScalar f, glm::dvec3 nl, int ti):
+            point(p),
+            fraction(f),
+            normal_local(nl),
+            triangle_index(ti)
+        {
+        }
+    };
+
+    btBvhTriangleMeshShape *m_mesh;
+    const glm::dvec3& m_glm_from;
+    const glm::dvec3& m_glm_to;
+    glm::dvec3 m_ray_normal;
+    std::vector<Hit> m_hits;
+
+    ShapeMeshRaycastAllTriangleCallback(
+        btBvhTriangleMeshShape* mesh,
+        const glm::dvec3& from,
+        const glm::dvec3& to,
+        const btVector3& bt_from,
+        const btVector3& bt_to
+    ):
+        btTriangleRaycastCallback(bt_from, bt_to, 0),
+        m_glm_from(from),
+        m_glm_to(to),
+        m_ray_normal(glm::normalize(from - to)),
+        m_mesh(mesh)
+    {
+    }
+
+    btScalar reportHit(
+        const btVector3& hit_normal_local,
+        btScalar hit_fraction,
+        int part_id,
+        int triangle_index
+    )
+    {
+        auto hit_point = m_glm_from + (hit_fraction * (m_glm_to - m_glm_from));
+        auto *normals = (const glm::dvec3 *)m_mesh->getUserPointer();
+        glm::dvec3 normal_local;
+        if (normals)
+        {
+            auto adjusted_normal = GamutCalculateTrimeshNormal(
+                m_mesh,
+                normals,
+                hit_point,
+                glm::dvec3(
+                    hit_normal_local.x(),
+                    hit_normal_local.y(),
+                    hit_normal_local.z()
+                ),
+                part_id,
+                triangle_index
+            );
+            if (
+                (m_flags & kF_FilterBackfaces) != 0 &&
+                glm::dot(m_ray_normal, adjusted_normal) <= 0
+            )
+            {
+                return m_hitFraction;
+            }
+            normal_local = adjusted_normal;
+        }
+        else
+        {
+            normal_local = glm::dvec3(
+                hit_normal_local.x(),
+                hit_normal_local.y(),
+                hit_normal_local.z()
+            );
+        }
+        m_hits.emplace_back(
+            hit_point,
+            hit_fraction,
+            normal_local,
+            triangle_index
+        );
+        return 1;
+    }
+};
+
+
+static PyObject *
+Shape_mesh_raycast_all(Shape *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    ASSERT(nargs == 6);
+    auto state = get_module_state();
+
+    auto from_x = PyFloat_AsDouble(args[0]);
+    ASSERT(!PyErr_Occurred());
+    auto from_y = PyFloat_AsDouble(args[1]);
+    ASSERT(!PyErr_Occurred());
+    auto from_z = PyFloat_AsDouble(args[2]);
+    ASSERT(!PyErr_Occurred());
+    auto to_x = PyFloat_AsDouble(args[3]);
+    ASSERT(!PyErr_Occurred());
+    auto to_y = PyFloat_AsDouble(args[4]);
+    ASSERT(!PyErr_Occurred());
+    auto to_z = PyFloat_AsDouble(args[5]);
+    ASSERT(!PyErr_Occurred());
+
+    glm::dvec3 from(from_x, from_y, from_z);
+    glm::dvec3 to(to_x, to_y, to_z);
+
+    btVector3 bt_from(from.x, from.y, from.z);
+    btVector3 bt_to(to.x, to.y, to.z);
+
+    auto mesh = (btBvhTriangleMeshShape*)self->shape;
+    ShapeMeshRaycastAllTriangleCallback result(mesh, from, to, bt_from, bt_to);
+    mesh->performRaycast(&result, bt_from, bt_to);
+
+    PyObject *py_result = PyList_New(result.m_hits.size());
+    if (!py_result){ return 0; }
+    for (size_t i = 0; i < result.m_hits.size(); ++i)
+    {
+        const auto& hit = result.m_hits[i];
+
+        PyObject *py_hit = PyTuple_New(8);
+        if (!py_hit){ goto error; }
+        PyList_SET_ITEM(py_result, i, py_hit);
+
+        PyObject *position_x = PyFloat_FromDouble(hit.point.x);
+        if (!position_x){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 0, position_x);
+
+        PyObject *position_y = PyFloat_FromDouble(hit.point.y);
+        if (!position_y){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 1, position_y);
+
+        PyObject *position_z = PyFloat_FromDouble(hit.point.z);
+        if (!position_z){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 2, position_z);
+
+        PyObject *normal_x = PyFloat_FromDouble(hit.normal_local.x);
+        if (!normal_x){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 3, normal_x);
+
+        PyObject *normal_y = PyFloat_FromDouble(hit.normal_local.y);
+        if (!normal_y){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 4, normal_y);
+
+        PyObject *normal_z = PyFloat_FromDouble(hit.normal_local.z);
+        if (!normal_z){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 5, normal_z);
+
+        PyObject *triangle_index = PyLong_FromLong(hit.triangle_index);
+        if (!triangle_index){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 6, triangle_index);
+
+        PyObject *fraction = PyFloat_FromDouble(hit.fraction);
+        if (!fraction){ goto error; }
+        PyTuple_SET_ITEM(py_hit, 7, fraction);
+    }
+    return py_result;
+error:
+    Py_DECREF(py_result);
+    return 0;
+}
+
+
 static PyMethodDef Shape_PyMethodDef[] = {
     {
         "add_capsule",
@@ -2158,6 +2342,12 @@ static PyMethodDef Shape_PyMethodDef[] = {
     {
         "mesh_raycast",
         (PyCFunction)Shape_mesh_raycast,
+        METH_FASTCALL,
+        0
+    },
+    {
+        "mesh_raycast_all",
+        (PyCFunction)Shape_mesh_raycast_all,
         METH_FASTCALL,
         0
     },
@@ -2284,4 +2474,3 @@ get_module_state()
     if (!module){ return 0; }
     return (ModuleState *)PyModule_GetState(module);
 }
-

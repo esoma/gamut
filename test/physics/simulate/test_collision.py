@@ -134,13 +134,14 @@ def test_no_collision_mask(ball_group_shift: int) -> None:
         next(world_simulation)
 
 
-def test_mesh_collision_normals() -> None:
+@pytest.mark.parametrize("direction", [1, -1])
+def test_mesh_collision_normals(direction: int) -> None:
     w = World(timedelta(seconds=1 / 120.0))
     w.gravity = DVector3(0, -9.8, 0)
 
     ball = Body(1, Sphere(DVector3(0), 1), world=w, type=BodyType.DYNAMIC)
-    ball.transform = DMatrix4(1).translate(DVector3(99, 1.2, 0))
-    ball.linear_velocity = DVector3(-8, 0, 0)
+    ball.transform = DMatrix4(1).translate(DVector3(99 * direction, 1.2, 0))
+    ball.linear_velocity = DVector3(8 * -direction, 0, 0)
 
     floor_shape = Composite3d(
         Mesh3d(
