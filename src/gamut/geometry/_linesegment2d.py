@@ -52,6 +52,27 @@ class LineSegment2d(Generic[T]):
         length_2 = sum(x ** 2 for x in (self._a - self._b))
         return ((point - self._a) @ self.slope) / length_2
 
+    def _get_intersection_times_line(
+        self,
+        other: LineSegment2d
+    ) -> tuple[float, float] | None:
+        # get the time on both lines where the two lines intersect
+        # if the lines are parallel then return None
+        det = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
+        if det == 0:
+            return None
+        s = (
+            (-self._slope.y * (self._a.x - other._a.x) +
+            self._slope.x * (self._a.y - other._a.y)) /
+            det
+        )
+        t = (
+            (other._slope.x * (self._a.y - other._a.y) -
+            other._slope.y * (self._a.x - other._a.x)) /
+            det
+        )
+        return t, s
+
     @property
     def a(self) -> T:
         return self._a
@@ -80,6 +101,81 @@ class LineSegment2d(Generic[T]):
             -other._slope.x * self._slope.y +
             self._slope.x * other._slope.y
         ) == 0
+
+    def where_intersected_by_line_segment(
+        self,
+        other: LineSegment2d[T],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment2d[T] | T | None:
+        # handle parallel segments
+        ts = self._get_intersection_times_line(other)
+        if ts is None:
+            # segments are parallel, check if they're part of the same line
+            oat = self._project_point_time(other._a)
+            oap = self.get_point_from_a_to_b(oat)
+            same_line = oap.distance(other._a) <= tolerance
+            if same_line:
+                # segments are part of the same line, figure out where the
+                # points of the other segment intersect this one
+                obt = self._project_point_time(other._b)
+                if tolerance == 0:
+                    oai = oat >= 0 and oat <= 1
+                    obi = obt >= 0 and obt <= 1
+                    if not oai and not obi:
+                        return None
+                obp = self.get_point_from_a_to_b(obt)
+                if tolerance != 0:
+                    oai = self.get_distance_to_point(oap) <= tolerance
+                    obi = self.get_distance_to_point(obp) <= tolerance
+                    if not oai and not obi:
+                        return None
+                intersection_points = []
+                if oai:
+                    if tolerance == 0:
+                        intersection_points.append(oap)
+                    else:
+                        intersection_points.append(
+                            self.get_point_from_a_to_b(max(min(oat, 1), 0))
+                        )
+                if obi:
+                    if tolerance == 0:
+                        intersection_points.append(obp)
+                    else:
+                        intersection_points.append(
+                            self.get_point_from_a_to_b(max(min(obt, 1), 0))
+                        )
+                assert intersection_points
+                if len(intersection_points) != 2:
+                    # only one of the points of other is intersecting, figure
+                    # out which point of self makes up the new intersection
+                    # segment
+                    nit = obt if oai else oat
+                    assert nit < 0 or nit > 1
+                    if nit < 0:
+                        intersection_points.append(self._a)
+                    else:
+                        intersection_points.append(self._b)
+                assert len(intersection_points) == 2
+                # it is possible the same line intersection devolves into a
+                # single point if the segments share a single point, but the
+                # other points don't intersect
+                try:
+                    return LineSegment2d(*intersection_points)
+                except LineSegment2d.DegenerateError as ex:
+                    return ex.degenerate_form
+            else:
+                return None
+        # not parallel
+        t, s = ts
+        if tolerance == 0:
+            if t < 0 or t > 1 or s < 0 or s > 1:
+                return None
+        i = self.get_point_from_a_to_b(max(min(t, 1), 0))
+        if tolerance != 0:
+            if other.get_distance_to_point(i) > tolerance:
+                return None
+        return i
 
     def get_line_segment_intersection(
         self,
