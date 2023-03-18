@@ -52,27 +52,6 @@ class LineSegment2d(Generic[T]):
         length_2 = sum(x ** 2 for x in (self._a - self._b))
         return ((point - self._a) @ self.slope) / length_2
 
-    def _get_intersection_times_line(
-        self,
-        other: LineSegment2d
-    ) -> tuple[float, float] | None:
-        # get the time on both lines where the two lines intersect
-        # if the lines are parallel then return None
-        det = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
-        if det == 0:
-            return None
-        s = (
-            (-self._slope.y * (self._a.x - other._a.x) +
-            self._slope.x * (self._a.y - other._a.y)) /
-            det
-        )
-        t = (
-            (other._slope.x * (self._a.y - other._a.y) -
-            other._slope.y * (self._a.x - other._a.x)) /
-            det
-        )
-        return t, s
-
     @property
     def a(self) -> T:
         return self._a
@@ -109,7 +88,7 @@ class LineSegment2d(Generic[T]):
         tolerance: float = 0.0
     ) -> LineSegment2d[T] | T | None:
         # handle parallel segments
-        ts = self._get_intersection_times_line(other)
+        ts = self.when_lines_intersect(other)
         if ts is None:
             # segments are parallel, check if they're part of the same line
             oat = self._project_point_time(other._a)
@@ -177,27 +156,42 @@ class LineSegment2d(Generic[T]):
                 return None
         return i
 
-    def get_line_segment_intersection(
+    def when_lines_intersect(
+        self,
+        other: LineSegment2d
+    ) -> tuple[float, float] | None:
+        # get the time on both lines where the two lines intersect
+        # if the lines are parallel then return None
+        if not isinstance(other, LineSegment2d):
+            raise TypeError('other must be LineSegment2d')
+
+        det = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
+        if det == 0:
+            return None
+        s = (
+            (-self._slope.y * (self._a.x - other._a.x) +
+            self._slope.x * (self._a.y - other._a.y)) /
+            det
+        )
+        t = (
+            (other._slope.x * (self._a.y - other._a.y) -
+            other._slope.y * (self._a.x - other._a.x)) /
+            det
+        )
+        return t, s
+
+    def when_line_segments_intersect(
         self,
         other: LineSegment2d
     ) -> tuple[float, float] | None:
         if not isinstance(other, LineSegment2d):
             raise TypeError('other must be LineSegment2d')
 
-        div = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
-        if div == 0:
+        ts = self.when_lines_intersect(other)
+        if ts is None:
             return None
-        s = (
-            (-self._slope.y * (self._a.x - other._a.x) +
-            self._slope.x * (self._a.y - other._a.y)) /
-            div
-        )
-        t = (
-            (other._slope.x * (self._a.y - other._a.y) -
-            other._slope.y * (self._a.x - other._a.x)) /
-            div
-        )
 
+        t, s = ts
         if s >= 0 and s <= 1 and t >= 0 and t <= 1:
             return t, s
         return None

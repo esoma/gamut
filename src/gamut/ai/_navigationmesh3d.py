@@ -225,7 +225,7 @@ class StringPuller(Generic[T]):
                 for intersection, edge in
                 (
                     (
-                        path_line.get_line_segment_intersection(
+                        path_line.when_line_segments_intersect(
                             LineSegment2d(edge.a.xz, edge.b.xz)
                         ),
                         edge

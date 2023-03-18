@@ -134,10 +134,17 @@ def test_distance_to_point(
     assert isclose(edge.get_distance_to_point(point), distance)
 
 
-def test_intersection_invalid() -> None:
+def test_when_line_segments_intersect_invalid() -> None:
     line = LineSegment2d(DVector2(0, 0), DVector2(10, 10))
     with pytest.raises(TypeError) as ex:
-        line.get_line_segment_intersection(None)
+        line.when_line_segments_intersect(None)
+    assert str(ex.value) == 'other must be LineSegment2d'
+
+
+def test_when_lines_intersect_invalid() -> None:
+    line = LineSegment2d(DVector2(0, 0), DVector2(10, 10))
+    with pytest.raises(TypeError) as ex:
+        line.when_lines_intersect(None)
     assert str(ex.value) == 'other must be LineSegment2d'
 
 
@@ -154,14 +161,47 @@ def test_intersection_invalid() -> None:
         LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
         LineSegment2d(DVector2(10, 0), DVector2(20, 10))
     ),
-        (
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        LineSegment2d(DVector2(-1, -1), DVector2(-10, -10))
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(1, 0)),
+        LineSegment2d(DVector2(2, -1), DVector2(2, 1))
+    ),
+])
+def test_when_line_segments_intersect_none(
+    l1: LineSegment2d,
+    l2: LineSegment2d
+) -> None:
+    assert l1.when_line_segments_intersect(l2) is None
+    assert l2.when_line_segments_intersect(l1) is None
+
+
+@pytest.mark.parametrize("l1, l2", [
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10))
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        LineSegment2d(DVector2(-10, -10), DVector2(10, 10))
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
+        LineSegment2d(DVector2(10, 0), DVector2(20, 10))
+    ),
+    (
         LineSegment2d(DVector2(0, 0), DVector2(10, 10)),
         LineSegment2d(DVector2(-1, -1), DVector2(-10, -10))
     ),
 ])
-def test_intersection_none(l1: LineSegment2d, l2: LineSegment2d) -> None:
-    assert l1.get_line_segment_intersection(l2) is None
-    assert l2.get_line_segment_intersection(l1) is None
+def test_when_lines_intersect_none(
+    l1: LineSegment2d,
+    l2: LineSegment2d
+) -> None:
+    assert l1.when_lines_intersect(l2) is None
+    assert l2.when_lines_intersect(l1) is None
 
 
 @pytest.mark.parametrize("l1, l2, intersection", [
@@ -196,16 +236,67 @@ def test_intersection_none(l1: LineSegment2d, l2: LineSegment2d) -> None:
         (.5, .5)
     ),
 ])
-def test_intersection(
+def test_when_line_segments_intersect(
     l1: LineSegment2d,
     l2: LineSegment2d,
     intersection: tuple[float, float]
 ) -> None:
-    t, s = l1.get_line_segment_intersection(l2)
+    t, s = l1.when_line_segments_intersect(l2)
     assert intersection[0] == t
     assert intersection[1] == s
 
-    t, s = l2.get_line_segment_intersection(l1)
+    t, s = l2.when_line_segments_intersect(l1)
+    assert intersection[0] == s
+    assert intersection[1] == t
+
+
+@pytest.mark.parametrize("l1, l2, intersection", [
+    (
+        LineSegment2d(DVector2(-5, -5), DVector2(5, 5)),
+        LineSegment2d(DVector2(-5, 5), DVector2(5, -5)),
+        (.5, .5)
+    ),
+    (
+        LineSegment2d(DVector2(-5, -5), DVector2(5, 5)),
+        LineSegment2d(DVector2(-5, 5), DVector2(0, 0)),
+        (.5, 1.0)
+    ),
+    (
+        LineSegment2d(DVector2(-15, -5), DVector2(-5, 5)),
+        LineSegment2d(DVector2(-15, 5), DVector2(-5, -5)),
+        (.5, .5)
+    ),
+    (
+        LineSegment2d(FVector2(-5, -5), FVector2(5, 5)),
+        LineSegment2d(FVector2(-5, 5), FVector2(5, -5)),
+        (.5, .5)
+    ),
+    (
+        LineSegment2d(FVector2(-5, -5), FVector2(5, 5)),
+        LineSegment2d(FVector2(-5, 5), FVector2(0, 0)),
+        (.5, 1.0)
+    ),
+    (
+        LineSegment2d(FVector2(-15, -5), FVector2(-5, 5)),
+        LineSegment2d(FVector2(-15, 5), FVector2(-5, -5)),
+        (.5, .5)
+    ),
+    (
+        LineSegment2d(DVector2(0, 0), DVector2(1, 0)),
+        LineSegment2d(DVector2(2, -1), DVector2(2, 1)),
+        (2, .5)
+    ),
+])
+def test_when_lines_intersect(
+    l1: LineSegment2d,
+    l2: LineSegment2d,
+    intersection: tuple[float, float]
+) -> None:
+    t, s = l1.when_lines_intersect(l2)
+    assert intersection[0] == t
+    assert intersection[1] == s
+
+    t, s = l2.when_lines_intersect(l1)
     assert intersection[0] == s
     assert intersection[1] == t
 
