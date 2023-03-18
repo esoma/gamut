@@ -63,6 +63,32 @@ class LineSegment3d(Generic[T]):
         c = (point - self._a).cross(d)
         return hypot(*c, h)
 
+    def get_distance_to_line_segment(self, other: LineSegment[T]) -> float:
+        # math :^)
+        d1 = self._slope
+        d2 = other._slope
+        r = self._a - other._a
+        a = d1 @ d1
+        e = d2 @ d2
+        f = d2 @ r
+        c = d1 @ r
+        b = d1 @ d2
+        denom = a * e - b * b
+        if denom != 0.0:
+            s = max(min((b * f - c * e) / denom, 1.0), 0.0)
+        else:
+            s = 0.0
+        t = (b * s + f) / e
+        if t < 0:
+            t = 0
+            s = max(min(-c / a, 1.0), 0.0)
+        elif t > 1:
+            t = 1
+            s = max(min((b - c) / a, 1.0), 0.0)
+        c1 = self._a + d1 * s
+        c2 = other._a + d2 * t
+        return c1.distance(c2)
+
     def get_point_from_a_to_b(self, t: float) -> T:
         return self._a + (t * self._slope)
 

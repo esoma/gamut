@@ -120,3 +120,37 @@ def test_get_distance_to_point(vtype: Any) -> None:
     assert line.get_distance_to_point(vtype(0, -1, 0)) == 1
     assert line.get_distance_to_point(vtype(0, 0, 2)) == 2
     assert line.get_distance_to_point(vtype(0, 0, -2)) == 2
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_distance_to_line_segment(vtype: Any) -> None:
+    line = LineSegment3d(vtype(-5), vtype(5))
+    assert line.get_distance_to_line_segment(line) == 0.0
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(-4), vtype(4))
+    ) == 0.0
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(4), vtype(-4))
+    ) == 0.0
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(6), vtype(8))
+    ) == vtype(5).distance(vtype(6))
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(-7), vtype(-8))
+    ) == vtype(-5).distance(vtype(-7))
+
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(0, 0, 0))
+    ) == 0.0
+    assert pytest.approx(
+        line.get_distance_to_line_segment(
+            LineSegment3d(vtype(-1, 0, 0), vtype(-2, 0, 0))
+        )
+    ) == 0.8164966106414795
+
+    line = LineSegment3d(vtype(0), vtype(1, 0, 0))
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(-1, 0, 0), vtype(-2, 0, 0))
+    ) == 1.0
+    assert line.get_distance_to_line_segment(
+        LineSegment3d(vtype(0, -1, 0), vtype(1, -1, 0))
+    ) == 1.0
