@@ -108,3 +108,15 @@ def test_point_along_line(vtype: Any) -> None:
     assert line.get_point_from_b_to_a(1) == vtype(-5)
     assert line.get_point_from_b_to_a(2) == vtype(-15)
     assert line.get_point_from_b_to_a(-1) == vtype(15)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_distance_to_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0), vtype(5, 0, 0))
+    assert line.get_distance_to_point(vtype(0)) == 0
+    assert line.get_distance_to_point(vtype(5, 0, 0)) == 0
+    assert line.get_distance_to_point(vtype(6, 0, 0)) == 1
+    assert line.get_distance_to_point(vtype(-1, 0, 0)) == 1
+    assert line.get_distance_to_point(vtype(0, 1, 0)) == 1
+    assert line.get_distance_to_point(vtype(0, -1, 0)) == 1
+    assert line.get_distance_to_point(vtype(0, 0, 2)) == 2
+    assert line.get_distance_to_point(vtype(0, 0, -2)) == 2

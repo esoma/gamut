@@ -8,6 +8,7 @@ from ._error import DegenerateGeometryError
 # gamut
 from gamut.math import DVector3, FVector3
 # python
+from math import hypot
 from typing import Generic, TypeVar
 
 T = TypeVar('T', FVector3, DVector3)
@@ -30,7 +31,7 @@ class LineSegment3d(Generic[T]):
         if a == b:
             raise self.DegenerateError(a, 'degenerate line segment')
 
-        self._diff = b - a
+        self._slope = b - a
 
     def __hash__(self) -> int:
         return hash((self._a, self._b))
@@ -54,8 +55,16 @@ class LineSegment3d(Generic[T]):
     def b(self) -> T:
         return self._b
 
+    def get_distance_to_point(self, point: T) -> float:
+        d = self._slope.normalize()
+        s = (self._a - point) @ d
+        t = (point - self._b) @ d
+        h = max(s, t, 0)
+        c = (point - self._a).cross(d)
+        return hypot(*c, h)
+
     def get_point_from_a_to_b(self, t: float) -> T:
-        return self._a + (t * self._diff)
+        return self._a + (t * self._slope)
 
     def get_point_from_b_to_a(self, t: float) -> T:
         t = -(t - 1)
