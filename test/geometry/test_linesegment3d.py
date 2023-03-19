@@ -67,10 +67,11 @@ def test_degenerate_error():
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
-def test_points(vtype: Any) -> None:
+def test_attributes(vtype: Any) -> None:
     line = LineSegment3d(vtype(0, 1, 2), vtype(3, 4, 5))
     assert line.a == vtype(0, 1, 2)
     assert line.b == vtype(3, 4, 5)
+    assert line.vector_type is vtype
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
@@ -154,3 +155,43 @@ def test_get_distance_to_line_segment(vtype: Any) -> None:
     assert line.get_distance_to_line_segment(
         LineSegment3d(vtype(0, -1, 0), vtype(1, -1, 0))
     ) == 1.0
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_project_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.project_point_time(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+    with pytest.raises(TypeError) as excinfo:
+        assert line.project_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert line.project_point_time(vtype(0, -2, 0)) == 0
+    assert line.project_point_time(vtype(0, 2, 0)) == 1
+    assert line.project_point_time(vtype(0, 0, 0)) == .5
+    assert line.project_point_time(vtype(0, -4, 0)) == -.5
+
+    assert line.project_point(vtype(0, -2, 0)) == vtype(0, -2, 0)
+    assert line.project_point(vtype(0, 2, 0)) == vtype(0, 2, 0)
+    assert line.project_point(vtype(0, 0, 0)) == vtype(0, 0, 0)
+    assert line.project_point(vtype(0, -4, 0)) == vtype(0, -4, 0)
+
+    assert line.project_point_time(vtype(100, -2, -100)) == 0
+    assert line.project_point_time(vtype(1, -4, -1)) == -.5
+
+    assert line.project_point(vtype(100, -2, -100)) == vtype(0, -2, 0)
+    assert line.project_point(vtype(1, -4, -1)) == vtype(0, -4, 0)
+
+    assert line.project_point(
+        vtype(100, -2, -100),
+        clamped=True
+    ) == vtype(0, -2, 0)
+    assert line.project_point(
+        vtype(1, -4, -1),
+        clamped=True
+    ) == vtype(0, -2, 0)
+    assert line.project_point(
+        vtype(1, 4, -1),
+        clamped=True
+    ) == vtype(0, 2, 0)

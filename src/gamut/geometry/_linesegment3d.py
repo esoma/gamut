@@ -55,6 +55,10 @@ class LineSegment3d(Generic[T]):
     def b(self) -> T:
         return self._b
 
+    @property
+    def vector_type(self) -> Type[T]:
+        return type(self._a)
+
     def get_distance_to_point(self, point: T) -> float:
         d = self._slope.normalize()
         s = (self._a - point) @ d
@@ -95,3 +99,20 @@ class LineSegment3d(Generic[T]):
     def get_point_from_b_to_a(self, t: float) -> T:
         t = -(t - 1)
         return self.get_point_from_a_to_b(t)
+
+    def project_point_time(self, point: T) -> float:
+        if not isinstance(point, self.vector_type):
+            raise TypeError(f'point must be {self.vector_type.__name__}]')
+        ap = point - self._a
+        return (ap @ self._slope) / (self._slope @ self._slope)
+
+    def project_point(
+        self,
+        point: T,
+        *,
+        clamped: bool = False
+    ) -> T:
+        t = self.project_point_time(point)
+        if clamped:
+            t = max(min(t, 1), 0)
+        return self._a + t * self._slope
