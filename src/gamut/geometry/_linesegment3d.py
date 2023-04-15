@@ -209,3 +209,39 @@ class LineSegment3d(Generic[T]):
         if sp.distance(op) > tolerance:
             return None
         return sp
+
+    def where_intersected_by_plane(
+        self,
+        plane: Plane[T],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment3d[T] | T | None:
+        # gamut
+        from ._plane import Plane
+        if (
+            not isinstance(plane, Plane) or
+            not isinstance(plane.normal, self.vector_type)
+        ):
+            raise TypeError(
+                f'plane must be Plane[{self.vector_type.__name__}]'
+            )
+        # find the intersection using math :^)
+        den = plane.normal @ self._slope
+        if den == 0:
+            # line segment is parallel to the plane, so any point of the
+            # segment will do as an intersection check
+            if abs(plane.get_signed_distance_to_point(self.a)) > tolerance:
+                return None
+            return self
+        d = plane.normal @ plane.origin
+        t = (d - plane.normal @ self._a) / den
+        if tolerance == 0:
+            if t < 0 or t > 1:
+                return None
+        else:
+            t = max(min(t, 1), 0)
+        p = self._a + t * self._slope
+        if tolerance != 0:
+            if abs(self.get_distance_to_point(p)) > tolerance:
+                return None
+        return p

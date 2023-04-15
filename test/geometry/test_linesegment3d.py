@@ -1,6 +1,6 @@
 from __future__ import annotations
 # gamut
-from gamut.geometry import DegenerateGeometryError, LineSegment3d
+from gamut.geometry import DegenerateGeometryError, LineSegment3d, Plane
 from gamut.math import DVector3, DVector4, FVector3
 # python
 from typing import Any
@@ -294,3 +294,41 @@ def test_where_intersected_by_line_segment(vtype: Any) -> None:
             vtype(1, 0, 0)
         ),
     ) == LineSegment3d(vtype(0), vtype(1, 0, 0))
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_plane(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.where_intersected_by_plane(None)
+    assert str(excinfo.value).startswith(
+        f'plane must be Plane[{vtype.__name__}]'
+    )
+
+    assert line.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == vtype(0, 1, 0)
+    assert line.where_intersected_by_plane(
+        Plane(-3, vtype(0, 1, 0))
+    ) is None
+    assert line.where_intersected_by_plane(
+        Plane(-3, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(0, 2, 0)
+    assert line.where_intersected_by_plane(
+        Plane(3, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(0, -2, 0)
+
+    line = LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+    assert line.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
+    assert line.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0))
+    ) is None
+    assert line.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(0, 1, 0), vtype(1, 1, 0))
