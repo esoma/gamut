@@ -116,3 +116,9 @@ class LineSegment3d(Generic[T]):
         if clamped:
             t = max(min(t, 1), 0)
         return self._a + t * self._slope
+
+    def is_parallel_with_line_segment(self, other: LineSegment3d[T]) -> bool:
+        return (
+            self._slope.cross(other._slope) ** 2 <=
+            (self._slope * self._slope).cross(other._slope * other._slope)
+        )

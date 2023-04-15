@@ -195,3 +195,32 @@ def test_project_point(vtype: Any) -> None:
         vtype(1, 4, -1),
         clamped=True
     ) == vtype(0, 2, 0)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_is_parallel_with_line_segment(vtype: Any) -> None:
+    line = LineSegment3d(vtype(-5), vtype(5))
+    assert line.is_parallel_with_line_segment(line)
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5), vtype(-5))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(8), vtype(16))
+    )
+    assert not line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(0), vtype(5, 0, 0))
+    )
+
+    line = LineSegment3d(vtype(0), vtype(5, 0, 0))
+    assert line.is_parallel_with_line_segment(line)
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, 0, 0), vtype(0))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, 1, 0), vtype(0, 1, 0))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, 0, 1), vtype(0, 0, 1))
+    )
+    assert line.is_parallel_with_line_segment(
+        LineSegment3d(vtype(5, -1, 1), vtype(0, -1, 1))
+    )
