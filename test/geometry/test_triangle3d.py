@@ -3,9 +3,18 @@
 from gamut.geometry import DegenerateGeometryError, LineSegment3d, Triangle3d
 from gamut.math import DVector3, DVector4, FVector3
 # python
+from math import isclose
 from typing import Any
 # pytest
 import pytest
+
+
+def vector3_is_close(a: Any, b: Any) -> bool:
+    return (
+        isclose(a.x, b.x, rel_tol=.00001) and
+        isclose(a.y, b.y, rel_tol=.00001) and
+        isclose(a.z, b.z, rel_tol=.00001)
+    )
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
@@ -128,7 +137,6 @@ def test_attributes(vtype: Any) -> None:
                 (tri.normal @ tri.positions[i]) / tri.normal.magnitude
             )
 
-
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_equal(vtype: Any) -> None:
     assert (
@@ -161,7 +169,6 @@ def test_equal(vtype: Any) -> None:
     )
     assert Triangle3d(vtype(0), vtype(0, 1, 2), vtype(1)) != object()
 
-
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])
 def test_degenerate(vtype: Any) -> None:
     with pytest.raises(Triangle3d.DegenerateError) as excinfo:
@@ -179,6 +186,46 @@ def test_degenerate(vtype: Any) -> None:
     assert str(excinfo.value).startswith('degenerate triangle')
     assert excinfo.value.degenerate_form == LineSegment3d(vtype(2), vtype(0))
 
-
 def test_degenerate_error():
     assert issubclass(Triangle3d.DegenerateError, DegenerateGeometryError)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_barycentric(vtype: Any) -> None:
+    with pytest.raises(TypeError) as excinfo:
+        Triangle3d(vtype(0), vtype(1, 0, 0), vtype(0, 1, 0)
+            ).get_projected_barycentric_point_from_cartesian(None)
+    assert str(excinfo.value).startswith(
+        f'cartesian_point must be {vtype}'
+    )
+    with pytest.raises(TypeError) as excinfo:
+        Triangle3d(vtype(0), vtype(1, 0, 0), vtype(0, 1, 0)
+            ).get_cartesian_point_from_barycentric(None)
+    assert str(excinfo.value).startswith(
+        f'barycentric_point must be {vtype}'
+    )
+
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(0))
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(0))
+    assert bp == vtype(1, 0, 0)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(0, 1, 0))
+    assert bp == vtype(0, 1, 0)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(0, 1, 0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(1, 0, 0))
+    assert bp == vtype(0, 0, 1)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(1, 0, 0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(0, 0, 1))
+    assert bp == vtype(1, 0, 0)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(0)
+
+    bp = t.get_projected_barycentric_point_from_cartesian(t.center)
+    assert vector3_is_close(bp, vtype(1 / 3, 1 / 3, 1 / 3))
+    assert t.get_cartesian_point_from_barycentric(bp) == t.center
+
+    bp = t.get_projected_barycentric_point_from_cartesian(vtype(-1, 2, 4))
+    assert bp == vtype(0, 2, -1)
+    assert t.get_cartesian_point_from_barycentric(bp) == vtype(-1, 2, 0)
