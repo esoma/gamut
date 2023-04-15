@@ -67,6 +67,7 @@ def test_attributes(vtype: Any) -> None:
         Triangle3d(vtype(1, 1, 0), vtype(1, 1, 2), vtype(0, 0, 0)),
         Triangle3d(vtype(1, 1, 2), vtype(0, 0, 0), vtype(1, 1, 0)),
     ]:
+        assert tri.vector_type is vtype
         assert tri.positions == (
             vtype(0, 0, 0),
             vtype(1, 1, 0),
@@ -81,11 +82,25 @@ def test_attributes(vtype: Any) -> None:
         assert LineSegment3d(vtype(1, 1, 0), vtype(1, 1, 2)) in tri.edges
         assert LineSegment3d(vtype(1, 1, 2), vtype(0, 0, 0)) in tri.edges
 
+        assert tri.bounding_box.min == vtype(0, 0, 0)
+        assert tri.bounding_box.max == vtype(1, 1, 2)
+
+        d_edge_0 = tri.positions[1] - tri.positions[0]
+        d_edge_1 = tri.positions[0] - tri.positions[2]
+        assert tri.normal == -d_edge_0.cross(d_edge_1).normalize()
+
+        assert tri.plane.normal == tri.normal / tri.normal.magnitude
+        for i in range(3):
+            assert tri.plane.distance == (
+                (tri.normal @ tri.positions[i]) / tri.normal.magnitude
+            )
+
     for tri in [
         Triangle3d(vtype(1, 1, 0), vtype(0, 0, 0), vtype(1, 1, 2)),
         Triangle3d(vtype(1, 1, 2), vtype(1, 1, 0), vtype(0, 0, 0)),
         Triangle3d(vtype(0, 0, 0), vtype(1, 1, 2), vtype(1, 1, 0)),
     ]:
+        assert tri.vector_type is vtype
         assert tri.positions == (
             vtype(0, 0, 0),
             vtype(1, 1, 2),
@@ -99,6 +114,19 @@ def test_attributes(vtype: Any) -> None:
         assert LineSegment3d(vtype(1, 1, 0), vtype(0, 0, 0)) in tri.edges
         assert LineSegment3d(vtype(0, 0, 0), vtype(1, 1, 2)) in tri.edges
         assert LineSegment3d(vtype(1, 1, 2), vtype(1, 1, 0)) in tri.edges
+
+        assert tri.bounding_box.min == vtype(0, 0, 0)
+        assert tri.bounding_box.max == vtype(1, 1, 2)
+
+        d_edge_0 = tri.positions[1] - tri.positions[0]
+        d_edge_1 = tri.positions[0] - tri.positions[2]
+        assert tri.normal == -d_edge_0.cross(d_edge_1).normalize()
+
+        assert tri.plane.normal == tri.normal / tri.normal.magnitude
+        for i in range(3):
+            assert tri.plane.distance == (
+                (tri.normal @ tri.positions[i]) / tri.normal.magnitude
+            )
 
 
 @pytest.mark.parametrize("vtype", [FVector3, DVector3])

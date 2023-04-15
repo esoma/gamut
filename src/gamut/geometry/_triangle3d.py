@@ -4,8 +4,10 @@ from __future__ import annotations
 __all__ = ['Triangle3d']
 
 # gamut
+from ._boundingbox3d import BoundingBox3d
 from ._error import DegenerateGeometryError
 from ._linesegment3d import LineSegment3d
+from ._plane import Plane
 # gamut
 from gamut.math import DVector3, FVector3
 # python
@@ -85,12 +87,31 @@ class Triangle3d(Generic[T]):
         return LineSegment3d(seg[0], seg[1])
 
     @property
+    def bounding_box(self) -> BoundingBox3d:
+        return BoundingBox3d(self._positions[0].get_array_type()(
+            *self._positions
+        ))
+
+    @property
     def center(self) -> T:
         return sum(self._positions) / 3
 
     @property
+    def normal(self) -> T:
+        return self._normal
+
+    @property
+    def plane(self) -> Plane:
+        normal = self.normal
+        return Plane(-normal @ self._positions[0], normal)
+
+    @property
     def positions(self) -> tuple[T, T, T]:
         return self._positions
+
+    @property
+    def vector_type(self) -> Type[T]:
+        return type(self._positions[0])
 
     @property
     def edges(self) -> tuple[
