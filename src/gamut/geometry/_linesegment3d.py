@@ -122,3 +122,16 @@ class LineSegment3d(Generic[T]):
             self._slope.cross(other._slope) ** 2 <=
             (self._slope * self._slope).cross(other._slope * other._slope)
         )
+
+    def where_intersected_by_point(
+        self,
+        point: T,
+        *,
+        tolerance: float = 0.0
+    ) -> T | None:
+        if not isinstance(point, self.vector_type):
+            raise TypeError(f'point must be {self.vector_type.__name__}]')
+        projected_point = self.project_point(point, clamped=True)
+        if point.distance(projected_point) <= tolerance:
+            return projected_point
+        return None
