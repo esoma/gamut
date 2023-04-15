@@ -83,6 +83,9 @@ class Quad3d(Generic[VT, AT, MT]):
 
     def seen_by(self, view_frustum: ViewFrustum3d[VT, Any]) -> bool:
         for plane in view_frustum.planes:
-            if all(plane.distance_to_point(p) < 0 for p in self._points):
+            if all(
+                plane.get_signed_distance_to_point(p) < 0
+                for p in self._points
+            ):
                 return False
         return True
