@@ -124,3 +124,35 @@ class Triangle3d(Generic[T]):
             LineSegment3d(self._positions[1], self._positions[2]),
             LineSegment3d(self._positions[2], self._positions[0]),
         )
+
+    def get_projected_barycentric_point_from_cartesian(
+        self,
+        cartesian_point: T
+    ) -> T:
+        if not isinstance(cartesian_point, self.vector_type):
+            raise TypeError(f'cartesian_point must be {self.vector_type}')
+        v0 = self._positions[2] - self._positions[0]
+        v1 = self._positions[1] - self._positions[0]
+        v2 = cartesian_point - self._positions[0]
+        dot00 = v0 @ v0
+        dot01 = v0 @ v1
+        dot02 = v0 @ v2
+        dot11 = v1 @ v1
+        dot12 = v1 @ v2
+        inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
+        w = (dot11 * dot02 - dot01 * dot12) * inv_denom
+        v = (dot00 * dot12 - dot01 * dot02) * inv_denom
+        u = 1.0 - w - v
+        return self.vector_type(u, v, w)
+
+    def get_cartesian_point_from_barycentric(
+        self,
+        barycentric_point: T
+    ) -> T:
+        if not isinstance(barycentric_point, self.vector_type):
+            raise TypeError(f'barycentric_point must be {self.vector_type}')
+        return (
+            barycentric_point.x * self._positions[0] +
+            barycentric_point.y * self._positions[1] +
+            barycentric_point.z * self._positions[2]
+        )
