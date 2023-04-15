@@ -115,7 +115,7 @@ class Sphere(Generic[VT, MT]):
 
     def seen_by(self, view_frustum: ViewFrustum3d[VT, Any]) -> bool:
         for plane in view_frustum.planes:
-            distance = plane.distance_to_point(self.center)
+            distance = plane.get_signed_distance_to_point(self.center)
             if distance < -self.radius:
                 return False
         return True

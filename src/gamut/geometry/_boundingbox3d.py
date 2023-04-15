@@ -152,6 +152,9 @@ class BoundingBox3d(Generic[T, VT, MT]):
 
     def seen_by(self, view_frustum: ViewFrustum3d) -> bool:
         for plane in view_frustum.planes:
-            if all(plane.distance_to_point(c) < 0 for c in self.corners):
+            if all(
+                plane.get_signed_distance_to_point(c) < 0
+                for c in self.corners
+            ):
                 return False
         return True

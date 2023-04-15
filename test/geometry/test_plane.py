@@ -158,10 +158,10 @@ def test_transform_wrong_type():
     DVector3(1),
     DVector3(-1),
 ])
-def test_d_distance_to_point(plane: Plane, point: DVector3) -> None:
+def test_d_get_signed_distance_to_point(plane: Plane, point: DVector3) -> None:
     expected = plane.normal @ point + plane.distance
     assert (
-        plane.distance_to_point(point) == pytest.approx(expected)
+        plane.get_signed_distance_to_point(point) == pytest.approx(expected)
     )
 
 
@@ -175,27 +175,27 @@ def test_d_distance_to_point(plane: Plane, point: DVector3) -> None:
     FVector3(1),
     FVector3(-1),
 ])
-def test_f_distance_to_point(plane: Plane, point: FVector3) -> None:
+def test_f_get_signed_distance_to_point(plane: Plane, point: FVector3) -> None:
     expected = plane.normal @ point + plane.distance
     assert (
-        plane.distance_to_point(point) == pytest.approx(expected)
+        plane.get_signed_distance_to_point(point) == pytest.approx(expected)
     )
 
 
 @pytest.mark.parametrize("point", [None, '123', 123, DVector4(1), DVector2(1)])
-def test_distance_to_point_invalid(point: Any) -> None:
+def test_get_signed_distance_to_point_invalid(point: Any) -> None:
     with pytest.raises(TypeError) as excinfo:
-        Plane(1, DVector3(0, 1, 0)).distance_to_point(point)
+        Plane(1, DVector3(0, 1, 0)).get_signed_distance_to_point(point)
     assert str(excinfo.value) == 'point must be DVector3'
 
 
-def test_distance_to_point_wrong_type():
+def test_get_signed_distance_to_point_wrong_type():
     with pytest.raises(TypeError) as excinfo:
-        Plane(0, FVector3(1, 0, 0)).distance_to_point(DVector3(0))
+        Plane(0, FVector3(1, 0, 0)).get_signed_distance_to_point(DVector3(0))
     assert str(excinfo.value).startswith('point must be FVector3')
 
     with pytest.raises(TypeError) as excinfo:
-        Plane(0, DVector3(1, 0, 0)).distance_to_point(FVector3(0))
+        Plane(0, DVector3(1, 0, 0)).get_signed_distance_to_point(FVector3(0))
     assert str(excinfo.value).startswith('point must be DVector3')
 
 
@@ -207,3 +207,13 @@ def test_equal() -> None:
     assert Plane(0, DVector3(0, 1, 0)) != Plane(0, DVector3(1, 0, 0))
     assert Plane(0, DVector3(0, 1, 0)) != Plane(0, DVector3(0, 0, 1))
     assert Plane(0, DVector3(0, 1, 0)) != object()
+
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_origin(vtype: Any) -> None:
+    assert Plane(0, vtype(1, 0, 0)).origin == vtype(0)
+    assert Plane(0, vtype(0, 1, 0)).origin == vtype(0)
+    assert Plane(0, vtype(0, 0, 1)).origin == vtype(0)
+    assert Plane(1, vtype(1, 0, 0)).origin == vtype(-1, 0, 0)
+    assert Plane(1, vtype(0, 1, 0)).origin == vtype(0, -1, 0)
+    assert Plane(1, vtype(0, 0, 1)).origin == vtype(0, 0, -1)

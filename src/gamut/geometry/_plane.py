@@ -107,7 +107,11 @@ class Plane(Generic[VT, MT]):
     def normal(self) -> VT:
         return self._normal
 
-    def distance_to_point(self, point: VT) -> float:
+    @property
+    def origin(self) -> VT:
+        return self._normal * -self._distance
+
+    def get_signed_distance_to_point(self, point: VT) -> float:
         if not isinstance(point, type(self._normal)):
             raise TypeError(f'point must be {type(self._normal).__name__}')
         return self._normal @ point + self._distance
