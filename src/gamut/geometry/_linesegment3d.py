@@ -135,3 +135,77 @@ class LineSegment3d(Generic[T]):
         if point.distance(projected_point) <= tolerance:
             return projected_point
         return None
+
+    def where_intersected_by_line_segment(
+        self,
+        other: LineSegment3d[T],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment3d[T] | T | None:
+        if (
+            not isinstance(other, LineSegment3d) or
+            not isinstance(other.a, self.vector_type)
+        ):
+            raise TypeError(
+                f'other must be LineSegment3d[{self.vector_type.__name__}]'
+            )
+        # figure out at which time on each line that the two intersect
+        det = -other._slope.x * self._slope.y + self._slope.x * other._slope.y
+        if det == 0:
+            # lines are parallel
+            # we need to check if the segments are part of the same line or not
+            # so project a point from one to the other and see if the distance
+            # between that point and the projected version are within tolerance
+            # (if they are part of the same line the point shouldn't change)
+            oat = self.project_point_time(other._a)
+            oap = self.get_point_from_a_to_b(oat)
+            if oap.distance(other._a) > tolerance:
+                # the segments are not part of the same line, there is no
+                # intersection
+                return None
+            # the segments part of the same line so the points that make up
+            # the segments can tell us about any intersections
+            obt = self.project_point_time(other._b)
+            obp = self.get_point_from_a_to_b(obt)
+            intersections = [
+                self.project_point(op, clamped=True)
+                for op in (oap, obp)
+                if self.get_distance_to_point(op) <= tolerance
+            ]
+            if not intersections:
+                return None
+            if len(intersections) == 1:
+                # only one of the points of other is intersecting self, figure
+                # out which point of self makes up the new intersection
+                # segment
+                t = obt if oap == intersections[0] else oat
+                if t < 0:
+                    intersections.append(self._a)
+                else:
+                    intersections.append(self._b)
+            assert len(intersections) == 2
+            # it is possible the same line intersection devolves into a
+            # single point if the segments share a single point, but the
+            # other points don't intersect
+            if intersections[0] == intersections[1]:
+                return intersections[0]
+            return LineSegment3d(*sorted(intersections))
+        # lines are not parallel, find the nearest points on each line and
+        # use their distance to find the intersection
+        st = (
+            (other._slope.x * (self._a.y - other._a.y) -
+            other._slope.y * (self._a.x - other._a.x)) /
+            det
+        )
+        ot = (
+            (-self._slope.y * (self._a.x - other._a.x) +
+            self._slope.x * (self._a.y - other._a.y)) /
+            det
+        )
+        st = max(min(st, 1), 0)
+        ot = max(min(ot, 1), 0)
+        sp = self.get_point_from_a_to_b(st)
+        op = other.get_point_from_a_to_b(ot)
+        if sp.distance(op) > tolerance:
+            return None
+        return sp
