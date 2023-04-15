@@ -224,3 +224,26 @@ def test_is_parallel_with_line_segment(vtype: Any) -> None:
     assert line.is_parallel_with_line_segment(
         LineSegment3d(vtype(5, -1, 1), vtype(0, -1, 1))
     )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_point(vtype: Any) -> None:
+    line = LineSegment3d(vtype(0, -2, 0), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert line.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert line.where_intersected_by_point(vtype(0, -2, 0)) == vtype(0, -2, 0)
+    assert line.where_intersected_by_point(vtype(0, 2, 0)) == vtype(0, 2, 0)
+    assert line.where_intersected_by_point(vtype(0, 0, 0)) == vtype(0, 0, 0)
+
+    assert line.where_intersected_by_point(vtype(0, -3, 0)) is None
+    assert line.where_intersected_by_point(
+        vtype(0, -3, 0),
+        tolerance=1
+    ) == vtype(0, -2, 0)
+    assert line.where_intersected_by_point(vtype(1, 0, 0)) is None
+    assert line.where_intersected_by_point(
+        vtype(1, 0, 0),
+        tolerance=1
+    ) == vtype(0, 0, 0)
