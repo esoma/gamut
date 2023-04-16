@@ -5,6 +5,7 @@ __all__ = ['Mesh3d', 'Mesh3dRaycastHit']
 
 # gamut
 from ._boundingbox3d import BoundingBox3d
+from ._triangle3d import Triangle3d
 # gamut
 from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
@@ -195,6 +196,21 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
     @property
     def triangle_indices(self) -> IT:
         return self._triangle_indices
+
+    @property
+    def triangles(self) -> tuple[Triangle3d[VT], ...]:
+        return tuple(
+            self.get_triangle(i)
+            for i in range(len(self._triangle_indices))
+        )
+
+    def get_triangle(self, index: int) -> Triangle3d[VT]:
+        ti = self._triangle_indices[index]
+        return Triangle3d(
+            self._positions[ti[0]],
+            self._positions[ti[1]],
+            self._positions[ti[2]]
+        )
 
     def raycast(
         self,

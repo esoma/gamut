@@ -1,7 +1,7 @@
 
 # gamut
 from gamut.geometry import (BoundingBox3d, Mesh3d, Mesh3dRaycastHit,
-                            RectangularCuboid)
+                            RectangularCuboid, Triangle3d)
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, DVector4,
                         FMatrix4, FVector3, FVector3Array, U8Vector3,
                         U8Vector3Array, U16Vector3, U16Vector3Array,
@@ -167,6 +167,44 @@ def test_triangle_indices(triangle_indices: Any) -> None:
     )
     assert m.triangle_indices == triangle_indices
 
+
+@pytest.mark.parametrize("pos_array, pos_vector", [
+    (FVector3Array, FVector3),
+    (DVector3Array, DVector3),
+])
+@pytest.mark.parametrize("index_array, index_vector", [
+    (UVector3Array, UVector3),
+    (U8Vector3Array, U8Vector3),
+    (U16Vector3Array, U16Vector3),
+    (U32Vector3Array, U32Vector3),
+])
+def test_triangles(
+    pos_array: Any,
+    pos_vector: Any,
+    index_array: Any,
+    index_vector: Any
+) -> None:
+    mesh = Mesh3d(
+        pos_array(
+            pos_vector(0, 0, 0),
+            pos_vector(0, 1, 0),
+            pos_vector(1, 1, 0),
+            pos_vector(1, 0, 0),
+        ),
+        index_array(index_vector(0, 1, 2), index_vector(2, 3, 0))
+    )
+    triangles = mesh.triangles
+    assert len(triangles) == 2
+    assert mesh.get_triangle(0) == Triangle3d(
+        pos_vector(0, 0, 0),
+        pos_vector(0, 1, 0),
+        pos_vector(1, 1, 0),
+    )
+    assert mesh.get_triangle(1) == Triangle3d(
+        pos_vector(1, 1, 0),
+        pos_vector(1, 0, 0),
+        pos_vector(0, 0, 0),
+    )
 
 @pytest.mark.parametrize("normals", [
     DVector3Array(DVector3(0, 1, 2), DVector3(3, 4, 5)),
