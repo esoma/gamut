@@ -9,6 +9,7 @@ __all__ = [
     'ConvexHull',
     'Cylinder',
     'DegenerateGeometryError',
+    'get_max_circle_radius_between_point_and_line_segment_along_direction',
     'LineSegment2d',
     'LineSegment3d',
     'Mesh2d',
@@ -49,3 +50,8 @@ from ._rectangularcuboid import RectangularCuboid
 from ._sphere import Sphere
 from ._triangle3d import Triangle3d
 from ._viewfrustum3d import ViewFrustum3d
+
+# isort: off
+from ._getmaxcircleradiusbetweenpointandlinesegmentalongdirection import \
+    get_max_circle_radius_between_point_and_line_segment_along_direction
+# isort: on
