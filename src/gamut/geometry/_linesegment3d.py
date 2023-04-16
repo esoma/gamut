@@ -59,6 +59,12 @@ class LineSegment3d(Generic[T]):
     def vector_type(self) -> Type[T]:
         return type(self._a)
 
+    def are_points_on_same_side(self, p0: T, p1: T) -> bool:
+        bma = self.b - self.a
+        cp1 = bma.cross(p0 - self.a)
+        cp2 = bma.cross(p1 - self.a)
+        return cp1 @ cp2 >= 0
+
     def get_distance_to_point(self, point: T) -> float:
         d = self._slope.normalize()
         s = (self._a - point) @ d

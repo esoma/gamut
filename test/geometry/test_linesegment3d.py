@@ -543,3 +543,21 @@ def test_where_intersected_by_triangle(vtype: Any) -> None:
         ),
         tolerance=1
     ) == LineSegment3d(vtype(0), vtype(1, 0, 0))
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+@pytest.mark.parametrize("axis", [
+    BVector3(True, False, False),
+    BVector3(False, True, False),
+    BVector3(False, False, True),
+    BVector3(True, True, False),
+    BVector3(False, True, True),
+    BVector3(True, False, True),
+])
+def test_are_points_on_same_side(vtype: Any, axis: BVector3) -> None:
+    av = vtype(*(1 if a else 0 for a in axis))
+    line = LineSegment3d(vtype(0), vtype(*(0 if a else 1 for a in axis)))
+    assert line.are_points_on_same_side(vtype(1) * av, vtype(2) * av)
+    assert line.are_points_on_same_side(vtype(0) * av, vtype(2) * av)
+    assert line.are_points_on_same_side(vtype(0) * av, vtype(-2) * av)
+    assert not line.are_points_on_same_side(vtype(2) * av, vtype(-2) * av)
+    assert line.are_points_on_same_side(vtype(0) * av, vtype(0) * av)
