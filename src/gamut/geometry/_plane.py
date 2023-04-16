@@ -115,3 +115,10 @@ class Plane(Generic[VT, MT]):
         if not isinstance(point, type(self._normal)):
             raise TypeError(f'point must be {type(self._normal).__name__}')
         return self._normal @ point + self._distance
+
+    def project_point(self, point: VT) -> VT:
+        if not isinstance(point, type(self._normal)):
+            raise TypeError(f'point must be {type(self._normal).__name__}')
+        v = point - self.origin
+        d = v @ self._normal
+        return point - d * self._normal
