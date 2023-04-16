@@ -1,6 +1,7 @@
 
 # gamut
-from gamut.geometry import Mesh3d, Mesh3dRaycastHit, RectangularCuboid
+from gamut.geometry import (BoundingBox3d, Mesh3d, Mesh3dRaycastHit,
+                            RectangularCuboid)
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector3Array, DVector4,
                         FMatrix4, FVector3, FVector3Array, U8Vector3,
                         U8Vector3Array, U16Vector3, U16Vector3Array,
@@ -148,6 +149,7 @@ def test_triangle_indices_invalid_value(
 def test_positions(positions: Any) -> None:
     m = Mesh3d(positions, UVector3Array(UVector3(0)))
     assert m.positions == positions
+    assert m.bounding_box == BoundingBox3d(positions)
 
 
 @pytest.mark.parametrize("triangle_indices", [
