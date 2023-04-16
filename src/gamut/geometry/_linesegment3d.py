@@ -245,3 +245,116 @@ class LineSegment3d(Generic[T]):
             if abs(self.get_distance_to_point(p)) > tolerance:
                 return None
         return p
+
+    def where_intersected_by_triangle(
+        self,
+        tri: Triangle3d[T],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment3d[T] | T | None:
+        # gamut
+        from ._triangle3d import Triangle3d
+        if (
+            not isinstance(tri, Triangle3d) or
+            tri.vector_type is not self.vector_type
+        ):
+            raise TypeError(
+                f'tri must be Triangle3d[{self.vector_type.__name__}]'
+            )
+        # first check where the segment intersects the plane that the triangle
+        # is on
+        plane_intersection = self.where_intersected_by_plane(
+            tri.plane,
+            tolerance=tolerance
+        )
+        if plane_intersection is None:
+            # no plane intersection means no triangle intersection
+            return None
+        if isinstance(plane_intersection, self.vector_type):
+            # point intersection, check if the intersection point is inside
+            # the triangle
+            b_point = tri.get_projected_barycentric_point_from_cartesian(
+                plane_intersection
+            )
+            if all(c >= 0 for c in b_point):
+                # point is in the triangle, this is the intersection
+                return plane_intersection
+            # point isn't in the triangle, check for intersections against any
+            # of the triangle's edges
+            for edge in tri.edges:
+                if edge.where_intersected_by_point(
+                    plane_intersection,
+                    tolerance=tolerance
+                ) is not None:
+                    return plane_intersection
+            return None
+        # segment intersection
+        assert isinstance(plane_intersection, LineSegment3d)
+        # check which points of the intersection are in the triangle
+        inside_points = [
+            p
+            for p in (plane_intersection._a, plane_intersection._b)
+            if all(
+                c >= 0
+                for c in tri.get_projected_barycentric_point_from_cartesian(p)
+            )
+        ]
+        if len(inside_points) == 2:
+            # all points of the segment are inside the tri, it is the
+            # intersection
+            return plane_intersection
+        if len(inside_points) == 1:
+            inside_point = inside_points[0]
+            # one point inside and one outside, which means it intersects one
+            # of the triangle's edges
+            for edge in tri.edges:
+                edge_intersection = (
+                    plane_intersection.where_intersected_by_line_segment(
+                        edge,
+                        tolerance=tolerance
+                    )
+                )
+                if edge_intersection is not None:
+                    if isinstance(edge_intersection, LineSegment3d):
+                        # a segment intersection should share one of its points
+                        # with the existing inside point
+                        if inside_point == edge_intersection._a:
+                            edge_intersection = edge_intersection._b
+                        else:
+                            assert inside_point == edge_intersection._b
+                            edge_intersection = edge_intersection._a
+                    assert isinstance(edge_intersection, self.vector_type)
+                    # construct the intersection from the edge intersection
+                    # point and the plane intersection point inside the
+                    # triangle
+                    if inside_point == edge_intersection:
+                        return inside_point
+                    return LineSegment3d(*sorted((
+                        inside_point,
+                        edge_intersection
+                    )))
+            # no other intersections, just this point
+            return inside_point
+        # all points outside
+        assert len(inside_points) == 0
+        # check where the edges of the triangle intersect with the plane
+        # intersections
+        intersections: set[T] = set()
+        for edge in tri.edges:
+            edge_intersection = (
+                plane_intersection.where_intersected_by_line_segment(
+                    edge,
+                    tolerance=tolerance
+                )
+            )
+            if edge_intersection is not None:
+                if isinstance(edge_intersection, LineSegment3d):
+                    return edge_intersection
+                intersections.add(edge_intersection)
+        assert len(intersections) < 3
+        if not intersections:
+            return None
+        if len(intersections) == 2:
+            return LineSegment3d(*sorted(intersections))
+        assert len(intersections) == 1
+        return next(iter(intersections))
