@@ -229,3 +229,17 @@ def test_barycentric(vtype: Any) -> None:
     bp = t.get_projected_barycentric_point_from_cartesian(vtype(-1, 2, 4))
     assert bp == vtype(0, 2, -1)
     assert t.get_cartesian_point_from_barycentric(bp) == vtype(-1, 2, 0)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_point(vtype: Any) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert plane.where_intersected_by_point(vtype(0)) is None
+    assert plane.where_intersected_by_point(
+        vtype(0), tolerance=1) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_point(
+        vtype(0, 1, 0)) == vtype(0, 1, 0)

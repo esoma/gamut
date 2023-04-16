@@ -122,3 +122,19 @@ class Plane(Generic[VT, MT]):
         v = point - self.origin
         d = v @ self._normal
         return point - d * self._normal
+
+    def where_intersected_by_point(
+        self,
+        point: VT,
+        *,
+        tolerance: float = 0.0
+    ) -> VT | None:
+        if not isinstance(point, type(self._normal)):
+            raise TypeError(f'point must be {type(self._normal).__name__}')
+        if abs(self.get_signed_distance_to_point(point)) <= tolerance:
+            if tolerance == 0.0:
+                return point
+            else:
+                return self.project_point(point)
+        else:
+            return None
