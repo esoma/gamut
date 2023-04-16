@@ -2,7 +2,7 @@ from __future__ import annotations
 # gamut
 from gamut.geometry import (DegenerateGeometryError, LineSegment3d, Plane,
                             Triangle3d)
-from gamut.math import DVector3, DVector4, FVector3
+from gamut.math import BVector3, DVector3, DVector4, FVector3
 # python
 from math import isclose
 from typing import Any
