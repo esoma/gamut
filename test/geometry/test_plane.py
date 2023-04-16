@@ -1,6 +1,6 @@
 
 # gamut
-from gamut.geometry import LineSegment3d, Plane
+from gamut.geometry import LineSegment3d, Plane, Triangle3d
 from gamut.math import (DMatrix4, DVector2, DVector3, DVector4, FMatrix4,
                         FVector3, FVector4)
 # python
@@ -305,3 +305,60 @@ def test_where_intersected_by_line_segment(
     assert plane.where_intersected_by_line_segment(
         LineSegment3d(vtype(1, 0, -1), vtype(1, 2, -1))
     ) == vtype(1, 1, -1)
+
+@pytest.mark.parametrize("vtype,wrong_type", [
+    (FVector3, DVector3),
+    (DVector3, FVector3)
+])
+def test_where_intersected_by_triangle(
+    vtype: Any,
+    wrong_type: Any
+) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_triangle(None)
+    assert str(excinfo.value).startswith(
+        f'tri must be Triangle3d[{vtype.__name__}]'
+    )
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_triangle(Triangle3d(
+            wrong_type(0),
+            wrong_type(1),
+            wrong_type(0, 1, 0),
+        ))
+    assert str(excinfo.value).startswith(
+        f'tri must be Triangle3d[{vtype.__name__}]'
+    )
+
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 1))
+    ) == Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 1))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, 0, 1))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, 0, 1)),
+        tolerance=1
+    ) == Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 1, 1))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 1, 0), vtype(0, 0, 1))
+    ) == LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, -1, 1))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, 0, 0), vtype(0, -1, 1)),
+        tolerance=1
+    ) == LineSegment3d(vtype(1, 1, 0), vtype(0, 1, 0))
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 1, 0), vtype(0, 0, 0), vtype(0, 0, 1))
+    ) == vtype(1, 1, 0)
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, -1, 0), vtype(0, -1, 1))
+    ) is None
+    assert plane.where_intersected_by_triangle(
+        Triangle3d(vtype(1, 0, 0), vtype(0, -1, 0), vtype(0, -1, 1)),
+        tolerance=1
+    ) == vtype(1, 1, 0)

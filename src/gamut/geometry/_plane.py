@@ -182,3 +182,65 @@ class Plane(Generic[VT, MT]):
                 return None
             p = self.project_point(p)
         return p
+
+    def where_intersected_by_triangle(
+        self,
+        tri: Triangle3d[VT],
+        *,
+        tolerance: float = 0.0
+    ) -> Triangle3d[VT] | LineSegment3d[VT] | VT | None:
+        # gamut
+        from gamut.geometry import Triangle3d
+        if (
+            not isinstance(tri, Triangle3d) or
+            not isinstance(tri.positions[0], type(self._normal))
+        ):
+            raise TypeError(
+                f'tri must be Triangle3d[{type(self._normal).__name__}]'
+            )
+        # check each edge of the tri
+        intersections = []
+        for edge in tri.edges:
+            intersection = self.where_intersected_by_line_segment(
+                edge,
+                tolerance=tolerance
+            )
+            if intersection is not None:
+                intersections.append(intersection)
+        if not intersections:
+            return None
+        if len(intersections) == 1:
+            # 1 intersection is either a single point or segment
+            return intersections[0]
+        if len(intersections) == 2:
+            # if there are just two intersections and one of them is a line
+            # segment then we can assume that is the actual intersection (the
+            # extra is almost certainly a point from a shared edge)
+            for intersection in intersections:
+                if isinstance(intersection, LineSegment3d):
+                    return intersection
+            assert all(
+                isinstance(i, type(self._normal))
+                for i in intersections
+            )
+            # two points make a segment
+            try:
+                intersection = LineSegment3d(*intersections)
+            except LineSegment3d.DegenerateError as ex:
+                return ex.degenerate_form
+            return intersection
+        assert len(intersections) == 3
+        # there are basically two conditions here, either we have a single line
+        # segment and some points "extra" points or we have 3 line segments
+        if all(isinstance(i, LineSegment3d) for i in intersections):
+            if tolerance == 0:
+                return tri
+            else:
+                return Triangle3d(*(
+                    self.project_point(p)
+                    for p in tri.positions
+                ))
+        for intersection in intersections:
+            if isinstance(intersection, LineSegment3d):
+                return intersection
+        assert False
