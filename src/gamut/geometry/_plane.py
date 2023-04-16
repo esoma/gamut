@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['Plane']
 
 # gamut
+from ._linesegment3d import LineSegment3d
+# gamut
 from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
                         FVector4)
@@ -138,3 +140,45 @@ class Plane(Generic[VT, MT]):
                 return self.project_point(point)
         else:
             return None
+
+    def where_intersected_by_line_segment(
+        self,
+        line: LineSegment3d[VT],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment3d[VT] | VT | None:
+        if (
+            not isinstance(line, LineSegment3d) or
+            not isinstance(line.a, type(self._normal))
+        ):
+            raise TypeError(
+                f'line must be LineSegment3d[{type(self._normal).__name__}]'
+            )
+        # find the intersection using math :^)
+        ab = line.b - line.a
+        den = self.normal @ ab
+        if den == 0:
+            # line segment is parallel to the plane, so any point of the
+            # segment will do as an intersection check
+            if abs(self.get_signed_distance_to_point(line.a)) > tolerance:
+                return None
+            if tolerance == 0:
+                return line
+            else:
+                return LineSegment3d(
+                    self.project_point(line.a),
+                    self.project_point(line.b)
+                )
+        d = self._normal @ self.origin
+        t = (d - self._normal @ line.a) / den
+        if tolerance == 0:
+            if t < 0 or t > 1:
+                return None
+        else:
+            t = max(min(t, 1), 0)
+        p = line.a + t * ab
+        if tolerance != 0:
+            if abs(self.get_signed_distance_to_point(p)) > tolerance:
+                return None
+            p = self.project_point(p)
+        return p
