@@ -232,3 +232,17 @@ def test_project_point(vtype: Any) -> None:
     plane = Plane(1, vtype(1, 0, 0))
     assert plane.project_point(vtype(0, 0, 0)) == vtype(-1, 0, 0)
     assert plane.project_point(vtype(1, 5, 1)) == vtype(-1, 5, 1)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_point(vtype: Any) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert plane.where_intersected_by_point(vtype(0)) is None
+    assert plane.where_intersected_by_point(
+        vtype(0), tolerance=1) == vtype(0, 1, 0)
+    assert plane.where_intersected_by_point(
+        vtype(0, 1, 0)) == vtype(0, 1, 0)
