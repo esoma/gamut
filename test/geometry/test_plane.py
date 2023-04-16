@@ -217,3 +217,18 @@ def test_origin(vtype: Any) -> None:
     assert Plane(1, vtype(1, 0, 0)).origin == vtype(-1, 0, 0)
     assert Plane(1, vtype(0, 1, 0)).origin == vtype(0, -1, 0)
     assert Plane(1, vtype(0, 0, 1)).origin == vtype(0, 0, -1)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_project_point(vtype: Any) -> None:
+    plane = Plane(-1, vtype(0, 1, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        plane.project_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert plane.project_point(vtype(0, 0, 0)) == vtype(0, 1, 0)
+    assert plane.project_point(vtype(1, 5, 1)) == vtype(1, 1, 1)
+
+    plane = Plane(1, vtype(1, 0, 0))
+    assert plane.project_point(vtype(0, 0, 0)) == vtype(-1, 0, 0)
+    assert plane.project_point(vtype(1, 5, 1)) == vtype(-1, 5, 1)
