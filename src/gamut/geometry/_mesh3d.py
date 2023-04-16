@@ -4,6 +4,8 @@ from __future__ import annotations
 __all__ = ['Mesh3d', 'Mesh3dRaycastHit']
 
 # gamut
+from ._boundingbox3d import BoundingBox3d
+# gamut
 from gamut._bullet import Shape
 from gamut.math import (DMatrix4, DVector3, DVector3Array, FMatrix4, FVector3,
                         FVector3Array, IVector3, IVector3Array, U8Vector3Array,
@@ -97,6 +99,7 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
                     'triangle indices must be between 0 and the number of '
                     'vertices'
                 )
+        self._bounding_box = BoundingBox3d(self._positions)
 
         self._bt: Shape | None = None
         self._bt_mesh: Any = None
@@ -176,6 +179,10 @@ class Mesh3d(Generic[VT, IT, MT, PT]):
                 self._bt_mesh = None
                 raise
         return self._bt
+
+    @property
+    def bounding_box(self) -> BoundingBox3d:
+        return self._bounding_box
 
     @property
     def normals(self) -> VT | None:
