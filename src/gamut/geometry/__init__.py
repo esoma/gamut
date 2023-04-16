@@ -9,6 +9,7 @@ __all__ = [
     'ConvexHull',
     'Cylinder',
     'DegenerateGeometryError',
+    'get_max_circle_radius_between_point_and_line_segment_along_direction',
     'LineSegment2d',
     'LineSegment3d',
     'Mesh2d',
@@ -36,6 +37,8 @@ from ._cone import Cone
 from ._convexhull import ConvexHull
 from ._cylinder import Cylinder
 from ._error import DegenerateGeometryError
+from ._getmaxcircleradiusbetweenpointandlinesegmentalongdirection import \
+    get_max_circle_radius_between_point_and_line_segment_along_direction
 from ._linesegment2d import LineSegment2d
 from ._linesegment3d import LineSegment3d
 from ._mesh2d import Mesh2d
