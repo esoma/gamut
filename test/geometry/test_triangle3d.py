@@ -1,7 +1,8 @@
 
 # gamut
-from gamut.geometry import DegenerateGeometryError, LineSegment3d, Triangle3d
-from gamut.math import DVector3, DVector4, FVector3
+from gamut.geometry import (DegenerateGeometryError, LineSegment3d, Triangle2d,
+                            Triangle3d)
+from gamut.math import DVector2, DVector3, DVector4, FVector2, FVector3
 # python
 from math import isclose
 from typing import Any
@@ -355,4 +356,45 @@ def test_get_edges_for_point(vtype: Any) -> None:
         assert t.get_edges_for_point(vtype(1, 1, 1))
     assert str(excinfo.value).startswith(
         'point is not a position of the triangle'
+    )
+
+@pytest.mark.parametrize("vtype, vtype2", [
+    [FVector3, FVector2],
+    [DVector3, DVector2],
+])
+def test_project_orthographic(vtype: Any, vtype2: Any) -> None:
+    t2 = Triangle3d(
+        vtype(0, 1, 10),
+        vtype(0, 0, 15),
+        vtype(0, 0, 3)
+    ).project_orthographic()
+    assert isinstance(t2, Triangle2d)
+    assert t2.positions == (
+        vtype2(3, 0),
+        vtype2(10, 1),
+        vtype2(15, 0),
+    )
+
+    t2 = Triangle3d(
+        vtype(1, 10, 0),
+        vtype(0, 15, 0),
+        vtype(0, 3, 0)
+    ).project_orthographic()
+    assert isinstance(t2, Triangle2d)
+    assert t2.positions == (
+        vtype2(0, 3),
+        vtype2(1, 10),
+        vtype2(0, 15),
+    )
+
+    t2 = Triangle3d(
+        vtype(1, 0, 10),
+        vtype(0, 0, 15),
+        vtype(0, 0, 3)
+    ).project_orthographic()
+    assert isinstance(t2, Triangle2d)
+    assert t2.positions == (
+        vtype2(0, 3),
+        vtype2(1, 10),
+        vtype2(0, 15),
     )
