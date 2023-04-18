@@ -23,6 +23,7 @@ __all__ = [
     'Shape3dCullable',
     'Shape3dPointContainer',
     'Sphere',
+    'Triangle2d',
     'Triangle3d',
     'ViewFrustum3d'
 ]
@@ -48,6 +49,7 @@ from ._quad3d import Quad3d
 from ._rectangle3d import Rectangle3d
 from ._rectangularcuboid import RectangularCuboid
 from ._sphere import Sphere
+from ._triangle2d import Triangle2d
 from ._triangle3d import Triangle3d
 from ._viewfrustum3d import ViewFrustum3d
 
