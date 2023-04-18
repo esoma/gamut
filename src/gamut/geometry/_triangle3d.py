@@ -97,6 +97,28 @@ class Triangle3d(Generic[T]):
         return sum(self._positions) / 3
 
     @property
+    def edges(self) -> tuple[
+        LineSegment3d[T],
+        LineSegment3d[T],
+        LineSegment3d[T]
+    ]:
+        return (
+            LineSegment3d(self._positions[0], self._positions[1]),
+            LineSegment3d(self._positions[1], self._positions[2]),
+            LineSegment3d(self._positions[2], self._positions[0]),
+        )
+
+    @property
+    def edge_normals(self) -> tuple[T, T, T]:
+        p = self._positions
+        normal = self.normal
+        return (
+            (p[1] - p[0]).cross(normal).normalize(),
+            (p[2] - p[1]).cross(normal).normalize(),
+            (p[0] - p[2]).cross(normal).normalize(),
+        )
+
+    @property
     def normal(self) -> T:
         return self._normal
 
@@ -113,17 +135,59 @@ class Triangle3d(Generic[T]):
     def vector_type(self) -> Type[T]:
         return type(self._positions[0])
 
-    @property
-    def edges(self) -> tuple[
-        LineSegment3d[T],
-        LineSegment3d[T],
-        LineSegment3d[T]
-    ]:
-        return (
-            LineSegment3d(self._positions[0], self._positions[1]),
-            LineSegment3d(self._positions[1], self._positions[2]),
-            LineSegment3d(self._positions[2], self._positions[0]),
+    def get_edge_for_points(self, a: T, b: T) -> LineSegment3d[T]:
+        for edge in self.edges:
+            if (edge.a == a and edge.b == b) or (edge.a == b and edge.b == a):
+                return edge
+        raise ValueError(
+            'one or more points are not a position of the triangle'
         )
+
+    def get_edges_for_point(
+        self,
+        point: T
+    ) -> tuple[LineSegment3d[T], LineSegment3d[T]]:
+        if point == self._positions[0]:
+            return (
+                LineSegment3d(self._positions[2], self._positions[0]),
+                LineSegment3d(self._positions[0], self._positions[1]),
+            )
+        if point == self._positions[1]:
+            return (
+                LineSegment3d(self._positions[0], self._positions[1]),
+                LineSegment3d(self._positions[1], self._positions[2]),
+            )
+        if point == self._positions[2]:
+            return (
+                LineSegment3d(self._positions[1], self._positions[2]),
+                LineSegment3d(self._positions[2], self._positions[0]),
+            )
+        raise ValueError('point is not a position of the triangle')
+
+    def get_edge_opposite_of_point(self, point: T) -> LineSegment3d[T]:
+        if point == self._positions[0]:
+            return LineSegment3d(self._positions[1], self._positions[2])
+        if point == self._positions[1]:
+            return LineSegment3d(self._positions[2], self._positions[0])
+        if point == self._positions[2]:
+            return LineSegment3d(self._positions[0], self._positions[1])
+        raise ValueError('point is not a position of the triangle')
+
+    def get_point_opposite_of_edge(self, edge: LineSegment3d[T]) -> T:
+        edges = self.edges
+        if edge == edges[0]:
+            return self._positions[2]
+        if edge == edges[1]:
+            return self._positions[0]
+        if edge == edges[2]:
+            return self._positions[1]
+        raise ValueError('edge is not an edge of the triangle')
+
+    def get_edge_normal(self, edge: LineSegments3d[T]) -> T:
+        for i, match_edge in enumerate(self.edges):
+            if edge == match_edge:
+                return self.edge_normals[i]
+        raise ValueError('edge is not part of triangle')
 
     def get_projected_barycentric_point_from_cartesian(
         self,
