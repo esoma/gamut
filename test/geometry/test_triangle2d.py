@@ -1,9 +1,9 @@
 
 # gamut
-from gamut.geometry import BoundingBox2d, LineSegment2d, Triangle2d
+from gamut.geometry import LineSegment2d, Triangle2d
 from gamut.math import DVector2, DVector4, FVector2
 # python
-from math import isclose, isnan
+from math import isclose
 from typing import Any
 # pytest
 import pytest
@@ -101,7 +101,7 @@ def test_attributes(vtype: Any) -> None:
         assert LineSegment2d(vtype(1, 2), vtype(0, 0)) == tri.edges[2]
         assert vtype(0, -1) == tri.edge_normals[0]
         assert vtype(1, 0) == tri.edge_normals[1]
-        assert vtype(-2, 1).normalize()  == tri.edge_normals[2]
+        assert vtype(-2, 1).normalize() == tri.edge_normals[2]
 
         assert tri.bounding_box.min == vtype(0, 0)
         assert tri.bounding_box.max == vtype(1, 2)
@@ -231,57 +231,14 @@ def test_intersects_point(vtype: Any) -> None:
     assert tri.intersects_point(vtype(0, .5))
     assert tri.intersects_point(vtype(.25, .25))
     assert not tri.intersects_point(vtype(2, 0))
+    assert not tri.intersects_point(vtype(-2, 0))
+    assert not tri.intersects_point(vtype(0, 2))
+    assert not tri.intersects_point(vtype(0, -2))
     assert tri.intersects_point(vtype(2, 0), tolerance=1)
 
 @pytest.mark.parametrize("vtype", [FVector2, DVector2])
 def test_intersects_triangle_2d(vtype: Any) -> None:
-    assert(
-        Triangle2d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_2d(Triangle2d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ))
-    )
-    assert not (
-        Triangle2d(
-            vtype(0),
-            vtype(0),
-            vtype(0),
-        ).intersects_triangle_2d(Triangle2d(
-            vtype(1),
-            vtype(1),
-            vtype(1),
-        ))
-    )
-
     assert (
-        Triangle2d(
-            vtype(0),
-            vtype(1),
-            vtype(0),
-        ).intersects_triangle_2d(Triangle2d(
-            vtype(0),
-            vtype(1),
-            vtype(0),
-        ))
-    )
-    assert not (
-        Triangle2d(
-            vtype(0),
-            vtype(1),
-            vtype(0),
-        ).intersects_triangle_2d(Triangle2d(
-            vtype(1, 0),
-            vtype(2, 1),
-            vtype(1, 0),
-        ))
-    )
-
-    assert(
         not
         Triangle2d(
             vtype(1, 0),
@@ -293,7 +250,7 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             vtype(0, .5),
         ))
     )
-    assert(
+    assert (
         Triangle2d(
             vtype(1, 0),
             vtype(1, 1),
@@ -306,7 +263,7 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             tolerance=.145
         )
     )
-    assert(
+    assert (
         Triangle2d(
             vtype(1, 0),
             vtype(1, 1),
@@ -317,7 +274,7 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             vtype(0, .5),
         ))
     )
-    assert(
+    assert (
         Triangle2d(
             vtype(1, 0),
             vtype(1, 1),
@@ -328,7 +285,7 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             vtype(0, .5),
         ))
     )
-    assert(
+    assert (
         Triangle2d(
             vtype(1, 0),
             vtype(1, 1),
@@ -339,7 +296,7 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             vtype(.5, 0),
         ))
     )
-    assert(
+    assert (
         Triangle2d(
             vtype(1, 0),
             vtype(1, 1),
@@ -348,5 +305,16 @@ def test_intersects_triangle_2d(vtype: Any) -> None:
             vtype(.65, .35),
             vtype(.85, .4),
             vtype(.6, .15),
+        ))
+    )
+    assert not (
+        Triangle2d(
+            vtype(1, 0),
+            vtype(1, 1),
+            vtype(0, 0),
+        ).intersects_triangle_2d(Triangle2d(
+            vtype(101, 100),
+            vtype(101, 101),
+            vtype(100, 100),
         ))
     )

@@ -126,10 +126,6 @@ class Triangle2d(Generic[T]):
         return LineSegment2d(seg[0], seg[1])
 
     @property
-    def is_degenerate(self) -> bool:
-        return self.degenerate_form is not None
-
-    @property
     def positions(self) -> tuple[T, T, T]:
         return self._positions
 
@@ -186,7 +182,7 @@ class Triangle2d(Generic[T]):
         # since we know the point is outside the tri we can check if any edges
         # are intersecting it, given the tolerance
         return any(
-            edge.intersects_point(point, tolerance=tolerance)
+            edge.get_distance_to_point(point) <= tolerance
             for edge in self.edges
         )
 
@@ -197,7 +193,7 @@ class Triangle2d(Generic[T]):
         tolerance: float = 0.0
     ) -> bool:
         # broad aabb check
-        if not self.bounding_box.intersects_bounding_box_2d_inclusive(
+        if not self.bounding_box.intersects_bounding_box_2d(
             other.bounding_box
         ):
             return False
