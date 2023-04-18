@@ -229,3 +229,130 @@ def test_barycentric(vtype: Any) -> None:
     bp = t.get_projected_barycentric_point_from_cartesian(vtype(-1, 2, 4))
     assert bp == vtype(0, 2, -1)
     assert t.get_cartesian_point_from_barycentric(bp) == vtype(-1, 2, 0)
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_normals(vtype: Any) -> None:
+    tri = Triangle3d(vtype(0, 0, 0), vtype(1, 1, 0), vtype(1, -1, 0))
+    assert tri.normal == vtype(0, 0, -1)
+    assert vector3_is_close(
+        tri.edge_normals[0],
+        vtype(-0.7071067811865475, 0.7071067811865475, 0)
+    )
+    assert tri.get_edge_normal(tri.edges[0]) == (
+        vtype(-0.7071067811865475, 0.7071067811865475, 0)
+    )
+    assert vector3_is_close(tri.edge_normals[1], vtype(1, 0, 0))
+    assert tri.get_edge_normal(tri.edges[1]) == vtype(1, 0, 0)
+    assert vector3_is_close(
+        tri.edge_normals[2],
+        vtype(-0.7071067811865475, -0.7071067811865475, 0)
+    )
+    assert tri.get_edge_normal(tri.edges[2]) == (
+        vtype(-0.7071067811865475, -0.7071067811865475, 0)
+    )
+
+    tri = Triangle3d(vtype(0, 0, 0), vtype(1, -1, 0), vtype(1, 1, 0))
+    assert tri.normal == vtype(0, 0, 1)
+    assert vector3_is_close(
+        tri.edge_normals[0],
+        vtype(-0.7071067811865475, -0.7071067811865475, 0)
+    )
+    assert tri.get_edge_normal(tri.edges[0]) == (
+        vtype(-0.7071067811865475, -0.7071067811865475, 0)
+    )
+    assert vector3_is_close(tri.edge_normals[1], vtype(1, 0, 0))
+    assert tri.get_edge_normal(tri.edges[1]) == vtype(1, 0, 0)
+    assert vector3_is_close(
+        tri.edge_normals[2],
+        vtype(-0.7071067811865475, 0.7071067811865475, 0)
+    )
+    assert tri.get_edge_normal(tri.edges[2]) == (
+        vtype(-0.7071067811865475, 0.7071067811865475, 0)
+    )
+
+    tri = Triangle3d(vtype(0, 0, 0), vtype(1, 0, 1), vtype(1, 0, -1))
+    assert tri.normal == vtype(0, 1, 0)
+    assert vector3_is_close(
+        tri.edge_normals[0],
+        vtype(-0.7071067811865475, 0, 0.7071067811865475)
+    )
+    assert tri.get_edge_normal(tri.edges[0]) == (
+        vtype(-0.7071067811865475, 0, 0.7071067811865475)
+    )
+    assert vector3_is_close(tri.edge_normals[1], vtype(1, 0, 0))
+    assert tri.get_edge_normal(tri.edges[1]) == vtype(1, 0, 0)
+    assert vector3_is_close(
+        tri.edge_normals[2],
+        vtype(-0.7071067811865475, 0, -0.7071067811865475)
+    )
+    assert tri.get_edge_normal(tri.edges[2]) == (
+        vtype(-0.7071067811865475, 0, -0.7071067811865475)
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        tri.get_edge_normal(LineSegment3d(vtype(0), vtype(1)))
+    assert str(excinfo.value).startswith('edge is not part of triangle')
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edge_for_points(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+    for edge in t.edges:
+        assert t.get_edge_for_points(edge.a, edge.b) == edge
+        assert t.get_edge_for_points(edge.b, edge.a) == edge
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_edge_for_points(vtype(0, 1, 0), vtype(1, 1, 1))
+    assert str(excinfo.value).startswith(
+        'one or more points are not a position of the triangle'
+    )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edge_opposite_of_point(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+
+    for edge in t.edges:
+        p = t.get_point_opposite_of_edge(edge)
+        assert t.get_edge_opposite_of_point(p) == edge
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_edge_opposite_of_point(vtype(1, 1, 1))
+    assert str(excinfo.value).startswith(
+        'point is not a position of the triangle'
+    )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edge_point_opposite_of_edge(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+
+    assert t.get_point_opposite_of_edge(t.edges[0]) == t.positions[2]
+    assert t.get_point_opposite_of_edge(t.edges[1]) == t.positions[0]
+    assert t.get_point_opposite_of_edge(t.edges[2]) == t.positions[1]
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_point_opposite_of_edge(LineSegment3d(vtype(0), vtype(2)))
+    assert str(excinfo.value).startswith(
+        'edge is not an edge of the triangle'
+    )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_get_edges_for_point(vtype: Any) -> None:
+    t = Triangle3d(vtype(0, 1, 0), vtype(1, 0, 0), vtype(1, 1, 0))
+
+    assert t.get_edges_for_point(t.positions[0]) == (
+        t.edges[2],
+        t.edges[0]
+    )
+    assert t.get_edges_for_point(t.positions[1]) == (
+        t.edges[0],
+        t.edges[1]
+    )
+    assert t.get_edges_for_point(t.positions[2]) == (
+        t.edges[1],
+        t.edges[2]
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        assert t.get_edges_for_point(vtype(1, 1, 1))
+    assert str(excinfo.value).startswith(
+        'point is not a position of the triangle'
+    )
