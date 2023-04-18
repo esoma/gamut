@@ -13,14 +13,13 @@ from gamut.math import (DMatrix4, DVector3, DVector4, FMatrix4, FVector3,
 from typing import Generic, overload, TypeVar
 
 VT = TypeVar('VT', FVector3, DVector3)
-MT = TypeVar('MT', FMatrix4, DMatrix4)
 
 
-class Plane(Generic[VT, MT]):
+class Plane(Generic[VT]):
 
     @overload
     def __init__(
-        self: Plane[FVector3, FMatrix4],
+        self: Plane[FVector3],
         distance: float,
         normal: FVector3
     ):
@@ -28,7 +27,7 @@ class Plane(Generic[VT, MT]):
 
     @overload
     def __init__(
-        self: Plane[DVector3, DMatrix4],
+        self: Plane[DVector3],
         distance: float,
         normal: DVector3
     ):
@@ -71,7 +70,15 @@ class Plane(Generic[VT, MT]):
             self._distance == other._distance
         )
 
-    def __rmatmul__(self, transform: MT) -> Plane:
+    @overload
+    def __rmatmul__(self: Plane[FVector3], transform: FMatrix4) -> Plane:
+        ...
+
+    @overload
+    def __rmatmul__(self: Plane[DVector3], transform: DMatrix4) -> Plane:
+        ...
+
+    def __rmatmul__(self, transform: FMatrix4 | DMatrix4) -> Plane:
         if not isinstance(transform, (FMatrix4, DMatrix4)):
             return NotImplemented
 
