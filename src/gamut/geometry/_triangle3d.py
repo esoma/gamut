@@ -250,3 +250,38 @@ class Triangle3d(Generic[T]):
             (vp @ p.xyzl).xy
             for p in self._positions
         ))
+
+    def where_intersected_by_point(
+        self,
+        point: T,
+        *,
+        tolerance: float = 0.0
+    ) -> T | None:
+        if not isinstance(point, self.vector_type):
+            raise TypeError(f'point must be {self.vector_type.__name__}')
+        # quick check to make sure the point lies in the triangle's plane
+        if abs(self.plane.get_signed_distance_to_point(point)) > tolerance:
+            return None
+        # solve for the point's projected barycentric coordinates which can
+        # tell us whether the projected point is in the triangle
+        b_point = self.get_projected_barycentric_point_from_cartesian(point)
+        if any(c < 0 for c in b_point):
+            # projected point is not in the triangle, so the real point must
+            # not be
+            if tolerance == 0:
+                # tolerance of 0 means no futher checks are needed, the point
+                # isn't in the tri so it can't be intersecting
+                return None
+            # since we know the point is outside the tri we can check if any
+            # edges are intersecting it, given the tolerance
+            for edge in self.edges:
+                intersection = edge.where_intersected_by_point(
+                    point,
+                    tolerance=tolerance
+                )
+                if intersection is not None:
+                    return intersection
+            return None
+        # projected point is in the triangle, converting it to cartesian will
+        # gives us the result
+        return self.get_cartesian_point_from_barycentric(b_point)

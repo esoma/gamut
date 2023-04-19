@@ -398,3 +398,69 @@ def test_project_orthographic(vtype: Any, vtype2: Any) -> None:
         vtype2(1, 10),
         vtype2(0, 15),
     )
+
+@pytest.mark.parametrize("vtype", [FVector3, DVector3])
+def test_where_intersected_by_point(vtype: Any) -> None:
+    t = Triangle3d(
+        vtype(0),
+        vtype(.5),
+        vtype(1, .5, 0)
+    )
+
+    with pytest.raises(TypeError) as excinfo:
+        assert t.where_intersected_by_point(None)
+    assert str(excinfo.value).startswith(f'point must be {vtype.__name__}')
+
+    assert t.where_intersected_by_point(vtype(0)) == vtype(0)
+    assert t.where_intersected_by_point(vtype(.5)) == vtype(.5)
+    assert t.where_intersected_by_point(vtype(1, .5, 0)) == vtype(1, .5, 0)
+
+    assert t.where_intersected_by_point(vtype(.5, .25, 0)) == vtype(.5, .25, 0)
+    assert t.where_intersected_by_point(vtype(.25)) == vtype(.25)
+    assert (
+        t.where_intersected_by_point(vtype(.75, .5, .25), tolerance=.00001) ==
+        vtype(.75, .5, .25)
+    )
+
+    assert vector3_is_close(
+        t.where_intersected_by_point(t.center, tolerance=.000001),
+        t.center
+    )
+
+    assert t.where_intersected_by_point(
+        vtype(.504, .242, .004),
+        tolerance=.0001
+    ) is None
+    assert t.where_intersected_by_point(
+        vtype(.254, .242, .254),
+        tolerance=.0001
+    ) is None
+    assert t.where_intersected_by_point(
+        vtype(.754, .492, .254),
+        tolerance=.0001
+    ) is None
+
+    assert (
+        t.where_intersected_by_point(vtype(.504, .242, .004), tolerance=.01) ==
+        vtype(.5, .25, 0)
+    )
+    assert (
+        t.where_intersected_by_point(vtype(.254, .242, .254), tolerance=.01) ==
+        vtype(.25)
+    )
+    assert (
+        t.where_intersected_by_point(vtype(.754, .492, .254), tolerance=.01) ==
+        vtype(.75, .5, .25)
+    )
+
+    t = Triangle3d(
+        vtype(0, .5, 0),
+        vtype(.5),
+        vtype(1, .5, 0)
+    )
+
+    assert t.where_intersected_by_point(vtype(0, .5, 1)) is None
+    assert t.where_intersected_by_point(vtype(2, .5, 0), tolerance=.9) is None
+    assert t.where_intersected_by_point(vtype(2, .5, 0), tolerance=1.1) == (
+        vtype(1, .5, 0)
+    )
