@@ -8,11 +8,13 @@ from ._boundingbox3d import BoundingBox3d
 from ._error import DegenerateGeometryError
 from ._linesegment3d import LineSegment3d
 from ._plane import Plane
+from ._triangle2d import Triangle2d
 # gamut
-from gamut.math import DVector3, FVector3
+from gamut.math import (DMatrix4, DVector2, DVector3, FMatrix4, FVector2,
+                        FVector3)
 # python
 from math import isnan
-from typing import Generic, TypeVar
+from typing import Generic, overload, TypeVar
 
 T = TypeVar('T', FVector3, DVector3)
 
@@ -220,3 +222,31 @@ class Triangle3d(Generic[T]):
             barycentric_point.y * self._positions[1] +
             barycentric_point.z * self._positions[2]
         )
+
+    @overload
+    def project_orthographic(
+        self: Triangle3d[FVector3]
+    ) -> Triangle2d[FVector2]:
+        ...
+
+    @overload
+    def project_orthographic(
+        self: Triangle3d[DVector3]
+    ) -> Triangle2d[DVector2]:
+        ...
+
+    def project_orthographic(self) -> Triangle2d:
+        Matrix4 = FMatrix4 if self.vector_type is FVector3 else DMatrix4
+        up = self.vector_type(0, 1, 0)
+        eye = -self.normal
+        if abs(up @ eye) == 1.0:
+            up = self.vector_type(0, 0, -1)
+            eye = -eye
+            assert abs(up @ eye) != 1.0
+        view = Matrix4.look_at(self.vector_type(0), eye, up)
+        projection = Matrix4.orthographic(-1, 1, -1, 1, -1, 1)
+        vp = projection @ view.inverse()
+        return Triangle2d(*(
+            (vp @ p.xyzl).xy
+            for p in self._positions
+        ))
