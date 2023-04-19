@@ -285,3 +285,58 @@ class Triangle3d(Generic[T]):
         # projected point is in the triangle, converting it to cartesian will
         # gives us the result
         return self.get_cartesian_point_from_barycentric(b_point)
+
+    def where_intersected_by_line_segment(
+        self,
+        line: LineSegment3d[T],
+        *,
+        tolerance: float = 0.0
+    ) -> LineSegment3d[T] | T | None:
+        if (
+            not isinstance(line, LineSegment3d) or
+            not isinstance(line.a, type(self._positions[0]))
+        ):
+            raise TypeError(
+                f'line must be LineSegment3d'
+                f'[{type(self._positions[0]).__name__}]'
+            )
+        # get the intersection of the line with the triangle's plane
+        plane_intersection = self.plane.where_intersected_by_line_segment(
+            line,
+            tolerance=tolerance
+        )
+        if plane_intersection is None:
+            return None
+        if isinstance(plane_intersection, LineSegment3d):
+            # the line segment is coplanar with the triangle, check for
+            # intersections on each edge
+            edge_intersections = []
+            for edge in self.edges:
+                edge_intersection = edge.where_intersected_by_line_segment(
+                    plane_intersection,
+                    tolerance=tolerance
+                )
+                if edge_intersection is not None:
+                    # any segment intersection will be the result, any other
+                    # intersections should be points on the same segment
+                    if isinstance(edge_intersection, LineSegment3d):
+                        return edge_intersection
+                    edge_intersections.append(edge_intersection)
+            if not edge_intersections:
+                return None
+            assert all(
+                isinstance(ei, type(self._positions[0]))
+                for ei in edge_intersections
+            )
+            # sort the intersections by distance from the line, the closest one
+            # to the line is the true intersection
+            edge_intersection_distances = sorted([
+                (ei, line.get_distance_to_point(ei))
+                for ei in edge_intersections
+            ], key=lambda pd: pd[1])
+            return edge_intersection_distances[0][0]
+        assert isinstance(plane_intersection, type(self._positions[0]))
+        return self.where_intersected_by_point(
+            plane_intersection,
+            tolerance=tolerance
+        )
