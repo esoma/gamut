@@ -1,7 +1,7 @@
 
 # gamut
-from gamut.geometry import (DegenerateGeometryError, LineSegment3d, Triangle2d,
-                            Triangle3d)
+from gamut.geometry import (DegenerateGeometryError, LineSegment3d, Plane,
+                            Triangle2d, Triangle3d)
 from gamut.math import DVector2, DVector3, DVector4, FVector2, FVector3
 # python
 from math import isclose
@@ -534,3 +534,54 @@ def test_where_intersected_by_line_segment(vtype: Any, bad_vtype: Any) -> None:
         LineSegment3d(vtype(.5, 0, 0), vtype(.5, -1, 0)),
         tolerance=10
     ) == vtype(.5, 0, 0)
+
+@pytest.mark.parametrize("vtype, bad_vtype", [
+    (FVector3, DVector3),
+    (DVector3, FVector3),
+])
+def test_where_intersected_by_plane(vtype: Any, bad_vtype: Any) -> None:
+    t = Triangle3d(vtype(1, 2, 0), vtype(1, 2, 1), vtype(0, 2, 0))
+
+    with pytest.raises(TypeError) as excinfo:
+        assert t.where_intersected_by_plane(None)
+    assert str(excinfo.value).startswith(
+        f'plane must be Plane[{vtype.__name__}]'
+    )
+
+    with pytest.raises(TypeError) as excinfo:
+        assert t.where_intersected_by_line_segment(
+            Plane(-1, bad_vtype(0, 1, 0))
+        )
+
+    assert t.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0))
+    ) == t
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0)),
+        tolerance=1
+    ) == t
+
+    t = Triangle3d(vtype(1, 2, 0), vtype(1, 2, 1), vtype(0, 3, 0))
+    assert t.where_intersected_by_plane(
+        Plane(-2, vtype(0, 1, 0))
+    ) == LineSegment3d(vtype(1, 2, 0), vtype(1, 2, 1))
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0))
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(-1, vtype(0, 1, 0)),
+        tolerance=1
+    ) == LineSegment3d(vtype(1, 2, 0), vtype(1, 2, 1))
+    assert t.where_intersected_by_plane(
+        Plane(-3, vtype(0, 1, 0))
+    ) == vtype(0, 3, 0)
+    assert t.where_intersected_by_plane(
+        Plane(-4, vtype(0, 1, 0))
+    ) is None
+    assert t.where_intersected_by_plane(
+        Plane(-4, vtype(0, 1, 0)),
+        tolerance=1
+    ) == vtype(0, 3, 0)
