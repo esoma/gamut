@@ -26,8 +26,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: openrndr/setup-opengl@v1.1
-    - run: xvfb-run glxinfo
 
     - name: Set up Python ${{ matrix.python-version }}-${{ matrix.python-arch }}
       uses: actions/setup-python@v2
@@ -48,7 +46,7 @@ jobs:
         python -m pip install --no-binary=:pyicu: pyicu
 
     - name: Install PyICU (Windows 3.9)
-      if: ${{ matrix.os == 'windows-latest' && matrix.python-version == '3.9 }}
+      if: ${{ matrix.os == 'windows-latest' && matrix.python-version == '3.9' }}
       shell: cmd
       run: |
         python -m pip install https://github.com/cgohlke/pyicu-build/releases/download/v2.11/PyICU-2.11-cp39-cp39-win_amd64.whl
@@ -96,7 +94,7 @@ jobs:
     - name: Test (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo apt-get install xvfb libopenal1
+        sudo apt-get install xvfb libopenal1 libglu1-mesa-dev freeglut3-dev mesa-common-dev
         sudo modprobe uinput
         sudo chmod a+rw /dev/uinput
         sudo usermod -a -G input $USER
