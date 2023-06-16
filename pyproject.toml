@@ -9,6 +9,7 @@ build-backend = "setuptools.build_meta"
 exclude_lines = [
     'pragma: no cover',
     '@overload',
+    'assert False',
 ]
 
 [tool.mypy]

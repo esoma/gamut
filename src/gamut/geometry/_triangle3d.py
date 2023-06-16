@@ -340,3 +340,57 @@ class Triangle3d(Generic[T]):
             plane_intersection,
             tolerance=tolerance
         )
+
+    def where_intersected_by_plane(
+        self,
+        plane: Plane[T],
+        *,
+        tolerance: float = 0.0
+    ) -> Triangle3d[T] | LineSegment3d[T] | T | None:
+        if (
+            not isinstance(plane, Plane) or
+            not isinstance(plane.normal, type(self._positions[0]))
+        ):
+            raise TypeError(
+                f'plane must be Plane[{type(self._positions[0]).__name__}]'
+            )
+        # check each edge of the tri
+        intersections = []
+        for edge in self.edges:
+            intersection = edge.where_intersected_by_plane(
+                plane,
+                tolerance=tolerance
+            )
+            if intersection is not None:
+                intersections.append(intersection)
+        if not intersections:
+            return None
+        if len(intersections) == 1:
+            # 1 intersection is either a single point or segment
+            return intersections[0]
+        if len(intersections) == 2:
+            # if there are just two intersections and one of them is a line
+            # segment then we can assume that is the actual intersection (the
+            # extra is almost certainly a point from a shared edge)
+            for intersection in intersections:
+                if isinstance(intersection, LineSegment3d):
+                    return intersection
+            assert all(
+                isinstance(i, type(self._positions[0]))
+                for i in intersections
+            )
+            # two points make a segment
+            try:
+                intersection = LineSegment3d(*intersections)
+            except LineSegment3d.DegenerateError as ex:
+                return ex.degenerate_form
+            return intersection
+        assert len(intersections) == 3
+        # there are basically two conditions here, either we have a single line
+        # segment and some points "extra" points or we have 3 line segments
+        if all(isinstance(i, LineSegment3d) for i in intersections):
+            return self
+        for intersection in intersections:
+            if isinstance(intersection, LineSegment3d):
+                return intersection
+        assert False
